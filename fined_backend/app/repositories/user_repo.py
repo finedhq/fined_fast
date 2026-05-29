@@ -54,4 +54,28 @@ class UserRepository:
             .order("created_at", desc=True).execute()
         return res.data or []
 
-user_repo=UserRepository()
+    def get_leaderboard(self, limit: int = 50) -> list:
+        """Fetch all users, compute fin_score, sort, return top N with rank"""
+        users = self.get_all_for_leaderboard()
+        for u in users:
+            u["fin_score"] = (
+                (u.get("article_score") or 0) +
+                (u.get("expense_score") or 0) +
+                (u.get("course_score") or 0) +
+                (u.get("consistency_score") or 0)
+            )
+        ranked = sorted(users, key=lambda x: x["fin_score"], reverse=True)[:limit]
+        for i, u in enumerate(ranked):
+            u["rank"] = i + 1
+        return ranked
+
+    def get_rank(self, email: str) -> int:
+        """Get a specific user's rank position"""
+        leaderboard = self.get_leaderboard(limit=1000)
+        for entry in leaderboard:
+            if entry["email"] == email:
+                return entry["rank"]
+        return 0
+
+
+user_repo = UserRepository()
