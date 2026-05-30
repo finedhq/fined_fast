@@ -10,16 +10,16 @@ class CourseRepository:
         return res.data or []
 
     def get_by_id(self, course_id: str) -> dict | None:
-        res = supabase.from_("courses").select("*").eq("id", course_id).maybe_single().execute()
-        return res.data
+        res = supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute()
+        return res.data[0] if res and res.data else None
 
     def insert(self, title: str, description: str, thumbnail_url: str = "") -> dict:
         res = supabase.from_("courses").insert([{
             "title": title,
             "description": description,
             "thumbnail_url": thumbnail_url
-        }]).select().single().execute()
-        return res.data
+        }]).execute()
+        return res.data[0] if res.data else {}
 
     def delete(self, course_id: str):
         supabase.from_("courses").delete().eq("id", course_id).execute()
@@ -36,8 +36,8 @@ class CourseRepository:
             "title": title,
             "description": description,
             "order_index": order_index
-        }]).select().single().execute()
-        return res.data
+        }]).execute()
+        return res.data[0] if res.data else {}
 
     def delete_module(self, module_id: str):
         supabase.from_("modules").delete().eq("id", module_id).execute()
@@ -49,13 +49,13 @@ class CourseRepository:
         return res.data or []
 
     def get_card(self, card_id: str) -> dict | None:
-        res = supabase.from_("cards").select("*").eq("card_id", card_id).maybe_single().execute()
-        return res.data
+        res = supabase.from_("cards").select("*").eq("card_id", card_id).limit(1).execute()
+        return res.data[0] if res and res.data else None
 
     def insert_card(self, module_id: str, card_data: dict) -> dict:
         card_data["module_id"] = module_id
-        res = supabase.from_("cards").insert([card_data]).select().single().execute()
-        return res.data
+        res = supabase.from_("cards").insert([card_data]).execute()
+        return res.data[0] if res.data else {}
 
     def delete_card(self, card_id: str):
         supabase.from_("cards").delete().eq("card_id", card_id).execute()

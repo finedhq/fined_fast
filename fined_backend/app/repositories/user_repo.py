@@ -4,13 +4,13 @@ from app.integrations.supabase_client import supabase
 
 class UserRepository:
 
-    def get_by_sub(self,user_sub:str):
-        res = supabase.from_("users").select("*").eq("user_sub", user_sub).maybe_single().execute()
-        return res.data
+    def get_by_sub(self, user_sub: str):
+        res = supabase.from_("users").select("*").eq("user_sub", user_sub).limit(1).execute()
+        return res.data[0] if res and res.data else None
     
     def get_by_email(self, email: str):
-        res = supabase.from_("users").select("*").eq("email", email).maybe_single().execute()
-        return res.data
+        res = supabase.from_("users").select("*").eq("email", email).limit(1).execute()
+        return res.data[0] if res and res.data else None
     
     def create(self, user_sub: str, email: str) -> dict:
         res = supabase.from_("users").insert([{
@@ -18,8 +18,8 @@ class UserRepository:
             "email": email,
             "streak_count": 1,
             "fin_stars": 0,
-        }]).select().single().execute()
-        return res.data
+        }]).execute()
+        return res.data[0] if res.data else {}
 
     def update_fields(self, email: str, fields: dict):
         supabase.from_("users").update(fields).eq("email", email).execute()
@@ -32,12 +32,35 @@ class UserRepository:
     
 
     def has_feedback(self, email: str) -> bool:
-        res = supabase.from_("user_feedbacks").select("id").eq("email", email).maybe_single().execute()
-        return res.data is not None
+        res = supabase.from_("user_feedbacks").select("id").eq("email", email).limit(1).execute()
+        return bool(res and res.data)
 
 
     def save_feedback(self, email: str, form: dict):
-        supabase.from_("user_feedbacks").insert([{"email": email, "form": form}]).execute()
+        payload = {
+            "email": email,
+            "name": form.get("name"),
+            "q1_helpfulness": form.get("q1_helpfulness"),
+            "q2_difficulty": form.get("q2_difficulty"),
+            "q3_navigation": form.get("q3_navigation"),
+            "q4_design": form.get("q4_design"),
+            "q5_confusing": form.get("q5_confusing"),
+            "q5_details": form.get("q5_details"),
+            "q6_favFeature": form.get("q6_favFeature"),
+            "q7_returnLikelihood": form.get("q7_returnLikelihood"),
+            "additionalFeedback": form.get("additionalFeedback")
+        }
+        
+        # Cast numeric columns to integers safely
+        for col in ["q1_helpfulness", "q3_navigation", "q7_returnLikelihood"]:
+            val = payload[col]
+            if val is not None:
+                try:
+                    payload[col] = int(val)
+                except (ValueError, TypeError):
+                    payload[col] = None
+
+        supabase.from_("user_feedbacks").insert([payload]).execute()
 
     
     def log_score_change(self, email: str, old: int, new: int, change: int, desc: str):

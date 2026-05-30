@@ -15,8 +15,8 @@ class ArticleRepository:
             "title": title,
             "content": content,
             "image_url": image_url
-        }]).select().single().execute()
-        return res.data
+        }]).execute()
+        return res.data[0] if res.data else {}
 
     def delete(self, article_id: str):
         supabase.from_("articles").delete().eq("id", article_id).execute()
@@ -27,12 +27,12 @@ class ArticleRepository:
 
     def get_user_rating(self, email: str, article_id: str):
         res = supabase.from_("article_ratings").select("rating")\
-            .eq("email", email).eq("article_id", article_id).maybe_single().execute()
-        return res.data
+            .eq("email", email).eq("article_id", article_id).limit(1).execute()
+        return res.data[0] if res and res.data else None
 
     def upsert_rating(self, email: str, article_id: str, rating: float):
         supabase.from_("article_ratings").upsert(
-            [{"email": email, "article_id": article_id, "rating": rating}],
+            [{"email": email, "article_id": article_id, "rating": int(rating)}],
             on_conflict="email,article_id"
         ).execute()
 

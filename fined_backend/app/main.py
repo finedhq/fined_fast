@@ -3,8 +3,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+# pyrefly: ignore [missing-import]
 from slowapi import Limiter, _rate_limit_exceeded_handler
+# pyrefly: ignore [missing-import]
 from slowapi.util import get_remote_address
+# pyrefly: ignore [missing-import]
 from slowapi.errors import RateLimitExceeded
 
 
@@ -50,3 +53,6 @@ app.add_middleware(
 @app.get("/",tags=["Health"])
 async def root():
     return {"status": "FinEd API is running", "version": "2.0.0"}
+
+from app.routes import api_router
+app.include_router(api_router, prefix="/api")

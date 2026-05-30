@@ -34,10 +34,26 @@ class ArticleService:
         result = score_service.update_article(user, today)
         if not result.get("updated"):
             return result
+        
+        # Build exact reasons matching Express server logs:
+        # parts = [
+        #   `✅ Read article (${newCountToday}/3 today)`,
+        #   bonus > 0 ? `🎉 Bonus: +${bonus} for 3-day streak` : "",
+        #   penalty < 0 ? `⚠️ Penalty: ${penalty} for breaking streak` : ""
+        # ];
+        parts = [
+            f"✅ Read article ({result['article_count']}/3 today)"
+        ]
+        if result.get("bonus", 0) > 0:
+            parts.append(f"🎉 Bonus: +{result['bonus']} for 3-day streak")
+        if result.get("penalty", 0) < 0:
+            parts.append(f"⚠️ Penalty: {result['penalty']} for breaking streak")
+        reasons = [p for p in parts if p]
+
         score_service.apply_and_log(
             user    = user,
             updates = result["updates"],
-            reasons = [f"+{result['points_earned']} for reading an article"]
+            reasons = reasons
         )
         return {
             "updated":       True,
@@ -46,6 +62,7 @@ class ArticleService:
             "streak":        result["streak"],
             "bonus":         result["bonus"],
             "penalty":       result["penalty"],
+            "new_score":     result["updates"]["article_score"]
         }
     
     def get_user_rating(self, email: str, article_id: str) -> dict | None:

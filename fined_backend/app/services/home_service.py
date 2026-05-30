@@ -27,9 +27,14 @@ class HomeService:
         yesterday_str = (today - timedelta(days=1)).isoformat()
 
         #step 1
-        user=user_repo.get_by_sub(user_sub)
+        user = user_repo.get_by_sub(user_sub)
         if not user:
-            user = user_repo.create(user_sub=user_sub, email=email)
+            user = user_repo.get_by_email(email)
+            if user:
+                user_repo.update_fields(email, {"user_sub": user_sub})
+                user["user_sub"] = user_sub
+            else:
+                user = user_repo.create(user_sub=user_sub, email=email)
         
         #step 2
         streak    = user.get("streak_count") or 1
@@ -60,10 +65,7 @@ class HomeService:
         show_feedback=not user_repo.has_feedback(email)
 
         #step 6
-        from app.repositories.progress_repo import progress_repo
-
-        ongoing = progress_repo.get_ongoing(email)
-        ongoing_course_id = ongoing.get("course_id") if ongoing else None
+        ongoing_course_id = user.get("ongoing_course_id")
         fin_score = score_service.compute_total(user)
 
 

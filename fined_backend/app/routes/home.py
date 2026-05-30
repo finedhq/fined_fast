@@ -1,1 +1,231 @@
 # HTTP endpoints for dashboard aggregates and leaderboards
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from typing import Optional, Dict, Any, List
+
+from app.services.home_service import home_service
+from app.services.notification_service import notification_service
+from app.repositories.article_repo import article_repo
+from app.repositories.course_repo import course_repo
+from app.repositories.user_repo import user_repo
+from app.dependencies import get_current_user, AuthUser
+
+router = APIRouter(prefix="/home", tags=["Home"])
+
+# --- Request Schemas ---
+
+class FetchDataRequest(BaseModel):
+    email: str
+    userId: str
+
+class NotificationsRequest(BaseModel):
+    email: str
+
+class FeedbackRequest(BaseModel):
+    form: Dict[str, Any]
+
+class RecommendationsRequest(BaseModel):
+    email: str
+    course_id: Optional[str] = None
+
+
+# --- Route Endpoints ---
+
+@router.post("/getdata")
+async def fetch_data(body: FetchDataRequest):
+    """
+    Main dashboard call returning stats, featured article,
+    recommended courses, and ongoing course details.
+    """
+    try:
+        # 1. Fetch dashboard statistics using the Python business service
+        stats = home_service.get_dashboard(user_sub=body.userId, email=body.email)
+        
+        # 2. Get featured article (latest article)
+        articles = article_repo.get_all(limit=1)
+        featured_article = articles[0] if articles else None
+        
+        # 3. Get recommended courses (latest 8 courses)
+        courses = course_repo.get_all()
+        recommended_courses = courses[:8]
+        
+        # 4. Format userData matching client HomePage.jsx expectations
+        user_row = user_repo.get_by_email(body.email) or {}
+        user_data = {
+            "fin_stars": stats.get("fin_stars", 0),
+            "streak_count": stats.get("streak_count", 1),
+            "rank": stats.get("rank"),
+            "ongoing_course_id": stats.get("ongoing_course_id"),
+            "ongoing_module_id": user_row.get("ongoing_module_id"),
+            "fin_score": stats.get("fin_score", 0)
+        }
+        
+        # 5. Fetch ongoing course details if applicable
+        ongoing_course_data = None
+        ongoing_course_id = stats.get("ongoing_course_id")
+        if ongoing_course_id:
+            ongoing_course_data = course_repo.get_by_id(ongoing_course_id)
+            
+        # 6. Fetch FinScore Log data
+        log_data = user_repo.get_score_logs(body.email)
+        
+        return {
+            "showFeedback": stats.get("show_feedback", False),
+            "featuredArticle": featured_article,
+            "recommendedCourses": recommended_courses,
+            "userData": user_data,
+            "ongoingCourseData": ongoing_course_data,
+            "logData": log_data
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch dashboard data: {str(e)}"
+        )
+
+
+@router.post("/notifications")
+async def fetch_notifications(body: NotificationsRequest):
+    """Fetch notifications for a user — newest first"""
+    try:
+        return notification_service.get_all(body.email)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch notifications: {str(e)}"
+        )
+
+
+@router.post("/updatenotifications")
+async def update_notifications(body: NotificationsRequest):
+    """Mark all unseen notifications as read"""
+    try:
+        notification_service.mark_all_seen(body.email)
+        # Fetch updated notifications to return
+        return notification_service.get_all(body.email)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update notifications: {str(e)}"
+        )
+
+
+@router.post("/hasunseen")
+async def has_unseen(body: NotificationsRequest):
+    """Check if the user has any unseen notifications"""
+    try:
+        return notification_service.has_unseen(body.email)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check unseen status: {str(e)}"
+        )
+
+
+@router.post("/finscorelog")
+async def fetch_fin_score_logs(body: NotificationsRequest):
+    """Get FinScore change logs for the user"""
+    try:
+        return user_repo.get_score_logs(body.email)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch score logs: {str(e)}"
+        )
+
+
+@router.get("/leaderboard")
+async def fetch_leaderboard():
+    """Returns top 50 users ranked by FinScore"""
+    try:
+        # Maps to the array structure expected by the client Leaderboard
+        raw_leaderboard = home_service.get_leaderboard()
+        
+        # Express maps columns user_sub, email, article_score, expense_score, course_score, consistency_score
+        # and dynamically computes finScore. Let's make sure both properties are included!
+        leaderboard_formatted = []
+        for u in raw_leaderboard:
+            fin_score = u.get("fin_score", 0)
+            leaderboard_formatted.append({
+                "user_sub": u.get("user_sub"),
+                "email": u.get("email"),
+                "article_score": u.get("article_score") or 0,
+                "expense_score": u.get("expense_score") or 0,
+                "course_score": u.get("course_score") or 0,
+                "consistency_score": u.get("consistency_score") or 0,
+                "finScore": fin_score  # React maps `entry.finScore`
+            })
+        return leaderboard_formatted
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch leaderboard: {str(e)}"
+        )
+
+
+@router.post("/feedback")
+async def save_feedback(body: FeedbackRequest):
+    """Save user feedback submission"""
+    try:
+        email = body.form.get("email")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email is required in feedback form"
+            )
+        home_service.save_feedback(email, body.form)
+        return {"message": "Feedback saved successfully."}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save feedback: {str(e)}"
+        )
+
+
+@router.post("/recommendations")
+async def get_recommendations(body: RecommendationsRequest):
+    """Tag-based product recommendations matching current course tags"""
+    try:
+        recommendations = []
+        
+        # Sanitize course_id to check if it's a valid UUID format
+        is_valid_uuid = False
+        if body.course_id:
+            try:
+                import uuid
+                uuid.UUID(body.course_id)
+                is_valid_uuid = True
+            except ValueError:
+                pass
+
+        if body.course_id and is_valid_uuid:
+            recommendations = home_service.get_recommendations(body.email, body.course_id)
+        else:
+            # Check if there are stored recommended schemes in user profile
+            user = user_repo.get_by_email(body.email)
+            if user and user.get("recommended_schemes"):
+                # Fetch Schemes by list of IDs from `allSchemesData` or matching table
+                # We fall back to returning standard tag-matched or latest schemes
+                from app.repositories.product_repo import product_repo
+                recommendations = product_repo.get_all_latest()[:3]
+                
+        # Format the scheme recommendations to match what HomePage.jsx maps:
+        # e.g., bank_name, scheme_name, description
+        formatted_recs = []
+        for rec in recommendations:
+            formatted_recs.append({
+                "id": rec.get("id"),
+                "bank_name": rec.get("bank_name", "FinEd"),
+                "scheme_name": rec.get("product_name", rec.get("title", "Scheme")),
+                "description": rec.get("description", rec.get("details", "")),
+                "tags": rec.get("tags", [])
+            })
+            
+        return {"recommendations": formatted_recs}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch recommendations: {str(e)}"
+        )

@@ -29,17 +29,20 @@ def _build_flow() -> Flow:
 
 class GmailService:
     #oauth
-    def get_auth_url(self)->str:
+    def get_auth_url(self, state: str = None)->str:
         """
         Generate Google consent screen URL.
         Frontend redirects user to this URL.
         """
         flow = _build_flow()
-        auth_url, _ = flow.authorization_url(
-            access_type="offline",
-            include_granted_scopes="true",
-            prompt="consent",
-        )
+        kwargs = {
+            "access_type": "offline",
+            "include_granted_scopes": "true",
+            "prompt": "consent",
+        }
+        if state:
+            kwargs["state"] = state
+        auth_url, _ = flow.authorization_url(**kwargs)
 
         return auth_url
     
