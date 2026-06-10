@@ -1,4 +1,5 @@
 # HTTP endpoints for dashboard aggregates and leaderboards
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -38,41 +39,43 @@ async def fetch_data(body: FetchDataRequest):
     recommended courses, and ongoing course details.
     """
     try:
-        # 1. Fetch dashboard statistics using the Python business service
-        stats = home_service.get_dashboard(user_sub=body.userId, email=body.email)
+        # 1. Fetch dashboard stats first (must be sequential because it updates score/streak)
+        stats = await asyncio.to_thread(
+            home_service.get_dashboard, body.userId, body.email
+        )
+
+        ongoing_course_id = stats.get("ongoing_course_id")
+
+        # 2. Define a small helper for the ongoing course fetch
+        async def fetch_ongoing_course():
+            if not ongoing_course_id:
+                return None
+            return await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
+
+        # 3. Run all independent DB queries in PARALLEL (~2x faster)
+        articles, courses, user_row, ongoing_course_data, log_data = await asyncio.gather(
+            asyncio.to_thread(article_repo.get_all, 1),
+            asyncio.to_thread(course_repo.get_all),
+            asyncio.to_thread(user_repo.get_by_email, body.email),
+            fetch_ongoing_course(),
+            asyncio.to_thread(user_repo.get_score_logs, body.email),
+        )
         
-        # 2. Get featured article (latest article)
-        articles = article_repo.get_all(limit=1)
-        featured_article = articles[0] if articles else None
+        user_row = user_row or {}
         
-        # 3. Get recommended courses (latest 8 courses)
-        courses = course_repo.get_all()
-        recommended_courses = courses[:8]
-        
-        # 4. Format userData matching client HomePage.jsx expectations
-        user_row = user_repo.get_by_email(body.email) or {}
         user_data = {
             "fin_stars": stats.get("fin_stars", 0),
             "streak_count": stats.get("streak_count", 1),
             "rank": stats.get("rank"),
-            "ongoing_course_id": stats.get("ongoing_course_id"),
+            "ongoing_course_id": ongoing_course_id,
             "ongoing_module_id": user_row.get("ongoing_module_id"),
             "fin_score": stats.get("fin_score", 0)
         }
         
-        # 5. Fetch ongoing course details if applicable
-        ongoing_course_data = None
-        ongoing_course_id = stats.get("ongoing_course_id")
-        if ongoing_course_id:
-            ongoing_course_data = course_repo.get_by_id(ongoing_course_id)
-            
-        # 6. Fetch FinScore Log data
-        log_data = user_repo.get_score_logs(body.email)
-        
         return {
             "showFeedback": stats.get("show_feedback", False),
-            "featuredArticle": featured_article,
-            "recommendedCourses": recommended_courses,
+            "featuredArticle": articles[0] if articles else None,
+            "recommendedCourses": courses[:8],
             "userData": user_data,
             "ongoingCourseData": ongoing_course_data,
             "logData": log_data

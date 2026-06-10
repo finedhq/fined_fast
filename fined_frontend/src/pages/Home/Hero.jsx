@@ -1,29 +1,10 @@
 import "./Hero.css";
-import bgImage from "./assets/landingpage-bg.png";
+import bgImage from "../../assets/landingpage-bg.png";
 
 function Hero() {
   return (
     <>
-      {/* NAVBAR */}
-      <nav>
-        <div className="logo">
-          {/* SVG Logo */}
-        </div>
-
-        <ul className="nav-links">
-          <li><a href="#">Courses</a></li>
-          <li><a href="#">Articles</a></li>
-          <li><a href="#">About Us</a></li>
-        </ul>
-
-        <div className="nav-right">
-          <div className="nav-divider"></div>
-          <button className="btn-signin">Sign in</button>
-          <button className="btn-nav-register">
-            Register now
-          </button>
-        </div>
-      </nav>
+      
 
       {/* HERO */}
       <section

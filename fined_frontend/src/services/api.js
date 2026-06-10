@@ -1,0 +1,48 @@
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+
+async function request(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    const detail = typeof data === "object" ? data.detail || JSON.stringify(data) : data;
+    throw new Error(detail || `Request failed with status ${response.status}`);
+  }
+
+  return data;
+}
+
+export function fetchArticles({ limit = 30, offset = 0 } = {}) {
+  return request("/articles/getall", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ limit, offset }),
+  });
+}
+
+export function postArticle(formData) {
+  return request("/articles/add", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export function deleteArticle(id) {
+  return request(`/articles/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function sendNewsletter(data) {
+  return request("/admin/newsletters", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data }),
+  });
+}
+
+export { API_BASE_URL };
