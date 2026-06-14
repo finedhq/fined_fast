@@ -91,14 +91,14 @@ function TestimonialsCarousel() {
   }, []);
 
   const svgHeight = 100;
-  const dotY = [65,55,55,65];
+  const dotY = [65, 55, 55, 65];
 
- const pathD = dots.length === 4
-  ? `M ${dots[0].x} ${dotY[0]}
+  const pathD = dots.length === 4
+    ? `M ${dots[0].x} ${dotY[0]}
      C ${dots[0].x + 120} ${dotY[0] - 50}, ${dots[1].x - 120} ${dotY[1] - 50}, ${dots[1].x} ${dotY[1]}
      C ${dots[1].x + 120} ${dotY[1] + 50}, ${dots[2].x - 120} ${dotY[2] + 50}, ${dots[2].x} ${dotY[2]}
      C ${dots[2].x + 120} ${dotY[2] - 50}, ${dots[3].x - 120} ${dotY[3] - 50}, ${dots[3].x} ${dotY[3]}`
-  : "";
+    : "";
 
   return (
     <div className="testimonials-carousel-wrapper">
@@ -186,48 +186,66 @@ function Hero() {
 
       {/* FEATURES STRIP */}
       <div className="features-strip">
+
         <div className="feature-item">
-          <div className="feature-icon-box fi-blue-soft"></div>
-          <div className="feature-title">Bite sized lessons</div>
-          <div className="feature-desc">Short, focused & easy to understand</div>
+          <div className="feature-item-inner">
+            <div className="feature-icon-box fi-blue-soft"></div>
+            <div>
+              <div className="feature-title">Bite sized lessons</div>
+              <div className="feature-desc">Short, focused & easy to understand</div>
+            </div>
+          </div>
         </div>
 
         <div className="feature-item">
-          <div className="feature-icon-box fi-yellow-soft">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
-              <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <div className="feature-item-inner">
+            <div className="feature-icon-box fi-yellow-soft">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
+                <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div className="feature-title">Interactive Learning</div>
+              <div className="feature-desc">Short, focused & easy to understand</div>
+            </div>
           </div>
-          <div className="feature-title">Interactive Learning</div>
-          <div className="feature-desc">Short, focused & easy to understand</div>
         </div>
 
         <div className="feature-item">
-          <div className="feature-icon-box fi-blue-soft">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
-            </svg>
+          <div className="feature-item-inner">
+            <div className="feature-icon-box fi-blue-soft">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <div className="feature-title">Real Rewards</div>
+              <div className="feature-desc">Short, focused & easy to understand</div>
+            </div>
           </div>
-          <div className="feature-title">Real Rewards</div>
-          <div className="feature-desc">Short, focused & easy to understand</div>
         </div>
 
         <div className="feature-item">
-          <div className="feature-icon-box fi-yellow-soft">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
-              <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
-              <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
-            </svg>
+          <div className="feature-item-inner">
+            <div className="feature-icon-box fi-yellow-soft">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
+                <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
+                <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
+              </svg>
+            </div>
+            <div>
+              <div className="feature-title">Leaderboards</div>
+              <div className="feature-desc">Short, focused & easy to understand</div>
+            </div>
           </div>
-          <div className="feature-title">Leaderboards</div>
-          <div className="feature-desc">Short, focused & easy to understand</div>
         </div>
+
       </div>
 
       {/* POPULAR COURSES SECTION */}
-      <section className="popular-courses-section">
+      < section className="popular-courses-section" >
         <div className="pc-header">
           <span className="pc-eyebrow">Popular Courses</span>
           <h2 className="pc-title">Start with the right course</h2>
@@ -255,9 +273,9 @@ function Hero() {
         <div className="pc-view-all">
           <a href="/courses" className="view-all-link">View all courses →</a>
         </div>
-      </section>
+      </section >
       {/* WHY FINED SECTION */}
-      <section className="why-fined-section">
+      < section className="why-fined-section" >
         <div className="wf-header">
           <span className="pc-eyebrow">Popular Courses</span>
           <h2 className="wf-title">Everything you need to build a <br /> strong financial future</h2>
@@ -296,7 +314,7 @@ function Hero() {
           <div className="wf-img-placeholder"><img src={retirementIncomePlanning2Img} alt="Retirement income planning" className="wf-img" /></div>
         </div>
 
-      </section>
+      </section >
       {/* ARTICLES SECTION */}
       {/* ARTICLES SECTION */}
       <section className="articles-section">
