@@ -1,0 +1,129 @@
+.footer {
+  background: #f5f6ff;
+  border-top: 1px solid #e8eaff;
+  padding: 48px 80px 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.8fr;
+  gap: 48px;
+  padding-bottom: 40px;
+}
+
+/* Brand */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-wordmark {
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.footer-wordmark .fin { color: #4A3AFF; }
+.footer-wordmark .ed  { color: #F5A623; }
+
+.footer-tagline {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.social-icon:hover { opacity: 0.8; }
+
+/* Columns */
+.footer-col h4.footer-col-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #aaa;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-col ul li a {
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.2s;
+}
+
+.footer-col ul li a:hover { color: #4A3AFF; }
+
+/* Newsletter */
+.footer-newsletter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-email-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.footer-email-input:focus { border-color: #4A3AFF; }
+
+.footer-subscribe-btn {
+  width: 100%;
+  background: #F5A623;
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  padding: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.footer-subscribe-btn:hover { background: #e09518; }
+
+/* Bottom bar */
+.footer-bottom {
+  border-top: 1px solid #e0e4ff;
+  padding: 18px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
