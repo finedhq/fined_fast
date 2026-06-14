@@ -45,4 +45,21 @@ export function sendNewsletter(data) {
   });
 }
 
+export function sendContactQuery(name, email, message) {
+  return request("/contact/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, message }),
+  });
+}
+
+export function sendFeedback(form) {
+  return request("/home/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ form }),
+  });
+}
+
 export { API_BASE_URL };
+

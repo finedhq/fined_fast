@@ -1,5 +1,7 @@
 import "./Footer.css";
 import footerLogo from "../assets/fined-footer-logo.png";
+import { Link } from "react-router-dom";
+
 export default function Footer() {
     return (
         <footer className="footer">
@@ -55,8 +57,8 @@ export default function Footer() {
                 <div className="footer-col">
                     <h4 className="footer-col-title">OTHER</h4>
                     <ul>
-                        <li><a href="/contact">Contact Us</a></li>
-                        <li><a href="/feedback">Feedback</a></li>
+                        <li><Link to="/contact">Contact Us</Link></li>
+                        <li><Link to="/feedback">Feedback</Link></li>
                     </ul>
                 </div>
 

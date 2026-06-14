@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { isAdminUser } from "../services/auth";
 
 export default function Navbar() {
@@ -13,7 +13,7 @@ export default function Navbar() {
         <li><NavLink to="/" className={({isActive}) => isActive ? "active" : ""}>Home</NavLink></li>
         <li><a href="#">Courses</a></li>
         <li><NavLink to="/articles" className={({isActive}) => isActive ? "active" : ""}>Articles</NavLink></li>
-        <li><a href="#">About Us</a></li>
+        <li><NavLink to="/contact" className={({isActive}) => isActive ? "active" : ""}>Contact Us</NavLink></li>
       </ul>
 
       <div className="nav-right">
