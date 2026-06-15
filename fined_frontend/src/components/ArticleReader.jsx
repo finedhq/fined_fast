@@ -195,9 +195,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       {children}
 
       {/* close */}
-      <button className="ar-close" onClick={onClose} aria-label="Close article">
-        &times;
-      </button>
+      
 
       <div className="ar-scroll-container">
         {/* structured data */}
