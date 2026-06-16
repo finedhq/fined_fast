@@ -26,7 +26,6 @@ function ArticlesPage() {
   const loaderRef = useRef(null);
   const loadingRef = useRef(false);
 
-  // Scroll arrow states
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
 
@@ -54,7 +53,6 @@ function ArticlesPage() {
     loadArticles(0, false);
   }, []);
 
-  // Check carousel scroll position
   const checkScroll = () => {
     const el = carouselRef.current;
     if (!el) return;
@@ -75,7 +73,6 @@ function ArticlesPage() {
     };
   }, [articles]);
 
-  // Infinite scroll via IntersectionObserver on sentinel
   useEffect(() => {
     if (!loaderRef.current) return;
     const observer = new IntersectionObserver(
@@ -94,6 +91,7 @@ function ArticlesPage() {
   useEffect(() => {
     if (selectedArticle) {
       document.body.style.overflow = "hidden";
+      window.dispatchEvent(new CustomEvent("articleReaderOpen"));  // ← ADD THIS
       const idx = articles.findIndex((a) => a.id === selectedArticle.id);
       const isLast = idx === articles.length - 1;
       if (isLast && hasMore && !prefetching) {
@@ -102,11 +100,11 @@ function ArticlesPage() {
       }
     } else {
       document.body.style.overflow = "";
+      window.dispatchEvent(new CustomEvent("articleReaderClose")); // ← ADD THIS
     }
     return () => { document.body.style.overflow = ""; };
   }, [selectedArticle]);
 
-  // Once new articles arrive, resolve pending next
   useEffect(() => {
     if (pendingNext && !loadingRef.current) {
       const idx = articles.findIndex((a) => a.id === selectedArticle?.id);
@@ -137,7 +135,6 @@ function ArticlesPage() {
 
   return (
     <div className="ap-root">
-      
 
       {/* HERO STRIP */}
       <div className="ap-hero-strip">
@@ -237,7 +234,6 @@ function ArticlesPage() {
                 </div>
               ))}
 
-              {/* Infinite-scroll sentinel */}
               <div ref={loaderRef} className="ap-sentinel" />
 
               {fetchingArticle && (

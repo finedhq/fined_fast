@@ -42,7 +42,20 @@ button {
 .nav-links button.active {
   color: #4A3AFF;
 }
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #ffffff;          
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+}
 
+.site-nav--hidden {
+  transform: translateY(-100%);
+}
 .site-nav .logo {
   border: 0;
   background: transparent;
@@ -107,7 +120,7 @@ button {
 .ap-hero-strip {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 46px 0 30px;
+  padding: 70px 0 30px;
 }
 
 .ap-eyebrow {
@@ -624,7 +637,7 @@ button {
   display: grid;
   grid-template-columns: 275px minmax(0, 760px);
   gap: 56px;
-  padding: 42px 0;
+  padding: 80px 0 42px;
 }
 
 .reader-toc {
@@ -798,7 +811,7 @@ button {
   height: 100vh;
   overflow-y: auto;
   scrollbar-width: none;
-  padding: 48px 28px 72px;
+  padding: 90px 28px 72px;
 }
 
 .ar-scroll-container::-webkit-scrollbar {

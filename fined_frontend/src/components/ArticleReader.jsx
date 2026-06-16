@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -23,7 +23,7 @@ const isLikelyHeading = (text = "") => {
   const titleLike =
     v === v.toUpperCase() ||
     v.split(" ").filter((w) => /^[A-Z0-9]/.test(w)).length >=
-      Math.max(1, v.split(" ").length - 2);
+    Math.max(1, v.split(" ").length - 2);
   return startsOk && (titleLike || /[?:]$/.test(v));
 };
 
@@ -100,7 +100,7 @@ const serializeJsonLd = (data) =>
 /* ── component ── */
 function ArticleReader({ article, onClose, children, footer, isLoadingMore = false }) {
   const description = useMemo(() => createDescription(article?.content), [article?.content]);
-
+  const scrollRef = useRef(null);
   const blocks = useMemo(
     () =>
       getParagraphs(article?.content).map((text, i) => ({
@@ -158,6 +158,22 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     window.addEventListener("keydown", handle);
     return () => window.removeEventListener("keydown", handle);
   }, [onClose]);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let lastY = el.scrollTop;
+    const onScroll = () => {
+      const currentY = el.scrollTop;
+      if (currentY > lastY && currentY > 80) {
+        window.dispatchEvent(new CustomEvent("articleScrollDown"));
+      } else {
+        window.dispatchEvent(new CustomEvent("articleScrollUp"));
+      }
+      lastY = currentY;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   if (!article) return null;
 
@@ -175,8 +191,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     tocItems.length > 16
       ? "0.18rem 1rem"
       : tocItems.length > 11
-      ? "0.25rem 1rem"
-      : "0.4rem 1rem";
+        ? "0.25rem 1rem"
+        : "0.4rem 1rem";
 
   const schema = {
     "@context": "https://schema.org",
@@ -195,9 +211,9 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       {children}
 
       {/* close */}
-      
 
-      <div className="ar-scroll-container">
+
+      <div className="ar-scroll-container" ref={scrollRef}>
         {/* structured data */}
         <script type="application/ld+json">{schemaJson}</script>
 
