@@ -171,7 +171,7 @@ function RevealOnScroll({ children, delay = 0 }) {
   const child = React.Children.only(children);
   const existingClassName = child.props.className || "";
   const className = `${existingClassName} reveal-on-scroll ${isVisible ? "is-visible" : ""}`.trim();
-  
+
   return React.cloneElement(child, {
     ref,
     className,
@@ -328,8 +328,10 @@ function Hero() {
 
 
 
+
   return (
     <>
+
       {/* HERO */}
       <section
         className="hero-section"
@@ -363,7 +365,7 @@ function Hero() {
               <div className="avatar a3">C</div>
               <div className="avatar-count">2k+</div>
             </div>
-            <span>
+            <span className="in-learners-row">
               Join 2000+ learners building
               <br />
               their financial future
@@ -374,68 +376,70 @@ function Hero() {
 
       {/* FEATURES STRIP */}
       <div className="features-strip">
-
         <RevealOnScroll delay={0}>
-        <div className="feature-item">
-          <div className="feature-item-inner">
-            <div className="feature-icon-box fi-blue-soft"></div>
-            <div>
-              <div className="feature-title">Bite sized lessons</div>
-              <div className="feature-desc">Short, focused & easy to understand</div>
+          <div className="feature-item" onClick={() => document.getElementById('wf-row-1').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            <div className="feature-item-inner">
+              <div className="feature-icon-box fi-blue-soft"></div>
+              <div>
+                <div className="feature-title">Bite sized lessons</div>
+                <div className="feature-desc">Short, focused & easy to understand</div>
+              </div>
             </div>
           </div>
-        </div>
         </RevealOnScroll>
 
+
         <RevealOnScroll delay={100}>
-        <div className="feature-item">
-          <div className="feature-item-inner">
-            <div className="feature-icon-box fi-yellow-soft">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
-                <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div>
-              <div className="feature-title">Interactive Learning</div>
-              <div className="feature-desc">Short, focused & easy to understand</div>
+          <div className="feature-item" onClick={() => document.getElementById('wf-row-2').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            <div className="feature-item-inner">
+              <div className="feature-icon-box fi-yellow-soft">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
+                  <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <div className="feature-title">Interactive Learning</div>
+                <div className="feature-desc">Short, focused & easy to understand</div>
+              </div>
             </div>
           </div>
-        </div>
         </RevealOnScroll>
 
         <RevealOnScroll delay={200}>
-        <div className="feature-item">
-          <div className="feature-item-inner">
-            <div className="feature-icon-box fi-blue-soft">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div>
-              <div className="feature-title">Real Rewards</div>
-              <div className="feature-desc">Short, focused & easy to understand</div>
+          <div className="feature-item"
+          onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            <div className="feature-item-inner">
+              <div className="feature-icon-box fi-blue-soft">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <div className="feature-title">Real Rewards</div>
+                <div className="feature-desc">Short, focused & easy to understand</div>
+              </div>
             </div>
           </div>
-        </div>
         </RevealOnScroll>
 
         <RevealOnScroll delay={300}>
-        <div className="feature-item">
-          <div className="feature-item-inner">
-            <div className="feature-icon-box fi-yellow-soft">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
-                <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
-                <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
-              </svg>
-            </div>
-            <div>
-              <div className="feature-title">Leaderboards</div>
-              <div className="feature-desc">Short, focused & easy to understand</div>
+          <div className="feature-item"
+          onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            <div className="feature-item-inner">
+              <div className="feature-icon-box fi-yellow-soft">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
+                  <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
+                  <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
+                </svg>
+              </div>
+              <div>
+                <div className="feature-title">Leaderboards</div>
+                <div className="feature-desc">Short, focused & easy to understand</div>
+              </div>
             </div>
           </div>
-        </div>
         </RevealOnScroll>
 
       </div>
@@ -443,23 +447,23 @@ function Hero() {
       {/* POPULAR COURSES SECTION */}
       < section className="popular-courses-section" >
         <RevealOnScroll>
-        <div className="pc-header">
-          <span className="pc-eyebrow">Popular Courses</span>
-          <h2 className="pc-title">Start with the right course</h2>
-          <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
-        </div>
+          <div className="pc-header">
+            <span className="pc-eyebrow">Popular Courses</span>
+            <h2 className="pc-title">Start with the right course</h2>
+            <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
+          </div>
         </RevealOnScroll>
 
         <div className="pc-grid">
           {/* Featured Card */}
           <RevealOnScroll delay={100}>
-          <div className="featured-card">
-            <img
-              src={budgetingBasicsImg}
-              alt="Budgeting Basics"
-              className="featured-card-img"
-            />
-          </div>
+            <div className="featured-card" id="featured-course">
+              <img
+                src={budgetingBasicsImg}
+                alt="Budgeting Basics"
+                className="featured-card-img"
+              />
+            </div>
           </RevealOnScroll>
 
           {/* 2x2 Small Cards Grid */}
@@ -473,21 +477,22 @@ function Hero() {
         </div>
 
         <RevealOnScroll delay={100}>
-        <div className="pc-view-all">
-          <a href="/courses" className="view-all-link">View all courses →</a>
-        </div>
+          <div className="pc-view-all">
+            <button className="btn-hero-secondary">View all courses →</button>
+          </div>
+
         </RevealOnScroll>
       </section >
       {/* WHY FINED SECTION */}
       {/* WHY FINED SECTION */}
       <section className="why-fined-section" ref={whyFinedRef}>
         <RevealOnScroll>
-        <div className="wf-header">
-          <span className="pc-eyebrow">Popular Courses</span>
-          <h2 className="wf-title">Everything you need to build a <br /> strong financial future</h2>
-          <div className="wf-title-underline"></div>
-          <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
-        </div>
+          <div className="wf-header">
+            <span className="pc-eyebrow">Popular Courses</span>
+            <h2 className="wf-title">Everything you need to build a <br /> strong financial future</h2>
+            <div className="wf-title-underline"></div>
+            <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
+          </div>
         </RevealOnScroll>
 
         <div className="wf-rows-container">
@@ -526,34 +531,83 @@ function Hero() {
           </svg>
 
           {/* 01 - image left, text right */}
-          <div className="wf-row" ref={el => wfRowRefs.current[0] = el}>
-            <div className="wf-img-placeholder"><img src={biteSizeLessonsImg} alt="Bite size lessons" className="wf-img" /></div>
-            <div className="wf-content">Most people never really learned about money. Not in school, not at home.<br />
-              Someone just handed you a salary one day and said good luck.<br />
-              FinEd fixes that, but without making it feel like homework.<br />
-              Every lesson is short enough to finish on a lunch break. We take one money concept, explain it simply, and move on. No filler, no 45 minute videos you'll never actually sit through.<br />
-              Topics range from budgeting basics to SIPs, credit scores, taxes and more.</div>
-          </div>
+          {/* 01 - image left, text right */}
+<div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
+  <div className="wf-img-placeholder"><img src={biteSizeLessonsImg} alt="Bite size lessons" className="wf-img" /></div>
+  
+  <div className="wf-content">
+    <div className="wf-step-header">
+      <div className="wf-step-number">01</div>
+      <h3 className="wf-step-title">Bite-size lessons</h3>
+    </div>
+    
+    {/* --- WRAP YOUR TEXT IN A P TAG --- */}
+    <p className="wf-step-desc">
+      Most people never really learned about money. Not in school, not at home.<br />
+      Someone just handed you a salary one day and said good luck.<br />
+      FinEd fixes that, but without making it feel like homework.<br />
+      Every lesson is short enough to finish on a lunch break. We take one money concept, explain it simply, and move on. No filler, no 45 minute videos you'll never actually sit through.<br />
+      Topics range from budgeting basics to SIPs, credit scores, taxes and more.
+    </p>
+  </div>
+</div>
+
 
           {/* 02 - text left, image right */}
-          <div className="wf-row" ref={el => wfRowRefs.current[1] = el}>
-            <div className="wf-content">Reading about money and actually understanding it are two very different things. That's why we don't just show you text and call it a day.<br />
-              You'll tap through real life scenarios, make decisions, answer quick questions and see what happens. It feels a lot more like a game than a class.<br />
-              And honestly, that's kind of the point because things you interact with are things you remember.</div>
-            <div className="wf-img-placeholder"><img src={interactiveLearningImg} alt="Interactive learning" className="wf-img" /></div>
-          </div>
+          {/* 02 - text left, image right */}
+<div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
+  <div className="wf-content">
+    <div className="wf-step-header">
+      <div className="wf-step-number">02</div>
+      <h3 className="wf-step-title">Interactive Learning</h3>
+    </div>
+    <p className="wf-step-desc">
+      Reading about money and actually understanding it are two very different things. That's why we don't just show you text and call it a day.<br />
+      You'll tap through real life scenarios, make decisions, answer quick questions and see what happens. It feels a lot more like a game than a class.<br />
+      And honestly, that's kind of the point because things you interact with are things you remember.
+    </p>
+  </div>
+  <div className="wf-img-placeholder">
+    <img src={interactiveLearningImg} alt="Interactive learning" className="wf-img" />
+  </div>
+</div>
+
 
           {/* 03 - image left, text right */}
-          <div className="wf-row" ref={el => wfRowRefs.current[2] = el}>
-            <div className="wf-img-placeholder"><img src={retirementIncomePlanning1Img} alt="Retirement income planning" className="wf-img" /></div>
-            <div className="wf-content">This is description of retirement income planning. This is just for dummy right now more content will be added soon.</div>
-          </div>
+         {/* 03 - image left, text right */}
+<div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
+  <div className="wf-img-placeholder">
+    <img src={retirementIncomePlanning1Img} alt="Retirement income planning" className="wf-img" />
+  </div>
+  <div className="wf-content">
+    <div className="wf-step-header">
+      <div className="wf-step-number">03</div>
+      <h3 className="wf-step-title">Real Rewards</h3>
+    </div>
+    <p className="wf-step-desc">
+      This is description of retirement income planning. This is just for dummy right now more content will be added soon.
+    </p>
+  </div>
+</div>
+
 
           {/* 04 - text left, image right */}
-          <div className="wf-row" ref={el => wfRowRefs.current[3] = el}>
-            <div className="wf-content">This is description of retirement income planning. This is just for dummy right now more content will be added soon.</div>
-            <div className="wf-img-placeholder"><img src={retirementIncomePlanning2Img} alt="Retirement income planning" className="wf-img" /></div>
-          </div>
+          {/* 04 - text left, image right */}
+<div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
+  <div className="wf-content">
+    <div className="wf-step-header">
+      <div className="wf-step-number">04</div>
+      <h3 className="wf-step-title">Leaderboards</h3>
+    </div>
+    <p className="wf-step-desc">
+      This is description of retirement income planning. This is just for dummy right now more content will be added soon.
+    </p>
+  </div>
+  <div className="wf-img-placeholder">
+    <img src={retirementIncomePlanning2Img} alt="Retirement income planning" className="wf-img" />
+  </div>
+</div>
+
         </div>
       </section>
 
@@ -562,67 +616,71 @@ function Hero() {
       {/* ARTICLES SECTION */}
       <section className="articles-section">
         <RevealOnScroll>
-        <div className="articles-header">
-          <span className="pc-eyebrow-1">From our articles</span>
-          <h2 className="articles-title">Insights to grow your money</h2>
-          <p className="pc-subtitle">Short reads . Big takeaways .</p>
-        </div>
+          <div className="articles-header">
+            <span className="pc-eyebrow-1">From our articles</span>
+            <h2 className="articles-title">Insights to grow your money</h2>
+            <p className="pc-subtitle">Short reads . Big takeaways .</p>
+          </div>
         </RevealOnScroll>
 
         <div className="articles-grid">
           {/* Featured Article - Left */}
           <RevealOnScroll delay={100}>
-          <div className="article-featured-card">
-            <img src={featuredImg} alt="Why nobody teaches money in school" className="article-featured-img" />
-          </div>
+            <div className="article-featured-card">
+              <img src={featuredImg} alt="Why nobody teaches money in school" className="article-featured-img" />
+            </div>
           </RevealOnScroll>
 
           {/* Side Articles - Right (MUST be inside articles-grid) */}
           <div className="articles-side">
             <RevealOnScroll delay={200}>
-            <div className="article-side-card">
-              <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
-              <div className="article-side-info">
-                <h4 className="article-side-title">The $500 saving rule students should know</h4>
-                <p className="article-side-desc">The saving rule that will change your financial future.</p>
-                <span className="article-read-time">4 min read</span>
+              <div className="article-side-card">
+                <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
+                <div className="article-side-info">
+                  <h4 className="article-side-title">The $500 saving rule students should know</h4>
+                  <p className="article-side-desc">The saving rule that will change your financial future.</p>
+                  <span className="article-read-time">4 min read</span>
+                </div>
+                <span className="article-bookmark">🔖</span>
               </div>
-              <span className="article-bookmark">🔖</span>
-            </div>
             </RevealOnScroll>
 
             <RevealOnScroll delay={300}>
-            <div className="article-side-card">
-              <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
-              <div className="article-side-info">
-                <h4 className="article-side-title">The $500 saving rule students should know</h4>
-                <p className="article-side-desc">The saving rule that will change your financial future.</p>
-                <span className="article-read-time">4 min read</span>
+              <div className="article-side-card">
+                <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
+                <div className="article-side-info">
+                  <h4 className="article-side-title">The $500 saving rule students should know</h4>
+                  <p className="article-side-desc">The saving rule that will change your financial future.</p>
+                  <span className="article-read-time">4 min read</span>
+                </div>
+                <span className="article-bookmark">🔖</span>
               </div>
-              <span className="article-bookmark">🔖</span>
-            </div>
             </RevealOnScroll>
           </div>
 
         </div>{/* END articles-grid */}
 
         <RevealOnScroll delay={100}>
-        <div className="pc-view-all">
-          <a href="/articles" className="view-all-articles">View all articles →</a>
-        </div>
+          {/* <div className="pc-view-all">
+            <a href="/articles" className="view-all-articles">View all articles →</a>
+          </div> */}
+          <div className="pc-view-all">
+            <button className="btn-hero-secondary">View all Articles →</button>
+          </div>
+
         </RevealOnScroll>
       </section>
       {/* TESTIMONIALS SECTION */}
       {/* TESTIMONIALS SECTION */}
       <section className="testimonials-section">
         <RevealOnScroll>
-        <div className="testimonials-header">
-          <span className="pc-eyebrow">What learners have to say</span>
-          <h2 className="testimonials-title">
-            Every path leads <span className="testimonials-highlight">somewhere</span>
-          </h2>
-          <p className="pc-subtitle">See what learners achieved after taking their first step.</p>
-        </div>
+          <div className="testimonials-header">
+            <span className="pc-eyebrow">What learners have to say</span>
+            <h2 className="testimonials-title">
+              Every path leads <span className="testimonials-highlight">somewhere</span>
+            </h2>
+            <p className="pc-subtitle">See what learners achieved after taking their first step.</p>
+          </div>
         </RevealOnScroll>
         <RevealOnScroll delay={100}>
           <TestimonialsCarousel />
@@ -635,11 +693,11 @@ function Hero() {
         style={{ backgroundImage: `url(${footerImg})` }}
       >
         <RevealOnScroll delay={100}>
-        <div className="footer-cta-content">
-          <h2 className="footer-cta-title">Your financial journey<br />starts here.</h2>
-          <p className="footer-cta-sub">Small steps today. Bigger opportunities tomorrow.</p>
-          <button className="btn-footer-cta">Register now →</button>
-        </div>
+          <div className="footer-cta-content">
+            <h2 className="footer-cta-title">Your financial journey<br />starts here.</h2>
+            <p className="footer-cta-sub">Small steps today. Bigger opportunities tomorrow.</p>
+            <button className="btn-footer-cta">Register now →</button>
+          </div>
         </RevealOnScroll>
       </section>
     </>

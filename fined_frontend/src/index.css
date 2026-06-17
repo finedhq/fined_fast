@@ -53,6 +53,7 @@ button {
 }
 
 .cube-wrapper {
+  font-family: Manrope ;
   position: relative;
   display: inline-block;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);

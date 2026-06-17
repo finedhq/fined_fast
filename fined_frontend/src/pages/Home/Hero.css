@@ -30,11 +30,12 @@ body {
 
 /* ─────────────── NAV ─────────────── */
 nav {
+  font-family: 'Manrope', sans-serif;
   position: relative;
   z-index: 150;
   display: flex;
   align-items: center;
-  padding: 10px 40px;
+  padding: 4px 40px;
   background: #fff;
   border-top: 3px solid #1a1a2e;
 }
@@ -45,13 +46,28 @@ nav {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  margin-right: auto;
+  /* margin-right: auto; */
 }
 
 .logo-icon {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+}
+
+.logo-icon-1 {
+  transition: transform 0.2s ease;
+  width: 59px;
+  height: 57px;
+  flex-shrink: 0;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-right: 5px;
+
+}
+
+.logo-icon-1:hover {
+  transform: scale(1.1);
 }
 
 .logo-wordmark {
@@ -94,6 +110,7 @@ nav {
   align-items: center;
   justify-content: flex-end;
   gap: 0;
+  margin-left: auto;
 }
 
 .nav-divider {
@@ -125,7 +142,7 @@ nav {
 .btn-nav-register {
   background: #F5A623;
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 15px;
   font-weight: 800;
   color: #fff;
@@ -145,6 +162,8 @@ nav {
 /* ─────────────── HERO ─────────────── */
 .hero-section {
   position: relative;
+  z-index: 5;
+  /* Sit above the features strip so image cuts into it */
   width: 100%;
   aspect-ratio: 16 / 7;
   min-height: 440px;
@@ -179,12 +198,15 @@ nav {
 }
 
 .hero-title {
+  margin-top: 80px;
   font-size: clamp(28px, 3.2vw, 52px);
   font-weight: 900;
-  line-height: 1.18;
+  line-height: 1;
+  font-family: 'Poppins',sans-serif;
   color: var(--brand-dark);
   margin-bottom: clamp(10px, 1.2vw, 18px);
   letter-spacing: -0.5px;
+  width: 800px;
 }
 
 .hero-title .highlight {
@@ -206,9 +228,10 @@ nav {
 
 .hero-sub {
   font-size: clamp(13px, 1.1vw, 16px);
-  color: #555;
-  font-weight: 500;
+  color: #000;
+  font-weight: bolder;
   line-height: 1.7;
+  font-family: 'Inter',sans-serif;
   margin-bottom: clamp(18px, 2vw, 34px);
 }
 
@@ -223,7 +246,7 @@ nav {
 .btn-hero-primary {
   background: var(--brand-yellow);
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: clamp(13px, 1.1vw, 16px);
   font-weight: 800;
   color: #fff;
@@ -244,12 +267,14 @@ nav {
   box-shadow: 0 10px 30px rgba(245, 166, 35, 0.45);
   transform: translateY(-2px);
 }
-
+.in-learners-row{
+  font-family: "Inter",sans-serif;
+}
 .btn-hero-secondary {
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(4px);
   border: 2px solid var(--brand-dark);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(13px, 1.1vw, 16px);
   font-weight: 800;
   color: var(--brand-dark);
@@ -345,6 +370,7 @@ nav {
   border-top: 1px solid #eaeaf0;
   box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.04);
   padding: 0 80px;
+  margin-top: 10px;
 }
 
 .feature-item {
@@ -357,6 +383,11 @@ nav {
   transition: box-shadow 0.25s, transform 0.2s;
   cursor: default;
   background: #fff;
+  border-radius: 15px;
+}
+
+.feature-item:last-child {
+  border-right: none;
 }
 
 .feature-item-inner {
@@ -364,10 +395,6 @@ nav {
   flex-direction: row;
   align-items: center;
   gap: 16px;
-}
-
-.feature-item:last-child {
-  border-right: none;
 }
 
 .feature-item:hover {
@@ -403,9 +430,9 @@ nav {
 }
 
 .feature-desc {
-  font-size: 13px;
+  font-size: 15px;
   color: #999;
-  font-weight: 500;
+  font-weight: 900;
   line-height: 1.5;
 }
 
@@ -423,8 +450,9 @@ nav {
 
 .pc-eyebrow {
   display: inline-block;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
+  font-family: 'Poppins' ,sans-serif;
   color: var(--brand-indigo);
   letter-spacing: 0.4px;
   margin-bottom: 10px;
@@ -437,21 +465,23 @@ nav {
   color: rgba(255, 182, 0, 1);
   letter-spacing: 0.4px;
   margin-bottom: 10px;
+  font-family: "Popins",sans-serif;
 }
 
 .pc-title {
-  font-size: clamp(26px, 3vw, 40px);
+  font-size: clamp(35px, 3vw, 40px);
   font-weight: 900;
   color: var(--brand-dark);
   line-height: 1.2;
   margin-bottom: 8px;
-}
+  font-family: 'Poppins',sans-serif;
+}feature-desc
 
 .pc-subtitle {
-  font-size: 16px;
-  font-weight: bold;
-  color: #999;
-  font-weight: 500;
+  font-size: 21px;
+  font-weight: 1000;
+  color: #9C9C9C;
+  font-family: 'Poppins',sans-serif;
   letter-spacing: 0.3px;
 }
 
@@ -536,10 +566,11 @@ nav {
 
 .scc-title {
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--brand-dark);
   margin-bottom: 3px;
   white-space: nowrap;
+  font-family: 'Inter',sans-serif;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -548,6 +579,7 @@ nav {
   font-size: 17px;
   color: #999;
   font-weight: 600;
+  font-family: 'Inter',sans-serif;
   margin-bottom: 6px;
 }
 
@@ -555,6 +587,7 @@ nav {
   display: inline-block;
   font-size: 15px;
   font-weight: 700;
+  font-family: 'Inter',sans-serif;
   color: #16a34a;
   background: #dcfce7;
   padding: 2px 10px;
@@ -661,7 +694,7 @@ nav {
 
   .btn-hero-primary,
   .btn-hero-secondary {
-    font-size: 14px;
+    font-size: 20px;
     padding: 11px 28px;
   }
 
@@ -676,16 +709,72 @@ nav {
   }
 
   .feature-item {
+    cursor: pointer;
+    outline: none;
+
     border-right: none;
     border-top: 1px solid #eaeaf0;
   }
+  .feature-item:focus,
+.feature-item:focus-visible {
+  outline: none;
+}
 
   .feature-item:first-child {
     border-top: none;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 24px;
+  }
+
+  .feature-item:last-child {
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 24px;
   }
 }
 
 /* ─────────────── WHY FINED SECTION ─────────────── */
+/* Step Header (Circle + Title) */
+.wf-step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* The Blue Circle */
+.wf-step-number {
+  width: 56px;
+  height: 56px;
+  background-color: #2338A4; /* Nice deep blue from your screenshot */
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+/* The Bold Title */
+.wf-step-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: #000000;
+  margin: 0;
+  font-family: 'Poppins',sans-serif;
+  line-height: 1.1;
+}
+
+/* The paragraph text */
+.wf-step-desc {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #6B7280; /* Gray text */
+  font-family: 'Inter',sans-serif;
+  margin: 0;
+}
+
 .why-fined-section {
   background: #f5f6ff;
   padding: 20px 80px 64px;
@@ -702,13 +791,14 @@ nav {
   color: var(--brand-dark);
   line-height: 1.2;
   margin-bottom: 10px;
+  font-family: 'Poppins',sans-serif;
 }
 
 .wf-title-underline {
-  width: 120px;
+  width: 280px;
   height: 4px;
   background: var(--brand-yellow);
-  margin: 10px auto 16px;
+  margin: 4px auto 16px;
   border-radius: 2px;
 }
 
@@ -806,7 +896,7 @@ nav {
 
 .wf-content {
   font-size: 21px;
-  max-width: 580px;
+  max-width: 600px;
 }
 
 .wf-header {
@@ -823,11 +913,12 @@ nav {
 }
 
 .wf-title-underline {
-  width: 140px;
+  width: 400px;
   height: 5px;
   background: var(--brand-yellow);
-  margin: 12px auto 18px;
+  margin: -10px auto 18px;
   border-radius: 2px;
+  margin-right: 500px;
 }
 
 @media (max-width: 900px) {
@@ -900,6 +991,7 @@ nav {
   font-size: 2rem;
   font-weight: 700;
   color: white;
+  font-family: 'Poppins',sans-serif;
   margin: 8px 0 4px;
 }
 
@@ -1044,7 +1136,7 @@ nav {
 
 /* ─────────────── TESTIMONIALS ─────────────── */
 .testimonials-section {
-  background: #f5f6ff;
+  background: #F9FAFB;
   padding: 64px 80px 0px;
   overflow: hidden;
 }
@@ -1058,6 +1150,7 @@ nav {
   font-size: clamp(28px, 3vw, 44px);
   font-weight: 900;
   color: var(--brand-dark);
+  font-family: "Poppins",sans-serif;
   margin: 8px 0 8px;
 }
 
@@ -1113,7 +1206,7 @@ nav {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 200px;
+  min-height: 320px;
   box-shadow: 0 2px 12px rgba(74, 58, 255, 0.06);
 }
 
@@ -1123,6 +1216,7 @@ nav {
   color: #1a1a2e;
   line-height: 1.7;
   margin-bottom: 24px;
+  font-family: 'Inter',sans-serif;
 }
 
 .tq-highlight {
@@ -1134,6 +1228,7 @@ nav {
   font-size: 14px;
   color: #888;
   font-weight: 600;
+  font-family: "Inter",sans-serif;
 }
 
 /* Journey dotted line */
@@ -1182,6 +1277,7 @@ nav {
   color: var(--brand-dark);
   line-height: 1.15;
   margin-top: -10px;
+  font-family: 'Poppins',sans-serif;
   margin-bottom: 16px;
 }
 
@@ -1190,12 +1286,13 @@ nav {
   color: #555;
   font-weight: 500;
   margin-bottom: 8px;
+  font-family: 'Inter',sans-serif;
 }
 
 .btn-footer-cta {
   background: var(--brand-yellow);
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 20px;
   font-weight: 800;
   color: #fff;

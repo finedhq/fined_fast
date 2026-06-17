@@ -42,7 +42,10 @@ export default function Navbar() {
   return (
     <nav className={`site-nav${hidden ? " site-nav--hidden" : ""}`}>
       <div className="logo" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
+        <img src="/logo.ico" alt="FinEd" className="logo-icon-1" />
       </div>
+
+
 
       <ul className="nav-links">
         <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
