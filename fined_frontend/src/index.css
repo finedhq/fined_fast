@@ -42,20 +42,63 @@ button {
 .nav-links button.active {
   color: #4A3AFF;
 }
+
+.cube-link {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  text-decoration: none;
+  vertical-align: top;
+  line-height: 1.2;
+}
+
+.cube-wrapper {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cube-wrapper::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  color: #4A3AFF;
+  display: block;
+}
+
+.cube-link:hover .cube-wrapper {
+  transform: translateY(-100%);
+}
+
+.cube-link.active .cube-wrapper {
+  transform: translateY(-100%);
+}
+
+.btn-signin.cube-link {
+  padding: 0;
+}
+
+.btn-signin .cube-wrapper {
+  padding: 6px 4px;
+}
+
 .site-nav {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  background: #ffffff;          
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease;
 }
 
 .site-nav--hidden {
   transform: translateY(-100%);
 }
+
 .site-nav .logo {
   border: 0;
   background: transparent;
