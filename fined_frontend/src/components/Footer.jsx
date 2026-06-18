@@ -1,6 +1,38 @@
+import React, { useEffect, useRef, useState } from "react";
 import "./Footer.css";
 import footerLogo from "../assets/fined-footer-logo.png";
 import { Link } from "react-router-dom";
+function RevealOnScroll({ children, delay = 0 }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.15 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => {
+      if (ref.current) observer.unobserve(ref.current);
+    };
+  }, []);
+
+  const child = React.Children.only(children);
+  const existingClassName = child.props.className || "";
+  const className = `${existingClassName} reveal-on-scroll ${isVisible ? "is-visible" : ""}`.trim();
+
+  return React.cloneElement(child, {
+    ref,
+    className,
+    style: { ...child.props.style, transitionDelay: `${delay}ms` }
+  });
+}
+
 
 export default function Footer() {
     return (
@@ -41,15 +73,14 @@ export default function Footer() {
                         </a>
                     </div>
                 </div>
-
-                {/* FEATURED links */}
+                                {/* FEATURED links */}
                 <div className="footer-col">
                     <h4 className="footer-col-title">FEATURED</h4>
                     <ul>
-                        <li><a href="/courses">Courses</a></li>
+                       <li><a href="/courses">Courses</a></li>
                         <li><a href="/articles">Articles</a></li>
                         <li><a href="/fintools">FinTools</a></li>
-                        <li><a href="/about">About Us</a></li>
+                       <li><a href="/about">About Us</a></li>
                     </ul>
                 </div>
 
@@ -65,19 +96,22 @@ export default function Footer() {
                 {/* NEWSLETTER */}
                 <div className="footer-col footer-newsletter">
                     <h4 className="footer-col-title">NEWSLETTER</h4>
-                    <input
-                        type="email"
-                        placeholder="Enter your email address"
-                        className="footer-email-input"
-                    />
-                    <button className="footer-subscribe-btn">Subscribe Now</button>
+                        <input
+                            type="email"
+                            placeholder="Enter your email address"
+                            className="footer-email-input"
+                        />
+                        <button className="footer-subscribe-btn">Subscribe Now</button>
+                   
                 </div>
 
             </div>
 
-            <div className="footer-bottom">
-                <p>© Copyright 2025, All Rights Reserved by FinEd.</p>
-            </div>
+           
+                <div className="footer-bottom">
+                    <p>© Copyright 2025, All Rights Reserved by FinEd.</p>
+                </div>
+
         </footer>
     );
 }

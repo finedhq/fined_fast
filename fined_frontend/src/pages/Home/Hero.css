@@ -363,8 +363,8 @@ nav {
 /* ─────────────── FEATURES STRIP ─────────────── */
 .features-strip {
   position: relative;
-  z-index: 2;
-  background: #fff;
+  z-index: 10;
+  background: #F9FAFB;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid #eaeaf0;
@@ -375,10 +375,11 @@ nav {
 
 .feature-item {
   display: flex;
+  background-color: #F9FAFB;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 26px 30px;
+  padding: 20px 30px;
   border-right: 1px solid #eaeaf0;
   transition: box-shadow 0.25s, transform 0.2s;
   cursor: default;

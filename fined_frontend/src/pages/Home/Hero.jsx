@@ -531,7 +531,7 @@ function Hero() {
           </svg>
 
           {/* 01 - image left, text right */}
-          {/* 01 - image left, text right */}
+
 <div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
   <div className="wf-img-placeholder"><img src={biteSizeLessonsImg} alt="Bite size lessons" className="wf-img" /></div>
   

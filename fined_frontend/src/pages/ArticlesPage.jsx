@@ -1,6 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import React,{ useEffect, useRef, useState } from "react";
 import ArticleReader from "../components/ArticleReader";
 import { fetchArticles } from "../services/api";
+function RevealOnScroll({ children, delay = 0 }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.15 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => {
+      if (ref.current) observer.unobserve(ref.current);
+    };
+  }, []);
+
+  const child = React.Children.only(children);
+  const existingClassName = child.props.className || "";
+  const className = `${existingClassName} reveal-on-scroll ${isVisible ? "is-visible" : ""}`.trim();
+
+  return React.cloneElement(child, {
+    ref,
+    className,
+    style: { ...child.props.style, transitionDelay: `${delay}ms` }
+  });
+}
 
 const ARTICLES_PER_PAGE = 30;
 
@@ -137,11 +167,14 @@ function ArticlesPage() {
     <div className="ap-root">
 
       {/* HERO STRIP */}
-      <div className="ap-hero-strip">
-        <span className="ap-eyebrow">FinEd Library</span>
-        <h1 className="ap-headline">Articles</h1>
-        <p className="ap-sub">Fresh financial explainers, backed by real research.</p>
-      </div>
+      <RevealOnScroll>
+        <div className="ap-hero-strip">
+          <span className="ap-eyebrow">FinEd Library</span>
+          <h1 className="ap-headline">Articles</h1>
+          <p className="ap-sub">Fresh financial explainers, backed by real research.</p>
+        </div>
+      </RevealOnScroll>
+
 
       {error && <div className="ap-error">{error}</div>}
 
@@ -157,6 +190,7 @@ function ArticlesPage() {
       {articles.length > 0 && (
         <div className="ap-body">
           {/* FEATURED CARD */}
+          <RevealOnScroll delay={100}>
           <div
             className="ap-featured"
             onClick={() => openArticle(articles[0])}
@@ -185,7 +219,7 @@ function ArticlesPage() {
               </p>
               <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
             </div>
-          </div>
+          </div></RevealOnScroll>
 
           {/* SCROLLABLE LIST */}
           <div className="ap-side-wrap">
@@ -206,6 +240,7 @@ function ArticlesPage() {
 
             <div className="ap-carousel" ref={carouselRef}>
               {articles.slice(1).map((article, idx) => (
+                <RevealOnScroll key={article.id} delay={100 + (idx % 10) * 50}>
                 <div
                   key={article.id}
                   className="ap-row"
@@ -232,6 +267,7 @@ function ArticlesPage() {
                     </p>
                   </div>
                 </div>
+                </RevealOnScroll>
               ))}
 
               <div ref={loaderRef} className="ap-sentinel" />
