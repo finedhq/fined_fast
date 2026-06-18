@@ -1,6 +1,7 @@
-import React,{ useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ArticleReader from "../components/ArticleReader";
 import { fetchArticles } from "../services/api";
+
 function RevealOnScroll({ children, delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
@@ -42,8 +43,25 @@ function formatDate(date) {
     day: "numeric",
   });
 }
+// Add this to automatically guess the category if it's missing
+const inferTag = (article = {}) => {
+  const src = `${article.title || ""} ${article.content || ""}`.toLowerCase();
+  const tags = [
+    ["IPO", /\bipo\b|listing|gmp|grey market|public issue/],
+    ["Economy", /economy|pipeline|trade|inflation|gdp|rupee|policy|market/],
+    ["Investing", /invest|stock|share|profit|revenue|valuation|portfolio/],
+    ["Banking", /bank|loan|credit|deposit|interest rate|rbi/],
+    ["Savings", /saving|emergency fund|retirement|college|budget/],
+    ["Energy", /energy|renewable|solar|wind|oil|gas|power/],
+    ["Business", /company|brand|consumer|industry|business|clients/],
+  ];
+  return tags.find(([, re]) => re.test(src))?.[0] || "Finance";
+};
+
 
 function ArticlesPage() {
+  const [activeCategory, setActiveCategory] = useState("All");
+  const categories = ["All", "IPO", "Marketing Basics", "Stocks"];
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [offset, setOffset] = useState(0);
@@ -79,9 +97,15 @@ function ArticlesPage() {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    
     loadArticles(0, false);
   }, []);
+
 
   const checkScroll = () => {
     const el = carouselRef.current;
@@ -121,7 +145,7 @@ function ArticlesPage() {
   useEffect(() => {
     if (selectedArticle) {
       document.body.style.overflow = "hidden";
-      window.dispatchEvent(new CustomEvent("articleReaderOpen"));  // ← ADD THIS
+      window.dispatchEvent(new CustomEvent("articleReaderOpen"));
       const idx = articles.findIndex((a) => a.id === selectedArticle.id);
       const isLast = idx === articles.length - 1;
       if (isLast && hasMore && !prefetching) {
@@ -130,7 +154,7 @@ function ArticlesPage() {
       }
     } else {
       document.body.style.overflow = "";
-      window.dispatchEvent(new CustomEvent("articleReaderClose")); // ← ADD THIS
+      window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
     return () => { document.body.style.overflow = ""; };
   }, [selectedArticle]);
@@ -163,6 +187,11 @@ function ArticlesPage() {
     carouselRef.current?.scrollBy({ top: 300, behavior: "smooth" });
   };
 
+  // Calculate filtered articles
+  const exploreArticles = activeCategory === "All"
+    ? articles
+    : articles.filter(article => article.category === activeCategory);
+
   return (
     <div className="ap-root">
 
@@ -188,99 +217,164 @@ function ArticlesPage() {
       )}
 
       {articles.length > 0 && (
-        <div className="ap-body">
-          {/* FEATURED CARD */}
-          <RevealOnScroll delay={100}>
-          <div
-            className="ap-featured"
-            onClick={() => openArticle(articles[0])}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && openArticle(articles[0])}
-          >
-            <div className="ap-featured-img-wrap">
-              {articles[0]?.image_url ? (
-                <img
-                  src={articles[0].image_url}
-                  alt={articles[0].title}
-                  className="ap-featured-img"
-                  onLoad={checkScroll}
-                />
-              ) : (
-                <div className="ap-featured-img-placeholder" />
-              )}
-              <span className="ap-badge">Featured</span>
-            </div>
-            <div className="ap-featured-body">
-              <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
-              <p className="ap-featured-excerpt">
-                {articles[0]?.content?.slice(0, 160) || ""}
-                <span className="ap-ellipsis"> [ . . . ]</span>
-              </p>
-              <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
-            </div>
-          </div></RevealOnScroll>
-
-          {/* SCROLLABLE LIST */}
-          <div className="ap-side-wrap">
-            <div className="ap-scroll-arrows">
-              <button
-                className={`ap-arrow ${canScrollUp ? "active" : ""}`}
-                onClick={scrollUp}
-                disabled={!canScrollUp}
-                aria-label="Scroll up"
-              >❮</button>
-              <button
-                className={`ap-arrow ${canScrollDown ? "active" : ""}`}
-                onClick={scrollDown}
-                disabled={!canScrollDown}
-                aria-label="Scroll down"
-              >❯</button>
-            </div>
-
-            <div className="ap-carousel" ref={carouselRef}>
-              {articles.slice(1).map((article, idx) => (
-                <RevealOnScroll key={article.id} delay={100 + (idx % 10) * 50}>
-                <div
-                  key={article.id}
-                  className="ap-row"
-                  onClick={() => openArticle(article)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
-                >
-                  {article.image_url ? (
+        <>
+          <div className="ap-body">
+            {/* FEATURED CARD */}
+            <RevealOnScroll delay={100}>
+              <div
+                className="ap-featured"
+                onClick={() => openArticle(articles[0])}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && openArticle(articles[0])}
+              >
+                <div className="ap-featured-img-wrap">
+                  {articles[0]?.image_url ? (
                     <img
-                      src={article.image_url}
-                      alt={article.title}
-                      className="ap-row-img"
+                      src={articles[0].image_url}
+                      alt={articles[0].title}
+                      className="ap-featured-img"
+                      onLoad={checkScroll}
                     />
                   ) : (
-                    <div className="ap-row-img-placeholder" />
+                    <div className="ap-featured-img-placeholder" />
                   )}
-                  <div className="ap-row-body">
-                    <p className="ap-row-date">{formatDate(article.created_at)}</p>
-                    <h3 className="ap-row-title">{article.title}</h3>
-                    <p className="ap-row-excerpt">
-                      {article.content?.slice(0, 100) || ""}
-                      <span className="ap-ellipsis"> [ . . . ]</span>
-                    </p>
-                  </div>
+                  <span className="ap-badge">Featured</span>
                 </div>
-                </RevealOnScroll>
-              ))}
+                <div className="ap-featured-body">
+                  <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
+                  <p className="ap-featured-excerpt">
+                    {articles[0]?.content?.slice(0, 160) || ""}
+                    <span className="ap-ellipsis"> [ . . . ]</span>
+                  </p>
+                  <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
+                </div>
+              </div>
+            </RevealOnScroll>
 
-              <div ref={loaderRef} className="ap-sentinel" />
+            {/* SCROLLABLE LIST */}
+            <div className="ap-side-wrap">
+              <div className="ap-scroll-arrows">
+                <button
+                  className={`ap-arrow ${canScrollUp ? "active" : ""}`}
+                  onClick={scrollUp}
+                  disabled={!canScrollUp}
+                  aria-label="Scroll up"
+                >❮</button>
+                <button
+                  className={`ap-arrow ${canScrollDown ? "active" : ""}`}
+                  onClick={scrollDown}
+                  disabled={!canScrollDown}
+                  aria-label="Scroll down"
+                >❯</button>
+              </div>
 
-              {fetchingArticle && (
-                <p className="ap-loading-more">Loading more articles...</p>
-              )}
-              {!hasMore && articles.length > 1 && (
-                <p className="ap-all-caught">✔️ You&apos;re all caught up.</p>
-              )}
+              <div className="ap-carousel" ref={carouselRef}>
+                {articles.slice(1).map((article, idx) => (
+                  <RevealOnScroll key={article.id} delay={100 + (idx % 10) * 50}>
+                    <div
+                      key={article.id}
+                      className="ap-row"
+                      onClick={() => openArticle(article)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
+                    >
+                      {article.image_url ? (
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="ap-row-img"
+                        />
+                      ) : (
+                        <div className="ap-row-img-placeholder" />
+                      )}
+                      <div className="ap-row-body">
+                        <p className="ap-row-date">{formatDate(article.created_at)}</p>
+                        <h3 className="ap-row-title">{article.title}</h3>
+                        <p className="ap-row-excerpt">
+                          {article.content?.slice(0, 100) || ""}
+                          <span className="ap-ellipsis"> [ . . . ]</span>
+                        </p>
+                      </div>
+                    </div>
+                  </RevealOnScroll>
+                ))}
+
+                <div ref={loaderRef} className="ap-sentinel" />
+
+                {fetchingArticle && (
+                  <p className="ap-loading-more">Loading more articles...</p>
+                )}
+                {!hasMore && articles.length > 1 && (
+                  <p className="ap-all-caught">✔️ You&apos;re all caught up.</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* EXPLORE ARTICLES SECTION */}
+          <div className="ap-explore-section">
+            <div className="ap-explore-header">
+              <h2 className="exp-ar-button">Explore Articles -&gt;</h2>
+              <div className="ap-mini-navbar">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    className={`ap-category-btn ${activeCategory === cat ? "active" : ""}`}
+                    onClick={() => setActiveCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+                        <div className="ap-articles-grid">
+              {exploreArticles.map((article) => (
+                <div
+                  key={article.id}
+                  className="ap-grid-card"
+                  onClick={() => openArticle(article)}
+                >
+                  {/* Image Section */}
+                  <div className="ap-grid-card-img-wrap">
+                    {article.image_url ? (
+                      <img
+                        src={article.image_url}
+                        alt={article.title}
+                        className="ap-grid-card-img"
+                      />
+                    ) : (
+                      <div className="ap-grid-card-img-placeholder" />
+                    )}
+                  </div>
+
+                  {/* Text Section */}
+                                    {/* Text Section */}
+                  <div className="ap-grid-card-content">
+                    
+                    {/* Date and Category (Just like the reader!) */}
+                    <span className="ap-grid-category">
+                      {formatDate(article.created_at)} • {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                    </span>
+                    
+                    {/* Title */}
+                    <h3 className="ap-grid-title">{article.title}</h3>
+                    
+                    {/* Excerpt */}
+                    <p className="ap-grid-excerpt">
+                      {article.content?.slice(0, 100) || ""}...
+                    </p>
+                  </div>
+
+
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </>
       )}
 
       {/* ARTICLE READER MODAL */}

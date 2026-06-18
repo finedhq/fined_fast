@@ -164,7 +164,7 @@ button {
 .ap-hero-strip {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 70px 0 30px;
+  padding: 40px 0 30px;
 }
 
 .ap-eyebrow {
@@ -1533,4 +1533,146 @@ button {
 .reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+/* --- EXPLORE SECTION --- */
+.ap-explore-section {
+  margin-top: 60px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Header & Navbar */
+.ap-explore-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.ap-explore-header h2 {
+  color: black;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.ap-mini-navbar {
+  display: flex;
+  gap: 10px;
+  background-color: #1a1a1a; /* Dark background matching your image */
+  padding: 5px 15px;
+  border-radius: 30px;
+  border: 1px solid #333;
+}
+
+.ap-category-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.ap-category-btn:hover {
+  color: #fff;
+}
+
+.ap-category-btn.active {
+  color: #fff;
+  /* Add a subtle highlight for the active state if you want, e.g., background-color: #333; */
+}
+
+/* Grid Layout for Cards */
+.ap-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* <- Exactly 4 columns */
+  gap: 20px;
+  width: 100%;
+}
+
+.ap-grid-card {
+  background-color: transparent;
+  border: 1px solid #333;
+  border-radius: 12px;
+  min-height: 250px;
+  overflow: hidden; 
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+/* Styling for the new image */
+.ap-grid-card-img-wrap {
+  width: 100%;
+  height: 160px; /* Adjust height of the image as needed */
+  background: #e5e7eb;
+}
+/* Category styling (Blue, uppercase, bold) */
+.ap-grid-category {
+  color: #4A3AFF; /* You can change this to match your exact blue */
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Title styling */
+.ap-grid-title {
+  color: #111827; /* Dark black text */
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+/* Date / Author styling */
+.ap-grid-date {
+  color: #6b7280; /* Gray text */
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+/* Excerpt text styling */
+.ap-grid-excerpt {
+  color: #4b5563; /* Lighter gray for readability */
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ap-grid-card-img,
+.ap-grid-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Prevents image from stretching/squishing */
+}
+
+/* Move the padding to just the text section so the image can touch the edges */
+.ap-grid-card-content {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+
+
+.ap-grid-card:hover {
+  border-color: #666;
+}
+
+.ap-grid-title {
+  color: black;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.ap-grid-excerpt {
+  color: #565353;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
