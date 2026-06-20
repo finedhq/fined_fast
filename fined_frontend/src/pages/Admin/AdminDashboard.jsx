@@ -33,6 +33,11 @@ function AdminDashboard() {
       icon: "⚙",
       action: null,
     },
+    { 
+      label: "Add Card", 
+      icon: "🎬", 
+      action: () => navigate("/admin/cards/add") 
+    },
   ];
 
   return (

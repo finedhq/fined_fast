@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getCourses } from "../services/api";
+import { getCourses } from "../../services/api";
 import "./Courses.css";
 
 function Courses() {

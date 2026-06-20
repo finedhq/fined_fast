@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendFeedback } from "../services/api";
+import { sendFeedback } from "../../services/api";
 import "./FeedbackPage.css";
 
 export default function FeedbackPage() {

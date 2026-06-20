@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import ArticleReader from "../components/ArticleReader";
-import { deleteArticle, fetchArticles } from "../services/api";
+import ArticleReader from "../../components/ArticleReader";
+import { deleteArticle, fetchArticles } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 function AdminArticleList() {

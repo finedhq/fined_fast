@@ -1,0 +1,94 @@
+/* ── Page background ── */
+.cv-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f4f6fb;
+}
+
+/* ── The bounding box every card type renders inside ── */
+.cv-card-box {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(15, 14, 42, 0.08);
+  padding: 24px 24px 0;
+  overflow: hidden;
+}
+
+/* ── Header row: module name + "2/7" ── */
+.cv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cv-module-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5a5a7a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cv-progress-fraction {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4A3AFF;
+}
+
+/* ── Progress bar ── */
+.cv-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #e8eaf2;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.cv-progress-fill {
+  height: 100%;
+  background: #4A3AFF;
+  border-radius: 3px;
+  transition: width 0.35s ease;
+}
+
+/* ── Wrapper around whatever CardRenderer outputs ── */
+.cv-card-content {
+  margin: 0 -24px; /* let the card's own background bleed to the box edges */
+}
+
+/* ── Loading / error states ── */
+.cv-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 12px;
+  color: #5a5a7a;
+  text-align: center;
+  background: #f4f6fb;
+}
+
+.cv-status a {
+  color: #4A3AFF;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .cv-card-box {
+    padding: 18px 18px 0;
+    border-radius: 16px;
+  }
+
+  .cv-card-content {
+    margin: 0 -18px;
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getArticles } from "../services/api";
+import { getArticles } from "../../services/api";
 import "./Articles.css";
 
 function Articles() {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import ArticleReader from "../components/ArticleReader";
-import { fetchArticles } from "../services/api";
+import ArticleReader from "../../components/ArticleReader";
+import { fetchArticles } from "../../services/api";
 
 function RevealOnScroll({ children, delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);

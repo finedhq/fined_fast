@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendContactQuery } from "../services/api";
+import { sendContactQuery } from "../../services/api";
 import "./ContactPage.css";
 
 export default function ContactPage() {

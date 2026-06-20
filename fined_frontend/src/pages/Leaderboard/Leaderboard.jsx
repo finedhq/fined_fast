@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getLeaderboard } from "../services/api";
+import { getLeaderboard } from "../../services/api";
 import "./Leaderboard.css";
 
 function Leaderboard() {

@@ -61,5 +61,36 @@ export function sendFeedback(form) {
   });
 }
 
+export function getCourses() {
+  return request("/courses/getall", {
+    method: "GET",
+  });
+}
+
+export function addCard(payload) {
+  return request("/courses/cards/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getCard(courseId, moduleId, cardId) {
+  return request(`/courses/course/${courseId}/module/${moduleId}/card/${cardId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: localStorage.getItem("fined_email") || "" }),
+  });
+}
+
+export function updateCard(courseId, moduleId, cardId, body) {
+  return request(`/courses/course/${courseId}/module/${moduleId}/card/${cardId}/updateCard`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+
 export { API_BASE_URL };
 

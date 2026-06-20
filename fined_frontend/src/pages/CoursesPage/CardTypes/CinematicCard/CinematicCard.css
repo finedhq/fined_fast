@@ -1,0 +1,155 @@
+.cc-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 55vh;
+  padding: 48px 32px;
+  background: linear-gradient(160deg, #eef3ff 0%, #f7faff 55%, #ffffff 100%);
+  border-radius: 0 0 24px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Soft ambient glow, matches the airy Figma background */
+.cc-root::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(74, 58, 255, 0.10), transparent 70%);
+  pointer-events: none;
+}
+
+.cc-root::after {
+  content: "";
+  position: absolute;
+  bottom: -140px;
+  left: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.cc-lines {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+
+.cc-line {
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f0e2a;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.cc-line--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cc-line--em {
+  color: #4A3AFF;
+}
+
+.cc-line--em2 {
+  color: #F5A623;
+}
+
+.cc-tagline {
+  position: relative;
+  z-index: 1;
+  max-width: 46ch;
+  font-size: 1.05rem;
+  color: #5a5a7a;
+  line-height: 1.65;
+  margin: 0 0 32px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.cc-tagline--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cc-cta {
+  position: relative;
+  z-index: 1;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 999px;
+  background: #4A3AFF;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.18s;
+  visibility: hidden;
+}
+
+.cc-cta--visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.cc-cta:hover:not(:disabled) {
+  background: #3a2dd9;
+}
+
+.cc-cta:disabled {
+  cursor: default;
+}
+
+.cc-finstars {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: #8a8aa3;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.cc-finstars--visible {
+  opacity: 1;
+}
+
+.cc-finstars span {
+  color: #F5A623;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .cc-root {
+    min-height: 50vh;
+    padding: 36px 20px;
+    border-radius: 0 0 18px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-line,
+  .cc-tagline,
+  .cc-cta,
+  .cc-finstars {
+    transition: none;
+    transform: none;
+  }
+}

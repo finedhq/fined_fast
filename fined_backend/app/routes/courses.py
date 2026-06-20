@@ -3,12 +3,13 @@ import asyncio
 import re
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from typing import Optional, Dict, Any, List
 
 from app.integrations.storage import upload_to_supabase
 from app.integrations.supabase_client import supabase
 from app.dependencies import get_current_user, require_admin, AuthUser
+from app.models.card_data import validate_card_data
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
@@ -203,7 +204,7 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
             "ongoing_module_id": module_id,
             "ongoing_course_id": course_id
         }).eq("email", body.email).execute())
-        modules_list_future = asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("course_id", course_id).order("order_index").execute())
+        modules_list_future = asyncio.to_thread(lambda: supabase.from_("modules").select("id, title").eq("course_id", course_id).order("order_index").execute())
         
         cards_res, progress_res, _, modules_res = await asyncio.gather(
             cards_future, progress_future, update_user_future, modules_list_future
@@ -220,6 +221,7 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
         # 2. Adjacent modules navigation lookup
         modules = modules_res.data or []
         module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
+        current_module_title = modules[module_index]["title"] if module_index != -1 else None
         
         prev_module = modules[module_index - 1] if module_index > 0 else None
         next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
@@ -254,7 +256,8 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
             "prevCardId": all_cards[current_index - 1]["card_id"] if current_index > 0 else None,
             "nextCardId": all_cards[current_index + 1]["card_id"] if current_index < len(all_cards) - 1 else None,
             "module_total_cards": len(all_cards),
-            "module_progress": current_card.get("order_index", 0) + 1,
+            "module_title": current_module_title,
+            "module_progress": current_card.get("order_index", 0),
             "isFirstCardInModule": current_index == 0,
             "isLastCardInModule": current_index == len(all_cards) - 1,
             "prevModuleFirstCard": prev_module_first_card,
@@ -465,4 +468,48 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update progress: {str(e)}"
+        )
+
+class AddCardRequest(BaseModel):
+    module_id: str
+    order_index: int
+    card_type: str
+    title: str  # admin-facing label, shown in the admin card list
+    card_data: dict
+ 
+ 
+@router.post("/cards/add")
+async def add_card(body: AddCardRequest):
+    """
+    Admin: adds a new card of any type to a module.
+    card_data is validated against the schema registered for card_type
+    before it is written to the database.
+    """
+    try:
+        validated_data = validate_card_data(body.card_type, body.card_data)
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid card_data for type '{body.card_type}': {e.errors()}",
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+ 
+    try:
+        res = await asyncio.to_thread(
+            lambda: supabase.from_("cards")
+            .insert([{
+                "module_id": body.module_id,
+                "order_index": body.order_index,
+                "card_template": body.card_type,  # NEW column — separate from content_type
+                "title": body.title,
+                "card_data": validated_data,
+            }])
+            .execute()
+        )
+        return res.data[0] if res.data else {}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to add card: {str(e)}",
         )

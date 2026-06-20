@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendNewsletter } from "../services/api";
+import { sendNewsletter } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 function AdminNewsletter() {
