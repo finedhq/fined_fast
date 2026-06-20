@@ -10,6 +10,18 @@ class CinematicLine(BaseModel):
     text: str
     emphasis: Literal["", "em", "em2"] = ""
 
+class ScenarioGlossaryTerm(BaseModel):
+    term: str
+    definition: str
+    example: Optional[str] = None
+
+class ScenarioStage(BaseModel):
+    icon: str
+    name: str
+    detail: str
+    glossary_terms: list[ScenarioGlossaryTerm] = Field(default_factory=list)
+    stat_line: Optional[str] = None
+
 
 class CinematicCardData(BaseModel):
     card_type: Literal["cinematic"] = "cinematic"
@@ -18,13 +30,20 @@ class CinematicCardData(BaseModel):
     cta_text: str = "Continue"
     finstars: int = Field(ge=0, default=0)
 
+class ScenarioCardData(BaseModel):
+    card_type: Literal["scenario"] = "scenario"
+    intro_text: str
+    stages: list[ScenarioStage] = Field(min_length=2, max_length=6)
+    reflection_question: str
+    reflection_options: list[str] = Field(min_length=2, max_length=5)
+
 
 # Registry — used by the route/service to validate the right shape
 # for whatever card_type the admin selects.
 CARD_DATA_SCHEMAS = {
     "cinematic": CinematicCardData,
+    "scenario": ScenarioCardData,
     # "quiz": QuizCardData,            # add as each type is built
-    # "scenario": ScenarioCardData,
     # "completion": CompletionCardData,
 }
 

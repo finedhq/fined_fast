@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCard } from "../../services/api";
 import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./cardfields/CinematicFields";
+import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./cardfields/ScenarioFields";
 
 // As new card types are built:
 // 1. import their Fields component + EMPTY_<TYPE>_DATA below
@@ -9,14 +10,16 @@ import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./cardfields/CinematicFie
 // 3. add one case in the renderFields() switch
 const CARD_TYPE_OPTIONS = [
   { value: "cinematic", label: "Cinematic Opener" },
+  { value: "scenario", label: "Story / Scenario" },
   // { value: "quiz", label: "Quiz" },
-  // { value: "scenario", label: "Scenario" },
 ];
 
 function getEmptyDataFor(cardType) {
   switch (cardType) {
     case "cinematic":
       return EMPTY_CINEMATIC_DATA;
+    case "scenario":
+      return EMPTY_SCENARIO_DATA;
     default:
       return {};
   }
@@ -43,6 +46,8 @@ function AddCardForm() {
     switch (cardType) {
       case "cinematic":
         return <CinematicFields data={cardData} onChange={setCardData} />;
+      case "scenario":
+        return <ScenarioFields data={cardData} onChange={setCardData} />;
       default:
         return <p>No fields defined yet for this card type.</p>;
     }

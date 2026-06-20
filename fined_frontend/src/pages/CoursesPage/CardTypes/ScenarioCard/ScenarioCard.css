@@ -1,0 +1,233 @@
+.sc-root {
+  background: linear-gradient(180deg, #ffffff 0%, #f9faff 100%);
+  border-radius: 0 0 24px 24px;
+  padding: 32px 24px;
+  color: #111827;
+}
+
+.sc-intro {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+/* Timeline */
+.sc-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 40px;
+}
+
+.sc-stage {
+  display: flex;
+  gap: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.3s;
+}
+
+.sc-stage:not(.sc-stage--active) {
+  opacity: 0.6;
+}
+
+.sc-stage:hover {
+  opacity: 1;
+}
+
+.sc-stage-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 32px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.sc-timeline-line {
+  width: 2px;
+  flex: 1;
+  background: #e5e7eb;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+.sc-stage--past .sc-timeline-line {
+  background: #4A3AFF; /* Indigo */
+}
+
+.sc-stage-content {
+  flex: 1;
+  padding-bottom: 24px;
+}
+
+.sc-stage-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111827;
+  padding-top: 4px;
+  transition: color 0.3s;
+}
+
+.sc-stage--active .sc-stage-name {
+  color: #4A3AFF;
+}
+
+.sc-stage-detail-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s ease-out;
+  overflow: hidden;
+}
+
+.sc-stage-detail-wrapper.open {
+  grid-template-rows: 1fr;
+}
+
+.sc-stage-detail-inner {
+  min-height: 0; /* needed for grid transition */
+}
+
+.sc-detail-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.sc-stat-line {
+  background: #f3f4f6;
+  border-left: 3px solid #F5A623; /* Amber */
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  border-radius: 0 8px 8px 0;
+  font-weight: 500;
+}
+
+/* Glossary Tooltips */
+.sc-glossary-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.sc-glossary-term {
+  background: rgba(74, 58, 255, 0.1);
+  border: 1px dashed #4A3AFF;
+  color: #4A3AFF;
+  padding: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.sc-glossary-term:hover, .sc-glossary-term.active {
+  background: #4A3AFF;
+  color: white;
+}
+
+.sc-glossary-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  width: 280px;
+  z-index: 10;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: left;
+  animation: tooltipIn 0.2s ease forwards;
+}
+
+.sc-glossary-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: #111827;
+}
+
+.sc-glossary-tooltip strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #F5A623;
+  margin-bottom: 6px;
+}
+
+.sc-glossary-tooltip p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  color: #e5e7eb;
+}
+
+.sc-glossary-tooltip .sc-example {
+  font-style: italic;
+  color: #9ca3af;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 8px;
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Reflection */
+.sc-reflection {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.sc-reflection-q {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.sc-reflection-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sc-btn-opt {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.sc-btn-opt:hover {
+  background: #eff6ff;
+  border-color: #4A3AFF;
+  color: #4A3AFF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 58, 255, 0.1);
+}

@@ -35,7 +35,8 @@ function CardViewer() {
 
   const handleContinue = async () => {
     try {
-      await updateCard(courseId, moduleId, cardId, { status: "completed", email: null });
+      const email = localStorage.getItem("fined_email") || "";
+      await updateCard(courseId, moduleId, cardId, { status: "completed", email });
     } catch {
       // Non-blocking — navigation should not stall on a logging failure
     }
