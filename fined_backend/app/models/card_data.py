@@ -37,12 +37,38 @@ class ScenarioCardData(BaseModel):
     reflection_question: str
     reflection_options: list[str] = Field(min_length=2, max_length=5)
 
+class ConceptReason(BaseModel):
+    icon: str
+    title: str
+    description: str
+
+class ConceptCardData(BaseModel):
+    card_type: Literal["concept"] = "concept"
+    title: str
+    explanation: str
+    reasons: list[ConceptReason] = Field(default_factory=list)
+    key_takeaway: Optional[str] = None
+
+class ExplorerItem(BaseModel):
+    label: str
+    title: str
+    content: str
+    icon: Optional[str] = None
+
+class InteractiveCardData(BaseModel):
+    card_type: Literal["interactive"] = "interactive"
+    title: str
+    intro_text: str
+    items: list[ExplorerItem] = Field(min_length=2, max_length=6)
+
 
 # Registry — used by the route/service to validate the right shape
 # for whatever card_type the admin selects.
 CARD_DATA_SCHEMAS = {
     "cinematic": CinematicCardData,
     "scenario": ScenarioCardData,
+    "concept": ConceptCardData,
+    "interactive": InteractiveCardData,
     # "quiz": QuizCardData,            # add as each type is built
     # "completion": CompletionCardData,
 }
