@@ -49,7 +49,7 @@ export default function Navbar() {
 
       <ul className="nav-links">
         <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
-        <li><a href="#" className="cube-link"><span className="cube-wrapper" data-text="Courses">Courses</span></a></li>
+        <li><NavLink to="/courses" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Courses">Courses</span></NavLink></li>
         <li><NavLink to="/articles" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Articles">Articles</span></NavLink></li>
         <li><NavLink to="/contact" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Contact Us">Contact Us</span></NavLink></li>
       </ul>

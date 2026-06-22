@@ -2,36 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticles } from "../../services/api";
 
-function RevealOnScroll({ children, delay = 0 }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      if (ref.current) observer.unobserve(ref.current);
-    };
-  }, []);
-
-  const child = React.Children.only(children);
-  const existingClassName = child.props.className || "";
-  const className = `${existingClassName} reveal-on-scroll ${isVisible ? "is-visible" : ""}`.trim();
-
-  return React.cloneElement(child, {
-    ref,
-    className,
-    style: { ...child.props.style, transitionDelay: `${delay}ms` }
-  });
-}
+import RevealOnScroll from "../../components/RevealOnScroll";
+import Lenis from 'lenis';
 
 const ARTICLES_PER_PAGE = 30;
 
@@ -76,6 +48,18 @@ function ArticlesPage() {
 
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+
+  useEffect(() => {
+    const lenis = new Lenis()
+    function raf(time) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+    requestAnimationFrame(raf)
+    return () => {
+      lenis.destroy()
+    }
+  }, [])
 
   const loadArticles = async (nextOffset = 0, append = false) => {
     if (loadingRef.current || (!hasMore && append)) return;
@@ -331,45 +315,43 @@ function ArticlesPage() {
             </div>
 
                         <div className="ap-articles-grid">
-              {exploreArticles.map((article) => (
-                <div
-                  key={article.id}
-                  className="ap-grid-card"
-                  onClick={() => openArticle(article)}
-                >
-                  {/* Image Section */}
-                  <div className="ap-grid-card-img-wrap">
-                    {article.image_url ? (
-                      <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="ap-grid-card-img"
-                      />
-                    ) : (
-                      <div className="ap-grid-card-img-placeholder" />
-                    )}
+              {exploreArticles.map((article, idx) => (
+                <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
+                  <div
+                    className="ap-grid-card"
+                    onClick={() => openArticle(article)}
+                  >
+                    {/* Image Section */}
+                    <div className="ap-grid-card-img-wrap">
+                      {article.image_url ? (
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="ap-grid-card-img"
+                        />
+                      ) : (
+                        <div className="ap-grid-card-img-placeholder" />
+                      )}
+                    </div>
+
+                    {/* Text Section */}
+                    <div className="ap-grid-card-content">
+                      
+                      {/* Date and Category (Just like the reader!) */}
+                      <span className="ap-grid-category">
+                        {formatDate(article.created_at)} • {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                      </span>
+                      
+                      {/* Title */}
+                      <h3 className="ap-grid-title">{article.title}</h3>
+                      
+                      {/* Excerpt */}
+                      <p className="ap-grid-excerpt">
+                        {article.content?.slice(0, 100) || ""}...
+                      </p>
+                    </div>
                   </div>
-
-                  {/* Text Section */}
-                                    {/* Text Section */}
-                  <div className="ap-grid-card-content">
-                    
-                    {/* Date and Category (Just like the reader!) */}
-                    <span className="ap-grid-category">
-                      {formatDate(article.created_at)} • {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
-                    </span>
-                    
-                    {/* Title */}
-                    <h3 className="ap-grid-title">{article.title}</h3>
-                    
-                    {/* Excerpt */}
-                    <p className="ap-grid-excerpt">
-                      {article.content?.slice(0, 100) || ""}...
-                    </p>
-                  </div>
-
-
-                </div>
+                </RevealOnScroll>
               ))}
             </div>
 

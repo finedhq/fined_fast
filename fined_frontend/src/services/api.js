@@ -67,6 +67,14 @@ export function getCourses() {
   });
 }
 
+export function getCourseDetails(courseId) {
+  return request(`/courses/course/${courseId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: localStorage.getItem("fined_email") || "" }),
+  });
+}
+
 export function addCard(payload) {
   return request("/courses/cards/add", {
     method: "POST",

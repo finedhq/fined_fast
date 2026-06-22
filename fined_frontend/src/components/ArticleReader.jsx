@@ -213,7 +213,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       {/* close */}
 
 
-      <div className="ar-scroll-container" ref={scrollRef}>
+      <div className="ar-scroll-container" ref={scrollRef} data-lenis-prevent="true">
         {/* structured data */}
         <script type="application/ld+json">{schemaJson}</script>
 

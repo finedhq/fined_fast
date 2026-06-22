@@ -1,0 +1,128 @@
+.conc-root {
+  background: linear-gradient(180deg, #ffffff 0%, #f9faff 100%);
+  border-radius: 0 0 24px 24px;
+  padding: 32px 24px;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.conc-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4A3AFF;
+  /* Indigo */
+  margin: 0;
+  text-align: center;
+}
+
+.conc-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.conc-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+.conc-reasons-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.conc-reason-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.conc-reason-card:hover {
+  border-color: rgba(74, 58, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(74, 58, 255, 0.05);
+}
+
+.conc-reason-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: rgba(74, 58, 255, 0.06); /* Indigo light */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conc-reason-body {
+  flex: 1;
+}
+
+.conc-reason-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.conc-reason-desc {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.conc-reason-desc strong {
+  color: #111827;
+}
+
+.conc-takeaway {
+  background: rgba(74, 58, 255, 0.05);
+  border: 1px dashed #4A3AFF;
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.conc-takeaway-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4A3AFF;
+  margin-bottom: 8px;
+}
+
+.conc-continue-btn {
+  background: #4A3AFF;
+  color: #ffffff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  /* pill shape */
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+  align-self: stretch;
+  font-family: inherit;
+}
+
+.conc-continue-btn:hover {
+  background: #3a2bd1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 58, 255, 0.2);
+}
