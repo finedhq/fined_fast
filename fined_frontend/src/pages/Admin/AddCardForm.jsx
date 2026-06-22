@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addCard } from "../../services/api";
-import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./cardfields/CinematicFields";
-import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./cardfields/ScenarioFields";
+import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./CardFields/CinematicFields";
+import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./CardFields/ScenarioFields";
+import ConceptFields, { EMPTY_CONCEPT_DATA } from "./CardFields/ConceptFields";
+import InteractiveFields, { EMPTY_INTERACTIVE_DATA } from "./CardFields/InteractiveFields";
 
 // As new card types are built:
 // 1. import their Fields component + EMPTY_<TYPE>_DATA below
@@ -11,6 +13,8 @@ import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./cardfields/ScenarioFields
 const CARD_TYPE_OPTIONS = [
   { value: "cinematic", label: "Cinematic Opener" },
   { value: "scenario", label: "Story / Scenario" },
+  { value: "concept", label: "Concept Explainer" },
+  { value: "interactive", label: "Interactive Explorer" },
   // { value: "quiz", label: "Quiz" },
 ];
 
@@ -20,6 +24,10 @@ function getEmptyDataFor(cardType) {
       return EMPTY_CINEMATIC_DATA;
     case "scenario":
       return EMPTY_SCENARIO_DATA;
+    case "concept":
+      return EMPTY_CONCEPT_DATA;
+    case "interactive":
+      return EMPTY_INTERACTIVE_DATA;
     default:
       return {};
   }
@@ -48,6 +56,10 @@ function AddCardForm() {
         return <CinematicFields data={cardData} onChange={setCardData} />;
       case "scenario":
         return <ScenarioFields data={cardData} onChange={setCardData} />;
+      case "concept":
+        return <ConceptFields data={cardData} onChange={setCardData} />;
+      case "interactive":
+        return <InteractiveFields data={cardData} onChange={setCardData} />;
       default:
         return <p>No fields defined yet for this card type.</p>;
     }

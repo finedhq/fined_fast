@@ -73,7 +73,6 @@ CARD_DATA_SCHEMAS = {
     # "completion": CompletionCardData,
 }
 
-
 def validate_card_data(card_type: str, raw_data: dict) -> dict:
     """
     Validates raw_data against the schema for card_type.
