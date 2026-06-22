@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { addCard } from "../../services/api";
 import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./CardFields/CinematicFields";
 import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./CardFields/ScenarioFields";
+import RiskSpectrumFields, { EMPTY_RISK_SPECTRUM_DATA } from "./CardFields/RiskSpectrumFields";
+import SIPCalculatorFields, { EMPTY_SIP_CALCULATOR_DATA } from "./CardFields/SIPCalculatorFields";
+import PillSelectorFields, { EMPTY_PILL_SELECTOR_DATA } from "./CardFields/PillSelectorFields";
+import QuizFields, { EMPTY_QUIZ_DATA } from "./CardFields/QuizFields";
 import ConceptFields, { EMPTY_CONCEPT_DATA } from "./CardFields/ConceptFields";
 import InteractiveFields, { EMPTY_INTERACTIVE_DATA } from "./CardFields/InteractiveFields";
 
@@ -13,6 +17,10 @@ import InteractiveFields, { EMPTY_INTERACTIVE_DATA } from "./CardFields/Interact
 const CARD_TYPE_OPTIONS = [
   { value: "cinematic", label: "Cinematic Opener" },
   { value: "scenario", label: "Story / Scenario" },
+  { value: "risk_spectrum", label: "Risk / Spectrum" },
+  { value: "sip_calculator", label: "SIP Calculator" },
+  { value: "pill_selector", label: "Pill Selector" },
+  { value: "quiz", label: "Quiz" },
   { value: "concept", label: "Concept Explainer" },
   { value: "interactive", label: "Interactive Explorer" },
   // { value: "quiz", label: "Quiz" },
@@ -24,6 +32,14 @@ function getEmptyDataFor(cardType) {
       return EMPTY_CINEMATIC_DATA;
     case "scenario":
       return EMPTY_SCENARIO_DATA;
+    case "risk_spectrum":
+      return EMPTY_RISK_SPECTRUM_DATA;
+    case "sip_calculator":
+      return EMPTY_SIP_CALCULATOR_DATA;
+    case "pill_selector":
+      return EMPTY_PILL_SELECTOR_DATA;
+    case "quiz":
+      return EMPTY_QUIZ_DATA;
     case "concept":
       return EMPTY_CONCEPT_DATA;
     case "interactive":
@@ -56,6 +72,14 @@ function AddCardForm() {
         return <CinematicFields data={cardData} onChange={setCardData} />;
       case "scenario":
         return <ScenarioFields data={cardData} onChange={setCardData} />;
+      case "risk_spectrum":
+        return <RiskSpectrumFields data={cardData} onChange={setCardData} />;
+      case "sip_calculator":
+        return <SIPCalculatorFields data={cardData} onChange={setCardData} />;
+      case "pill_selector":
+        return <PillSelectorFields data={cardData} onChange={setCardData} />;
+      case "quiz":
+        return <QuizFields data={cardData} onChange={setCardData} />;
       case "concept":
         return <ConceptFields data={cardData} onChange={setCardData} />;
       case "interactive":

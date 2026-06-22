@@ -465,6 +465,9 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             "module_total_cards": module_total_cards
         }
     except Exception as e:
+        import traceback
+        with open("error_log.txt", "a") as f:
+            f.write(traceback.format_exc() + "\n")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update progress: {str(e)}"

@@ -1,0 +1,255 @@
+.sip-root {
+  background: linear-gradient(180deg, #ffffff 0%, #f9faff 100%);
+  border-radius: 0 0 24px 24px;
+  padding: 32px 24px;
+  color: #111827;
+}
+
+.sip-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+.sip-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.sip-detail-text {
+  display: inline;
+}
+
+/* Glossary Tooltips */
+.sip-glossary-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.sip-glossary-term {
+  background: rgba(74, 58, 255, 0.1);
+  color: #4A3AFF;
+  border: 1px dashed rgba(74, 58, 255, 0.4);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.sip-glossary-term:hover, .sip-glossary-term.active {
+  background: #4A3AFF;
+  color: #ffffff;
+  border-style: solid;
+}
+
+.sip-glossary-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 280px;
+  background: #111827;
+  color: #f3f4f6;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  text-align: left;
+}
+
+.sip-glossary-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #111827 transparent transparent transparent;
+}
+
+.sip-glossary-tooltip strong {
+  display: block;
+  color: #ffffff;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.sip-example {
+  margin-top: 6px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Calculator Shell */
+.calc-shell {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.calc-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.calc-field label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.calc-field label span {
+  font-weight: 800;
+  color: #111827;
+}
+
+.calc-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.calc-slider:focus {
+  outline: none;
+}
+
+.calc-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #e5e7eb;
+  border-radius: 99px;
+}
+
+.calc-slider::-webkit-slider-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4A3AFF;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -7px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 3px solid #ffffff;
+}
+
+/* Results Grid */
+.calc-results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 24px;
+}
+
+.calc-result-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.calc-result-box.highlight {
+  grid-column: span 2;
+  background: linear-gradient(135deg, rgba(74, 58, 255, 0.05) 0%, rgba(74, 58, 255, 0.1) 100%);
+  border-color: rgba(74, 58, 255, 0.2);
+}
+
+.crb-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.crb-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.crb-val.accent {
+  color: #10b981;
+}
+
+.calc-result-box.highlight .crb-val {
+  font-size: 1.8rem;
+  color: #4A3AFF;
+}
+
+.crb-sub {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.calc-result-box.highlight .crb-sub {
+  color: #4A3AFF;
+  font-weight: 600;
+}
+
+.sip-disclaimer {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.4;
+}
+
+/* Highlight line */
+.sip-highlight-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 24px 0;
+  line-height: 1.5;
+}
+
+/* CTA */
+.sip-btn-primary {
+  display: block;
+  width: 100%;
+  background: #4A3AFF;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.sip-btn-primary:hover {
+  background: #3a2bd1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(74, 58, 255, 0.2);
+}

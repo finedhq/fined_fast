@@ -1,0 +1,180 @@
+.rr-root {
+  background: linear-gradient(180deg, #ffffff 0%, #f9faff 100%);
+  border-radius: 0 0 24px 24px;
+  padding: 32px 24px;
+  color: #111827;
+}
+
+.rr-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+.rr-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.rr-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+/* Spectrum Track */
+.rr-spectrum {
+  position: relative;
+  margin: 36px 0 16px;
+}
+
+.rr-track {
+  height: 8px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #3b82f6 0%, #10b981 40%, #f59e0b 70%, #ef4444 100%);
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.rr-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rr-dot:hover, .rr-dot.active {
+  transform: translate(-50%, -50%) scale(1.4);
+  box-shadow: 0 0 0 4px rgba(74, 58, 255, 0.1);
+}
+
+/* Color Classes for dots */
+.rr-color-blue { background-color: #3b82f6; }
+.rr-color-green { background-color: #10b981; }
+.rr-color-amber { background-color: #f59e0b; }
+.rr-color-red { background-color: #ef4444; }
+
+.rr-color-blue-text { color: #3b82f6; }
+.rr-color-green-text { color: #10b981; }
+.rr-color-amber-text { color: #f59e0b; }
+.rr-color-red-text { color: #ef4444; }
+
+.rr-label {
+  position: absolute;
+  top: 18px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  color: #6b7280;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.rr-label.active {
+  color: #111827;
+  font-weight: 700;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.rr-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #6b7280;
+  padding: 0 4px;
+}
+
+/* Info Box */
+.rr-info {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  animation: rrFadeIn 0.3s ease forwards;
+}
+
+@keyframes rrFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rr-info-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.rr-info-desc {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.rr-info-stat-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rr-stat-chip {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.rr-stat-chip span {
+  font-weight: 700;
+}
+
+/* Highlight line */
+.rr-highlight-line {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  background: rgba(74, 58, 255, 0.05);
+  border-left: 3px solid #4A3AFF;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 24px 0;
+  line-height: 1.5;
+}
+
+/* CTA */
+.rr-btn-primary {
+  display: block;
+  width: 100%;
+  background: #4A3AFF;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.rr-btn-primary:hover {
+  background: #3a2bd1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(74, 58, 255, 0.2);
+}

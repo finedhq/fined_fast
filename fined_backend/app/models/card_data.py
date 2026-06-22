@@ -37,6 +37,71 @@ class ScenarioCardData(BaseModel):
     reflection_question: str
     reflection_options: list[str] = Field(min_length=2, max_length=5)
 
+class RiskSpectrumDot(BaseModel):
+    id: str  # internal identifier
+    label: str
+    position_pct: int = Field(ge=0, le=100)
+    color: Literal["blue", "green", "amber", "red"] = "blue"
+    title: str
+    desc: str
+    return_text: str
+    risk_text: str
+
+class RiskSpectrumCardData(BaseModel):
+    card_type: Literal["risk_spectrum"] = "risk_spectrum"
+    title: str
+    body_text: str
+    dots: list[RiskSpectrumDot] = Field(min_length=2, max_length=7)
+    highlight_line: Optional[str] = None
+    cta_text: str = "Continue"
+
+class SIPCalculatorCardData(BaseModel):
+    card_type: Literal["sip_calculator"] = "sip_calculator"
+    title: str
+    body_text: str
+    glossary_terms: list[ScenarioGlossaryTerm] = []
+    default_monthly_investment: int = Field(ge=500, le=100000)
+    default_investment_period: int = Field(ge=1, le=40)
+    default_expected_return: float = Field(ge=1.0, le=30.0)
+    highlight_line: Optional[str] = None
+    cta_text: str = "Continue"
+
+class AllocationImpact(BaseModel):
+    eq: int = 0
+    fd: int = 0
+    gold: int = 0
+
+class PillOption(BaseModel):
+    label: str
+    value: str
+    impact: AllocationImpact
+
+class PillGroup(BaseModel):
+    group_id: str
+    label: str
+    options: list[PillOption]
+
+class PillSelectorCardData(BaseModel):
+    card_type: Literal["pill_selector"] = "pill_selector"
+    title: str
+    body_text: str
+    base_allocation: AllocationImpact
+    groups: list[PillGroup]
+    cta_text: str = "Continue"
+
+class QuizOption(BaseModel):
+    id: str
+    text: str
+    is_correct: bool
+
+class QuizCardData(BaseModel):
+    card_type: Literal["quiz"] = "quiz"
+    title: str
+    question: str
+    options: list[QuizOption] = Field(min_length=2, max_length=5)
+    explanation: str
+    cta_text: str = "Continue"
+
 class ConceptReason(BaseModel):
     icon: str
     title: str
@@ -67,9 +132,12 @@ class InteractiveCardData(BaseModel):
 CARD_DATA_SCHEMAS = {
     "cinematic": CinematicCardData,
     "scenario": ScenarioCardData,
+    "risk_spectrum": RiskSpectrumCardData,
+    "sip_calculator": SIPCalculatorCardData,
+    "pill_selector": PillSelectorCardData,
+    "quiz": QuizCardData,
     "concept": ConceptCardData,
     "interactive": InteractiveCardData,
-    # "quiz": QuizCardData,            # add as each type is built
     # "completion": CompletionCardData,
 }
 
