@@ -1,11 +1,11 @@
-.sip-root {
+.slider-root {
   background: linear-gradient(180deg, #ffffff 0%, #f9faff 100%);
   border-radius: 0 0 24px 24px;
   padding: 32px 24px;
   color: #111827;
 }
 
-.sip-title {
+.slider-title {
   font-size: 1.35rem;
   font-weight: 800;
   color: #111827;
@@ -13,24 +13,24 @@
   line-height: 1.25;
 }
 
-.sip-body {
+.slider-body {
   font-size: 0.95rem;
   line-height: 1.6;
   color: #4b5563;
   margin-bottom: 24px;
 }
 
-.sip-detail-text {
+.slider-detail-text {
   display: inline;
 }
 
 /* Glossary Tooltips */
-.sip-glossary-wrapper {
+.slider-glossary-wrapper {
   position: relative;
   display: inline-block;
 }
 
-.sip-glossary-term {
+.slider-glossary-term {
   background: rgba(74, 58, 255, 0.1);
   color: #4A3AFF;
   border: 1px dashed rgba(74, 58, 255, 0.4);
@@ -43,13 +43,13 @@
   font-family: inherit;
 }
 
-.sip-glossary-term:hover, .sip-glossary-term.active {
+.slider-glossary-term:hover, .slider-glossary-term.active {
   background: #4A3AFF;
   color: #ffffff;
   border-style: solid;
 }
 
-.sip-glossary-tooltip {
+.slider-glossary-tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
@@ -67,7 +67,7 @@
   text-align: left;
 }
 
-.sip-glossary-tooltip::after {
+.slider-glossary-tooltip::after {
   content: "";
   position: absolute;
   top: 100%;
@@ -78,14 +78,14 @@
   border-color: #111827 transparent transparent transparent;
 }
 
-.sip-glossary-tooltip strong {
+.slider-glossary-tooltip strong {
   display: block;
   color: #ffffff;
   font-size: 0.9rem;
   margin-bottom: 4px;
 }
 
-.sip-example {
+.slider-example {
   margin-top: 6px;
   color: #9ca3af;
   font-style: italic;
@@ -210,7 +210,7 @@
   font-weight: 600;
 }
 
-.sip-disclaimer {
+.slider-disclaimer {
   font-size: 0.7rem;
   color: #9ca3af;
   text-align: center;
@@ -219,7 +219,7 @@
 }
 
 /* Highlight line */
-.sip-highlight-line {
+.slider-highlight-line {
   font-size: 0.95rem;
   font-weight: 600;
   color: #111827;
@@ -232,7 +232,7 @@
 }
 
 /* CTA */
-.sip-btn-primary {
+.slider-btn-primary {
   display: block;
   width: 100%;
   background: #4A3AFF;
@@ -248,7 +248,7 @@
   text-align: center;
 }
 
-.sip-btn-primary:hover {
+.slider-btn-primary:hover {
   background: #3a2bd1;
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(74, 58, 255, 0.2);

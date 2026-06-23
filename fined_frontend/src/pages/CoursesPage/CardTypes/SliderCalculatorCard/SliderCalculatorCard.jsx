@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
-import "./SIPCalculatorCard.css";
+import "./SliderCalculatorCard.css";
 
 // Helper to replace terms in text with interactive spans
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0) return <span className="sip-detail-text">{detailText}</span>;
+  if (!glossaryTerms || glossaryTerms.length === 0) return <span className="slider-detail-text">{detailText}</span>;
 
   let elements = [detailText];
 
@@ -21,9 +21,9 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
         if (part.toLowerCase() === gTerm.term.toLowerCase()) {
           const isActive = activeTermIndex === termIdx;
           newElements.push(
-            <span key={`${termIdx}`} className="sip-glossary-wrapper">
+            <span key={`${termIdx}`} className="slider-glossary-wrapper">
               <button
-                className={`sip-glossary-term ${isActive ? "active" : ""}`}
+                className={`slider-glossary-term ${isActive ? "active" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveTermIndex(isActive ? null : termIdx);
@@ -32,10 +32,10 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
                 {part}
               </button>
               {isActive && (
-                <div className="sip-glossary-tooltip">
+                <div className="slider-glossary-tooltip">
                   <strong>{gTerm.term}</strong>
                   <p>{gTerm.definition}</p>
-                  {gTerm.example && <p className="sip-example">e.g., {gTerm.example}</p>}
+                  {gTerm.example && <p className="slider-example">e.g., {gTerm.example}</p>}
                 </div>
               )}
             </span>
@@ -48,10 +48,10 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
     elements = newElements;
   });
 
-  return <span className="sip-detail-text">{elements}</span>;
+  return <span className="slider-detail-text">{elements}</span>;
 }
 
-function SIPCalculatorCard({ card, onContinue }) {
+function SliderCalculatorCard({ card, onContinue }) {
   const {
     title = "",
     body_text = "",
@@ -103,10 +103,10 @@ function SIPCalculatorCard({ card, onContinue }) {
   };
 
   return (
-    <div className="sip-root" onClick={() => setActiveTermIndex(null)}>
-      <h2 className="sip-title">{title}</h2>
+    <div className="slider-root" onClick={() => setActiveTermIndex(null)}>
+      <h2 className="slider-title">{title}</h2>
       {body_text && (
-        <p className="sip-body">
+        <p className="slider-body">
           {renderDetailWithGlossary(body_text, glossary_terms, activeTermIndex, setActiveTermIndex)}
         </p>
       )}
@@ -163,22 +163,22 @@ function SIPCalculatorCard({ card, onContinue }) {
           </div>
         </div>
         
-        <p className="sip-disclaimer">
+        <p className="slider-disclaimer">
           Illustrative only. Assumes constant returns which don't reflect actual market volatility. Not investment advice.
         </p>
       </div>
 
       {highlight_line && (
-        <div className="sip-highlight-line">
+        <div className="slider-highlight-line">
           {highlight_line}
         </div>
       )}
 
-      <button className="sip-btn-primary" onClick={onContinue}>
+      <button className="slider-btn-primary" onClick={onContinue}>
         {cta_text} →
       </button>
     </div>
   );
 }
 
-export default SIPCalculatorCard;
+export default SliderCalculatorCard;

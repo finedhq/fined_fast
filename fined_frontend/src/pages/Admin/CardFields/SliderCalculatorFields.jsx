@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export const EMPTY_SIP_CALCULATOR_DATA = {
-  card_type: "sip_calculator",
+export const EMPTY_SLIDER_CALCULATOR_DATA = {
+  card_type: "slider_calculator",
   title: "",
   body_text: "",
   glossary_terms: [],
@@ -12,7 +12,7 @@ export const EMPTY_SIP_CALCULATOR_DATA = {
   cta_text: "Continue",
 };
 
-function SIPCalculatorFields({ data, onChange }) {
+function SliderCalculatorFields({ data, onChange }) {
   const { 
     title, 
     body_text, 
@@ -166,4 +166,4 @@ function SIPCalculatorFields({ data, onChange }) {
   );
 }
 
-export default SIPCalculatorFields;
+export default SliderCalculatorFields;

@@ -4,7 +4,7 @@ import { addCard } from "../../services/api";
 import CinematicFields, { EMPTY_CINEMATIC_DATA } from "./CardFields/CinematicFields";
 import ScenarioFields, { EMPTY_SCENARIO_DATA } from "./CardFields/ScenarioFields";
 import RiskSpectrumFields, { EMPTY_RISK_SPECTRUM_DATA } from "./CardFields/RiskSpectrumFields";
-import SIPCalculatorFields, { EMPTY_SIP_CALCULATOR_DATA } from "./CardFields/SIPCalculatorFields";
+import SliderCalculatorFields, { EMPTY_SLIDER_CALCULATOR_DATA } from "./CardFields/SliderCalculatorFields";
 import PillSelectorFields, { EMPTY_PILL_SELECTOR_DATA } from "./CardFields/PillSelectorFields";
 import QuizFields, { EMPTY_QUIZ_DATA } from "./CardFields/QuizFields";
 import ConceptFields, { EMPTY_CONCEPT_DATA } from "./CardFields/ConceptFields";
@@ -18,7 +18,7 @@ const CARD_TYPE_OPTIONS = [
   { value: "cinematic", label: "Cinematic Opener" },
   { value: "scenario", label: "Story / Scenario" },
   { value: "risk_spectrum", label: "Risk / Spectrum" },
-  { value: "sip_calculator", label: "SIP Calculator" },
+  { value: "slider_calculator", label: "Slider Calculator" },
   { value: "pill_selector", label: "Pill Selector" },
   { value: "quiz", label: "Quiz" },
   { value: "concept", label: "Concept Explainer" },
@@ -34,8 +34,8 @@ function getEmptyDataFor(cardType) {
       return EMPTY_SCENARIO_DATA;
     case "risk_spectrum":
       return EMPTY_RISK_SPECTRUM_DATA;
-    case "sip_calculator":
-      return EMPTY_SIP_CALCULATOR_DATA;
+    case "slider_calculator":
+      return EMPTY_SLIDER_CALCULATOR_DATA;
     case "pill_selector":
       return EMPTY_PILL_SELECTOR_DATA;
     case "quiz":
@@ -74,8 +74,8 @@ function AddCardForm() {
         return <ScenarioFields data={cardData} onChange={setCardData} />;
       case "risk_spectrum":
         return <RiskSpectrumFields data={cardData} onChange={setCardData} />;
-      case "sip_calculator":
-        return <SIPCalculatorFields data={cardData} onChange={setCardData} />;
+      case "slider_calculator":
+        return <SliderCalculatorFields data={cardData} onChange={setCardData} />;
       case "pill_selector":
         return <PillSelectorFields data={cardData} onChange={setCardData} />;
       case "quiz":

@@ -55,8 +55,8 @@ class RiskSpectrumCardData(BaseModel):
     highlight_line: Optional[str] = None
     cta_text: str = "Continue"
 
-class SIPCalculatorCardData(BaseModel):
-    card_type: Literal["sip_calculator"] = "sip_calculator"
+class SliderCalculatorCardData(BaseModel):
+    card_type: Literal["slider_calculator"] = "slider_calculator"
     title: str
     body_text: str
     glossary_terms: list[ScenarioGlossaryTerm] = []
@@ -133,7 +133,7 @@ CARD_DATA_SCHEMAS = {
     "cinematic": CinematicCardData,
     "scenario": ScenarioCardData,
     "risk_spectrum": RiskSpectrumCardData,
-    "sip_calculator": SIPCalculatorCardData,
+    "slider_calculator": SliderCalculatorCardData,
     "pill_selector": PillSelectorCardData,
     "quiz": QuizCardData,
     "concept": ConceptCardData,
