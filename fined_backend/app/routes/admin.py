@@ -21,7 +21,7 @@ class NewsletterRequest(BaseModel):
 # --- Route Endpoints ---
 
 @router.post("/newsletters")
-async def send_newsletter(body: NewsletterRequest):
+async def send_newsletter(body: NewsletterRequest, user: AuthUser = Depends(require_admin)):
     """Admin: sends newsletter email to all subscribers concurrently"""
     try:
         # 1. Fetch all newsletter subscribers from DB

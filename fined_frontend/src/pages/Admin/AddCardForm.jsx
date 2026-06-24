@@ -7,6 +7,7 @@ import RiskSpectrumFields, { EMPTY_RISK_SPECTRUM_DATA } from "./CardFields/RiskS
 import SliderCalculatorFields, { EMPTY_SLIDER_CALCULATOR_DATA } from "./CardFields/SliderCalculatorFields";
 import PillSelectorFields, { EMPTY_PILL_SELECTOR_DATA } from "./CardFields/PillSelectorFields";
 import QuizFields, { EMPTY_QUIZ_DATA } from "./CardFields/QuizFields";
+import ChartFields, { EMPTY_CHART_DATA } from "./CardFields/ChartFields";
 import ConceptFields, { EMPTY_CONCEPT_DATA } from "./CardFields/ConceptFields";
 import InteractiveFields, { EMPTY_INTERACTIVE_DATA } from "./CardFields/InteractiveFields";
 
@@ -21,6 +22,7 @@ const CARD_TYPE_OPTIONS = [
   { value: "slider_calculator", label: "Slider Calculator" },
   { value: "pill_selector", label: "Pill Selector" },
   { value: "quiz", label: "Quiz" },
+  { value: "chart", label: "Chart / Graph" },
   { value: "concept", label: "Concept Explainer" },
   { value: "interactive", label: "Interactive Explorer" },
   // { value: "quiz", label: "Quiz" },
@@ -40,6 +42,8 @@ function getEmptyDataFor(cardType) {
       return EMPTY_PILL_SELECTOR_DATA;
     case "quiz":
       return EMPTY_QUIZ_DATA;
+    case "chart":
+      return EMPTY_CHART_DATA;
     case "concept":
       return EMPTY_CONCEPT_DATA;
     case "interactive":
@@ -80,6 +84,8 @@ function AddCardForm() {
         return <PillSelectorFields data={cardData} onChange={setCardData} />;
       case "quiz":
         return <QuizFields data={cardData} onChange={setCardData} />;
+      case "chart":
+        return <ChartFields data={cardData} onChange={setCardData} />;
       case "concept":
         return <ConceptFields data={cardData} onChange={setCardData} />;
       case "interactive":

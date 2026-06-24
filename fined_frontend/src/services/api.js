@@ -1,7 +1,17 @@
+import { getAuthToken } from "../lib/axios";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 async function request(path, options = {}) {
+  const token = await getAuthToken();
+  if (token) {
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`
+    };
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, options);
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json")

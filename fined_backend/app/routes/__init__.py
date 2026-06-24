@@ -9,6 +9,7 @@ from app.routes.expenses import router as expenses_router
 from app.routes.products import sbi_router, kotak_router, hdfc_router, icici_router
 from app.routes.modules import router as modules_router
 from app.routes.cards import router as cards_router
+from app.routes.auth import router as auth_router
 
 api_router = APIRouter()
 
@@ -22,6 +23,7 @@ api_router.include_router(sbi_router)
 api_router.include_router(kotak_router)
 api_router.include_router(hdfc_router)
 api_router.include_router(icici_router)
+api_router.include_router(auth_router)
 api_router.include_router(modules_router)
 api_router.include_router(cards_router)
 

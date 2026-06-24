@@ -34,7 +34,18 @@ class HomeService:
                 user_repo.update_fields(email, {"user_sub": user_sub})
                 user["user_sub"] = user_sub
             else:
-                user = user_repo.create(user_sub=user_sub, email=email)
+                try:
+                    user = user_repo.create(user_sub=user_sub, email=email)
+                except Exception:
+                    # Catch unique constraint violation from concurrent requests (React StrictMode)
+                    user = user_repo.get_by_email(email)
+                    if not user:
+                        # Fallback if the concurrent transaction hasn't committed yet
+                        user = {"user_sub": user_sub, "email": email, "streak_count": 1, "fin_stars": 0}
+        
+        # Ensure user is absolutely never None
+        if not user:
+            user = {"user_sub": user_sub, "email": email, "streak_count": 1, "fin_stars": 0}
         
         #step 2
         streak    = user.get("streak_count") or 1
@@ -56,7 +67,9 @@ class HomeService:
         score_service.apply_and_log(user, all_updates, consistency_result["reasons"])
 
 
-        user=user_repo.get_by_email(email)
+        user = user_repo.get_by_email(email)
+        if not user:
+            user = {"user_sub": user_sub, "email": email, "streak_count": streak, "fin_stars": 0}
 
         #step 4
         rank=user_repo.get_rank(email)

@@ -1,5 +1,6 @@
 # HTTP endpoints for dashboard aggregates and leaderboards
 import asyncio
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -33,7 +34,7 @@ class RecommendationsRequest(BaseModel):
 # --- Route Endpoints ---
 
 @router.post("/getdata")
-async def fetch_data(body: FetchDataRequest):
+async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_current_user)):
     """
     Main dashboard call returning stats, featured article,
     recommended courses, and ongoing course details.
@@ -52,14 +53,12 @@ async def fetch_data(body: FetchDataRequest):
                 return None
             return await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
 
-        # 3. Run all independent DB queries in PARALLEL (~2x faster)
-        articles, courses, user_row, ongoing_course_data, log_data = await asyncio.gather(
-            asyncio.to_thread(article_repo.get_all, 1),
-            asyncio.to_thread(course_repo.get_all),
-            asyncio.to_thread(user_repo.get_by_email, body.email),
-            fetch_ongoing_course(),
-            asyncio.to_thread(user_repo.get_score_logs, body.email),
-        )
+        # 3. Run all independent DB queries sequentially (Thread-safe)
+        articles = await asyncio.to_thread(article_repo.get_all, 1)
+        courses = await asyncio.to_thread(course_repo.get_all)
+        user_row = await asyncio.to_thread(user_repo.get_by_email, body.email)
+        ongoing_course_data = await fetch_ongoing_course()
+        log_data = await asyncio.to_thread(user_repo.get_score_logs, body.email)
         
         user_row = user_row or {}
         
@@ -81,6 +80,7 @@ async def fetch_data(body: FetchDataRequest):
             "logData": log_data
         }
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch dashboard data: {str(e)}"
@@ -88,7 +88,7 @@ async def fetch_data(body: FetchDataRequest):
 
 
 @router.post("/notifications")
-async def fetch_notifications(body: NotificationsRequest):
+async def fetch_notifications(body: NotificationsRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch notifications for a user — newest first"""
     try:
         return notification_service.get_all(body.email)
@@ -100,7 +100,7 @@ async def fetch_notifications(body: NotificationsRequest):
 
 
 @router.post("/updatenotifications")
-async def update_notifications(body: NotificationsRequest):
+async def update_notifications(body: NotificationsRequest, user: AuthUser = Depends(get_current_user)):
     """Mark all unseen notifications as read"""
     try:
         notification_service.mark_all_seen(body.email)
@@ -114,7 +114,7 @@ async def update_notifications(body: NotificationsRequest):
 
 
 @router.post("/hasunseen")
-async def has_unseen(body: NotificationsRequest):
+async def has_unseen(body: NotificationsRequest, user: AuthUser = Depends(get_current_user)):
     """Check if the user has any unseen notifications"""
     try:
         return notification_service.has_unseen(body.email)
@@ -126,7 +126,7 @@ async def has_unseen(body: NotificationsRequest):
 
 
 @router.post("/finscorelog")
-async def fetch_fin_score_logs(body: NotificationsRequest):
+async def fetch_fin_score_log(body: FetchDataRequest, user: AuthUser = Depends(get_current_user)):
     """Get FinScore change logs for the user"""
     try:
         return user_repo.get_score_logs(body.email)
@@ -138,7 +138,7 @@ async def fetch_fin_score_logs(body: NotificationsRequest):
 
 
 @router.get("/leaderboard")
-async def fetch_leaderboard():
+async def fetch_leaderboard(user: AuthUser = Depends(get_current_user)):
     """Returns top 50 users ranked by FinScore"""
     try:
         # Maps to the array structure expected by the client Leaderboard
@@ -167,7 +167,7 @@ async def fetch_leaderboard():
 
 
 @router.post("/feedback")
-async def save_feedback(body: FeedbackRequest):
+async def send_feedback(body: FeedbackRequest, user: AuthUser = Depends(get_current_user)):
     """Save user feedback submission"""
     try:
         email = body.form.get("email")
@@ -188,7 +188,7 @@ async def save_feedback(body: FeedbackRequest):
 
 
 @router.post("/recommendations")
-async def get_recommendations(body: RecommendationsRequest):
+async def get_recommendations(body: RecommendationsRequest, user: AuthUser = Depends(get_current_user)):
     """Tag-based product recommendations matching current course tags"""
     try:
         recommendations = []
@@ -204,15 +204,29 @@ async def get_recommendations(body: RecommendationsRequest):
                 pass
 
         if body.course_id and is_valid_uuid:
-            recommendations = home_service.get_recommendations(body.email, body.course_id)
+            try:
+                recommendations = home_service.get_recommendations(body.email, body.course_id)
+            except Exception as e:
+                print(f"Failed to fetch course recommendations: {e}")
+                pass
         else:
-            # Check if there are stored recommended schemes in user profile
-            user = user_repo.get_by_email(body.email)
-            if user and user.get("recommended_schemes"):
-                # Fetch Schemes by list of IDs from `allSchemesData` or matching table
-                # We fall back to returning standard tag-matched or latest schemes
-                from app.repositories.product_repo import product_repo
-                recommendations = product_repo.get_all_latest()[:3]
+            try:
+                # Check if there are stored recommended schemes in user profile
+                user = user_repo.get_by_email(body.email)
+                if user and user.get("recommended_schemes"):
+                    from app.repositories.product_repo import product_repo
+                    recommendations = product_repo.get_all_latest()[:3]
+            except Exception as inner_e:
+                print(f"Failed to fetch schemes from DB, using placeholders: {inner_e}")
+                pass
+                
+        # Fallback placeholders if DB is empty, table doesn't exist, or no matching tags
+        if not recommendations:
+            recommendations = [
+                {"id": "1", "bank_name": "HDFC Bank", "product_name": "MoneyBack+ Credit Card", "description": "Earn 10X CashPoints on Amazon, BigBasket, Flipkart, Reliance Smart SuperStore & Swiggy.", "tags": ["credit", "rewards"]},
+                {"id": "2", "bank_name": "SBI Bank", "product_name": "SBI SimplySAVE", "description": "10 Reward Points per Rs.150 spent on Dining, Movies, Departmental Stores and Grocery.", "tags": ["credit", "shopping"]},
+                {"id": "3", "bank_name": "ICICI Bank", "product_name": "iMobile Pay Savings", "description": "Zero balance account with exciting cashback offers on bill payments.", "tags": ["savings", "digital"]}
+            ]
                 
         # Format the scheme recommendations to match what HomePage.jsx maps:
         # e.g., bank_name, scheme_name, description

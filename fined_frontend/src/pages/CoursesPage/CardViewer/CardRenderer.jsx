@@ -4,6 +4,7 @@ import RiskSpectrumCard from "../CardTypes/RiskSpectrumCard/RiskSpectrumCard";
 import SliderCalculatorCard from "../CardTypes/SliderCalculatorCard/SliderCalculatorCard";
 import PillSelectorCard from "../CardTypes/PillSelectorCard/PillSelectorCard";
 import QuizCard from "../CardTypes/QuizCard/QuizCard";
+import ChartCard from "../CardTypes/ChartCard/ChartCard";
 import ConceptCard from "../CardTypes/ConceptCard/ConceptCard";
 import InteractiveCard from "../CardTypes/InteractiveCard/InteractiveCard";
 
@@ -17,12 +18,15 @@ function CardRenderer({ card, onContinue }) {
       return <ScenarioCard card={card} onContinue={onContinue} />;
     case "risk_spectrum":
       return <RiskSpectrumCard card={card} onContinue={onContinue} />;
+    case "sip_calculator":
     case "slider_calculator":
       return <SliderCalculatorCard card={card} onContinue={onContinue} />;
     case "pill_selector":
       return <PillSelectorCard card={card} onContinue={onContinue} />;
     case "quiz":
       return <QuizCard card={card} onContinue={onContinue} />;
+    case "chart":
+      return <ChartCard card={card} onContinue={onContinue} />;
     case "concept":
       return <ConceptCard card={card} onContinue={onContinue} />;
     case "interactive":

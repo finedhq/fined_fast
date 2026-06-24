@@ -6,10 +6,8 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str
     SUPABASE_BUCKET: str
 
-    # AUTH0_DOMAIN: str
-    # AUTH0_AUDIENCE: str
-    AUTH0_DOMAIN: str = "placeholder.auth0.com"
-    AUTH0_AUDIENCE: str = "https://api.myfined.com"
+    AUTH0_DOMAIN: str
+    AUTH0_AUDIENCE: str
  
 
 

@@ -102,6 +102,28 @@ class QuizCardData(BaseModel):
     explanation: str
     cta_text: str = "Continue"
 
+class ChartDataset(BaseModel):
+    label: str
+    data: list[float]
+    color: str
+
+class StatChip(BaseModel):
+    value: str
+    label: str
+    color: str
+
+class ChartCardData(BaseModel):
+    card_type: Literal["chart"] = "chart"
+    title: str
+    body_text_top: str
+    labels: list[str]
+    datasets: list[ChartDataset] = Field(min_length=1, max_length=5)
+    chart_caption: Optional[str] = None
+    stat_chips: list[StatChip] = Field(default_factory=list)
+    body_text_bottom: Optional[str] = None
+    glossary_terms: list[ScenarioGlossaryTerm] = Field(default_factory=list)
+    cta_text: str = "Continue"
+
 class ConceptReason(BaseModel):
     icon: str
     title: str
@@ -136,6 +158,7 @@ CARD_DATA_SCHEMAS = {
     "slider_calculator": SliderCalculatorCardData,
     "pill_selector": PillSelectorCardData,
     "quiz": QuizCardData,
+    "chart": ChartCardData,
     "concept": ConceptCardData,
     "interactive": InteractiveCardData,
     # "completion": CompletionCardData,

@@ -67,7 +67,7 @@ async def get_all_articles(body: Optional[GetAllArticlesRequest] = None):
         )
 
 @router.post("/saveemail")
-async def save_email(body: SaveEmailRequest):
+async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Save newsletter email subscription"""
     try:
         article_service.save_newsletter_email(body.email, body.entered_email)
@@ -79,7 +79,7 @@ async def save_email(body: SaveEmailRequest):
         )
 
 @router.post("/removeemail")
-async def remove_email(body: RemoveEmailRequest):
+async def remove_email(body: RemoveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Remove newsletter email subscription"""
     try:
         article_service.remove_newsletter_email(body.email, body.entered_email)
@@ -91,7 +91,7 @@ async def remove_email(body: RemoveEmailRequest):
         )
 
 @router.post("/getenteredemail")
-async def get_entered_email(body: GetEnteredEmailRequest):
+async def get_entered_email(body: GetEnteredEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Get newsletter email subscribed by the user"""
     try:
         return article_service.get_newsletter_email(body.email)
@@ -102,7 +102,7 @@ async def get_entered_email(body: GetEnteredEmailRequest):
         )
 
 @router.post("/updatetask")
-async def update_task(body: UpdateTaskRequest):
+async def update_task(body: UpdateTaskRequest, user: AuthUser = Depends(get_current_user)):
     """Mark article read to update user score/consistency metrics"""
     try:
         res = article_service.mark_read(body.email)
@@ -125,7 +125,7 @@ async def update_task(body: UpdateTaskRequest):
         )
 
 @router.post("/fetchrating")
-async def fetch_rating(body: FetchRatingRequest):
+async def fetch_rating(body: FetchRatingRequest, user: AuthUser = Depends(get_current_user)):
     """Get this user's rating for a specific article"""
     try:
         # Validate article_id is a valid UUID
@@ -145,7 +145,7 @@ async def fetch_rating(body: FetchRatingRequest):
         )
 
 @router.post("/rate")
-async def rate_article(body: RateRequest):
+async def rate_article(body: RateRequest, user: AuthUser = Depends(get_current_user)):
     """Save or update rating, recalculate article average"""
     # Validate article_id is a valid UUID
     import uuid
@@ -167,7 +167,7 @@ async def rate_article(body: RateRequest):
         )
 
 @router.delete("/{id}")
-async def delete_article(id: str):
+async def delete_article(id: str, user: AuthUser = Depends(require_admin)):
     """Admin deletes an article"""
     # Validate article_id is a valid UUID
     import uuid
@@ -192,7 +192,8 @@ async def delete_article(id: str):
 async def add_article(
     title: str = Form(...),
     content: str = Form(...),
-    image: Optional[UploadFile] = File(None)
+    image: Optional[UploadFile] = File(None),
+    user: AuthUser = Depends(require_admin)
 ):
     """Admin adds an article with optional image upload to Supabase Storage"""
     try:

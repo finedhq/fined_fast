@@ -1,0 +1,170 @@
+.ch-root {
+  background: #ffffff;
+  border-radius: 0 0 24px 24px;
+  padding: 32px 24px;
+  color: #111827;
+  position: relative;
+}
+
+.ch-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+.ch-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.ch-chart-container {
+  height: 250px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.ch-chart-caption {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.ch-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ch-stat-chip {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.ch-stat-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.ch-stat-lbl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+/* Glossary Tooltip Support */
+.ch-glossary-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.ch-glossary-term {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #4A3AFF;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all 0.2s ease;
+}
+
+.ch-glossary-term:hover,
+.ch-glossary-term.active {
+  color: #3a2bd1;
+  background: rgba(74, 58, 255, 0.1);
+  border-radius: 4px;
+  text-decoration-style: solid;
+}
+
+.ch-glossary-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  background: #111827;
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 100;
+  text-align: left;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  animation: chTooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.ch-glossary-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px;
+  border-style: solid;
+  border-color: #111827 transparent transparent transparent;
+}
+
+.ch-glossary-tooltip strong {
+  display: block;
+  font-family: "Syne", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #4A3AFF;
+}
+
+.ch-glossary-tooltip .ch-example {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+@keyframes chTooltipFadeIn {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* CTA */
+.ch-btn-primary {
+  display: block;
+  width: 100%;
+  background: #4A3AFF;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  margin-top: 24px;
+}
+
+.ch-btn-primary:hover {
+  background: #3a2bd1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(74, 58, 255, 0.2);
+}

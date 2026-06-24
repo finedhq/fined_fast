@@ -9,6 +9,7 @@ import featuredImg from "../../assets/featured-img.png";
 import savingRuleImg from "../../assets/500dollarsaving.png";
 import footerImg from "../../assets/footer-img.png";
 import React, { useRef, useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const SMALL_COURSES = [
   {
@@ -180,6 +181,7 @@ function RevealOnScroll({ children, delay = 0 }) {
 }
 
 function Hero() {
+  const { loginWithRedirect } = useAuth0();
   const whyFinedRef = useRef(null);
   const pathSvgRef = useRef(null);
   const wfRowRefs = useRef([]);
@@ -354,7 +356,7 @@ function Hero() {
           </p>
 
           <div className="hero-buttons">
-            <button className="btn-hero-primary">Register now →</button>
+            <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
             <button className="btn-hero-secondary">Explore a course →</button>
           </div>
 
