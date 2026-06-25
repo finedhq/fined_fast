@@ -182,7 +182,6 @@ function ArticlesPage() {
       {/* HERO STRIP */}
       <RevealOnScroll>
         <div className="ap-hero-strip">
-          <span className="ap-eyebrow">FinEd Library</span>
           <h1 className="ap-headline">Articles</h1>
           <p className="ap-sub">Fresh financial explainers, backed by real research.</p>
         </div>
@@ -202,55 +201,74 @@ function ArticlesPage() {
 
       {articles.length > 0 && (
         <>
-          <div className="ap-body">
-            {/* FEATURED CARD */}
-            <RevealOnScroll delay={100}>
-              <div
-                className="ap-featured"
-                onClick={() => openArticle(articles[0])}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && openArticle(articles[0])}
-              >
-                <div className="ap-featured-img-wrap">
-                  {articles[0]?.image_url ? (
-                    <img
-                      src={articles[0].image_url}
-                      alt={articles[0].title}
-                      className="ap-featured-img"
-                      onLoad={checkScroll}
-                    />
-                  ) : (
-                    <div className="ap-featured-img-placeholder" />
-                  )}
-                  <span className="ap-badge">Featured</span>
+                    <div className="ap-body">
+            {/* FEATURED CARD COLUMN */}
+            <div>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>
+                Today's Article
+              </h2>
+              <RevealOnScroll delay={100}>
+                <div
+                  className="ap-featured"
+                  onClick={() => openArticle(articles[0])}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && openArticle(articles[0])}
+                >
+                  <div className="ap-featured-img-wrap">
+                    {articles[0]?.image_url ? (
+                      <img
+                        src={articles[0].image_url}
+                        alt={articles[0].title}
+                        className="ap-featured-img"
+                        onLoad={checkScroll}
+                      />
+                    ) : (
+                      <div className="ap-featured-img-placeholder" />
+                    )}
+                    
+                  </div>
+                  <div className="ap-featured-body">
+                    <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
+                    <p className="ap-featured-excerpt">
+                      {articles[0]?.content?.slice(0, 160) || ""}
+                      <span className="ap-ellipsis"> . . .</span>
+                    </p>
+                    <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
+                    <p className="ap-featured-date" style={{ marginTop: '4px' }}>
+                      By {articles[0]?.author || "Unknown Author"}
+                    </p>
+
+                  </div>
                 </div>
-                <div className="ap-featured-body">
-                  <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
-                  <p className="ap-featured-excerpt">
-                    {articles[0]?.content?.slice(0, 160) || ""}
-                    <span className="ap-ellipsis"> [ . . . ]</span>
-                  </p>
-                  <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
-                </div>
-              </div>
-            </RevealOnScroll>
+              </RevealOnScroll>
+            </div>
 
             {/* SCROLLABLE LIST */}
+                        {/* SCROLLABLE LIST */}
             <div className="ap-side-wrap">
-              <div className="ap-scroll-arrows">
-                <button
-                  className={`ap-arrow ${canScrollUp ? "active" : ""}`}
-                  onClick={scrollUp}
-                  disabled={!canScrollUp}
-                  aria-label="Scroll up"
-                >❮</button>
-                <button
-                  className={`ap-arrow ${canScrollDown ? "active" : ""}`}
-                  onClick={scrollDown}
-                  disabled={!canScrollDown}
-                  aria-label="Scroll down"
-                >❯</button>
+              
+              {/* New Right-Side Title with Arrows */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>
+                  Featured Articles
+                </h2>
+                
+                {/* We override the absolute positioning of the arrows so they sit nicely next to the title */}
+                <div className="ap-scroll-arrows" style={{ position: 'static' }}>
+                  <button
+                    className={`ap-arrow ${canScrollUp ? "active" : ""}`}
+                    onClick={scrollUp}
+                    disabled={!canScrollUp}
+                    aria-label="Scroll up"
+                  >❮</button>
+                  <button
+                    className={`ap-arrow ${canScrollDown ? "active" : ""}`}
+                    onClick={scrollDown}
+                    disabled={!canScrollDown}
+                    aria-label="Scroll down"
+                  >❯</button>
+                </div>
               </div>
 
               <div className="ap-carousel" ref={carouselRef}>
@@ -278,7 +296,7 @@ function ArticlesPage() {
                         <h3 className="ap-row-title">{article.title}</h3>
                         <p className="ap-row-excerpt">
                           {article.content?.slice(0, 100) || ""}
-                          <span className="ap-ellipsis"> [ . . . ]</span>
+                          <span className="ap-ellipsis"> . . .</span>
                         </p>
                       </div>
                     </div>
@@ -300,7 +318,8 @@ function ArticlesPage() {
           {/* EXPLORE ARTICLES SECTION */}
           <div className="ap-explore-section">
             <div className="ap-explore-header">
-              <h2 className="exp-ar-button">Explore Articles -&gt;</h2>
+              <h2 className="exp-ar-button" style={{fontSize: "34px",fontWeight: "bolder"
+              }}>Explore Articles -&gt;</h2>
               <div className="ap-mini-navbar">
                 {categories.map((cat) => (
                   <button
@@ -338,10 +357,17 @@ function ArticlesPage() {
                     <div className="ap-grid-card-content">
                       
                       {/* Date and Category (Just like the reader!) */}
+                                      
                       <span className="ap-grid-category">
                         {formatDate(article.created_at)} • {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
                       </span>
                       
+                                            {/* Author */}
+                      <span className="ap-grid-category" style={{ display: 'block', marginTop: '4px' }}>
+                        By {article.author || "Unknown Author"}
+                      </span>
+
+
                       {/* Title */}
                       <h3 className="ap-grid-title">{article.title}</h3>
                       

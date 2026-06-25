@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 * {
-  box-sizing: border-box;
+  box-sizing: bord
+  r-box;
 }
 
 html {
@@ -180,16 +181,20 @@ button {
 
 .ap-headline {
   margin: 10px 0 0;
-  font-size: clamp(48px, 8vw, 92px);
-  line-height: 0.95;
+  font-size: clamp(32px, 3vw, 80px);
+  line-height: 0.75;
   letter-spacing: 0;
+  font-weight: bold;
+  margin-left: 15px;
 }
 
 .ap-sub {
   margin: 18px 0 0;
   color: #4b5563;
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1.5;
+  margin-top: 25px;
+  margin-left: 16px;
 }
 
 .ap-error {
@@ -214,7 +219,7 @@ button {
 }
 
 .ap-featured {
-  min-height: 540px;
+  height: 675px;
   overflow: hidden;
   border-radius: 8px;
   background: #ffffff;
@@ -230,7 +235,7 @@ button {
 
 .ap-featured-img-wrap {
   position: relative;
-  height: 330px;
+  height: 350px;
   background: #e5e7eb;
 
 }
@@ -252,26 +257,16 @@ button {
   animation: apPulse 1.4s infinite;
 }
 
-.ap-badge {
-  position: absolute;
-  left: 18px;
-  bottom: 18px;
-  border-radius: 999px;
-  background: #f59e0b;
-  color: #ffffff;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 950;
-}
-
 .ap-featured-body {
   padding: 22px;
 }
 
 .ap-featured-title {
   margin: 0;
+  margin-top: 12px;
   font-size: clamp(26px, 3vw, 36px);
   line-height: 1.12;
+  font-weight: bold;
 }
 
 .ap-featured-excerpt,
@@ -292,11 +287,13 @@ button {
   overflow: hidden;
 }
 
+
 .ap-featured-date,
 .ap-row-date {
   color: #6b7280;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 850;
+  margin-top: 15px;
 }
 
 .ap-side-wrap {
@@ -1575,7 +1572,7 @@ button {
   padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   transition: all 0.2s ease;
 }
 

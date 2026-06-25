@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { isAdminUser } from "../services/auth";
 import { useState, useEffect } from "react";
@@ -5,6 +6,9 @@ import { useState, useEffect } from "react";
 export default function Navbar() {
   const navigate = useNavigate();
   const [hidden, setHidden] = useState(false);
+  
+  // This must be INSIDE the component function
+  const { loginWithRedirect } = useAuth0();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -45,8 +49,6 @@ export default function Navbar() {
         <img src="/logo.ico" alt="FinEd" className="logo-icon-1" />
       </div>
 
-
-
       <ul className="nav-links">
         <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
         <li><NavLink to="/courses" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Courses">Courses</span></NavLink></li>
@@ -56,7 +58,8 @@ export default function Navbar() {
 
       <div className="nav-right">
         <div className="nav-divider"></div>
-        <button className="btn-signin cube-link">
+        {/* The updated button is placed here */}
+        <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
           <span className="cube-wrapper" data-text="Sign in">Sign in</span>
         </button>
         {isAdminUser() && (

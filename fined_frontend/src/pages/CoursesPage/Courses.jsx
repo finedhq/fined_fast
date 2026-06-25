@@ -90,7 +90,6 @@ function Courses() {
 
       {/* HERO STRIP */}
       <div className="ap-hero-strip">
-        <span className="ap-eyebrow">FinEd Library</span>
         <h1 className="ap-headline">Courses</h1>
         <p className="ap-sub">Gain practical financial literacy with our bite-sized courses. Start learning today!</p>
       </div>
@@ -108,7 +107,7 @@ function Courses() {
           </div>
         ) : (
           <div className="recommended-section">
-            <h2 className="recommended-title" style={{ color: 'black', fontSize: '1.5rem', fontWeight: '500', marginBottom: '20px' }}>Recommended Courses</h2>
+            <h2 className="recommended-title" style={{ color: 'black', fontSize: '1.5rem', fontWeight: '500', marginBottom: '20px',marginTop: "0px"}}>Recommended Courses</h2>
             <div className="ap-articles-grid">
               {courses.map((course, idx) => (
                 <RevealOnScroll key={course.id || course.course_id} delay={100 + (idx % 4) * 50}>
