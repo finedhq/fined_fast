@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { sendContactQuery } from "../../services/api";
+import Lenis from 'lenis';
+import RevealOnScroll from '../../components/RevealOnScroll';
 import "./ContactPage.css";
 
 export default function ContactPage() {
@@ -8,6 +10,18 @@ export default function ContactPage() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,12 +43,15 @@ export default function ContactPage() {
   return (
     <div className="contact-page-wrapper">
       <div className="contact-page-container">
+        <RevealOnScroll delay={100}>
         <div className="contact-page-header">
           <h1>Get in Touch</h1>
           <div className="section-divider"></div>
           <p>Have questions, feedback, or need support? Send us a message and our team will get back to you.</p>
         </div>
+        </RevealOnScroll>
 
+        <RevealOnScroll delay={300}>
         <form onSubmit={handleSubmit} className="contact-page-form">
           <div className="form-group">
             <label htmlFor="contact-name">Your Name</label>
@@ -81,6 +98,7 @@ export default function ContactPage() {
             </p>
           )}
         </form>
+        </RevealOnScroll>
       </div>
     </div>
   );

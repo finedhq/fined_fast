@@ -10,6 +10,7 @@ import savingRuleImg from "../../assets/500dollarsaving.png";
 import footerImg from "../../assets/footer-img.png";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import Lenis from 'lenis';
 
 const SMALL_COURSES = [
   {
@@ -181,6 +182,18 @@ function RevealOnScroll({ children, delay = 0 }) {
 }
 
 function Hero() {
+  useEffect(() => {
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   const { loginWithRedirect } = useAuth0();
   const whyFinedRef = useRef(null);
   const pathSvgRef = useRef(null);
