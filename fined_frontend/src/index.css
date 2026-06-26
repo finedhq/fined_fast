@@ -1588,9 +1588,11 @@ button {
 /* Grid Layout for Cards */
 .ap-articles-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* <- Exactly 4 columns */
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr); /* <- Exactly 3 columns */
+  gap: 30px;
   width: 100%;
+  padding: 0 5%;
+  box-sizing: border-box;
 }
 
 .ap-grid-card {
@@ -1655,6 +1657,8 @@ button {
 .ap-grid-card-content {
   padding: 20px;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 

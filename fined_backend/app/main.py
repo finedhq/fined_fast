@@ -40,7 +40,7 @@ app.add_middleware(
     allow_origins=[
         settings.FRONTEND_URL,
         "https://fined-web.vercel.app",
-        "https://www.myfined.com",
+        "https://www.myfined.com"
     ],
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,

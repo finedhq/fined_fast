@@ -229,12 +229,15 @@ function ArticlesPage() {
                     
                   </div>
                   <div className="ap-featured-body">
+                    <span className="ap-grid-category" style={{ marginBottom: '8px' }}>
+                      {articles[0]?.category ? articles[0].category.toUpperCase() : inferTag(articles[0]).toUpperCase()}
+                    </span>
                     <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
                     <p className="ap-featured-excerpt">
                       {articles[0]?.content?.slice(0, 160) || ""}
                       <span className="ap-ellipsis"> . . .</span>
                     </p>
-                    <p className="ap-featured-date">{formatDate(articles[0]?.created_at)}</p>
+                    <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.created_at)}</p>
                     <p className="ap-featured-date" style={{ marginTop: '4px' }}>
                       By {articles[0]?.author || "Unknown Author"}
                     </p>
@@ -292,7 +295,12 @@ function ArticlesPage() {
                         <div className="ap-row-img-placeholder" />
                       )}
                       <div className="ap-row-body">
-                        <p className="ap-row-date">{formatDate(article.created_at)}</p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
+                          <span className="ap-grid-category" style={{ margin: 0, fontSize: '11px' }}>
+                            {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                          </span>
+                        </div>
                         <h3 className="ap-row-title">{article.title}</h3>
                         <p className="ap-row-excerpt">
                           {article.content?.slice(0, 100) || ""}
@@ -356,25 +364,24 @@ function ArticlesPage() {
                     {/* Text Section */}
                     <div className="ap-grid-card-content">
                       
-                      {/* Date and Category (Just like the reader!) */}
-                                      
+                      {/* Category */}
                       <span className="ap-grid-category">
-                        {formatDate(article.created_at)} • {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                        {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
                       </span>
-                      
-                                            {/* Author */}
-                      <span className="ap-grid-category" style={{ display: 'block', marginTop: '4px' }}>
-                        By {article.author || "Unknown Author"}
-                      </span>
-
 
                       {/* Title */}
                       <h3 className="ap-grid-title">{article.title}</h3>
                       
                       {/* Excerpt */}
-                      <p className="ap-grid-excerpt">
+                      <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
                         {article.content?.slice(0, 100) || ""}...
                       </p>
+
+                      {/* Date and Author */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                        <span>{formatDate(article.created_at)}</span>
+                        <span>By {article.author || "Unknown Author"}</span>
+                      </div>
                     </div>
                   </div>
                 </RevealOnScroll>
