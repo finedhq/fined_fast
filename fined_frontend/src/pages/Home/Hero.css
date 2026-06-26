@@ -46,7 +46,7 @@ nav {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  /* margin-right: auto; */
+  margin-right: 30px;
 }
 
 .logo-icon {
@@ -62,7 +62,7 @@ nav {
   flex-shrink: 0;
   padding-top: 0px;
   padding-bottom: 0px;
-  margin-right: 5px;
+  margin-right: 4px;
 
 }
 
@@ -791,7 +791,7 @@ nav {
   font-weight: 900;
   color: var(--brand-dark);
   line-height: 1.2;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   font-family: 'Poppins',sans-serif;
 }
 
@@ -799,8 +799,11 @@ nav {
   width: 280px;
   height: 4px;
   background: var(--brand-yellow);
-  margin: 4px auto 16px;
+  margin: 8px auto 16px;
+  transform: translateY(6px);
   border-radius: 2px;
+  margin-top: 1px;
+ 
 }
 
 .wf-row {
@@ -1112,10 +1115,19 @@ nav {
 }
 
 .article-side-desc {
-  font-size: 1.1rem;
+  font-size: 1.0rem;
   color: #666;
   margin: 0 0 8px;
+  
+  /* This is the magic for exactly 1 line: */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block; 
 }
+
+
+
 
 .article-bookmark {
   position: absolute;

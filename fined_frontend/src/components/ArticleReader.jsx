@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -101,6 +101,13 @@ const serializeJsonLd = (data) =>
 function ArticleReader({ article, onClose, children, footer, isLoadingMore = false }) {
   const description = useMemo(() => createDescription(article?.content), [article?.content]);
   const scrollRef = useRef(null);
+  const [readingProgress, setReadingProgress] = useState(0);
+
+  const [activeHeadingId, setActiveHeadingId] = useState("");
+  const [triangleTop, setTriangleTop] = useState(0);
+  const tocListRef = useRef(null);
+
+
   const blocks = useMemo(
     () =>
       getParagraphs(article?.content).map((text, i) => ({
@@ -118,6 +125,32 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     if (headings.length > 0) return headings;
     return blocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i) }));
   }, [blocks]);
+
+  // Set first heading active on load
+  useEffect(() => {
+    if (!tocItems.length) return;
+    setActiveHeadingId(tocItems[0].id);
+  }, [tocItems]);
+
+  // Calculate triangle position whenever active heading changes
+  useEffect(() => {
+    if (!activeHeadingId || !tocListRef.current) return;
+    
+    // Slight delay to ensure DOM has painted the updated active classes
+    const timer = setTimeout(() => {
+      const activeEl = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`);
+      if (activeEl) {
+        const ulRect = tocListRef.current.getBoundingClientRect();
+        const elRect = activeEl.getBoundingClientRect();
+        // Position it vertically in the center of the active link
+        setTriangleTop((elRect.top - ulRect.top) + (elRect.height / 2));
+        
+        // Auto scroll TOC
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [activeHeadingId]);
 
   /* title / meta */
   useEffect(() => {
@@ -158,12 +191,49 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     window.addEventListener("keydown", handle);
     return () => window.removeEventListener("keydown", handle);
   }, [onClose]);
+
+  /* scroll events */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     let lastY = el.scrollTop;
+    
     const onScroll = () => {
       const currentY = el.scrollTop;
+
+      // Calculate the progress percentage
+      const scrollHeight = el.scrollHeight - el.clientHeight;
+      if (scrollHeight > 0) {
+        setReadingProgress((currentY / scrollHeight) * 100);
+      }
+
+      // --- SCROLL SPY LOGIC ---
+      const tocElements = tocItems.map(item => document.getElementById(item.id)).filter(Boolean);
+      
+      if (tocElements.length) {
+        const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+        if (isAtBottom) {
+          setActiveHeadingId(tocElements[tocElements.length - 1].id);
+        } else {
+          const scrollTopPos = el.getBoundingClientRect().top;
+          const activationLine = scrollTopPos + Math.min(el.clientHeight * 0.35, 220);
+          
+          const activeHeading = tocElements.reduce((current, heading) => {
+            const headingTop = heading.getBoundingClientRect().top;
+            const currentTop = current.getBoundingClientRect().top;
+            const headingHasPassedLine = headingTop <= activationLine;
+            const headingIsCloserToLine = Math.abs(headingTop - activationLine) < Math.abs(currentTop - activationLine);
+
+            if (headingHasPassedLine && (!current || currentTop > activationLine || headingTop > currentTop)) {
+              return heading;
+            }
+            return !headingHasPassedLine && !current ? heading : headingIsCloserToLine && currentTop > activationLine ? heading : current;
+          }, tocElements[0]);
+
+          if (activeHeading?.id) setActiveHeadingId(activeHeading.id);
+        }
+      }
+
       if (currentY > lastY && currentY > 80) {
         window.dispatchEvent(new CustomEvent("articleScrollDown"));
       } else {
@@ -171,9 +241,12 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       }
       lastY = currentY;
     };
+    
     el.addEventListener("scroll", onScroll, { passive: true });
+    // Call once to set initial state
+    onScroll();
     return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [tocItems]);
 
   if (!article) return null;
 
@@ -208,6 +281,20 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
   return (
     <div className="ar-overlay" role="dialog" aria-modal="true" aria-label="Article reader">
+      {/* --- READING PROGRESS BAR --- */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          height: '5px',
+          backgroundColor: '#4A3AFF', // Nice vibrant blue
+          width: `${readingProgress}%`,
+          zIndex: 9999,
+          transition: 'width 0.1s ease-out'
+        }}
+      />
+
       {children}
 
       {/* close */}
@@ -220,28 +307,51 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         <div className="ar-grid">
           {/* TOC */}
           <aside className="ar-toc-aside">
-            <nav className="ar-toc-nav" aria-label="Article 
-             of contents">
+            <nav className="ar-toc-nav" aria-label="Article of contents">
               <p className="ar-toc-heading">Table of Contents</p>
-              <ul className="ar-toc-list">
-                {tocItems.map((item, i) => (
-                  <li key={item.id} className="ar-toc-item">
-                    <a
-                      href={`#${item.id}`}
-                      className={`ar-toc-link ${i === 0 ? "first" : ""}`}
-                      onClick={(event) => scrollToSection(event, item.id)}
-                      style={{
-                        fontSize: tocFontSize,
-                        lineHeight: tocLineHeight,
-                        padding: tocRowPadding,
-                      }}
-                    >
-                      {i === 0 && <span className="ar-toc-arrow" />}
-                      <span className="ar-toc-label">{item.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              
+              <div style={{ position: "relative" }}>
+                {/* --- THE MOVING TRIANGLE --- */}
+                <div style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: `${triangleTop}px`,
+                  transform: 'translateY(-50%)',
+                  width: 0,
+                  height: 0,
+                  borderTop: '9px solid transparent',
+                  borderBottom: '10px solid transparent',
+                  borderLeft: '15px solid #4A3AFF',
+                  transition: 'top 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  opacity: activeHeadingId && triangleTop > 0 ? 1 : 0,
+                  pointerEvents: 'none',
+                  zIndex: 10
+                }} />
+
+                <ul className="ar-toc-list" ref={tocListRef}>
+                  {tocItems.map((item, i) => (
+                    <li key={item.id} className="ar-toc-item">
+                      <a
+                        href={`#${item.id}`}
+                        className={`ar-toc-link ${i === 0 ? "first" : ""} ${activeHeadingId === item.id ? "active" : ""}`}
+                        onClick={(event) => scrollToSection(event, item.id)}
+                        style={{
+                          display: 'block',
+                          fontSize: tocFontSize,
+                          lineHeight: tocLineHeight,
+                          padding: tocRowPadding,
+                          paddingLeft: '1.25rem', // Make room for the triangle
+                          fontWeight: activeHeadingId === item.id ? "600" : "400",
+                          color: activeHeadingId === item.id ? "#111827" : "#6B7280",
+                          transition: "color 0.2s ease"
+                        }}
+                      >
+                        <span className="ar-toc-label">{item.label}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </nav>
           </aside>
 

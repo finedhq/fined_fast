@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticles } from "../../services/api";
@@ -81,7 +82,7 @@ function ArticlesPage() {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
@@ -201,7 +202,7 @@ function ArticlesPage() {
 
       {articles.length > 0 && (
         <>
-                    <div className="ap-body">
+          <div className="ap-body">
             {/* FEATURED CARD COLUMN */}
             <div>
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>
@@ -248,12 +249,11 @@ function ArticlesPage() {
             </div>
 
             {/* SCROLLABLE LIST */}
-                        {/* SCROLLABLE LIST */}
             <div className="ap-side-wrap">
               
               {/* New Right-Side Title with Arrows */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0 }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: "13px" }}>
                   Featured Articles
                 </h2>
                 
@@ -274,59 +274,61 @@ function ArticlesPage() {
                 </div>
               </div>
 
-              <div className="ap-carousel" ref={carouselRef}>
-                {articles.slice(1).map((article, idx) => (
-                  <RevealOnScroll key={article.id} delay={100 + (idx % 10) * 50}>
-                    <div
-                      key={article.id}
-                      className="ap-row"
-                      onClick={() => openArticle(article)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
-                    >
-                      {article.image_url ? (
-                        <img
-                          src={article.image_url}
-                          alt={article.title}
-                          className="ap-row-img"
-                        />
-                      ) : (
-                        <div className="ap-row-img-placeholder" />
-                      )}
-                      <div className="ap-row-body">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
-                          <span className="ap-grid-category" style={{ margin: 0, fontSize: '11px' }}>
-                            {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
-                          </span>
+              {/* FIX: ADDED EXTRA <div> HERE SO REVEALONSCROLL DOESN'T STEAL CAROUSEL REF */}
+              <RevealOnScroll delay={200}>
+                <div>
+                  <div className="ap-carousel" ref={carouselRef}>
+                    {articles.slice(1).map((article, idx) => (
+                      <div
+                        key={article.id}
+                        className="ap-row"
+                        onClick={() => openArticle(article)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
+                      >
+                        {article.image_url ? (
+                          <img
+                            src={article.image_url}
+                            alt={article.title}
+                            className="ap-row-img"
+                          />
+                        ) : (
+                          <div className="ap-row-img-placeholder" />
+                        )}
+                        
+                        <div className="ap-row-body">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
+                            <span className="ap-grid-category" style={{ margin: 0, fontSize: '11px' }}>
+                              {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                            </span>
+                          </div>
+                          <h3 className="ap-row-title">{article.title}</h3>
+                          <p className="ap-row-excerpt">
+                            {article.content?.slice(0, 100) || ""}
+                            <span className="ap-ellipsis"> . . .</span>
+                          </p>
                         </div>
-                        <h3 className="ap-row-title">{article.title}</h3>
-                        <p className="ap-row-excerpt">
-                          {article.content?.slice(0, 100) || ""}
-                          <span className="ap-ellipsis"> . . .</span>
-                        </p>
                       </div>
-                    </div>
-                  </RevealOnScroll>
-                ))}
+                    ))}
+                  </div>
+                </div>
+              </RevealOnScroll>
 
-                <div ref={loaderRef} className="ap-sentinel" />
+              <div ref={loaderRef} className="ap-sentinel" />
 
-                {fetchingArticle && (
-                  <p className="ap-loading-more">Loading more articles...</p>
-                )}
-                {!hasMore && articles.length > 1 && (
-                  <p className="ap-all-caught">✔️ You&apos;re all caught up.</p>
-                )}
-              </div>
+              {fetchingArticle && (
+                <p className="ap-loading-more">Loading more articles...</p>
+              )}
+              
             </div>
           </div>
 
           {/* EXPLORE ARTICLES SECTION */}
           <div className="ap-explore-section">
             <div className="ap-explore-header">
-              <h2 className="exp-ar-button" style={{fontSize: "34px",fontWeight: "bolder"
+              <h2 className="exp-ar-button" style={{fontSize: "34px",fontWeight: "bolder",marginLeft: "0px"
               }}>Explore Articles -&gt;</h2>
               <div className="ap-mini-navbar">
                 {categories.map((cat) => (
@@ -341,7 +343,7 @@ function ArticlesPage() {
               </div>
             </div>
 
-                        <div className="ap-articles-grid">
+            <div className="ap-articles-grid">
               {exploreArticles.map((article, idx) => (
                 <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
                   <div

@@ -111,6 +111,7 @@ button {
   padding: 0;
 }
 
+
 .ap-root {
   min-height: 100vh;
   background: #f6f6f2;
@@ -185,7 +186,8 @@ button {
   line-height: 0.75;
   letter-spacing: 0;
   font-weight: bold;
-  margin-left: 15px;
+  /* margin-left: 15px; */
+  font-family: 'Poppins';
 }
 
 .ap-sub {
@@ -194,7 +196,8 @@ button {
   font-size: 22px;
   line-height: 1.5;
   margin-top: 25px;
-  margin-left: 16px;
+  /* margin-left: 16px; */
+  font-family: 'Manrope';
 }
 
 .ap-error {
@@ -235,7 +238,7 @@ button {
 
 .ap-featured-img-wrap {
   position: relative;
-  height: 350px;
+  height: 355px;
   background: #e5e7eb;
 
 }
@@ -244,7 +247,7 @@ button {
 .ap-featured-img-placeholder {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   margin-right: 10px;
 }
 
@@ -272,7 +275,7 @@ button {
 .ap-featured-excerpt,
 .ap-row-excerpt {
   color: #4b5563;
-  line-height: 1.6;
+  line-height: 1.99;
   overflow-wrap: anywhere;
   word-break: normal;
   hyphens: auto;
@@ -355,7 +358,7 @@ button {
 .ap-row {
   height: 150px;
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
+  grid-template-columns: 170px minmax(0, 1fr);
   gap: 18px;
   border-radius: 8px;
   background: #ffffff;
@@ -370,7 +373,7 @@ button {
   width: 100%;
   height: 126px;
   border-radius: 6px;
-  object-fit: cover;
+  object-fit: fill;
 }
 
 .ap-row-date {
@@ -388,7 +391,7 @@ button {
 
 .ap-row-title {
   margin: 7px 0 6px;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1.2;
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -1108,7 +1111,6 @@ button {
   align-items: center;
   gap: 20px;
 }
-
 .brand-logo {
   width: 48px;
   height: 48px;
@@ -1591,7 +1593,7 @@ button {
   grid-template-columns: repeat(3, 1fr); /* <- Exactly 3 columns */
   gap: 30px;
   width: 100%;
-  padding: 0 5%;
+  padding: 0 ;
   box-sizing: border-box;
 }
 
@@ -1609,7 +1611,7 @@ button {
 /* Styling for the new image */
 .ap-grid-card-img-wrap {
   width: 100%;
-  height: 160px; /* Adjust height of the image as needed */
+  height: 200px; /* Adjust height of the image as needed */
   background: #e5e7eb;
 }
 /* Category styling (Blue, uppercase, bold) */
@@ -1649,8 +1651,8 @@ button {
 .ap-grid-card-img,
 .ap-grid-card-img-placeholder {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* Prevents image from stretching/squishing */
+  height: 210px;
+  object-fit: fill; /* Prevents image from stretching/squishing */
 }
 
 /* Move the padding to just the text section so the image can touch the edges */
