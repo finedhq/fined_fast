@@ -1,12 +1,13 @@
 # HTTP endpoints for course cards
-from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
+from app.dependencies import get_current_user, require_admin, AuthUser
 from typing import Optional, List
 from app.services.course_service import course_service
 
 router = APIRouter(prefix="/cards", tags=["Cards"])
 
 @router.get("/{moduleId}/getall")
-async def get_cards_by_module(moduleId: str):
+async def get_cards_by_module(moduleId: str, user: AuthUser = Depends(get_current_user)):
     """Get all cards for a module"""
     try:
         cards = course_service.get_cards(moduleId)
@@ -18,7 +19,7 @@ async def get_cards_by_module(moduleId: str):
         )
 
 @router.delete("/{id}")
-async def delete_card(id: str):
+async def delete_card(id: str, user: AuthUser = Depends(require_admin)):
     """Delete a card"""
     try:
         course_service.delete_card(id)
@@ -45,7 +46,8 @@ async def add_card(
     options_tags: Optional[List[str]] = Form(None),
     image_file: Optional[UploadFile] = File(None),
     audio_file: Optional[UploadFile] = File(None),
-    video_file: Optional[UploadFile] = File(None)
+    video_file: Optional[UploadFile] = File(None),
+    user: AuthUser = Depends(require_admin)
 ):
     """Admin adds a course card with optional multipart media uploads to Supabase storage"""
     try:

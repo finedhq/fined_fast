@@ -1,5 +1,6 @@
 # HTTP endpoints for contact and feedback inquiries
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from app.dependencies import get_current_user, AuthUser
 from pydantic import BaseModel
 from app.services.contact_service import contact_service
 
@@ -11,7 +12,7 @@ class ContactQueryRequest(BaseModel):
     message: str
 
 @router.post("/user")
-async def contact_user(body: ContactQueryRequest):
+async def contact_user(body: ContactQueryRequest, user: AuthUser = Depends(get_current_user)):
     """Save user support request query"""
     # Mimic strict validation from original Express backend
     if not body.name or not body.email or not body.message:

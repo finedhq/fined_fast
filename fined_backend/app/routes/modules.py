@@ -1,5 +1,6 @@
 # HTTP endpoints for course modules
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from app.dependencies import get_current_user, require_admin, AuthUser
 from pydantic import BaseModel
 from app.services.course_service import course_service
 
@@ -11,7 +12,7 @@ class AddModuleRequest(BaseModel):
     order_index: int
 
 @router.get("/course/{course_id}")
-async def get_modules_by_course(course_id: str):
+async def get_modules_by_course(course_id: str, user: AuthUser = Depends(get_current_user)):
     """Get all modules for a specific course"""
     try:
         from app.repositories.course_repo import course_repo
@@ -31,7 +32,7 @@ async def get_modules_by_course(course_id: str):
         )
 
 @router.post("/add/{course_id}", status_code=status.HTTP_201_CREATED)
-async def add_module(course_id: str, body: AddModuleRequest):
+async def add_module(course_id: str, body: AddModuleRequest, user: AuthUser = Depends(require_admin)):
     """Add a new module to a course"""
     if not body.title or not body.description or body.order_index is None:
         raise HTTPException(
@@ -52,7 +53,7 @@ async def add_module(course_id: str, body: AddModuleRequest):
         )
 
 @router.delete("/{id}")
-async def delete_module(id: str):
+async def delete_module(id: str, user: AuthUser = Depends(require_admin)):
     """Delete a module"""
     try:
         course_service.delete_module(id)

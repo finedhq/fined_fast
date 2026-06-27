@@ -1,12 +1,13 @@
 # HTTP endpoints for comparative banking schemes and credit cards
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from app.repositories.product_repo import product_repo
+from app.dependencies import get_current_user, AuthUser
 
 # --- Routers ---
-sbi_router = APIRouter(prefix="/sbi", tags=["SBI Products"])
-kotak_router = APIRouter(prefix="/kotak", tags=["Kotak Products"])
-hdfc_router = APIRouter(prefix="/hdfc", tags=["HDFC Products"])
-icici_router = APIRouter(prefix="/icici", tags=["ICICI Products"])
+sbi_router = APIRouter(prefix="/sbi", tags=["SBI Products"], dependencies=[Depends(get_current_user)])
+kotak_router = APIRouter(prefix="/kotak", tags=["Kotak Products"], dependencies=[Depends(get_current_user)])
+hdfc_router = APIRouter(prefix="/hdfc", tags=["HDFC Products"], dependencies=[Depends(get_current_user)])
+icici_router = APIRouter(prefix="/icici", tags=["ICICI Products"], dependencies=[Depends(get_current_user)])
 
 async def get_bank_product(product_name: str):
     """

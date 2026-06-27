@@ -13,9 +13,11 @@ from app.repositories.transaction_repo import transaction_repo
 from app.repositories.user_repo import user_repo
 from app.services.score_service import score_service
 from app.config import settings
+from app.dependencies import get_current_user
 from googleapiclient.discovery import build
 
-router = APIRouter(prefix="/expenses", tags=["Expenses"])
+router = APIRouter(prefix="/expenses", tags=["Expenses"], dependencies=[Depends(get_current_user)])
+oauth_router = APIRouter(prefix="/expenses", tags=["Expenses OAuth"])
 
 # --- Request Schemas ---
 
@@ -92,7 +94,7 @@ class StatusChangeRequest(BaseModel):
 
 # --- Route Endpoints ---
 
-@router.get("/bank-auth")
+@oauth_router.get("/bank-auth")
 async def bank_auth(state: str):
     """Start Google OAuth process by generating consent URL with user state"""
     try:
@@ -105,8 +107,8 @@ async def bank_auth(state: str):
             detail=f"Failed to generate auth URL: {str(e)}"
         )
 
-@router.get("/bank-callback")
-@router.get("/gmail-callback")
+@oauth_router.get("/bank-callback")
+@oauth_router.get("/gmail-callback")
 async def bank_callback(code: str, state: str):
     """Handle callback from Google, save OAuth tokens and redirect to frontend"""
     try:
