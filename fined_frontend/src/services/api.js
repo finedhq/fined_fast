@@ -26,12 +26,31 @@ async function request(path, options = {}) {
   return data;
 }
 
-export function fetchArticles({ limit = 30, offset = 0 } = {}) {
-  return request("/articles/getall", {
+const articleCache = new Map();
+const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+
+export async function fetchArticles({ limit = 30, offset = 0 } = {}) {
+  const cacheKey = `articles-${limit}-${offset}`;
+  
+  // Check if we have a valid cached response
+  if (articleCache.has(cacheKey)) {
+    const { data, timestamp } = articleCache.get(cacheKey);
+    if (Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
+  // Fetch fresh data
+  const data = await request("/articles/getall", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ limit, offset }),
   });
+  
+  // Save to cache
+  articleCache.set(cacheKey, { data, timestamp: Date.now() });
+  
+  return data;
 }
 
 export function postArticle(formData) {

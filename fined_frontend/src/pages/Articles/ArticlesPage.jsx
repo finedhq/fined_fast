@@ -1,5 +1,5 @@
-
 import React, { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticles } from "../../services/api";
 
@@ -31,8 +31,18 @@ const inferTag = (article = {}) => {
   return tags.find(([, re]) => re.test(src))?.[0] || "Finance";
 };
 
+const generateSlug = (title) => {
+  if (!title) return "";
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+};
+
 
 function ArticlesPage() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const categories = ["All", "IPO", "Marketing Basics", "Stocks"];
   const [articles, setArticles] = useState([]);
@@ -130,6 +140,7 @@ function ArticlesPage() {
   useEffect(() => {
     if (selectedArticle) {
       document.body.style.overflow = "hidden";
+      document.title = `${selectedArticle.title} | FinEd`;
       window.dispatchEvent(new CustomEvent("articleReaderOpen"));
       const idx = articles.findIndex((a) => a.id === selectedArticle.id);
       const isLast = idx === articles.length - 1;
@@ -139,9 +150,13 @@ function ArticlesPage() {
       }
     } else {
       document.body.style.overflow = "";
+      document.title = "Insights & Articles | FinEd";
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => { 
+      document.body.style.overflow = ""; 
+      document.title = "FinEd";
+    };
   }, [selectedArticle]);
 
   useEffect(() => {
@@ -149,7 +164,7 @@ function ArticlesPage() {
       const idx = articles.findIndex((a) => a.id === selectedArticle?.id);
       const next = articles[idx + 1];
       if (next) {
-        setSelectedArticle(next);
+        openArticle(next);
         setPendingNext(false);
       }
     }
@@ -161,8 +176,26 @@ function ArticlesPage() {
 
   const openArticle = (article) => {
     if (!article) return;
+    navigate(`/articles/${generateSlug(article.title)}`);
     setSelectedArticle(article);
   };
+
+  const closeArticle = () => {
+    setSelectedArticle(null);
+    navigate(`/articles`);
+  };
+
+  // Sync URL path params with modal state for back button & deep linking support
+  useEffect(() => {
+    if (slug && articles.length > 0) {
+      const article = articles.find(a => generateSlug(a.title) === slug);
+      if (article && (!selectedArticle || generateSlug(selectedArticle.title) !== slug)) {
+        setSelectedArticle(article);
+      }
+    } else if (!slug && selectedArticle) {
+      setSelectedArticle(null);
+    }
+  }, [slug, articles]);
 
   const scrollUp = () => {
     carouselRef.current?.scrollBy({ top: -300, behavior: "smooth" });
@@ -398,14 +431,14 @@ function ArticlesPage() {
       {selectedArticle && (
         <ArticleReader
           article={selectedArticle}
-          onClose={() => setSelectedArticle(null)}
+          onClose={closeArticle}
           isLoadingMore={prefetching && selectedIndex === articles.length - 1}
           footer={
             <div className="ap-reader-footer">
               <button
                 className={`ap-nav-btn ${selectedIndex <= 0 ? "" : "active"}`}
                 onClick={() => {
-                  if (selectedIndex > 0) setSelectedArticle(articles[selectedIndex - 1]);
+                  if (selectedIndex > 0) openArticle(articles[selectedIndex - 1]);
                 }}
                 disabled={selectedIndex <= 0}
               >
@@ -416,7 +449,7 @@ function ArticlesPage() {
                 onClick={() => {
                   const next = articles[selectedIndex + 1];
                   if (next) {
-                    setSelectedArticle(next);
+                    openArticle(next);
                   } else if (hasMore) {
                     setPendingNext(true);
                     loadArticles(offset, true);

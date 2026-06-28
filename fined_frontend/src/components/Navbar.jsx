@@ -59,8 +59,7 @@ export default function Navbar() {
       <div className="nav-right">
         {/* Commented out for now to disable the login/signin system
         <div className="nav-divider"></div>
-        {/* The updated button is placed here */}
-          <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
+        <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
           <span className="cube-wrapper" data-text="Sign in">Sign in</span>
         </button>
         */}

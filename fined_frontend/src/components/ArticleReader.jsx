@@ -132,6 +132,16 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     setActiveHeadingId(tocItems[0].id);
   }, [tocItems]);
 
+  // Scroll to top when article changes
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      setTimeout(() => {
+        el.scrollTop = 0;
+      }, 10);
+    }
+  }, [article?.title]);
+
   // Calculate triangle position whenever active heading changes
   useEffect(() => {
     if (!activeHeadingId || !tocListRef.current) return;

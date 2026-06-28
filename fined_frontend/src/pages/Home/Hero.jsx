@@ -374,7 +374,7 @@ function Hero() {
             <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
             */}
             <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Register now →</button>
-            <button className="btn-hero-secondary" onClick={() => navigate("/courses")}>Explore a course →</button>
+            <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>Explore Articles →</button>
           </div>
 
           <div className="learners-row">
