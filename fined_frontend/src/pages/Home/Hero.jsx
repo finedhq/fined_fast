@@ -11,6 +11,7 @@ import footerImg from "../../assets/footer-img.png";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
+import { useNavigate } from "react-router-dom";
 
 const SMALL_COURSES = [
   {
@@ -182,6 +183,7 @@ function RevealOnScroll({ children, delay = 0 }) {
 }
 
 function Hero() {
+  const navigate = useNavigate();
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time) {
@@ -193,7 +195,6 @@ function Hero() {
       lenis.destroy();
     };
   }, []);
-
   const { loginWithRedirect } = useAuth0();
   const whyFinedRef = useRef(null);
   const pathSvgRef = useRef(null);
@@ -369,8 +370,11 @@ function Hero() {
           </p>
 
           <div className="hero-buttons">
+            {/* Commented out for now to disable the login/signin system
             <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
-            <button className="btn-hero-secondary">Explore a course →</button>
+            */}
+            <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Register now →</button>
+            <button className="btn-hero-secondary" onClick={() => navigate("/courses")}>Explore a course →</button>
           </div>
 
           <div className="learners-row">
@@ -493,7 +497,7 @@ function Hero() {
 
         <RevealOnScroll delay={100}>
           <div className="pc-view-all">
-            <button className="btn-hero-secondary">View all courses →</button>
+            <button className="btn-hero-secondary" onClick={() => navigate("/courses")}>View all courses →</button>
           </div>
 
         </RevealOnScroll>
@@ -680,7 +684,7 @@ function Hero() {
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
           <div className="pc-view-all">
-            <button className="btn-hero-secondary">View all Articles →</button>
+            <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>View all Articles →</button>
           </div>
 
         </RevealOnScroll>
@@ -711,7 +715,7 @@ function Hero() {
           <div className="footer-cta-content">
             <h2 className="footer-cta-title">Your financial journey<br />starts here.</h2>
             <p className="footer-cta-sub">Small steps today. Bigger opportunities tomorrow.</p>
-            <button className="btn-footer-cta">Register now →</button>
+            <button className="btn-footer-cta" onClick={() => navigate("/articles")}>Register now →</button>
           </div>
         </RevealOnScroll>
       </section>
