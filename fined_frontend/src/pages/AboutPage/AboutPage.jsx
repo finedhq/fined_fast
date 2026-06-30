@@ -22,101 +22,104 @@ export default function AboutPage() {
       <section className="about-hero">
         <div className="about-hero-container">
           <RevealOnScroll delay={100}>
-            <span className="badge">ABOUT FINED</span>
+            <span className="brand-label">Our Story</span>
           </RevealOnScroll>
           <RevealOnScroll delay={200}>
-            <h1>Democratizing Financial Literacy for Everyone</h1>
+            <h1>We build tools to make personal finance easy to understand.</h1>
           </RevealOnScroll>
           <RevealOnScroll delay={300}>
             <p className="hero-subtitle">
-              Most people never learned how money works—not in school, and not at home. FinEd is here to change that. We make financial education engaging, visual, and highly practical.
+              FinEd started because we realized most people learn personal finance the hard way—through costly mistakes. We're here to change that with visual lessons and straightforward tools.
             </p>
           </RevealOnScroll>
         </div>
-        <div className="hero-gradient-orb"></div>
       </section>
 
-      {/* 2. Our Mission Section */}
-      <section className="about-mission-section">
+      {/* 2. Brand Context (Two Column) */}
+      <section className="about-narrative-section">
         <div className="about-container">
-          <div className="mission-grid">
+          <div className="narrative-grid">
             <RevealOnScroll delay={200}>
-              <div className="mission-text-block">
-                <h2>Our Mission</h2>
-                <div className="mission-line"></div>
-                <p>
-                  We believe that financial independence shouldn't require an MBA or hours of sorting through complex bank paperwork. Our mission is to bridge the gap between financial theory and real-life action.
-                </p>
-                <p>
-                  FinEd empowers you to build positive financial habits, discover the best savings and investment products suited to your profile, and take control of your financial future.
-                </p>
+              <div className="narrative-left">
+                <h2>Why we built FinEd.</h2>
+                <div className="narrative-accent-line"></div>
               </div>
             </RevealOnScroll>
             
-            <RevealOnScroll delay={400}>
-              <div className="mission-stat-box">
-                <div className="stat-card">
-                  <h3>01</h3>
-                  <h4>Visual & Interactive</h4>
-                  <p>Skip the textbooks. Learn via interactive flashcards, courses, and visual dashboards.</p>
-                </div>
-                <div className="stat-card">
-                  <h3>02</h3>
-                  <h4>Tailored For You</h4>
-                  <p>Our algorithms match you with the top financial products based on your goals and habits.</p>
-                </div>
+            <RevealOnScroll delay={350}>
+              <div className="narrative-right">
+                <p>
+                  Most of us finished school without ever learning how credit scores work, how to invest in a mutual fund, or how to budget our monthly expenses. We had to figure it out ourselves.
+                </p>
+                <p>
+                  We built FinEd to fix this gap. Our goal is to make finance intuitive. We don't publish long, dry textbooks. Instead, we use interactive flashcards, calculators, and simple dashboards so you can learn by doing.
+                </p>
               </div>
             </RevealOnScroll>
           </div>
         </div>
       </section>
 
-      {/* 3. Core Values Grid */}
-      <section className="about-values-section">
+      {/* 3. Key Approaches (Replacing Pillars Grid) */}
+      <section className="about-approach-section">
         <div className="about-container">
           <RevealOnScroll delay={100}>
-            <div className="section-header">
-              <h2>Our Core Pillars</h2>
-              <p>The principles guiding our platform design and curriculum.</p>
+            <div className="approach-header">
+              <h2>The FinEd Approach</h2>
             </div>
           </RevealOnScroll>
 
-          <div className="values-grid">
-            <RevealOnScroll delay={100}>
-              <div className="value-card">
-                <div className="value-icon">💡</div>
-                <h3>Clarity First</h3>
-                <p>We translate complex financial jargon into simple, actionable concepts you can apply immediately.</p>
+          <div className="approach-grid">
+            <RevealOnScroll delay={150}>
+              <div className="approach-card">
+                <div className="approach-icon-wrapper">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                </div>
+                <h3>Bite-sized learning</h3>
+                <p>Learn complex financial topics through interactive flashcard decks and progress trackers that fit into your day.</p>
               </div>
             </RevealOnScroll>
 
-            <RevealOnScroll delay={200}>
-              <div className="value-card">
-                <div className="value-icon">🎯</div>
-                <h3>Action Oriented</h3>
-                <p>We don't just teach. We provide tools like the Expense Tracker to help you practice what you learn.</p>
+            <RevealOnScroll delay={250}>
+              <div className="approach-card">
+                <div className="approach-icon-wrapper">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                <h3>Zero sponsored bias</h3>
+                <p>We match you with financial plans and savings schemes based on your metrics, not bank sponsorships.</p>
               </div>
             </RevealOnScroll>
 
-            <RevealOnScroll delay={300}>
-              <div className="value-card">
-                <div className="value-icon">🔒</div>
-                <h3>Unbiased Trust</h3>
-                <p>We suggest banks and plans that match your data point requirements, not paying sponsors.</p>
+            <RevealOnScroll delay={350}>
+              <div className="approach-card">
+                <div className="approach-icon-wrapper">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                  </svg>
+                </div>
+                <h3>Interactive tools</h3>
+                <p>Apply your knowledge immediately with an integrated expense tracker and budgeting simulation tools.</p>
               </div>
             </RevealOnScroll>
           </div>
         </div>
       </section>
 
-      {/* 4. CTA / Final Wave */}
-      <section className="about-cta-section">
+      {/* 4. Action Section */}
+      <section className="about-action-section">
         <div className="about-container">
           <RevealOnScroll delay={200}>
-            <div className="about-cta-box">
-              <h2>Ready to start your financial journey?</h2>
-              <p>Explore our latest visual guides, track your expenses, or find the best schemes today.</p>
-              <a href="/articles" className="btn-about-cta">Explore Insights</a>
+            <div className="about-action-banner">
+              <h2>Ready to build your financial confidence?</h2>
+              <p>Explore articles, try our calculators, and learn how to make your money work for you.</p>
+              <a href="/articles" className="btn-about-action">Get Started</a>
             </div>
           </RevealOnScroll>
         </div>
