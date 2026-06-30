@@ -75,20 +75,6 @@ const formatDate = (date) => {
   });
 };
 
-const inferTag = (article = {}) => {
-  const src = `${article.title || ""} ${article.content || ""}`.toLowerCase();
-  const tags = [
-    ["IPO", /\bipo\b|listing|gmp|grey market|public issue/],
-    ["Economy", /economy|pipeline|trade|inflation|gdp|rupee|policy|market/],
-    ["Investing", /invest|stock|share|profit|revenue|valuation|portfolio/],
-    ["Banking", /bank|loan|credit|deposit|interest rate|rbi/],
-    ["Savings", /saving|emergency fund|retirement|college|budget/],
-    ["Energy", /energy|renewable|solar|wind|oil|gas|power/],
-    ["Business", /company|brand|consumer|industry|business|clients/],
-  ];
-  return tags.find(([, re]) => re.test(src))?.[0] || "Finance";
-};
-
 const serializeJsonLd = (data) =>
   JSON.stringify(data)
     .replace(/</g, "\\u003c")
@@ -266,7 +252,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   };
 
   const publishedDate = formatDate(article.created_at);
-  const articleTag = inferTag(article);
+  const articleTag = article.tag;
 
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
   const tocLineHeight = tocItems.length > 16 ? "1.25" : tocItems.length > 11 ? "1.3" : "1.35";

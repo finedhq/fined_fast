@@ -14,6 +14,7 @@ router = APIRouter(prefix="/articles", tags=["Articles"])
 class GetAllArticlesRequest(BaseModel):
     limit: Optional[int] = 30
     offset: Optional[int] = 0
+    tag: Optional[str] = None
 
 class SaveEmailRequest(BaseModel):
     email: str
@@ -59,7 +60,8 @@ async def get_all_articles(body: Optional[GetAllArticlesRequest] = None):
     try:
         limit = body.limit if body and body.limit is not None else 30
         offset = body.offset if body and body.offset is not None else 0
-        return article_service.get_all(limit=limit, offset=offset)
+        tag = body.tag if body else None
+        return article_service.get_all(limit=limit, offset=offset, tag=tag)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -192,6 +194,7 @@ async def delete_article(id: str, user: AuthUser = Depends(require_admin)):
 async def add_article(
     title: str = Form(...),
     content: str = Form(...),
+    tag: str = Form(...),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
@@ -207,7 +210,7 @@ async def add_article(
                 folder="articles",
                 title=title
             )
-        return article_service.add(title=title, content=content, image_url=image_url)
+        return article_service.add(title=title, content=content, image_url=image_url, tag=tag)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

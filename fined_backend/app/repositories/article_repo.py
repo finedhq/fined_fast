@@ -4,17 +4,20 @@ from app.integrations.supabase_client import supabase
 
 class ArticleRepository:
 
-    def get_all(self, limit: int = 30, offset: int = 0) -> list:
-        res = supabase.from_("articles").select("*")\
-            .order("created_at", desc=True)\
+    def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
+        query = supabase.from_("articles").select("*")
+        if tag:
+            query = query.eq("tag", tag)
+        res = query.order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
         return res.data or []
 
-    def insert(self, title: str, content: str, image_url: str = "") -> dict:
+    def insert(self, title: str, content: str, image_url: str = "", tag: str = "Finance") -> dict:
         res = supabase.from_("articles").insert([{
             "title": title,
             "content": content,
-            "image_url": image_url
+            "image_url": image_url,
+            "tag": tag
         }]).execute()
         return res.data[0] if res.data else {}
 

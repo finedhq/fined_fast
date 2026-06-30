@@ -9,13 +9,13 @@ from app.services.score_service import score_service
 
 class ArticleService:
 
-    def get_all(self, limit: int = 30, offset: int = 0) -> list:
+    def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
         """Fetch all articles — equivalent to getAllArticles"""
-        return article_repo.get_all(limit=limit, offset=offset)
-        
-    def add(self, title: str, content: str, image_url: str = "") -> dict:
+        return article_repo.get_all(limit=limit, offset=offset, tag=tag)
+
+    def add(self, title: str, content: str, image_url: str = "", tag: str = "Finance") -> dict:
         """Admin adds article — equivalent to addArticle"""
-        return article_repo.insert(title=title, content=content, image_url=image_url)
+        return article_repo.insert(title=title, content=content, image_url=image_url, tag=tag)
         
     def delete(self, article_id: str):
         """Admin deletes article — fixes the original bug where data was undefined"""

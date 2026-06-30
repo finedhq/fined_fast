@@ -16,20 +16,6 @@ function formatDate(date) {
     day: "numeric",
   });
 }
-// Add this to automatically guess the category if it's missing
-const inferTag = (article = {}) => {
-  const src = `${article.title || ""} ${article.content || ""}`.toLowerCase();
-  const tags = [
-    ["IPO", /\bipo\b|listing|gmp|grey market|public issue/],
-    ["Economy", /economy|pipeline|trade|inflation|gdp|rupee|policy|market/],
-    ["Investing", /invest|stock|share|profit|revenue|valuation|portfolio/],
-    ["Banking", /bank|loan|credit|deposit|interest rate|rbi/],
-    ["Savings", /saving|emergency fund|retirement|college|budget/],
-    ["Energy", /energy|renewable|solar|wind|oil|gas|power/],
-    ["Business", /company|brand|consumer|industry|business|clients/],
-  ];
-  return tags.find(([, re]) => re.test(src))?.[0] || "Finance";
-};
 
 const generateSlug = (title) => {
   if (!title) return "";
@@ -44,7 +30,7 @@ function ArticlesPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
-  const categories = ["All", "IPO", "Marketing Basics", "Stocks"];
+  const categories = ["All", "Finance", "IPO", "Economy", "Investing", "Banking", "Savings", "Stocks", "Markets", "Personal Finance", "Business"];
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [offset, setOffset] = useState(0);
@@ -207,8 +193,8 @@ function ArticlesPage() {
 
   // Calculate filtered articles
   const exploreArticles = activeCategory === "All"
-    ? articles
-    : articles.filter(article => article.category === activeCategory);
+  ? articles
+  : articles.filter(article => article.tag === activeCategory);
 
   return (
     <div className="ap-root">
@@ -264,7 +250,7 @@ function ArticlesPage() {
                   </div>
                   <div className="ap-featured-body">
                     <span className="ap-grid-category" style={{ marginBottom: '8px' }}>
-                      {articles[0]?.category ? articles[0].category.toUpperCase() : inferTag(articles[0]).toUpperCase()}
+                      {articles[0]?.tag?.toUpperCase()}
                     </span>
                     <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
                     <p className="ap-featured-excerpt">
@@ -334,7 +320,7 @@ function ArticlesPage() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
                             <span className="ap-grid-category" style={{ margin: 0, fontSize: '11px' }}>
-                              {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                              {article.tag?.toUpperCase()}
                             </span>
                           </div>
                           <h3 className="ap-row-title">{article.title}</h3>
@@ -401,7 +387,7 @@ function ArticlesPage() {
                       
                       {/* Category */}
                       <span className="ap-grid-category">
-                        {article.category ? article.category.toUpperCase() : inferTag(article).toUpperCase()}
+                        {article.tag?.toUpperCase()}
                       </span>
 
                       {/* Title */}

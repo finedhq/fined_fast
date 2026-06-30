@@ -4,10 +4,23 @@ import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", content: "" });
+  const [form, setForm] = useState({ title: "", content: "", tag: "Finance" });
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const ARTICLE_TAGS = [
+  "Finance",
+  "IPO",
+  "Economy",
+  "Investing",
+  "Banking",
+  "Savings",
+  "Stocks",
+  "Markets",
+  "Personal Finance",
+  "Business",
+];
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,11 +30,12 @@ function AdminArticleForm() {
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("content", form.content);
+    formData.append("tag", form.tag);
     if (imageFile) formData.append("image", imageFile);
 
     try {
       await postArticle(formData);
-      setForm({ title: "", content: "" });
+      setForm({ title: "", content: "", tag: "Finance" });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");
@@ -51,6 +65,20 @@ function AdminArticleForm() {
               required
             />
           </label>
+
+          <label>
+            Tag
+            <select
+              name="tag"
+              value={form.tag}
+              onChange={(event) => setForm((prev) => ({ ...prev, tag: event.target.value }))}
+              required
+            >
+    {ARTICLE_TAGS.map((t) => (
+      <option key={t} value={t}>{t}</option>
+    ))}
+  </select>
+</label>
 
           <label>
             Content
