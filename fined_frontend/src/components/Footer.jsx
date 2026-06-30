@@ -77,10 +77,10 @@ export default function Footer() {
                 <div className="footer-col">
                     <h4 className="footer-col-title">FEATURED</h4>
                     <ul>
-                       <li><a href="/courses">Courses</a></li>
-                        <li><a href="/articles">Articles</a></li>
-                        <li><a href="/fintools">FinTools</a></li>
-                       <li><a href="/about">About Us</a></li>
+                        <li><Link to="/courses">Courses</Link></li>
+                        <li><Link to="/articles">Articles</Link></li>
+                        <li><Link to="/fin-tools">FinTools</Link></li>
+                        <li><Link to="/about">About Us</Link></li>
                     </ul>
                 </div>
 

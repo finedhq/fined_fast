@@ -21,6 +21,7 @@ import PoliciesPage from "./pages/Policies/PoliciesPage";
 import ProductPage from "./pages/Policies/ProductPage";
 import NotificationsPage from "./pages/Notifications/NotificationsPage";
 import StaticPage from "./pages/StaticPages/StaticPage";
+import AboutPage from "./pages/AboutPage/AboutPage";
 import { AuthenticationGuard } from "./components/AuthenticationGuard";
 import { AdminGuard } from "./components/AdminGuard";
 import { ApiTokenProvider } from "./components/ApiTokenProvider";
@@ -39,7 +40,7 @@ function App() {
                 <Route path="contact" element={<ContactPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
                 
-                <Route path="about" element={<StaticPage />} />
+                <Route path="about" element={<AboutPage />} />
                 <Route path="help" element={<StaticPage />} />
                 <Route path="privacy-policy" element={<StaticPage />} />
                 <Route path="termsofservice" element={<StaticPage />} />
