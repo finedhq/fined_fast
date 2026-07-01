@@ -249,7 +249,14 @@ function ArticlesPage() {
                     
                   </div>
                   <div className="ap-featured-body">
-                    <span className="ap-grid-category" style={{ marginBottom: '8px' }}>
+                    <span 
+                      className="ap-grid-category" 
+                      style={{ marginBottom: '8px', cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (articles[0]?.tag) navigate(`/tags/${articles[0].tag.toLowerCase()}`);
+                      }}
+                    >
                       {articles[0]?.tag?.toUpperCase()}
                     </span>
                     <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
@@ -319,7 +326,14 @@ function ArticlesPage() {
                         <div className="ap-row-body">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
-                            <span className="ap-grid-category" style={{ margin: 0, fontSize: '11px' }}>
+                            <span 
+                              className="ap-grid-category" 
+                              style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (article.tag) navigate(`/tags/${article.tag.toLowerCase()}`);
+                              }}
+                            >
                               {article.tag?.toUpperCase()}
                             </span>
                           </div>
@@ -386,7 +400,14 @@ function ArticlesPage() {
                     <div className="ap-grid-card-content">
                       
                       {/* Category */}
-                      <span className="ap-grid-category">
+                      <span 
+                        className="ap-grid-category"
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (article.tag) navigate(`/tags/${article.tag.toLowerCase()}`);
+                        }}
+                      >
                         {article.tag?.toUpperCase()}
                       </span>
 

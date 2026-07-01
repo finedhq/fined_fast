@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -85,6 +86,7 @@ const serializeJsonLd = (data) =>
 
 /* ── component ── */
 function ArticleReader({ article, onClose, children, footer, isLoadingMore = false }) {
+  const navigate = useNavigate();
   const description = useMemo(() => createDescription(article?.content), [article?.content]);
   const scrollRef = useRef(null);
   const [readingProgress, setReadingProgress] = useState(0);
@@ -357,7 +359,12 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               <div className="ar-meta">
                 {publishedDate && <time dateTime={article.created_at}>{publishedDate}</time>}
                 <span aria-hidden="true">•</span>
-                <span>{articleTag}</span>
+                <span 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/tags/${articleTag.toLowerCase()}`)}
+                >
+                  {articleTag}
+                </span>
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
               <p className="ar-byline">By - FinEd Editorial Team</p>

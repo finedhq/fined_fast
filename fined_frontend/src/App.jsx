@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Hero from "./pages/Home/Hero";
 import ArticlesPage from "./pages/Articles/ArticlesPage";
+import TagArticlesPage from "./pages/Articles/TagArticlesPage";
 import Courses from "./pages/CoursesPage/Courses";
 import ContactPage from "./pages/ContactPage/ContactPage";
 import FeedbackPage from "./pages/FeedbackPage/FeedbackPage";
@@ -36,6 +37,8 @@ function App() {
                 <Route index element={<Hero />} />
                 <Route path="articles" element={<AuthenticationGuard component={ArticlesPage} />} />  
                 <Route path="articles/:slug" element={<AuthenticationGuard component={ArticlesPage} />} />
+                <Route path="tags/:tag" element={<AuthenticationGuard component={TagArticlesPage} />} />
+                <Route path="tags/:tag/:slug" element={<AuthenticationGuard component={TagArticlesPage} />} />
                 <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
                 <Route path="contact" element={<ContactPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
