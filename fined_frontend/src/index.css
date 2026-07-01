@@ -349,12 +349,8 @@ button {
   display: grid;
   gap: 18px;
   padding: 14px;
-  scrollbar-width: none;
 }
 
-.ap-carousel::-webkit-scrollbar {
-  display: none;
-}
 
 .ap-row {
   height: 150px;
@@ -860,13 +856,9 @@ button {
 .ar-scroll-container {
   height: 100vh;
   overflow-y: auto;
-  scrollbar-width: none;
   padding: 90px 28px 72px;
 }
 
-.ar-scroll-container::-webkit-scrollbar {
-  display: none;
-}
 
 .ar-grid {
   width: min(1490px, 100%);
@@ -914,13 +906,9 @@ button {
   border-left: 2px solid #f3f4f6;
   list-style: none;
   overflow-y: auto;
-  scrollbar-width: none;
   position: relative;
 }
 
-.ar-toc-list::-webkit-scrollbar {
-  display: none;
-}
 
 .ar-toc-item {
   margin: 0;

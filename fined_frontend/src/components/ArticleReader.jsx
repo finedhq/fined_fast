@@ -168,7 +168,11 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         });
         
         // Auto scroll TOC
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // We use scrollTo with 'auto' instead of scrollIntoView to prevent cancelling 
+        // the main article's smooth scroll (a known issue in Chrome)
+        const tocList = tocListRef.current;
+        const scrollPos = activeEl.offsetTop - (tocList.clientHeight / 2) + (activeEl.offsetHeight / 2);
+        tocList.scrollTo({ top: scrollPos, behavior: 'auto' });
       }
     }, 10);
     return () => clearTimeout(timer);
