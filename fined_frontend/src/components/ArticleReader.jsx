@@ -92,26 +92,50 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [readingProgress, setReadingProgress] = useState(0);
 
   const [activeHeadingId, setActiveHeadingId] = useState("");
-  const [triangleTop, setTriangleTop] = useState(0);
+  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
   const tocListRef = useRef(null);
 
 
   const blocks = useMemo(
-    () =>
-      getParagraphs(article?.content).map((text, i) => ({
-        id: `article-section-${i}`,
-        text,
-        isHeading: isLikelyHeading(text),
-      })),
+    () => {
+      const paragraphs = getParagraphs(article?.content);
+      const hasExplicitHeadings = paragraphs.some(p => p.startsWith("## ") || p.startsWith("### "));
+
+      return paragraphs.map((rawText, i) => {
+        let text = rawText;
+        let isHeading = false;
+        let level = 0;
+
+        if (text.startsWith("### ")) {
+          text = text.substring(4).trim();
+          isHeading = true;
+          level = 3;
+        } else if (text.startsWith("## ")) {
+          text = text.substring(3).trim();
+          isHeading = true;
+          level = 2;
+        } else if (!hasExplicitHeadings) {
+          isHeading = isLikelyHeading(text);
+          if (isHeading) level = 2;
+        }
+
+        return {
+          id: `article-section-${i}`,
+          text,
+          isHeading,
+          level,
+        };
+      });
+    },
     [article?.content]
   );
 
   const tocItems = useMemo(() => {
-    const headings = blocks
-      .filter((b) => b.isHeading)
-      .map((b) => ({ id: b.id, label: trimLabel(b.text, 42) }));
-    if (headings.length > 0) return headings;
-    return blocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i) }));
+    const headings = blocks.filter((b) => b.isHeading);
+    if (headings.length > 0) {
+      return headings.map((b) => ({ id: b.id, label: trimLabel(b.text, 42), level: b.level }));
+    }
+    return blocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i), level: 2 }));
   }, [blocks]);
 
   // Set first heading active on load
@@ -130,18 +154,18 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     }
   }, [article?.title]);
 
-  // Calculate triangle position whenever active heading changes
+  // Calculate indicator position whenever active heading changes
   useEffect(() => {
     if (!activeHeadingId || !tocListRef.current) return;
     
     // Slight delay to ensure DOM has painted the updated active classes
     const timer = setTimeout(() => {
-      const activeEl = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`);
+      const activeEl = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`)?.parentElement;
       if (activeEl) {
-        const ulRect = tocListRef.current.getBoundingClientRect();
-        const elRect = activeEl.getBoundingClientRect();
-        // Position it vertically in the center of the active link
-        setTriangleTop((elRect.top - ulRect.top) + (elRect.height / 2));
+        setIndicatorStyle({
+          top: activeEl.offsetTop,
+          height: activeEl.offsetHeight
+        });
         
         // Auto scroll TOC
         activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -309,39 +333,35 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               <p className="ar-toc-heading">Table of Contents</p>
               
               <div style={{ position: "relative" }}>
-                {/* --- THE MOVING TRIANGLE --- */}
-                <div style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: `${triangleTop}px`,
-                  transform: 'translateY(-50%)',
-                  width: 0,
-                  height: 0,
-                  borderTop: '9px solid transparent',
-                  borderBottom: '10px solid transparent',
-                  borderLeft: '15px solid #4A3AFF',
-                  transition: 'top 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  opacity: activeHeadingId && triangleTop > 0 ? 1 : 0,
-                  pointerEvents: 'none',
-                  zIndex: 10
-                }} />
-
                 <ul className="ar-toc-list" ref={tocListRef}>
+                  {/* --- THE MOVING INDICATOR --- */}
+                  <div style={{
+                    position: 'absolute',
+                    left: '-2px',
+                    top: `${indicatorStyle.top}px`,
+                    width: '2px',
+                    height: `${indicatorStyle.height}px`,
+                    backgroundColor: '#4A3AFF',
+                    transition: 'top 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: activeHeadingId && indicatorStyle.height > 0 ? 1 : 0,
+                    pointerEvents: 'none',
+                    zIndex: 10
+                  }} />
+
                   {tocItems.map((item, i) => (
                     <li key={item.id} className="ar-toc-item">
                       <a
                         href={`#${item.id}`}
-                        className={`ar-toc-link ${i === 0 ? "first" : ""} ${activeHeadingId === item.id ? "active" : ""}`}
+                        className={`ar-toc-link ${activeHeadingId === item.id ? "active" : ""}`}
                         onClick={(event) => scrollToSection(event, item.id)}
                         style={{
                           display: 'block',
-                          fontSize: tocFontSize,
+                          fontSize: item.level === 3 ? "13px" : tocFontSize,
                           lineHeight: tocLineHeight,
                           padding: tocRowPadding,
-                          paddingLeft: '1.25rem', // Make room for the triangle
-                          fontWeight: activeHeadingId === item.id ? "600" : "400",
-                          color: activeHeadingId === item.id ? "#111827" : "#6B7280",
-                          transition: "color 0.2s ease"
+                          paddingLeft: item.level === 3 ? '2.25rem' : '1.25rem',
+                          fontWeight: activeHeadingId === item.id ? "600" : (item.level === 3 ? "400" : "500"),
+                          color: activeHeadingId === item.id ? "#4A3AFF" : "#6B7280",
                         }}
                       >
                         <span className="ar-toc-label">{item.label}</span>
@@ -385,16 +405,22 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
             <div className="ar-divider" aria-hidden="true" />
 
             <div className="ar-body">
-              {blocks.map((block, i) =>
-                block.isHeading ? (
-                  <h2
-                    key={`${article.id || article.title}-${i}`}
-                    id={block.id}
-                    className="ar-h2"
-                  >
-                    {block.text}
-                  </h2>
-                ) : (
+              {blocks.map((block, i) => {
+                if (block.level === 2) {
+                  return (
+                    <h2 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h2">
+                      {block.text}
+                    </h2>
+                  );
+                }
+                if (block.level === 3) {
+                  return (
+                    <h3 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h3">
+                      {block.text}
+                    </h3>
+                  );
+                }
+                return (
                   <p
                     key={`${article.id || article.title}-${i}`}
                     id={block.id}
@@ -403,8 +429,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   >
                     {block.text}
                   </p>
-                )
-              )}
+                );
+              })}
             </div>
 
             {footer}
