@@ -183,7 +183,7 @@ function TagArticlesPage() {
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
                     <span>{formatDate(article.created_at)}</span>
-                    <span>By {article.author || "Unknown Author"}</span>
+                    <span>By {article.author || "Shravan Mutha"}</span>
                   </div>
                 </div>
               </div>

@@ -19,6 +19,24 @@ import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
 import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
 import satvikImg from "../../assets/satvik-img.png"
 import { fetchArticles } from "../../services/api";
+import newLandingpagebgm from "../../assets/newlandingpagebg.png";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import planeImg1 from "../../assets/image 27.png";
+import planeImg2 from "../../assets/image 28.png";
+
+const generateSlug = (title) => {
+  if (!title) return "";
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+};
+
 const SMALL_COURSES = [
   {
     id: 1,
@@ -220,20 +238,20 @@ function Hero() {
   const [svgPaths, setSvgPaths] = useState([]);
   const [pathOffsets, setPathOffsets] = useState([]);
   const [pathProgresses, setPathProgresses] = useState([]);
-  const [featuredArticle, setFeaturedArticle] = useState(null);
+  const [articles, setArticles] = useState([]);
 
   useEffect(() => {
-    async function getHeroArticle() {
+    async function getHeroArticles() {
       try {
-        const data = await fetchArticles({ limit: 1, offset: 0, tag: "Economy" });
+        const data = await fetchArticles({ limit: 10, offset: 0 });
         if (data && data.length > 0) {
-          setFeaturedArticle(data[0]);
+          setArticles(data);
         }
       } catch (err) {
-        console.error("Failed to fetch featured article", err);
+        console.error("Failed to fetch articles", err);
       }
     }
-    getHeroArticle();
+    getHeroArticles();
   }, []);
   // Calculate SVG path data between consecutive wf-rows
   useEffect(() => {
@@ -384,7 +402,7 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${bgImage})` }}
+        style={{ backgroundImage: `url(${newLandingpagebgm})` }}
       >
         <div className="hero-content">
           <h1 className="hero-title">
@@ -669,75 +687,79 @@ function Hero() {
           <div className="articles-header">
             <span className="pc-eyebrow-1">From our articles</span>
             <h2 className="articles-title">Insights to grow your money</h2>
-            <p className="pc-subtitle">Short reads . Big takeaways .</p>
+            <p className="pc-subtitle-ar">Short reads . Big takeaways .</p>
           </div>
         </RevealOnScroll>
 
-        <div className="articles-grid">
-          {/* Featured Article - Left */}
+
+
+        <div className="articles-swiper-container">
+          <div className="swiper-custom-prev">❮</div>
+          <div className="swiper-custom-next">❯</div>
+
           <RevealOnScroll delay={100}>
-            {featuredArticle ? (
-              <div
-                className="article-featured-card"
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/articles/${featuredArticle.id}`)}
-              >
-                <img src={featuredArticle.image_url || satvikImg} alt={featuredArticle.title} className="article-featured-img" />
-                <div className="article-featured-meta">
-                  <span className="article-featured-badge">{featuredArticle.tag?.toUpperCase() || 'ECONOMY'}</span>
-                  <h3 className="article-featured-title">{featuredArticle.title}</h3>
-                  <p className="article-featured-desc">
-                    {featuredArticle.content ? `${featuredArticle.content.substring(0, 100)}...` : "The saving rule that will change your financial future."}
-                  </p>
-                  <div className="article-featured-footer">
-                    <span className="article-read-time">
-                      {new Date(featuredArticle.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                    <span className="article-read-time">•</span>
-                    <span className="article-read-time">By FinEd Team</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="article-featured-card">
-                <img src={satvikImg} alt="The BSE just launched a stock index built on purity and responsibility" className="article-featured-img" />
-                <div className="article-featured-meta">
-                  <span className="article-featured-badge">ECONOMY</span>
-                  <h3 className="article-featured-title">Loading featured article...</h3>
-                  <p className="article-featured-desc"></p>
-                </div>
-              </div>
-            )}
+            <Swiper
+              effect={'coverflow'}
+              grabCursor={true}
+              centeredSlides={true}
+              slidesPerView={'auto'}
+              loop={true}
+              speed={500}
+              navigation={{
+                prevEl: '.swiper-custom-prev',
+                nextEl: '.swiper-custom-next',
+              }}
+              coverflowEffect={{
+                rotate: 0,
+                stretch: 0,
+                depth: 100,
+                modifier: 2,
+                slideShadows: false,
+              }}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[EffectCoverflow, Pagination, Autoplay, Navigation]}
+              className="articles-swiper"
+            >
+              {(articles.length > 0 ? articles : [null, null, null, null, null]).map((article, index) => {
+                const isPlaceholder = !article;
+                const articleData = isPlaceholder ? null : article;
+                return (
+                  <SwiperSlide key={index}>
+                    <div
+                      className="article-swiper-card"
+                      onClick={() => !isPlaceholder ? navigate(`/articles/${generateSlug(articleData.title)}`) : null}
+                    >
+                      <img 
+                        src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg} 
+                        alt={!isPlaceholder ? articleData.title : "Article"} 
+                        className="article-swiper-img" 
+                      />
+                      <div className="article-swiper-meta">
+                        <div className="article-swiper-footer-top">
+                          <span className="article-swiper-author">By {!isPlaceholder ? (articleData.author || "Shravan Mutha") : 'Shravan Mutha'}</span>
+                          <span className="article-swiper-date">
+                            {!isPlaceholder ? new Date(articleData.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }) : "Jul 1, 2026"}
+                          </span>
+                        </div>
+                        <h3 className="article-swiper-title">
+                          {!isPlaceholder ? articleData.title : "The $500 saving rule students should know"}
+                        </h3>
+                        <p className="article-swiper-desc">
+                          {!isPlaceholder && articleData.content 
+                            ? `${articleData.content.substring(0, 100)}...` 
+                            : "The saving rule that will change your financial future. The saving rule that will change your financial future. The saving rule that will change your financial future."}
+                        </p>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
           </RevealOnScroll>
-
-          {/* Side Articles - Right (MUST be inside articles-grid) */}
-          <div className="articles-side">
-            <RevealOnScroll delay={200}>
-              <div className="article-side-card">
-                <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
-                <div className="article-side-info">
-                  <h4 className="article-side-title">The $500 saving rule students should know</h4>
-                  <p className="article-side-desc">The saving rule that will change your financial future.</p>
-                  <span className="article-read-time">4 min read</span>
-                </div>
-                <span className="article-bookmark">🔖</span>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delay={300}>
-              <div className="article-side-card">
-                <img src={savingRuleImg} alt="The $500 saving rule" className="article-side-img" />
-                <div className="article-side-info">
-                  <h4 className="article-side-title">The $500 saving rule students should know</h4>
-                  <p className="article-side-desc">The saving rule that will change your financial future.</p>
-                  <span className="article-read-time">4 min read</span>
-                </div>
-                <span className="article-bookmark">🔖</span>
-              </div>
-            </RevealOnScroll>
-          </div>
-
-        </div>{/* END articles-grid */}
+        </div>
 
         <RevealOnScroll delay={100}>
           {/* <div className="pc-view-all">
