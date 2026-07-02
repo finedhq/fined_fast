@@ -83,7 +83,7 @@ function ArticlesPage() {
       window.history.scrollRestoration = 'manual';
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    
+
     loadArticles(0, false);
   }, []);
 
@@ -139,8 +139,8 @@ function ArticlesPage() {
       document.title = "Insights & Articles | FinEd";
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
-    return () => { 
-      document.body.style.overflow = ""; 
+    return () => {
+      document.body.style.overflow = "";
       document.title = "FinEd";
     };
   }, [selectedArticle]);
@@ -193,8 +193,8 @@ function ArticlesPage() {
 
   // Calculate filtered articles
   const exploreArticles = activeCategory === "All"
-  ? articles
-  : articles.filter(article => article.tag === activeCategory);
+    ? articles
+    : articles.filter(article => article.tag === activeCategory);
 
   return (
     <div className="ap-root">
@@ -246,11 +246,11 @@ function ArticlesPage() {
                     ) : (
                       <div className="ap-featured-img-placeholder" />
                     )}
-                    
+
                   </div>
                   <div className="ap-featured-body">
-                    <span 
-                      className="ap-grid-category" 
+                    <span
+                      className="ap-grid-category"
                       style={{ marginBottom: '8px', cursor: 'pointer' }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -275,13 +275,13 @@ function ArticlesPage() {
 
             {/* SCROLLABLE LIST */}
             <div className="ap-side-wrap">
-              
+
               {/* New Right-Side Title with Arrows */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: "13px" }}>
                   Featured Articles
                 </h2>
-                
+
                 {/* We override the absolute positioning of the arrows so they sit nicely next to the title */}
                 <div className="ap-scroll-arrows" style={{ position: 'static' }}>
                   <button
@@ -321,12 +321,12 @@ function ArticlesPage() {
                         ) : (
                           <div className="ap-row-img-placeholder" />
                         )}
-                        
+
                         <div className="ap-row-body">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
-                            <span 
-                              className="ap-grid-category" 
+                            <span
+                              className="ap-grid-category"
                               style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -350,14 +350,15 @@ function ArticlesPage() {
               {fetchingArticle && (
                 <p className="ap-loading-more">Loading more articles...</p>
               )}
-              
+
             </div>
           </div>
 
           {/* EXPLORE ARTICLES SECTION */}
           <div className="ap-explore-section">
             <div className="ap-explore-header">
-              <h2 className="exp-ar-button" style={{fontSize: "34px",fontWeight: "bolder",marginLeft: "0px"
+              <h2 className="exp-ar-button" style={{
+                fontSize: "34px", fontWeight: "bolder", marginLeft: "0px"
               }}>Explore Articles</h2>
               <div className="ap-mini-navbar">
                 {categories.map((cat) => (
@@ -394,9 +395,9 @@ function ArticlesPage() {
 
                     {/* Text Section */}
                     <div className="ap-grid-card-content">
-                      
+
                       {/* Category */}
-                      <span 
+                      <span
                         className="ap-grid-category"
                         style={{ cursor: 'pointer' }}
                         onClick={(e) => {
@@ -409,7 +410,7 @@ function ArticlesPage() {
 
                       {/* Title */}
                       <h3 className="ap-grid-title">{article.title}</h3>
-                      
+
                       {/* Excerpt */}
                       <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
                         {article.description || ""}

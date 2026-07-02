@@ -12,7 +12,13 @@ import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
 import { useNavigate } from "react-router-dom";
-
+import investingImg from "../../assets/investing-img.png";
+import wfBiteSizeLessson from "../../assets/wf-bite-size-lessons.png";
+import wfInteractiveLearning from "../../assets/wf-interactivelearning.png";
+import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
+import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
+import satvikImg from "../../assets/satvik-img.png"
+import { fetchArticles } from "../../services/api";
 const SMALL_COURSES = [
   {
     id: 1,
@@ -182,6 +188,18 @@ function RevealOnScroll({ children, delay = 0 }) {
   });
 }
 
+const TickItem = ({ children }) => (
+  <div className="wf-tick-item">
+    <div className="wf-tick-icon">
+      <svg width="12" height="9" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 5L5 9L13 1" stroke="#A855F7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+    <div className="wf-tick-text">{children}</div>
+  </div>
+);
+
+
 function Hero() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -202,6 +220,21 @@ function Hero() {
   const [svgPaths, setSvgPaths] = useState([]);
   const [pathOffsets, setPathOffsets] = useState([]);
   const [pathProgresses, setPathProgresses] = useState([]);
+  const [featuredArticle, setFeaturedArticle] = useState(null);
+
+  useEffect(() => {
+    async function getHeroArticle() {
+      try {
+        const data = await fetchArticles({ limit: 1, offset: 0, tag: "Economy" });
+        if (data && data.length > 0) {
+          setFeaturedArticle(data[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured article", err);
+      }
+    }
+    getHeroArticle();
+  }, []);
   // Calculate SVG path data between consecutive wf-rows
   useEffect(() => {
     function calcPaths() {
@@ -427,7 +460,7 @@ function Hero() {
 
         <RevealOnScroll delay={200}>
           <div className="feature-item"
-          onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
               <div className="feature-icon-box fi-blue-soft">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -444,7 +477,7 @@ function Hero() {
 
         <RevealOnScroll delay={300}>
           <div className="feature-item"
-          onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+            onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
               <div className="feature-icon-box fi-yellow-soft">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -478,7 +511,7 @@ function Hero() {
           <RevealOnScroll delay={100}>
             <div className="featured-card" id="featured-course">
               <img
-                src={budgetingBasicsImg}
+                src={investingImg}
                 alt="Budgeting Basics"
                 className="featured-card-img"
               />
@@ -507,7 +540,7 @@ function Hero() {
       <section className="why-fined-section" ref={whyFinedRef}>
         <RevealOnScroll>
           <div className="wf-header">
-            <span className="pc-eyebrow">Popular Courses</span>
+            {/* <span className="pc-eyebrow">Popular Courses</span> */}
             <h2 className="wf-title">Everything you need to build a <br /> strong financial future</h2>
             <div className="wf-title-underline"></div>
             <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
@@ -551,81 +584,79 @@ function Hero() {
 
           {/* 01 - image left, text right */}
 
-<div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
-  <div className="wf-img-placeholder"><img src={biteSizeLessonsImg} alt="Bite size lessons" className="wf-img" /></div>
-  
-  <div className="wf-content">
-    <div className="wf-step-header">
-      <div className="wf-step-number">01</div>
-      <h3 className="wf-step-title">Bite-size lessons</h3>
-    </div>
-    
-    {/* --- WRAP YOUR TEXT IN A P TAG --- */}
-    <p className="wf-step-desc">
-      Most people never really learned about money. Not in school, not at home.<br />
-      Someone just handed you a salary one day and said good luck.<br />
-      FinEd fixes that, but without making it feel like homework.<br />
-      Every lesson is short enough to finish on a lunch break. We take one money concept, explain it simply, and move on. No filler, no 45 minute videos you'll never actually sit through.<br />
-      Topics range from budgeting basics to SIPs, credit scores, taxes and more.
-    </p>
-  </div>
-</div>
+          <div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
+            <div className="wf-img-placeholder"><img src={wfBiteSizeLessson} alt="Bite-sized lessons" className="wf-img" /></div>
+
+            <div className="wf-content">
+              <div className="wf-step-header">
+                <h3 className="wf-step-title">Bite-sized lessons</h3>
+              </div>
+
+              <div className="wf-tick-list">
+                <TickItem>Built for short attention spans (we get it)</TickItem>
+                <TickItem>One money topic at a time. No information overload</TickItem>
+                <TickItem>No boring 45-minute lectures or endless videos</TickItem>
+                <TickItem>From budgeting to SIPs, taxes and credit scores</TickItem>
+              </div>
+            </div>
+          </div>
 
 
           {/* 02 - text left, image right */}
-          {/* 02 - text left, image right */}
-<div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
-  <div className="wf-content">
-    <div className="wf-step-header">
-      <div className="wf-step-number">02</div>
-      <h3 className="wf-step-title">Interactive Learning</h3>
-    </div>
-    <p className="wf-step-desc">
-      Reading about money and actually understanding it are two very different things. That's why we don't just show you text and call it a day.<br />
-      You'll tap through real life scenarios, make decisions, answer quick questions and see what happens. It feels a lot more like a game than a class.<br />
-      And honestly, that's kind of the point because things you interact with are things you remember.
-    </p>
-  </div>
-  <div className="wf-img-placeholder">
-    <img src={interactiveLearningImg} alt="Interactive learning" className="wf-img" />
-  </div>
-</div>
+          <div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
+            <div className="wf-content">
+              <div className="wf-step-header">
+                <h3 className="wf-step-title">Interactive Learning</h3>
+              </div>
+              <div className="wf-tick-list">
+                <TickItem>Learn by doing, not just scrolling</TickItem>
+                <TickItem>Make money decisions without real-life consequences</TickItem>
+                <TickItem>Quick quizzes that keep things interesting</TickItem>
+                <TickItem>Feels more like a game than a finance class</TickItem>
+              </div>
+            </div>
+            <div className="wf-img-placeholder">
+              <img src={wfInteractiveLearning} alt="Interactive learning" className="wf-img" />
+            </div>
+          </div>
 
 
           {/* 03 - image left, text right */}
-         {/* 03 - image left, text right */}
-<div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
-  <div className="wf-img-placeholder">
-    <img src={retirementIncomePlanning1Img} alt="Retirement income planning" className="wf-img" />
-  </div>
-  <div className="wf-content">
-    <div className="wf-step-header">
-      <div className="wf-step-number">03</div>
-      <h3 className="wf-step-title">Real Rewards</h3>
-    </div>
-    <p className="wf-step-desc">
-      This is description of retirement income planning. This is just for dummy right now more content will be added soon.
-    </p>
-  </div>
-</div>
+          <div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
+            <div className="wf-img-placeholder">
+              <img src={wfRewardnLeaderBoard} alt="Rewards & Leaderboards" className="wf-img" />
+            </div>
+            <div className="wf-content">
+              <div className="wf-step-header">
+                <h3 className="wf-step-title">Rewards & Leaderboards</h3>
+              </div>
+              <div className="wf-tick-list">
+                <TickItem>Every lesson earns you rewards</TickItem>
+                <TickItem>Friendly competition keeps you motivated</TickItem>
+                <TickItem>Don't break the streak 👀</TickItem>
+                <TickItem>Build your FinScore by staying consistent</TickItem>
+              </div>
+            </div>
+          </div>
 
 
           {/* 04 - text left, image right */}
-          {/* 04 - text left, image right */}
-<div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
-  <div className="wf-content">
-    <div className="wf-step-header">
-      <div className="wf-step-number">04</div>
-      <h3 className="wf-step-title">Leaderboards</h3>
-    </div>
-    <p className="wf-step-desc">
-      This is description of retirement income planning. This is just for dummy right now more content will be added soon.
-    </p>
-  </div>
-  <div className="wf-img-placeholder">
-    <img src={retirementIncomePlanning2Img} alt="Retirement income planning" className="wf-img" />
-  </div>
-</div>
+          <div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
+            <div className="wf-content">
+              <div className="wf-step-header">
+                <h3 className="wf-step-title">Personalized Recommendations</h3>
+              </div>
+              <div className="wf-tick-list">
+                <TickItem>No one-size-fits-all money advice</TickItem>
+                <TickItem>We recommend what actually fits you</TickItem>
+                <TickItem>Zero spam, Zero random product pushes</TickItem>
+                <TickItem>The more you learn, the better we get</TickItem>
+              </div>
+            </div>
+            <div className="wf-img-placeholder">
+              <img src={wfPersonalRecommend} alt="Personalized Recommendations" className="wf-img" />
+            </div>
+          </div>
 
         </div>
       </section>
@@ -645,9 +676,38 @@ function Hero() {
         <div className="articles-grid">
           {/* Featured Article - Left */}
           <RevealOnScroll delay={100}>
-            <div className="article-featured-card">
-              <img src={featuredImg} alt="Why nobody teaches money in school" className="article-featured-img" />
-            </div>
+            {featuredArticle ? (
+              <div
+                className="article-featured-card"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/articles/${featuredArticle.id}`)}
+              >
+                <img src={featuredArticle.image_url || satvikImg} alt={featuredArticle.title} className="article-featured-img" />
+                <div className="article-featured-meta">
+                  <span className="article-featured-badge">{featuredArticle.tag?.toUpperCase() || 'ECONOMY'}</span>
+                  <h3 className="article-featured-title">{featuredArticle.title}</h3>
+                  <p className="article-featured-desc">
+                    {featuredArticle.content ? `${featuredArticle.content.substring(0, 100)}...` : "The saving rule that will change your financial future."}
+                  </p>
+                  <div className="article-featured-footer">
+                    <span className="article-read-time">
+                      {new Date(featuredArticle.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="article-read-time">•</span>
+                    <span className="article-read-time">By FinEd Team</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="article-featured-card">
+                <img src={satvikImg} alt="The BSE just launched a stock index built on purity and responsibility" className="article-featured-img" />
+                <div className="article-featured-meta">
+                  <span className="article-featured-badge">ECONOMY</span>
+                  <h3 className="article-featured-title">Loading featured article...</h3>
+                  <p className="article-featured-desc"></p>
+                </div>
+              </div>
+            )}
           </RevealOnScroll>
 
           {/* Side Articles - Right (MUST be inside articles-grid) */}
@@ -684,7 +744,7 @@ function Hero() {
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
           <div className="pc-view-all">
-            <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>View all Articles →</button>
+            <p className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>View all Articles →</p>
           </div>
 
         </RevealOnScroll>

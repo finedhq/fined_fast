@@ -203,6 +203,7 @@ nav {
   margin-bottom: clamp(10px, 1.2vw, 18px);
   letter-spacing: -0.5px;
   width: 800px;
+  text-shadow: 0px 4px 25px rgba(0, 0, 0, 0.45);
 }
 
 .hero-title .highlight {
@@ -267,31 +268,16 @@ nav {
   font-family: "Inter",sans-serif;
 }
 .btn-hero-secondary {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
-  border: 2px solid var(--brand-dark);
+  color: white;
   font-family: 'Inter', sans-serif;
-  font-size: clamp(13px, 1.1vw, 16px);
-  font-weight: 800;
-  color: var(--brand-dark);
+  font-size: 20px;
   cursor: pointer;
-  padding: clamp(9px, 0.8vw, 12px) clamp(28px, 2.5vw, 44px);
-  border-radius: var(--radius-pill);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  letter-spacing: 0.1px;
-  white-space: nowrap;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  display: inline-block;
+  transition: transform 0.2s ease;
 }
 
 .btn-hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: var(--brand-indigo);
-  color: var(--brand-indigo);
-  box-shadow: 0 8px 24px rgba(74, 58, 255, 0.15);
-  transform: translateY(-2px);
+  transform: scale(1.05);
 }
 
 /* ─── SOCIAL PROOF ─── */
@@ -772,6 +758,39 @@ nav {
   margin: 0;
 }
 
+.wf-tick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.wf-tick-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.wf-tick-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f3e8ff; /* light purple */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.wf-tick-text {
+  font-size: 19px;
+  color: #6B7280;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+
 .why-fined-section {
   background: #f5f6ff;
   padding: 20px 80px 64px;
@@ -806,7 +825,7 @@ nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 80px;
+  gap: 30px;
   margin-bottom: 60px;
   padding: 40px 0;
 }
@@ -824,10 +843,11 @@ nav {
 }
 
 .wf-img-placeholder {
-  background: #e8eaff;
+  /* background: #e8eaff; */
   border-radius: 20px;
-  height: 320px;
-  width: 100%;
+  height: 400px;
+  width: 90%;
+  margin: 0 auto;
   /* fills the column */
   display: flex;
   align-items: center;
@@ -835,7 +855,7 @@ nav {
   font-size: 14px;
   font-weight: 600;
   color: #888;
-  border: 2px dashed #c7d2fe;
+  /* border: 2px dashed #c7d2fe; */
 }
 
 .wf-number-title {
@@ -899,6 +919,14 @@ nav {
   max-width: 600px;
 }
 
+#wf-row-2 .wf-content,
+#wf-row-4 .wf-content {
+  padding-left: 75px;
+}
+#wf-row-4
+{
+  padding-left: 69px;
+}
 .wf-header {
   text-align: center;
   margin-bottom: 56px;
@@ -928,7 +956,7 @@ nav {
 
   .wf-row {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 30px;
     padding: 32px 24px;
     direction: ltr;
   }
@@ -940,8 +968,8 @@ nav {
 
 .wf-img {
   width: 100%;
-  height: 320px;
-  object-fit: fill;
+  height: 100%;
+  object-fit: contain;
   border-radius: 20px;
 }
 
@@ -1006,20 +1034,20 @@ nav {
   align-items: stretch;
 }
 
-/* Featured card */
 .article-featured-card {
   border-radius: 16px;
   overflow: hidden;
   width: 100%;
   height: 100%;
+  background: white;
 }
 
 .article-featured-img {
   width: 100%;
-  height: 100%;
+  height: 340px;
   object-fit: cover;
   display: block;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
   min-height: 300px;
 }
 
@@ -1092,8 +1120,8 @@ nav {
 }
 
 .article-side-img {
-  width: 120px;
-  height: 100px;
+  width: 155px;
+  height: 150px;
   object-fit: cover;
   border-radius: 10px;
   flex-shrink: 0;
@@ -1104,14 +1132,14 @@ nav {
 }
 
 .article-side-title {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
   margin: 0 0 6px;
   color: #1a1a2e;
 }
 
 .article-side-desc {
-  font-size: 1.0rem;
+  font-size: 1.2rem;
   color: #666;
   margin: 0 0 8px;
   
@@ -1131,6 +1159,24 @@ nav {
   bottom: 16px;
   font-size: 1.4rem;
   cursor: pointer;
+}
+
+.pc-view-all {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.btn-hero-secondary-blue {
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn-hero-secondary-blue:hover {
+  transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
