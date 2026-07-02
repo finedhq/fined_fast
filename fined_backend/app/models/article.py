@@ -8,6 +8,7 @@ class ArticleOut(BaseModel):
     id: str
     title: str
     content: str
+    description: Optional[str] = None
     image_url: Optional[str] = None
     rating: Optional[float] = None
     created_at: Optional[str] = None

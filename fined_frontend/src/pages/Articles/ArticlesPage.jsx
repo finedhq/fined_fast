@@ -261,8 +261,7 @@ function ArticlesPage() {
                     </span>
                     <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
                     <p className="ap-featured-excerpt">
-                      {articles[0]?.content?.slice(0, 160) || ""}
-                      <span className="ap-ellipsis"> . . .</span>
+                      {articles[0]?.description || ""}
                     </p>
                     <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.created_at)}</p>
                     <p className="ap-featured-date" style={{ marginTop: '4px' }}>
@@ -338,10 +337,7 @@ function ArticlesPage() {
                             </span>
                           </div>
                           <h3 className="ap-row-title">{article.title}</h3>
-                          <p className="ap-row-excerpt">
-                            {article.content?.slice(0, 100) || ""}
-                            <span className="ap-ellipsis"> . . .</span>
-                          </p>
+
                         </div>
                       </div>
                     ))}
@@ -362,7 +358,7 @@ function ArticlesPage() {
           <div className="ap-explore-section">
             <div className="ap-explore-header">
               <h2 className="exp-ar-button" style={{fontSize: "34px",fontWeight: "bolder",marginLeft: "0px"
-              }}>Explore Articles -&gt;</h2>
+              }}>Explore Articles</h2>
               <div className="ap-mini-navbar">
                 {categories.map((cat) => (
                   <button
@@ -416,7 +412,7 @@ function ArticlesPage() {
                       
                       {/* Excerpt */}
                       <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                        {article.content?.slice(0, 100) || ""}...
+                        {article.description || ""}
                       </p>
 
                       {/* Date and Author */}

@@ -179,7 +179,7 @@ function TagArticlesPage() {
                   </span>
                   <h3 className="ap-grid-title">{article.title}</h3>
                   <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                    {article.content?.slice(0, 100) || ""}...
+                    {article.description || ""}
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
                     <span>{formatDate(article.created_at)}</span>

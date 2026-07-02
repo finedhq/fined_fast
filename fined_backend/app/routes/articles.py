@@ -194,6 +194,7 @@ async def delete_article(id: str, user: AuthUser = Depends(require_admin)):
 async def add_article(
     title: str = Form(...),
     content: str = Form(...),
+    description: Optional[str] = Form(None),
     tag: str = Form(...),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
@@ -210,7 +211,7 @@ async def add_article(
                 folder="articles",
                 title=title
             )
-        return article_service.add(title=title, content=content, image_url=image_url, tag=tag)
+        return article_service.add(title=title, content=content, description=description or "", image_url=image_url, tag=tag)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

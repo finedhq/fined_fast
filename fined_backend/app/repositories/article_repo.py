@@ -12,10 +12,11 @@ class ArticleRepository:
             .range(offset, offset + limit - 1).execute()
         return res.data or []
 
-    def insert(self, title: str, content: str, image_url: str = "", tag: str = "Finance") -> dict:
+    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance") -> dict:
         res = supabase.from_("articles").insert([{
             "title": title,
             "content": content,
+            "description": description,
             "image_url": image_url,
             "tag": tag
         }]).execute()

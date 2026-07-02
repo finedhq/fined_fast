@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", content: "", tag: "Finance" });
+  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Finance" });
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
@@ -30,12 +30,13 @@ function AdminArticleForm() {
     const formData = new FormData();
     formData.append("title", form.title);
     formData.append("content", form.content);
+    formData.append("description", form.description);
     formData.append("tag", form.tag);
     if (imageFile) formData.append("image", imageFile);
 
     try {
       await postArticle(formData);
-      setForm({ title: "", content: "", tag: "Finance" });
+      setForm({ title: "", content: "", description: "", tag: "Finance" });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");
@@ -79,6 +80,17 @@ function AdminArticleForm() {
     ))}
   </select>
 </label>
+
+          <label>
+            Custom Description (For article preview lists)
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
+              placeholder="Short description for preview (max 3 lines)..."
+              rows={3}
+            />
+          </label>
 
           <label>
             Content
