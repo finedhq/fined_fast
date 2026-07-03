@@ -7,7 +7,7 @@ import retirementIncomePlanning1Img from "../../assets/retirement-income-plannin
 import retirementIncomePlanning2Img from "../../assets/retirement-income-planning-2.png";
 import featuredImg from "../../assets/featured-img.png";
 import savingRuleImg from "../../assets/500dollarsaving.png";
-import footerImg from "../../assets/footer-img.png";
+import footerImg from "../../assets/new-footer-bg.png";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
@@ -28,6 +28,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import planeImg1 from "../../assets/image 27.png";
 import planeImg2 from "../../assets/image 28.png";
+import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.png"
 
 const generateSlug = (title) => {
   if (!title) return "";
@@ -848,7 +849,7 @@ function Hero() {
       {/* FOOTER CTA SECTION */}
       <section
         className="footer-cta-section"
-        style={{ backgroundImage: `url(${footerImg})` }}
+        style={{ backgroundImage: `url(${newfooterImg})` }}
       >
         <RevealOnScroll delay={100}>
           <div className="footer-cta-content">
