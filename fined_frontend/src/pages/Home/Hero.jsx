@@ -206,15 +206,17 @@ function RevealOnScroll({ children, delay = 0 }) {
   });
 }
 
-const TickItem = ({ children }) => (
-  <div className="wf-tick-item">
-    <div className="wf-tick-icon">
-      <svg width="12" height="9" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M1 5L5 9L13 1" stroke="#A855F7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+const TickItem = ({ children, delay = 0 }) => (
+  <RevealOnScroll delay={delay}>
+    <div className="wf-tick-item">
+      <div className="wf-tick-icon">
+        <svg width="12" height="9" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 5L5 9L13 1" stroke="#A855F7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div className="wf-tick-text">{children}</div>
     </div>
-    <div className="wf-tick-text">{children}</div>
-  </div>
+  </RevealOnScroll>
 );
 
 
@@ -281,16 +283,20 @@ function Hero() {
 
         if (currentImgRect && nextImgRect) {
           const cornerOffset = 80; // Inset further horizontally (inside)
+          // Custom offset for the last image since its illustration is drawn lower inside the bounding box
+          let endYOffset = 80;
+          if (i === 2) endYOffset = 65; 
+
           if (isLeft) {
             startX = currentImgRect.right - containerRect.left - cornerOffset;
-            startY = currentImgRect.bottom - containerRect.top; // Touch exactly
+            startY = currentImgRect.bottom - containerRect.top - 60; // Offset up to touch visual image
             endX = nextImgRect.left - containerRect.left + cornerOffset;
-            endY = nextImgRect.top - containerRect.top - 18; // Offset by 18px for the new arrowhead tip
+            endY = nextImgRect.top - containerRect.top - endYOffset; 
           } else {
             startX = currentImgRect.left - containerRect.left + cornerOffset;
-            startY = currentImgRect.bottom - containerRect.top;
+            startY = currentImgRect.bottom - containerRect.top - 60;
             endX = nextImgRect.right - containerRect.left - cornerOffset;
-            endY = nextImgRect.top - containerRect.top - 18; // Offset by 18px for the new arrowhead tip
+            endY = nextImgRect.top - containerRect.top - endYOffset;
           }
         } else {
           // Fallback if images aren't found
@@ -362,10 +368,13 @@ function Hero() {
         const currentLength = len * clamped;
         maskPaths[i].style.strokeDashoffset = len - currentLength;
 
-        // Update dynamic arrow
+        // Update dynamic arrow and tail
         const dynamicArrows = pathSvgRef.current?.querySelectorAll('.wf-dynamic-arrow');
+        const dynamicTails = pathSvgRef.current?.querySelectorAll('.wf-dynamic-tail');
         if (dynamicArrows && dynamicArrows[i]) {
           const arrow = dynamicArrows[i];
+          const tail = dynamicTails ? dynamicTails[i] : null;
+
           if (clamped > 0.01) {
             const pt = maskPaths[i].getPointAtLength(currentLength);
 
@@ -378,8 +387,22 @@ function Hero() {
 
             arrow.setAttribute('transform', `translate(${pt.x}, ${pt.y}) rotate(${angle})`);
             arrow.style.opacity = 1;
+            
+            if (tail) {
+              const phase = currentLength % 24;
+              const tailLength = phase > 12 ? phase - 12 : 0;
+              
+              if (tailLength > 0.1) {
+                tail.style.strokeDasharray = `${tailLength} 10000`;
+                tail.style.strokeDashoffset = -(currentLength - tailLength);
+                tail.style.opacity = 1;
+              } else {
+                tail.style.opacity = 0;
+              }
+            }
           } else {
             arrow.style.opacity = 0;
+            if (tail) tail.style.opacity = 0;
           }
         }
 
@@ -405,42 +428,50 @@ function Hero() {
         style={{ backgroundImage: `url(${newLandingpagebgm})` }}
       >
         <div className="hero-content">
-          <h1 className="hero-title">
-            Learn money skills in
-            <br />
-            <span className="highlight">10 minutes</span>{" "}
-            a day
-          </h1>
-
-          <p className="hero-sub">
-            Bite-sized interactive personal finance courses built
-            <br />
-            for 15–35 year olds.
-            <br />
-            No jargon, no fees, no excuses.
-          </p>
-
-          <div className="hero-buttons">
-            {/* Commented out for now to disable the login/signin system
-            <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
-            */}
-            <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Register now →</button>
-            <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>Explore Articles →</button>
-          </div>
-
-          <div className="learners-row">
-            <div className="avatars">
-              <div className="avatar a1">A</div>
-              <div className="avatar a2">B</div>
-              <div className="avatar a3">C</div>
-              <div className="avatar-count">2k+</div>
-            </div>
-            <span className="in-learners-row">
-              Join 2000+ learners building
+          <RevealOnScroll delay={0}>
+            <h1 className="hero-title">
+              Learn money skills in
               <br />
-              their financial future
-            </span>
-          </div>
+              <span className="highlight">10 minutes</span>{" "}
+              a day
+            </h1>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={100}>
+            <p className="hero-sub">
+              Bite-sized interactive personal finance courses built
+              <br />
+              for 15–35 year olds.
+              <br />
+              No jargon, no fees, no excuses.
+            </p>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={200}>
+            <div className="hero-buttons">
+              {/* Commented out for now to disable the login/signin system
+              <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
+              */}
+              <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Explore Articles →</button>
+              <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>Explore Articles →</button>
+            </div>
+          </RevealOnScroll>
+
+          <RevealOnScroll delay={300}>
+            <div className="learners-row">
+              <div className="avatars">
+                <div className="avatar a1">A</div>
+                <div className="avatar a2">B</div>
+                <div className="avatar a3">C</div>
+                <div className="avatar-count">2k+</div>
+              </div>
+              <span className="in-learners-row">
+                Join 2000+ learners building
+                <br />
+                their financial future
+              </span>
+            </div>
+          </RevealOnScroll>
         </div>
       </section>
 
@@ -515,7 +546,7 @@ function Hero() {
       </div>
 
       {/* POPULAR COURSES SECTION */}
-      < section className="popular-courses-section" >
+      {/*< section className="popular-courses-section" >
         <RevealOnScroll>
           <div className="pc-header">
             <span className="pc-eyebrow">Popular Courses</span>
@@ -526,7 +557,7 @@ function Hero() {
 
         <div className="pc-grid">
           {/* Featured Card */}
-          <RevealOnScroll delay={100}>
+          {/*<RevealOnScroll delay={100}>
             <div className="featured-card" id="featured-course">
               <img
                 src={investingImg}
@@ -537,7 +568,7 @@ function Hero() {
           </RevealOnScroll>
 
           {/* 2x2 Small Cards Grid */}
-          <div className="small-cards-grid">
+          {/*<div className="small-cards-grid">
             {SMALL_COURSES.map((course, idx) => (
               <RevealOnScroll key={course.id} delay={100 + (idx * 100)}>
                 <SmallCourseCard course={course} />
@@ -553,13 +584,14 @@ function Hero() {
 
         </RevealOnScroll>
       </section >
+      
       {/* WHY FINED SECTION */}
       {/* WHY FINED SECTION */}
       <section className="why-fined-section" ref={whyFinedRef}>
         <RevealOnScroll>
           <div className="wf-header">
             {/* <span className="pc-eyebrow">Popular Courses</span> */}
-            <h2 className="wf-title">Everything you need to build a <br /> strong financial future</h2>
+            <h2 className="wf-title">Everything you need to build a <br /> <span className="wf-highlight">strong financial future</span></h2>
             <div className="wf-title-underline"></div>
             <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
           </div>
@@ -590,6 +622,15 @@ function Hero() {
                   mask={`url(#path-mask-${i})`}
                   style={{ strokeDasharray: '12 12', strokeDashoffset: 0 }}
                 />
+                <path
+                  className="wf-dynamic-tail"
+                  d={d}
+                  fill="none"
+                  stroke="#4A3AFF"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  style={{ strokeDasharray: '16 10000', strokeDashoffset: 0, opacity: 0 }}
+                />
                 <polygon
                   className="wf-dynamic-arrow"
                   points="0,-8 18,0 0,8"
@@ -603,18 +644,22 @@ function Hero() {
           {/* 01 - image left, text right */}
 
           <div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
-            <div className="wf-img-placeholder"><img src={wfBiteSizeLessson} alt="Bite-sized lessons" className="wf-img" /></div>
+            <RevealOnScroll delay={0}>
+              <div className="wf-img-placeholder"><img src={wfBiteSizeLessson} alt="Bite-sized lessons" className="wf-img" /></div>
+            </RevealOnScroll>
 
             <div className="wf-content">
-              <div className="wf-step-header">
-                <h3 className="wf-step-title">Bite-sized lessons</h3>
-              </div>
+              <RevealOnScroll delay={150}>
+                <div className="wf-step-header">
+                  <h3 className="wf-step-title">Bite-sized lessons</h3>
+                </div>
+              </RevealOnScroll>
 
               <div className="wf-tick-list">
-                <TickItem>Built for short attention spans (we get it)</TickItem>
-                <TickItem>One money topic at a time. No information overload</TickItem>
-                <TickItem>No boring 45-minute lectures or endless videos</TickItem>
-                <TickItem>From budgeting to SIPs, taxes and credit scores</TickItem>
+                <TickItem delay={300}>Built for short attention spans (we get it)</TickItem>
+                <TickItem delay={400}>One money topic at a time. No information overload</TickItem>
+                <TickItem delay={500}>No boring 45-minute lectures or endless videos</TickItem>
+                <TickItem delay={600}>From budgeting to SIPs, taxes and credit scores</TickItem>
               </div>
             </div>
           </div>
@@ -623,36 +668,44 @@ function Hero() {
           {/* 02 - text left, image right */}
           <div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
             <div className="wf-content">
-              <div className="wf-step-header">
-                <h3 className="wf-step-title">Interactive Learning</h3>
-              </div>
+              <RevealOnScroll delay={150}>
+                <div className="wf-step-header">
+                  <h3 className="wf-step-title">Interactive Learning</h3>
+                </div>
+              </RevealOnScroll>
               <div className="wf-tick-list">
-                <TickItem>Learn by doing, not just scrolling</TickItem>
-                <TickItem>Make money decisions without real-life consequences</TickItem>
-                <TickItem>Quick quizzes that keep things interesting</TickItem>
-                <TickItem>Feels more like a game than a finance class</TickItem>
+                <TickItem delay={300}>Learn by doing, not just scrolling</TickItem>
+                <TickItem delay={400}>Make money decisions without real-life consequences</TickItem>
+                <TickItem delay={500}>Quick quizzes that keep things interesting</TickItem>
+                <TickItem delay={600}>Feels more like a game than a finance class</TickItem>
               </div>
             </div>
-            <div className="wf-img-placeholder">
-              <img src={wfInteractiveLearning} alt="Interactive learning" className="wf-img" />
-            </div>
+            <RevealOnScroll delay={0}>
+              <div className="wf-img-placeholder">
+                <img src={wfInteractiveLearning} alt="Interactive learning" className="wf-img" />
+              </div>
+            </RevealOnScroll>
           </div>
 
 
           {/* 03 - image left, text right */}
           <div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
-            <div className="wf-img-placeholder">
-              <img src={wfRewardnLeaderBoard} alt="Rewards & Leaderboards" className="wf-img" />
-            </div>
-            <div className="wf-content">
-              <div className="wf-step-header">
-                <h3 className="wf-step-title">Rewards & Leaderboards</h3>
+            <RevealOnScroll delay={0}>
+              <div className="wf-img-placeholder">
+                <img src={wfRewardnLeaderBoard} alt="Rewards & Leaderboards" className="wf-img" />
               </div>
+            </RevealOnScroll>
+            <div className="wf-content">
+              <RevealOnScroll delay={150}>
+                <div className="wf-step-header">
+                  <h3 className="wf-step-title">Rewards & Leaderboards</h3>
+                </div>
+              </RevealOnScroll>
               <div className="wf-tick-list">
-                <TickItem>Every lesson earns you rewards</TickItem>
-                <TickItem>Friendly competition keeps you motivated</TickItem>
-                <TickItem>Don't break the streak 👀</TickItem>
-                <TickItem>Build your FinScore by staying consistent</TickItem>
+                <TickItem delay={300}>Every lesson earns you rewards</TickItem>
+                <TickItem delay={400}>Friendly competition keeps you motivated</TickItem>
+                <TickItem delay={500}>Don't break the streak 👀</TickItem>
+                <TickItem delay={600}>Build your FinScore by staying consistent</TickItem>
               </div>
             </div>
           </div>
@@ -661,19 +714,23 @@ function Hero() {
           {/* 04 - text left, image right */}
           <div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
             <div className="wf-content">
-              <div className="wf-step-header">
-                <h3 className="wf-step-title">Personalized Recommendations</h3>
-              </div>
+              <RevealOnScroll delay={150}>
+                <div className="wf-step-header">
+                  <h3 className="wf-step-title">Personalized Recommendations</h3>
+                </div>
+              </RevealOnScroll>
               <div className="wf-tick-list">
-                <TickItem>No one-size-fits-all money advice</TickItem>
-                <TickItem>We recommend what actually fits you</TickItem>
-                <TickItem>Zero spam, Zero random product pushes</TickItem>
-                <TickItem>The more you learn, the better we get</TickItem>
+                <TickItem delay={300}>No one-size-fits-all money advice</TickItem>
+                <TickItem delay={400}>We recommend what actually fits you</TickItem>
+                <TickItem delay={500}>Zero spam, Zero random product pushes</TickItem>
+                <TickItem delay={600}>The more you learn, the better we get</TickItem>
               </div>
             </div>
-            <div className="wf-img-placeholder">
-              <img src={wfPersonalRecommend} alt="Personalized Recommendations" className="wf-img" />
-            </div>
+            <RevealOnScroll delay={0}>
+              <div className="wf-img-placeholder">
+                <img src={wfPersonalRecommend} alt="Personalized Recommendations" className="wf-img" />
+              </div>
+            </RevealOnScroll>
           </div>
 
         </div>
@@ -766,7 +823,7 @@ function Hero() {
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
           <div className="pc-view-all">
-            <p className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>View all Articles →</p>
+            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles</button>
           </div>
 
         </RevealOnScroll>
