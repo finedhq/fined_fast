@@ -1,5 +1,5 @@
 .articles-page {
-  background: #fafbff;
+  background: #ffffff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -127,7 +127,7 @@
 .btn-read-more {
   background: none;
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 14px;
   font-weight: 800;
   color: #4A3AFF;

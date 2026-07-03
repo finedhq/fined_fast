@@ -129,7 +129,7 @@
 
 .rating-btn {
   flex: 1;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   height: 48px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
@@ -169,7 +169,7 @@
   background: var(--brand-indigo, #4a3aff);
   color: #ffffff;
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 16px;
   font-weight: 800;
   padding: 16px;

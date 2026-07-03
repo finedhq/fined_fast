@@ -97,6 +97,25 @@ const SmallCourseCard = React.forwardRef(({ course, className, style }, ref) => 
   );
 });
 
+const TESTIMONIAL_DATA = [
+  {
+    quote: "The articles explain complex financial topics in a way that's actually easy to understand. I finally feel confident reading about investing.",
+    author: " Gaurav, 20"
+  },
+  {
+    quote: "I wish I had access to content like this when I started college. It's practical and doesn't overwhelm beginners.",
+    author: " Rahul, 25"
+  },
+  {
+    quote: "FinEd's mission of making financial education free and accessible is something I genuinely support. Financial literacy shouldn't be a privilege.",
+    author: " Priya, 24"
+  },
+  {
+    quote: "The content is concise, engaging, and easy to revisit whenever I need a quick refresher.",
+    author: " Ananya, 19"
+  }
+];
+
 const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
   const cardRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
   const trackRef = useRef(null);
@@ -134,12 +153,12 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
 
       <div className="testimonials-track-wrapper">
         <div className="testimonials-track" ref={trackRef}>
-          {[1, 2, 3, 4].map((i, idx) => (
-            <div className="testimonial-card" key={i} ref={cardRefs[idx]}>
+          {TESTIMONIAL_DATA.map((item, idx) => (
+            <div className="testimonial-card" key={idx} ref={cardRefs[idx]}>
               <p className="testimonial-quote">
-                " I <span className="tq-highlight">saved my first $10,000</span> and built my emergency fund."
+                {item.quote}
               </p>
-              <p className="testimonial-author">-Aarav , 22 years</p>
+              <p className="testimonial-author">-{item.author}</p>
             </div>
           ))}
         </div>
@@ -286,13 +305,13 @@ function Hero() {
           const cornerOffset = 80; // Inset further horizontally (inside)
           // Custom offset for the last image since its illustration is drawn lower inside the bounding box
           let endYOffset = 80;
-          if (i === 2) endYOffset = 65; 
+          if (i === 2) endYOffset = 65;
 
           if (isLeft) {
             startX = currentImgRect.right - containerRect.left - cornerOffset;
             startY = currentImgRect.bottom - containerRect.top - 60; // Offset up to touch visual image
             endX = nextImgRect.left - containerRect.left + cornerOffset;
-            endY = nextImgRect.top - containerRect.top - endYOffset; 
+            endY = nextImgRect.top - containerRect.top - endYOffset;
           } else {
             startX = currentImgRect.left - containerRect.left + cornerOffset;
             startY = currentImgRect.bottom - containerRect.top - 60;
@@ -388,11 +407,11 @@ function Hero() {
 
             arrow.setAttribute('transform', `translate(${pt.x}, ${pt.y}) rotate(${angle})`);
             arrow.style.opacity = 1;
-            
+
             if (tail) {
               const phase = currentLength % 24;
               const tailLength = phase > 12 ? phase - 12 : 0;
-              
+
               if (tailLength > 0.1) {
                 tail.style.strokeDasharray = `${tailLength} 10000`;
                 tail.style.strokeDashoffset = -(currentLength - tailLength);
@@ -484,7 +503,7 @@ function Hero() {
               <div className="feature-icon-box fi-blue-soft"></div>
               <div>
                 <div className="feature-title">Bite sized lessons</div>
-                <div className="feature-desc">Short, focused & easy to understand</div>
+                <div className="feature-desc">Made for people with a busy schedule.</div>
               </div>
             </div>
           </div>
@@ -502,7 +521,7 @@ function Hero() {
               </div>
               <div>
                 <div className="feature-title">Interactive Learning</div>
-                <div className="feature-desc">Short, focused & easy to understand</div>
+                <div className="feature-desc">No boring lectures or monotonous content</div>
               </div>
             </div>
           </div>
@@ -518,8 +537,8 @@ function Hero() {
                 </svg>
               </div>
               <div>
-                <div className="feature-title">Real Rewards</div>
-                <div className="feature-desc">Short, focused & easy to understand</div>
+                <div className="feature-title">Rewards & Leaderboard</div>
+                <div className="feature-desc">Exciting rewards for the most engaged learners</div>
               </div>
             </div>
           </div>
@@ -537,8 +556,8 @@ function Hero() {
                 </svg>
               </div>
               <div>
-                <div className="feature-title">Leaderboards</div>
-                <div className="feature-desc">Short, focused & easy to understand</div>
+                <div className="feature-title">Personalized Recommendations</div>
+                <div className="feature-desc">Coming Soon!</div>
               </div>
             </div>
           </div>
@@ -558,7 +577,7 @@ function Hero() {
 
         <div className="pc-grid">
           {/* Featured Card */}
-          {/*<RevealOnScroll delay={100}>
+      {/*<RevealOnScroll delay={100}>
             <div className="featured-card" id="featured-course">
               <img
                 src={investingImg}
@@ -569,7 +588,7 @@ function Hero() {
           </RevealOnScroll>
 
           {/* 2x2 Small Cards Grid */}
-          {/*<div className="small-cards-grid">
+      {/*<div className="small-cards-grid">
             {SMALL_COURSES.map((course, idx) => (
               <RevealOnScroll key={course.id} delay={100 + (idx * 100)}>
                 <SmallCourseCard course={course} />
@@ -790,10 +809,10 @@ function Hero() {
                       className="article-swiper-card"
                       onClick={() => !isPlaceholder ? navigate(`/articles/${generateSlug(articleData.title)}`) : null}
                     >
-                      <img 
-                        src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg} 
-                        alt={!isPlaceholder ? articleData.title : "Article"} 
-                        className="article-swiper-img" 
+                      <img
+                        src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg}
+                        alt={!isPlaceholder ? articleData.title : "Article"}
+                        className="article-swiper-img"
                       />
                       <div className="article-swiper-meta">
                         <div className="article-swiper-footer-top">
@@ -806,8 +825,8 @@ function Hero() {
                           {!isPlaceholder ? articleData.title : "The $500 saving rule students should know"}
                         </h3>
                         <p className="article-swiper-desc">
-                          {!isPlaceholder && articleData.content 
-                            ? `${articleData.content.substring(0, 100)}...` 
+                          {!isPlaceholder && articleData.content
+                            ? `${articleData.content.substring(0, 100)}...`
                             : "The saving rule that will change your financial future. The saving rule that will change your financial future. The saving rule that will change your financial future."}
                         </p>
                       </div>
@@ -824,7 +843,7 @@ function Hero() {
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
           <div className="pc-view-all">
-            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles</button>
+            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles →</button>
           </div>
 
         </RevealOnScroll>

@@ -58,7 +58,7 @@
 .footer-col h4.footer-col-title {
   font-size: 12px;
   font-weight: 800;
-  font-family: 'Manrope',sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #aaa;
   letter-spacing: 0.08em;
   margin-bottom: 16px;
@@ -107,7 +107,7 @@
   width: 100%;
   background: #F5A623;
   border: none;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 15px;
   font-weight: 800;
   color: #fff;
