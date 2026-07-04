@@ -128,3 +128,19 @@
   color: #999;
   font-weight: 500;
 }
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 24px 0;
+  }
+  
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .footer-brand, 
+  .footer-newsletter {
+    grid-column: 1 / -1;
+  }
+}

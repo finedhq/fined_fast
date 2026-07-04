@@ -241,6 +241,7 @@ function ArticlesPage() {
                         src={articles[0].image_url}
                         alt={articles[0].title}
                         className="ap-featured-img"
+                        loading="eager"
                         onLoad={checkScroll}
                       />
                     ) : (
@@ -278,7 +279,7 @@ function ArticlesPage() {
 
               {/* New Right-Side Title with Arrows */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginLeft: "13px" }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>
                   Featured Articles
                 </h2>
 
@@ -317,6 +318,7 @@ function ArticlesPage() {
                             src={article.image_url}
                             alt={article.title}
                             className="ap-row-img"
+                            loading="lazy"
                           />
                         ) : (
                           <div className="ap-row-img-placeholder" />
@@ -360,6 +362,9 @@ function ArticlesPage() {
               <h2 className="exp-ar-button" style={{
                 fontSize: "34px", fontWeight: "bolder", marginLeft: "0px"
               }}>Explore Articles</h2>
+              
+              <p className="mobile-swipe-hint">Swipe to see more tags ➔</p>
+
               <div className="ap-mini-navbar">
                 {categories.map((cat) => (
                   <button
@@ -387,6 +392,7 @@ function ArticlesPage() {
                           src={article.image_url}
                           alt={article.title}
                           className="ap-grid-card-img"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="ap-grid-card-img-placeholder" />

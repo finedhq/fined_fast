@@ -148,41 +148,75 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
     : "";
 
   return (
-    <div ref={ref} className={`testimonials-carousel-wrapper ${className || ""}`} style={style}>
-      <button className="carousel-arrow carousel-arrow-left">‹</button>
+    <div ref={ref} className={className} style={style}>
+      {/* DESKTOP VIEW */}
+      <div className="testimonials-carousel-wrapper desktop-testimonials">
+        <button className="carousel-arrow carousel-arrow-left">‹</button>
 
-      <div className="testimonials-track-wrapper">
-        <div className="testimonials-track" ref={trackRef}>
-          {TESTIMONIAL_DATA.map((item, idx) => (
-            <div className="testimonial-card" key={idx} ref={cardRefs[idx]}>
-              <p className="testimonial-quote">
-                {item.quote}
-              </p>
-              <p className="testimonial-author">-{item.author}</p>
-            </div>
-          ))}
+        <div className="testimonials-track-wrapper">
+          <div className="testimonials-track" ref={trackRef}>
+            {TESTIMONIAL_DATA.map((item, idx) => (
+              <div className="testimonial-card" key={idx} ref={cardRefs[idx]}>
+                <p className="testimonial-quote">
+                  {item.quote}
+                </p>
+                <p className="testimonial-author">-{item.author}</p>
+              </div>
+            ))}
+          </div>
+
+          {dots.length === 4 && (
+            <svg
+              style={{ width: "100%", height: svgHeight, display: "block", overflow: "visible" }}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {dots.map((d, i) => (
+                <line key={i} x1={d.x} y1={0} x2={d.x} y2={dotY[i]} stroke="#c7d2fe" strokeWidth="1.5" />
+              ))}
+              <path d={pathD} stroke="#4A3AFF" strokeWidth="2.5" strokeDasharray="10 6" fill="none" strokeLinecap="round" />
+              {dots.map((d, i) => (
+                <g key={i}>
+                  <circle cx={d.x} cy={dotY[i]} r="10" fill="#4A3AFF" />
+                  <circle cx={d.x} cy={dotY[i]} r="5" fill="white" />
+                </g>
+              ))}
+            </svg>
+          )}
         </div>
 
-        {dots.length === 4 && (
-          <svg
-            style={{ width: "100%", height: svgHeight, display: "block", overflow: "visible" }}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {dots.map((d, i) => (
-              <line key={i} x1={d.x} y1={0} x2={d.x} y2={dotY[i]} stroke="#c7d2fe" strokeWidth="1.5" />
-            ))}
-            <path d={pathD} stroke="#4A3AFF" strokeWidth="2.5" strokeDasharray="10 6" fill="none" strokeLinecap="round" />
-            {dots.map((d, i) => (
-              <g key={i}>
-                <circle cx={d.x} cy={dotY[i]} r="10" fill="#4A3AFF" />
-                <circle cx={d.x} cy={dotY[i]} r="5" fill="white" />
-              </g>
-            ))}
-          </svg>
-        )}
+        <button className="carousel-arrow carousel-arrow-right">›</button>
       </div>
 
-      <button className="carousel-arrow carousel-arrow-right">›</button>
+      {/* MOBILE VIEW (SWIPER) */}
+      <div className="mobile-testimonials">
+        <div className="mobile-testimonials-container">
+          <div className="swiper-custom-prev-mobile">❮</div>
+          <div className="swiper-custom-next-mobile">❯</div>
+          <Swiper
+            modules={[Pagination, Autoplay, Navigation]}
+            spaceBetween={20}
+            slidesPerView={1}
+            pagination={{ clickable: true }}
+            navigation={{
+              prevEl: '.swiper-custom-prev-mobile',
+              nextEl: '.swiper-custom-next-mobile'
+            }}
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            style={{ paddingBottom: "40px" }}
+          >
+          {TESTIMONIAL_DATA.map((item, idx) => (
+            <SwiperSlide key={idx}>
+              <div className="testimonial-card" style={{ margin: '0 auto', maxWidth: '300px' }}>
+                <p className="testimonial-quote">
+                  {item.quote}
+                </p>
+                <p className="testimonial-author">-{item.author}</p>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        </div>
+      </div>
     </div>
   );
 });
@@ -473,7 +507,6 @@ function Hero() {
               <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
               */}
               <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Explore Articles →</button>
-              <button className="btn-hero-secondary" onClick={() => navigate("/articles")}>Explore Articles →</button>
             </div>
           </RevealOnScroll>
 
