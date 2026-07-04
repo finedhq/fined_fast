@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 * {
-  box-sizing: bord r-box;
+  box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -13,7 +15,39 @@ body {
   font-family: 'Nunito', sans-serif;
   background: #fafbff;
   color: #111827;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
+
+body.no-scroll {
+  overflow: hidden !important;
+  height: 100vh !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* ── Performance & Touch Optimizations ── */
+
+/* Prevent 300ms tap delay on all interactive elements on mobile */
+a, button, [role="button"], input, label, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Smooth, momentum-based scrolling on iOS for scrollable containers */
+.ap-carousel,
+.ap-mini-navbar {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Offload animating elements to the GPU so animations don't cause main-thread jank */
+.reveal-on-scroll,
+.testimonial-card,
+.ap-grid-card,
+.ap-row,
+.ap-featured {
+  will-change: transform, opacity;
+}
+
 
 button,
 input,
@@ -1467,12 +1501,26 @@ button {
     padding: 16px 0;
   }
 
+  .ap-scroll-arrows {
+    display: none !important;
+  }
+
   .ap-featured-img-wrap {
     height: 260px;
   }
 
+  .ap-carousel {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
   .ap-row {
     grid-template-columns: 1fr;
+    height: auto;
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
   }
 
   .ap-row-img,
@@ -1514,7 +1562,7 @@ button {
   }
 
   .ar-scroll-container {
-    padding: 64px 14px 48px;
+    padding: 100px 14px 48px;
   }
 
   .ar-close {
@@ -1579,6 +1627,10 @@ button {
   padding: 5px 15px;
   border-radius: 30px;
   border: 1px solid #333;
+}
+
+.mobile-swipe-hint {
+  display: none;
 }
 
 .ap-category-btn {
@@ -1704,3 +1756,41 @@ button {
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
+@media (max-width: 900px) {
+  .ap-articles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ap-articles-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ap-mini-navbar {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    width: 100%;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .ap-mini-navbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  .ap-category-btn {
+    white-space: nowrap;
+  }
+  
+  .mobile-swipe-hint {
+    display: block;
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+    margin: -10px 0 10px 0;
+  }
+}
