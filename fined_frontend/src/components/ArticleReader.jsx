@@ -94,6 +94,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
   const tocListRef = useRef(null);
+  const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
 
 
   const blocks = useMemo(
@@ -334,9 +335,15 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           {/* TOC */}
           <aside className="ar-toc-aside">
             <nav className="ar-toc-nav" aria-label="Article of contents">
-              <p className="ar-toc-heading">Table of Contents</p>
+              <div 
+                className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}
+                onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
+              >
+                <p className="ar-toc-heading">Table of Contents</p>
+                <span className="ar-toc-icon">▼</span>
+              </div>
               
-              <div style={{ position: "relative" }}>
+              <div className={`ar-toc-content-wrapper ${isMobileTocOpen ? 'open' : ''}`} style={{ position: "relative" }}>
                 <ul className="ar-toc-list" ref={tocListRef}>
                   {/* --- THE MOVING INDICATOR --- */}
                   <div style={{

@@ -938,6 +938,13 @@ button {
   font-weight: 700;
 }
 
+.ar-toc-header-wrapper {
+}
+
+.ar-toc-icon {
+  display: none;
+}
+
 .ar-toc-list {
   max-height: calc(100vh - 205px);
   margin: 0;
@@ -1433,7 +1440,7 @@ button {
 
   .ar-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 15px;
   }
 
   .ar-article {
@@ -1445,18 +1452,60 @@ button {
     max-height: none;
   }
 
+  .ar-toc-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ar-toc-header-wrapper.open {
+    border-radius: 6px 6px 0 0;
+  }
+
+  .ar-toc-heading {
+    margin: 0;
+    color: #475569;
+  }
+
+  .ar-toc-icon {
+    display: block;
+    font-size: 12px;
+    color: #9ca3af;
+    transition: transform 0.2s;
+  }
+  
+  .ar-toc-header-wrapper.open .ar-toc-icon {
+    transform: rotate(180deg);
+  }
+
+  .ar-toc-content-wrapper {
+    display: none;
+  }
+
+  .ar-toc-content-wrapper.open {
+    display: block;
+  }
+
   .ar-toc-list {
     max-height: none;
     display: flex;
-    gap: 10px;
-    overflow-x: auto;
+    flex-direction: column;
     padding: 12px 0;
+    border: 1px solid #f3f4f6;
+    border-top: 0;
+    border-radius: 0 0 6px 6px;
+    background: #fff;
     border-left: 0;
-    border-block: 1px solid #d1d5db;
   }
 
   .ar-toc-item {
-    min-width: 210px;
+    min-width: 0;
   }
 
   .reader-toc {
@@ -1793,4 +1842,4 @@ button {
     font-style: italic;
     margin: -10px 0 10px 0;
   }
-}
+}
