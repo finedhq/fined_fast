@@ -30,7 +30,7 @@ function ArticlesPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
-  const categories = ["All", "Finance", "IPO", "Economy", "Investing", "Banking", "Savings", "Stocks", "Markets", "Personal Finance", "Business"];
+  const categories = ["All", "Personal Finance", "IPO", "Investing", "Deep Dives", "Economy"];
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [offset, setOffset] = useState(0);

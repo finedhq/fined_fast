@@ -7,7 +7,7 @@ import Lenis from 'lenis';
 
 const ARTICLES_PER_PAGE = 30;
 
-const CATEGORIES = ["Finance", "IPO", "Economy", "Investing", "Banking", "Savings", "Stocks", "Markets", "Personal Finance", "Business"];
+const CATEGORIES = ["Personal Finance", "IPO", "Investing", "Deep Dives", "Economy"];
 
 function formatDate(date) {
   if (!date) return "";

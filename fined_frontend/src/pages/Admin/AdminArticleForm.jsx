@@ -4,22 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Finance" });
+  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Deep Dives" });
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
   const ARTICLE_TAGS = [
-  "Finance",
-  "IPO",
-  "Economy",
-  "Investing",
-  "Banking",
-  "Savings",
-  "Stocks",
-  "Markets",
   "Personal Finance",
-  "Business",
+  "IPO",
+  "Investing",
+  "Deep Dives",
+  "Economy",
 ];
 
   const handleSubmit = async (event) => {
@@ -36,7 +31,7 @@ function AdminArticleForm() {
 
     try {
       await postArticle(formData);
-      setForm({ title: "", content: "", description: "", tag: "Finance" });
+      setForm({ title: "", content: "", description: "", tag: "Deep Dives" });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");

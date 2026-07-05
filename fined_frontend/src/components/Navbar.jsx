@@ -3,6 +3,7 @@ import { NavLink, useNavigate, Link } from "react-router-dom";
 import { isAdminUser } from "../services/auth";
 import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();

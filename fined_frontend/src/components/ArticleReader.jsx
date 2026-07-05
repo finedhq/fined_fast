@@ -4,16 +4,14 @@ import { useNavigate } from "react-router-dom";
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
 
-const createDescription = (content = "") => {
-  const text = cleanText(content);
-  if (!text) return "A clear, practical finance explainer from FinEd.";
-  const sentenceEnd = text.search(/[.!?]\s/);
-  const source = sentenceEnd > 60 ? text.slice(0, sentenceEnd + 1) : text;
-  return source.length <= 170 ? source : `${source.slice(0, 167).trim()}...`;
-};
-
 const getParagraphs = (content = "") =>
   content.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
+
+const createDescription = (content = "") => {
+  const paragraphs = getParagraphs(content);
+  if (paragraphs.length === 0) return "A clear, practical finance explainer from FinEd.";
+  return paragraphs[0];
+};
 
 const isLikelyHeading = (text = "") => {
   const v = cleanText(text);
@@ -101,9 +99,11 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const blocks = useMemo(
     () => {
       const paragraphs = getParagraphs(article?.content);
-      const hasExplicitHeadings = paragraphs.some(p => p.startsWith("## ") || p.startsWith("### "));
+      // Skip the first paragraph since it is used as the description above the image
+      const bodyParagraphs = paragraphs.slice(1);
+      const hasExplicitHeadings = bodyParagraphs.some(p => p.startsWith("## ") || p.startsWith("### "));
 
-      return paragraphs.map((rawText, i) => {
+      return bodyParagraphs.map((rawText, i) => {
         let text = rawText;
         let isHeading = false;
         let level = 0;
@@ -401,7 +401,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </span>
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
-              <p className="ar-byline">By - FinEd Editorial Team</p>
+              <p className="ar-byline">By {article?.author || "Shravan Mutha"}</p>
               <p className="ar-description" itemProp="description">{description}</p>
             </header>
 
