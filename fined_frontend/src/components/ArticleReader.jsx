@@ -95,6 +95,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
   const tocListRef = useRef(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
+  const [isScrollingUp, setIsScrollingUp] = useState(false);
 
 
   const blocks = useMemo(
@@ -262,8 +263,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       }
 
       if (currentY > lastY && currentY > 80) {
+        setIsScrollingUp(false);
         window.dispatchEvent(new CustomEvent("articleScrollDown"));
       } else {
+        setIsScrollingUp(true);
         window.dispatchEvent(new CustomEvent("articleScrollUp"));
       }
       lastY = currentY;
@@ -333,7 +336,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
         <div className="ar-grid">
           {/* TOC */}
-          <aside className="ar-toc-aside">
+          <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''}`}>
             <nav className="ar-toc-nav" aria-label="Article of contents">
               <div 
                 className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}

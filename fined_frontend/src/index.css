@@ -29,7 +29,13 @@ body.no-scroll {
 /* ── Performance & Touch Optimizations ── */
 
 /* Prevent 300ms tap delay on all interactive elements on mobile */
-a, button, [role="button"], input, label, select, textarea {
+a,
+button,
+[role="button"],
+input,
+label,
+select,
+textarea {
   touch-action: manipulation;
 }
 
@@ -891,6 +897,9 @@ button {
   overflow-y: auto;
   padding: 90px 28px 72px;
   scroll-padding-top: 40px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
 }
 
 
@@ -938,8 +947,7 @@ button {
   font-weight: 700;
 }
 
-.ar-toc-header-wrapper {
-}
+.ar-toc-header-wrapper {}
 
 .ar-toc-icon {
   display: none;
@@ -1479,7 +1487,7 @@ button {
     color: #9ca3af;
     transition: transform 0.2s;
   }
-  
+
   .ar-toc-header-wrapper.open .ar-toc-icon {
     transform: rotate(180deg);
   }
@@ -1630,6 +1638,28 @@ button {
   .ar-description,
   .ar-body {
     font-size: 18px;
+  }
+
+  .ar-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .ar-toc-aside {
+    position: sticky;
+    top: -100px;
+    z-index: 100;
+    background: #f6f6f2;
+    padding: 15px 0 10px;
+    margin-top: -15px;
+    max-height: none;
+    transition: top 0.3s ease;
+    width: 100%;
+  }
+
+  .ar-toc-aside.scroll-up {
+    top: -30px;
   }
 }
 
@@ -1823,18 +1853,21 @@ button {
     justify-content: flex-start;
     overflow-x: auto;
     width: 100%;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
   .ap-mini-navbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
   }
 
   .ap-category-btn {
     white-space: nowrap;
   }
-  
+
   .mobile-swipe-hint {
     display: block;
     color: #888;

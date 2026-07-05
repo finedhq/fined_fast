@@ -778,8 +778,8 @@ feature-desc .pc-subtitle {
 
   .btn-hero-primary,
   .btn-hero-secondary {
-    font-size: 13px;
-    padding: 8px 22px;
+    font-size: 11px;
+    padding: 6px 16px;
   }
 
   .small-cards-grid {
@@ -1130,6 +1130,10 @@ feature-desc .pc-subtitle {
   #wf-row-2,
   #wf-row-4 {
     flex-direction: column-reverse;
+  }
+
+  .wf-step-title {
+    font-size: 30px;
   }
 }
 
@@ -1650,6 +1654,8 @@ feature-desc .pc-subtitle {
   
   .hero-title {
     width: 100%;
+    margin-top: 2px;
+    margin-bottom: 28px;
   }
 
   /* Shrink article cards and text on mobile to prevent clipping */
