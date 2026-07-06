@@ -926,6 +926,11 @@ feature-desc .pc-subtitle {
   .wf-step-title {
     font-size: 30px;
   }
+
+  /* "Practical paths . Real skills . Lifelong effect ." — mobile only */
+  .wf-header .pc-subtitle {
+    margin-top: 16px;
+  }
 }
 
 .wf-img {
