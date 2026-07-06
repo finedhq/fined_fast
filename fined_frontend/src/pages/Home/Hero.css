@@ -1467,11 +1467,11 @@ feature-desc .pc-subtitle {
   }
   
   .article-swiper-meta {
-    padding: 24px 32px;
+    padding: 16px 20px;
   }
   
   .articles-swiper-container {
-    padding: 0 45px;
+    padding: 0 40px;
   }
   
   .testimonials-section {
@@ -1537,3 +1537,30 @@ feature-desc .pc-subtitle {
 .mobile-testimonials {
   display: none;
 }
+
+/* ─── ARTICLE CARD: extra-small phones (≤ 480px) ─── */
+@media (max-width: 480px) {
+  .articles-swiper .swiper-slide {
+    width: 80vw; /* fluid width so card never overflows the viewport */
+  }
+
+  .articles-swiper-container {
+    padding: 0 36px; /* just enough room for the ❮ ❯ arrows */
+  }
+
+  .article-swiper-meta {
+    padding: 14px 16px; /* comfortable inner breathing room on tiny screens */
+  }
+
+  .article-swiper-title {
+    font-size: 1rem;
+  }
+
+  .article-swiper-desc {
+    font-size: 0.88rem;
+  }
+
+  .article-swiper-footer-top {
+    font-size: 0.75rem;
+  }
+}
