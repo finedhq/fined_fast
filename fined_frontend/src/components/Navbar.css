@@ -149,8 +149,13 @@ nav {
 
 @media (max-width: 900px) {
   nav {
-    padding: 14px 24px;
+    padding: 8px 16px;
     flex-wrap: wrap;
+  }
+
+  .logo-icon-1 {
+    width: 40px;
+    height: 38px;
   }
 
   .mobile-menu-toggle {
@@ -220,8 +225,8 @@ nav {
   .mobile-nav-links a {
     display: block;
     width: 100%;
-    padding: 24px 0;
-    font-size: 24px;
+    padding: 16px 0;
+    font-size: 18px;
     font-weight: 500;
     color: var(--brand-dark);
     text-decoration: none;

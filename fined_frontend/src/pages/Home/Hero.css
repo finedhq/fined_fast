@@ -554,9 +554,15 @@ feature-desc .pc-subtitle {
   }
 
   .btn-hero-primary,
-  .btn-hero-secondary {
-    font-size: 11px;
-    padding: 6px 16px;
+  .btn-hero-secondary,
+  .btn-hero-secondary-blue,
+  .btn-footer-cta {
+    font-size: 15px;
+    padding: 8px 20px;
+  }
+
+  .btn-hero-secondary-blue {
+    padding: 8px 12px;
   }
 
   .small-cards-grid {
@@ -861,6 +867,14 @@ feature-desc .pc-subtitle {
 @media (max-width: 900px) {
   .why-fined-section {
     padding: 48px 24px;
+  }
+
+  .wf-title-underline {
+    display: none;
+  }
+
+  .wf-highlight {
+    color: var(--brand-yellow);
   }
 
   .wf-row {
@@ -1437,7 +1451,7 @@ feature-desc .pc-subtitle {
 
   /* Shrink article cards and text on mobile to prevent clipping */
   .articles-swiper .swiper-slide {
-    width: 290px;
+    width: 330px;
   }
 
   .article-swiper-title {
@@ -1450,6 +1464,14 @@ feature-desc .pc-subtitle {
 
   .article-swiper-footer-top {
     font-size: 0.8rem;
+  }
+  
+  .article-swiper-meta {
+    padding: 24px 32px;
+  }
+  
+  .articles-swiper-container {
+    padding: 0 45px;
   }
   
   .testimonials-section {
