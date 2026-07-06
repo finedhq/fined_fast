@@ -45,10 +45,10 @@ function App() {
               <Routes>
                 <Route path="/" element={<MainLayout />}>
                 <Route index element={<Hero />} />
-                <Route path="articles" element={<AuthenticationGuard component={ArticlesPage} />} />  
-                <Route path="articles/:slug" element={<AuthenticationGuard component={ArticlesPage} />} />
-                <Route path="tags/:tag" element={<AuthenticationGuard component={TagArticlesPage} />} />
-                <Route path="tags/:tag/:slug" element={<AuthenticationGuard component={TagArticlesPage} />} />
+                <Route path="articles" element={<ArticlesPage />} />  
+                <Route path="articles/:slug" element={<ArticlesPage />} />
+                <Route path="tags/:tag" element={<TagArticlesPage />} />
+                <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
                 <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
                 <Route path="contact" element={<ContactPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />

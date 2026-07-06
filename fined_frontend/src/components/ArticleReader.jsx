@@ -26,16 +26,8 @@ const isLikelyHeading = (text = "") => {
   return startsOk && (titleLike || /[?:]$/.test(v));
 };
 
-const trimLabel = (v = "", max = 42) => {
-  const text = cleanText(v).replace(/[.,;:!?]+$/, "");
-  if (text.length <= max) return text;
-  let label = "";
-  for (const word of text.split(" ")) {
-    const next = label ? `${label} ${word}` : word;
-    if (next.length > max) break;
-    label = next;
-  }
-  return label || text.slice(0, max).trim();
+const trimLabel = (v = "") => {
+  return cleanText(v).replace(/[.,;:!?]+$/, "");
 };
 
 const titleCase = (v = "") =>
@@ -54,15 +46,7 @@ const titleCase = (v = "") =>
 const createTocLabel = (text = "", index = 0) => {
   const v = cleanText(text);
   if (!v) return `Topic ${index + 1}`;
-  const m = v.match(
-    /\b(?:about|on|for|into|toward|towards|through|with)\s+([a-zA-Z0-9][^.!?;,]{8,70})/i
-  );
-  if (m?.[1]) return trimLabel(titleCase(m[1]));
-  const clause = v
-    .split(/[.!?;:]/)[0]
-    .replace(/^(this|that|these|those|it|they|we|you)\s+/i, "")
-    .replace(/^(means|shows|explains|covers|looks at|talks about)\s+/i, "");
-  return trimLabel(titleCase(clause));
+  return trimLabel(v);
 };
 
 const formatDate = (date) => {
@@ -135,7 +119,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const tocItems = useMemo(() => {
     const headings = blocks.filter((b) => b.isHeading);
     if (headings.length > 0) {
-      return headings.map((b) => ({ id: b.id, label: trimLabel(b.text, 42), level: b.level }));
+      return headings.map((b) => ({ id: b.id, label: trimLabel(b.text), level: b.level }));
     }
     return blocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i), level: 2 }));
   }, [blocks]);
