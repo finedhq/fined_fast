@@ -304,7 +304,7 @@ function ArticlesPage() {
               <RevealOnScroll delay={200}>
                 <div>
                   <div className="ap-carousel" ref={carouselRef}>
-                    {articles.slice(1).map((article, idx) => (
+                    {articles.slice(1, 5).map((article, idx) => (
                       <div
                         key={article.id}
                         className="ap-row"
