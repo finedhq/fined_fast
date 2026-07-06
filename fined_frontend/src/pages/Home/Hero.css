@@ -1467,7 +1467,7 @@ feature-desc .pc-subtitle {
   }
   
   .article-swiper-meta {
-    padding: 16px 20px;
+    padding: 20px 36px;
   }
   
   .articles-swiper-container {
@@ -1549,7 +1549,7 @@ feature-desc .pc-subtitle {
   }
 
   .article-swiper-meta {
-    padding: 14px 16px; /* comfortable inner breathing room on tiny screens */
+    padding: 14px 28px; /* comfortable inner breathing room on tiny screens */
   }
 
   .article-swiper-title {
@@ -1563,4 +1563,4 @@ feature-desc .pc-subtitle {
   .article-swiper-footer-top {
     font-size: 0.75rem;
   }
-}
+}
