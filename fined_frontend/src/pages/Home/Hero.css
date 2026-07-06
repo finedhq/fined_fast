@@ -554,9 +554,15 @@ feature-desc .pc-subtitle {
   }
 
   .btn-hero-primary,
-  .btn-hero-secondary {
-    font-size: 11px;
-    padding: 6px 16px;
+  .btn-hero-secondary,
+  .btn-hero-secondary-blue,
+  .btn-footer-cta {
+    font-size: 15px;
+    padding: 8px 20px;
+  }
+
+  .btn-hero-secondary-blue {
+    padding: 8px 12px;
   }
 
   .small-cards-grid {
@@ -863,6 +869,14 @@ feature-desc .pc-subtitle {
     padding: 48px 24px;
   }
 
+  .wf-title-underline {
+    display: none;
+  }
+
+  .wf-highlight {
+    color: var(--brand-yellow);
+  }
+
   .wf-row {
     display: flex;
     flex-direction: column;
@@ -911,6 +925,11 @@ feature-desc .pc-subtitle {
 
   .wf-step-title {
     font-size: 30px;
+  }
+
+  /* "Practical paths . Real skills . Lifelong effect ." — mobile only */
+  .wf-header .pc-subtitle {
+    margin-top: 16px;
   }
 }
 
@@ -1437,7 +1456,7 @@ feature-desc .pc-subtitle {
 
   /* Shrink article cards and text on mobile to prevent clipping */
   .articles-swiper .swiper-slide {
-    width: 290px;
+    width: 330px;
   }
 
   .article-swiper-title {
@@ -1450,6 +1469,14 @@ feature-desc .pc-subtitle {
 
   .article-swiper-footer-top {
     font-size: 0.8rem;
+  }
+  
+  .article-swiper-meta {
+    padding: 20px 36px;
+  }
+  
+  .articles-swiper-container {
+    padding: 0 40px;
   }
   
   .testimonials-section {
@@ -1514,4 +1541,31 @@ feature-desc .pc-subtitle {
 /* Hide mobile testimonials on desktop */
 .mobile-testimonials {
   display: none;
+}
+
+/* ─── ARTICLE CARD: extra-small phones (≤ 480px) ─── */
+@media (max-width: 480px) {
+  .articles-swiper .swiper-slide {
+    width: 80vw; /* fluid width so card never overflows the viewport */
+  }
+
+  .articles-swiper-container {
+    padding: 0 36px; /* just enough room for the ❮ ❯ arrows */
+  }
+
+  .article-swiper-meta {
+    padding: 14px 28px; /* comfortable inner breathing room on tiny screens */
+  }
+
+  .article-swiper-title {
+    font-size: 1rem;
+  }
+
+  .article-swiper-desc {
+    font-size: 0.88rem;
+  }
+
+  .article-swiper-footer-top {
+    font-size: 0.75rem;
+  }
 }
