@@ -28,7 +28,8 @@ const generateSlug = (title) => {
 
 function TagArticlesPage() {
   const { tag, slug } = useParams(); // URL params: /tags/:tag or /tags/:tag/:slug
-  const displayTag = CATEGORIES.find(c => c.toLowerCase() === tag?.toLowerCase()) || (tag ? tag.charAt(0).toUpperCase() + tag.slice(1) : "");
+  const toTitleCase = (str) => str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  const displayTag = CATEGORIES.find(c => generateSlug(c) === tag?.toLowerCase()) || (tag ? toTitleCase(tag) : "");
   const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -172,7 +173,7 @@ function TagArticlesPage() {
                     style={{ cursor: 'pointer' }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (article.tag) navigate(`/tags/${article.tag.toLowerCase()}`);
+                      if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
                     }}
                   >
                     {article.tag?.toUpperCase()}

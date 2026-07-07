@@ -255,7 +255,7 @@ function ArticlesPage() {
                       style={{ marginBottom: '8px', cursor: 'pointer' }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (articles[0]?.tag) navigate(`/tags/${articles[0].tag.toLowerCase()}`);
+                        if (articles[0]?.tag) navigate(`/tags/${generateSlug(articles[0].tag)}`);
                       }}
                     >
                       {articles[0]?.tag?.toUpperCase()}
@@ -332,7 +332,7 @@ function ArticlesPage() {
                               style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (article.tag) navigate(`/tags/${article.tag.toLowerCase()}`);
+                                if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
                               }}
                             >
                               {article.tag?.toUpperCase()}
@@ -408,7 +408,7 @@ function ArticlesPage() {
                         style={{ cursor: 'pointer' }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (article.tag) navigate(`/tags/${article.tag.toLowerCase()}`);
+                          if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
                         }}
                       >
                         {article.tag?.toUpperCase()}
