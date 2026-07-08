@@ -129,17 +129,20 @@ button {
 
 .site-nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease;
+  width: 95%;
+  max-width: 1200px;
+  border-radius: 9999px;
 }
 
 .site-nav--hidden {
-  transform: translateY(-100%);
+  transform: translate(-50%, -150%);
 }
 
 .site-nav .logo {

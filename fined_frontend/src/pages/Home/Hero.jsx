@@ -336,20 +336,21 @@ function Hero() {
         let startX, startY, endX, endY;
 
         if (currentImgRect && nextImgRect) {
-          const cornerOffset = 80; // Inset further horizontally (inside)
-          // Custom offset for the last image since its illustration is drawn lower inside the bounding box
+          const startCornerOffset = 130; // Tail inwards
+          const endCornerOffset = 130; // Head rightwards/inwards
+          
           let endYOffset = 80;
           if (i === 2) endYOffset = 65;
 
           if (isLeft) {
-            startX = currentImgRect.right - containerRect.left - cornerOffset;
+            startX = currentImgRect.right - containerRect.left - startCornerOffset;
             startY = currentImgRect.bottom - containerRect.top - 60; // Offset up to touch visual image
-            endX = nextImgRect.left - containerRect.left + cornerOffset;
+            endX = nextImgRect.left - containerRect.left + endCornerOffset;
             endY = nextImgRect.top - containerRect.top - endYOffset;
           } else {
-            startX = currentImgRect.left - containerRect.left + cornerOffset;
+            startX = currentImgRect.left - containerRect.left + startCornerOffset;
             startY = currentImgRect.bottom - containerRect.top - 60;
-            endX = nextImgRect.right - containerRect.left - cornerOffset;
+            endX = nextImgRect.right - containerRect.left - endCornerOffset;
             endY = nextImgRect.top - containerRect.top - endYOffset;
           }
         } else {
@@ -506,7 +507,7 @@ function Hero() {
               {/* Commented out for now to disable the login/signin system
               <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
               */}
-              <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Explore Articles →</button>
+              <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Explore Articles</button>
             </div>
           </RevealOnScroll>
 
@@ -876,7 +877,7 @@ function Hero() {
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
           <div className="pc-view-all">
-            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles →</button>
+            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles</button>
           </div>
 
         </RevealOnScroll>
