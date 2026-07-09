@@ -29,7 +29,8 @@ import 'swiper/css/navigation';
 import planeImg1 from "../../assets/image 27.png";
 import planeImg2 from "../../assets/image 28.png";
 import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.png"
-
+import test1 from "../../assets/testbgimg1.png";
+import test2 from "../../assets/testbgimg2.png"
 const generateSlug = (title) => {
   if (!title) return "";
   return title
@@ -480,12 +481,12 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${newLandingpagebgm})` }}
+        style={{ backgroundImage: `url(${test2})` , zIndex: 100 }}
       >
         <div className="hero-content">
           <RevealOnScroll delay={0}>
             <h1 className="hero-title">
-              Learn money skills in
+              <span style={{ whiteSpace: 'nowrap' }}>Learn money skills in</span>
               <br />
               <span className="highlight">10 minutes</span>{" "}
               a day

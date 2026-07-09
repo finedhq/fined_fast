@@ -156,7 +156,7 @@ button {
 
 .ap-root {
   min-height: 100vh;
-  background: #f6f6f2;
+  background: #ffffff;
   color: #111827;
 }
 
@@ -225,7 +225,7 @@ button {
 .ap-headline {
   margin: 10px 0 0;
   font-size: clamp(32px, 3vw, 80px);
-  line-height: 0.75;
+  line-height: 1;
   letter-spacing: 0;
   font-weight: bold;
   /* margin-left: 15px; */
@@ -264,7 +264,8 @@ button {
 }
 
 .ap-featured {
-  height: 675px;
+  height: auto;
+  min-height: 600px;
   overflow: hidden;
   border-radius: 8px;
   background: #ffffff;
@@ -344,7 +345,7 @@ button {
 
 .ap-side-wrap {
   position: relative;
-  min-height: 682px;
+  min-height: auto;
 }
 
 .ap-scroll-arrows {
@@ -391,6 +392,11 @@ button {
   display: grid;
   gap: 18px;
   padding: 14px;
+  scrollbar-width: none;
+}
+
+.ap-carousel::-webkit-scrollbar {
+  display: none;
 }
 
 
@@ -1566,7 +1572,26 @@ button {
   }
 
   .ap-featured-img-wrap {
-    height: 260px;
+    height: 220px;
+  }
+
+  .ap-featured {
+    min-height: auto;
+  }
+
+  .ap-hero-strip {
+    padding: 24px 0 16px;
+  }
+
+  .ap-sub {
+    font-size: 16px;
+    margin-top: 12px;
+  }
+
+  .ap-body,
+  .ap-skeleton-wrap {
+    gap: 20px;
+    padding-bottom: 40px;
   }
 
   .ap-carousel {
