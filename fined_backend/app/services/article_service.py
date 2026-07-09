@@ -4,8 +4,8 @@ from datetime import date
 from app.repositories.article_repo import article_repo
 from app.repositories.user_repo import user_repo
 from app.services.score_service import score_service
-
-
+import re
+from xml.sax.saxutils import escape
 
 class ArticleService:
 
@@ -104,6 +104,36 @@ class ArticleService:
     def get_all_newsletter_emails(self) -> list:
         """Admin: get all subscriber emails — for newsletter sending"""
         return article_repo.get_all_newsletter_emails()
+
+    def _generate_slug(self, title: str) -> str:
+        # Must exactly match generateSlug() in ArticlesPage.jsx
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower())
+        slug = re.sub(r'^-+|-+$', '', slug)
+        return slug
+
+    def build_sitemap_xml(self) -> str:
+        articles = article_repo.get_all_for_sitemap()
+
+        static_urls = [
+            ("https://myfined.com/", "weekly", "1.0", None),
+            ("https://myfined.com/articles", "daily", "0.8", None),
+        ]
+
+        entries = []
+        for loc, changefreq, priority, lastmod in static_urls:
+            entries.append(f"<url><loc>{loc}</loc><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>")
+
+        for a in articles:
+            slug = self._generate_slug(a["title"])
+            loc = escape(f"https://myfined.com/articles/{slug}")
+            lastmod = a["created_at"][:10] if a.get("created_at") else ""
+            entries.append(
+                f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>"
+            )
+
+        body = "".join(entries)
+        return f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>'
+
 
 
 article_service=ArticleService()

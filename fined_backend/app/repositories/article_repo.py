@@ -64,5 +64,10 @@ class ArticleRepository:
         res = supabase.from_("newsletter_gmails").select("enteredEmail").execute()
         return [r["enteredEmail"] for r in (res.data or [])]
 
+    def get_all_for_sitemap(self) -> list:
+        res = supabase.from_("articles").select("id, title, created_at")\
+            .order("created_at", desc=True).execute()
+        return res.data or []
+
 
 article_repo = ArticleRepository()

@@ -10,8 +10,6 @@ from slowapi.util import get_remote_address
 # pyrefly: ignore [missing-import]
 from slowapi.errors import RateLimitExceeded
 
-
-
 from app.config import settings
 
 limiter=Limiter(key_func=get_remote_address,default_limits=["100/minute"])
@@ -56,6 +54,14 @@ import os
 @app.get("/", tags=["Health"])
 async def root():
     return {"status": "FinEd API is running", "version": "2.0.0"}
+
+from fastapi.responses import Response
+from app.services.article_service import article_service  # adjust import to match actual service module
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    xml = article_service.build_sitemap_xml()
+    return Response(content=xml, media_type="application/xml")
 
 from app.routes import api_router
 app.include_router(api_router, prefix="/api")
