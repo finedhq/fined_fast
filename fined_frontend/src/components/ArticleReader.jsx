@@ -76,7 +76,24 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
   const tocListRef = useRef(null);
+  const tocNavRef = useRef(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
+
+  // Close mobile TOC when clicking outside
+  useEffect(() => {
+    if (!isMobileTocOpen) return;
+    const handleClickOutside = (e) => {
+      if (tocNavRef.current && !tocNavRef.current.contains(e.target)) {
+        setIsMobileTocOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isMobileTocOpen]);
   const [isScrollingUp, setIsScrollingUp] = useState(false);
 
 
@@ -321,7 +338,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         <div className="ar-grid">
           {/* TOC */}
           <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''}`}>
-            <nav className="ar-toc-nav" aria-label="Article of contents">
+            <nav className="ar-toc-nav" aria-label="Article of contents" ref={tocNavRef}>
               <div 
                 className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}
                 onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
@@ -351,7 +368,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       <a
                         href={`#${item.id}`}
                         className={`ar-toc-link ${activeHeadingId === item.id ? "active" : ""}`}
-                        onClick={(event) => scrollToSection(event, item.id)}
+                        onClick={(event) => {
+                          scrollToSection(event, item.id);
+                          setIsMobileTocOpen(false);
+                        }}
                         style={{
                           display: 'block',
                           fontSize: item.level === 3 ? "13px" : tocFontSize,
