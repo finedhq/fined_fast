@@ -136,7 +136,7 @@ function ArticlesPage() {
       }
     } else {
       document.body.style.overflow = "";
-      document.title = "Insights & Articles | FinEd";
+      document.title = "Articles | FinEd";
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
     return () => {
