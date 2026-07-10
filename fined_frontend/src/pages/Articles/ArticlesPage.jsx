@@ -26,7 +26,7 @@ const generateSlug = (title) => {
 function ArticlesPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
-  const categories = ["All", "Personal Finance", "IPO", "Investing", "Deep Dives", "Economy"];
+  const categories = ["All", "Deep Dives", "Personal Finance", "IPO" ];
   const [articles, setArticles] = useState([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);

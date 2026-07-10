@@ -86,5 +86,4 @@ class ArticleRepository:
             "next": next_res.data[0] if next_res.data else None
         }
 
-
 article_repo = ArticleRepository()
