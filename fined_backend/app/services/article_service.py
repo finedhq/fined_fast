@@ -13,9 +13,21 @@ class ArticleService:
         """Fetch all articles — equivalent to getAllArticles"""
         return article_repo.get_all(limit=limit, offset=offset, tag=tag)
 
+    def get_by_slug(self, slug: str) -> dict | None:
+        """Fetch a specific article directly by its slug."""
+        return article_repo.get_by_slug(slug)
+
+    def get_adjacent(self, slug: str) -> dict:
+        """Get previous and next articles based on current slug"""
+        article = self.get_by_slug(slug)
+        if not article or not article.get("created_at"):
+            return {"previous": None, "next": None}
+        return article_repo.get_adjacent(article["created_at"])
+
     def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance") -> dict:
         """Admin adds article — equivalent to addArticle"""
-        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag)
+        slug = self._generate_slug(title)
+        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=slug)
         
     def delete(self, article_id: str):
         """Admin deletes article — fixes the original bug where data was undefined"""

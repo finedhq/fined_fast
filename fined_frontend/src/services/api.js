@@ -28,6 +28,7 @@ async function request(path, options = {}) {
 }
 
 const articleCache = new Map();
+const singleArticleCache = new Map();
 const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 
 export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {}) {
@@ -46,9 +47,41 @@ export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {})
     body: JSON.stringify({ limit, offset, tag }),
   });
   
-  articleCache.set(cacheKey, { data, timestamp: Date.now() });
+  const now = Date.now();
+  
+  // Prime single article cache
+  const articles = Array.isArray(data) ? data : (data.articles || []);
+  articles.forEach(article => {
+    if (article.slug) {
+      singleArticleCache.set(article.slug, { data: article, timestamp: now });
+    }
+  });
+
+  articleCache.set(cacheKey, { data, timestamp: now });
   
   return data;
+}
+
+export async function fetchArticleBySlug(slug) {
+  if (singleArticleCache.has(slug)) {
+    const { data, timestamp } = singleArticleCache.get(slug);
+    if (Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
+  const data = await request(`/articles/slug/${slug}`, {
+    method: "GET",
+  });
+  
+  singleArticleCache.set(slug, { data, timestamp: Date.now() });
+  return data;
+}
+
+export function fetchAdjacentArticles(slug) {
+  return request(`/articles/adjacent/${slug}`, {
+    method: "GET",
+  });
 }
 
 export function postArticle(formData) {

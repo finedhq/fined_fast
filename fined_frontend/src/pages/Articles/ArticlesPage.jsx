@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import ArticleReader from "../../components/ArticleReader";
+import { useNavigate } from "react-router-dom";
 import { fetchArticles } from "../../services/api";
-
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
 
@@ -25,20 +23,15 @@ const generateSlug = (title) => {
     .replace(/(^-|-$)+/g, '');
 };
 
-
 function ArticlesPage() {
-  const { slug } = useParams();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const categories = ["All", "Personal Finance", "IPO", "Investing", "Deep Dives", "Economy"];
   const [articles, setArticles] = useState([]);
-  const [selectedArticle, setSelectedArticle] = useState(null);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [fetchingArticle, setFetchingArticle] = useState(false);
   const [error, setError] = useState("");
-  const [pendingNext, setPendingNext] = useState(false);
-  const [prefetching, setPrefetching] = useState(false);
   const carouselRef = useRef(null);
   const loaderRef = useRef(null);
   const loadingRef = useRef(false);
@@ -122,66 +115,17 @@ function ArticlesPage() {
     return () => observer.disconnect();
   }, [articles, hasMore, offset]);
 
-  // Lock body scroll when article open
   useEffect(() => {
-    if (selectedArticle) {
-      document.body.style.overflow = "hidden";
-      document.title = `${selectedArticle.title} | FinEd`;
-      window.dispatchEvent(new CustomEvent("articleReaderOpen"));
-      const idx = articles.findIndex((a) => a.id === selectedArticle.id);
-      const isLast = idx === articles.length - 1;
-      if (isLast && hasMore && !prefetching) {
-        setPrefetching(true);
-        loadArticles(offset, true).then?.(() => setPrefetching(false));
-      }
-    } else {
-      document.body.style.overflow = "";
-      document.title = "Articles | FinEd";
-      window.dispatchEvent(new CustomEvent("articleReaderClose"));
-    }
+    document.title = "Articles | FinEd";
     return () => {
-      document.body.style.overflow = "";
       document.title = "FinEd";
     };
-  }, [selectedArticle]);
-
-  useEffect(() => {
-    if (pendingNext && !loadingRef.current) {
-      const idx = articles.findIndex((a) => a.id === selectedArticle?.id);
-      const next = articles[idx + 1];
-      if (next) {
-        openArticle(next);
-        setPendingNext(false);
-      }
-    }
-  }, [articles]);
-
-  const selectedIndex = selectedArticle
-    ? articles.findIndex((a) => a.id === selectedArticle.id)
-    : -1;
+  }, []);
 
   const openArticle = (article) => {
     if (!article) return;
     navigate(`/articles/${generateSlug(article.title)}`);
-    setSelectedArticle(article);
   };
-
-  const closeArticle = () => {
-    setSelectedArticle(null);
-    navigate(`/articles`);
-  };
-
-  // Sync URL path params with modal state for back button & deep linking support
-  useEffect(() => {
-    if (slug && articles.length > 0) {
-      const article = articles.find(a => generateSlug(a.title) === slug);
-      if (article && (!selectedArticle || generateSlug(selectedArticle.title) !== slug)) {
-        setSelectedArticle(article);
-      }
-    } else if (!slug && selectedArticle) {
-      setSelectedArticle(null);
-    }
-  }, [slug, articles]);
 
   const scrollUp = () => {
     carouselRef.current?.scrollBy({ top: -300, behavior: "smooth" });
@@ -362,7 +306,7 @@ function ArticlesPage() {
               <h2 className="exp-ar-button" style={{
                 fontSize: "34px", fontWeight: "bolder", marginLeft: "0px"
               }}>Explore Articles</h2>
-              
+
               <p className="mobile-swipe-hint">Swipe to see more tags ➔</p>
 
               <div className="ap-mini-navbar">
@@ -437,42 +381,6 @@ function ArticlesPage() {
         </>
       )}
 
-      {/* ARTICLE READER MODAL */}
-      {selectedArticle && (
-        <ArticleReader
-          article={selectedArticle}
-          onClose={closeArticle}
-          isLoadingMore={prefetching && selectedIndex === articles.length - 1}
-          footer={
-            <div className="ap-reader-footer">
-              <button
-                className={`ap-nav-btn ${selectedIndex <= 0 ? "" : "active"}`}
-                onClick={() => {
-                  if (selectedIndex > 0) openArticle(articles[selectedIndex - 1]);
-                }}
-                disabled={selectedIndex <= 0}
-              >
-                ← Previous
-              </button>
-              <button
-                className={`ap-nav-btn ${(!hasMore && selectedIndex >= articles.length - 1) ? "" : "active"}`}
-                onClick={() => {
-                  const next = articles[selectedIndex + 1];
-                  if (next) {
-                    openArticle(next);
-                  } else if (hasMore) {
-                    setPendingNext(true);
-                    loadArticles(offset, true);
-                  }
-                }}
-                disabled={!hasMore && selectedIndex >= articles.length - 1}
-              >
-                Next →
-              </button>
-            </div>
-          }
-        />
-      )}
     </div>
   );
 }

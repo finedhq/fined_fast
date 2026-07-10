@@ -12,13 +12,18 @@ class ArticleRepository:
             .range(offset, offset + limit - 1).execute()
         return res.data or []
 
-    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance") -> dict:
+    def get_by_id(self, article_id: str) -> dict | None:
+        res = supabase.from_("articles").select("*").eq("id", article_id).execute()
+        return res.data[0] if res.data else None
+
+    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "") -> dict:
         res = supabase.from_("articles").insert([{
             "title": title,
             "content": content,
             "description": description,
             "image_url": image_url,
-            "tag": tag
+            "tag": tag,
+            "slug": slug
         }]).execute()
         return res.data[0] if res.data else {}
 
@@ -68,6 +73,18 @@ class ArticleRepository:
         res = supabase.from_("articles").select("id, title, created_at")\
             .order("created_at", desc=True).execute()
         return res.data or []
+
+    def get_by_slug(self, slug: str) -> dict | None:
+        res = supabase.from_("articles").select("*").eq("slug", slug).execute()
+        return res.data[0] if res.data else None
+
+    def get_adjacent(self, current_created_at: str) -> dict:
+        prev_res = supabase.from_("articles").select("title, slug, created_at").lt("created_at", current_created_at).order("created_at", desc=True).limit(1).execute()
+        next_res = supabase.from_("articles").select("title, slug, created_at").gt("created_at", current_created_at).order("created_at", desc=False).limit(1).execute()
+        return {
+            "previous": prev_res.data[0] if prev_res.data else None,
+            "next": next_res.data[0] if next_res.data else None
+        }
 
 
 article_repo = ArticleRepository()

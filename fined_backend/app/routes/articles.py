@@ -68,6 +68,36 @@ async def get_all_articles(body: Optional[GetAllArticlesRequest] = None):
             detail=f"Failed to fetch articles: {str(e)}"
         )
 
+@router.get("/slug/{slug}")
+async def get_article_by_slug(slug: str):
+    """Fetch a specific article by its slug"""
+    try:
+        article = article_service.get_by_slug(slug)
+        if not article:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Article not found"
+            )
+        return article
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch article: {str(e)}"
+        )
+
+@router.get("/adjacent/{slug}")
+async def get_adjacent_articles(slug: str):
+    """Fetch previous and next articles relative to the given slug"""
+    try:
+        return article_service.get_adjacent(slug)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch adjacent articles: {str(e)}"
+        )
+
 @router.post("/saveemail")
 async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Save newsletter email subscription"""

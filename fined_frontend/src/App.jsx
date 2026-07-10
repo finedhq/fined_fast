@@ -11,6 +11,7 @@ import ScrollToTop from "./components/ScrollToTop";
 // Lazy-load all page components — each is only fetched when the user navigates to it
 const Hero = lazy(() => import("./pages/Home/Hero"));
 const ArticlesPage = lazy(() => import("./pages/Articles/ArticlesPage"));
+const SingleArticlePage = lazy(() => import("./pages/Articles/SingleArticlePage"));
 const TagArticlesPage = lazy(() => import("./pages/Articles/TagArticlesPage"));
 const Courses = lazy(() => import("./pages/CoursesPage/Courses"));
 const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
@@ -46,7 +47,7 @@ function App() {
                 <Route path="/" element={<MainLayout />}>
                 <Route index element={<Hero />} />
                 <Route path="articles" element={<ArticlesPage />} />  
-                <Route path="articles/:slug" element={<ArticlesPage />} />
+                <Route path="articles/:slug" element={<SingleArticlePage />} />
                 <Route path="tags/:tag" element={<TagArticlesPage />} />
                 <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
                 <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
