@@ -3,6 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+import asyncio
+from contextlib import asynccontextmanager
 # pyrefly: ignore [missing-import]
 from slowapi import Limiter, _rate_limit_exceeded_handler
 # pyrefly: ignore [missing-import]
@@ -11,6 +13,24 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
+from app.services.scheduled_publisher import publish_scheduled_articles
+
+async def run_scheduler():
+    while True:
+        await asyncio.to_thread(publish_scheduled_articles)
+        await asyncio.sleep(60)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the background scheduler
+    scheduler_task = asyncio.create_task(run_scheduler())
+    yield
+    # Shutdown: Cancel the scheduler
+    scheduler_task.cancel()
+    try:
+        await scheduler_task
+    except asyncio.CancelledError:
+        pass
 
 limiter=Limiter(key_func=get_remote_address,default_limits=["100/minute"])
 
@@ -19,6 +39,7 @@ app=FastAPI(
     title="FinEd API",
     description="FinEd Financial Education Platform — FastAPI Backend",
     version="2.0.0",
+    lifespan=lifespan,
     docs_url="/docs" if settings.ENVIRONMENT == "development" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT == "development" else None,
 )

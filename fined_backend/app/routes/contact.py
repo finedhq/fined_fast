@@ -12,7 +12,7 @@ class ContactQueryRequest(BaseModel):
     message: str
 
 @router.post("/user")
-async def contact_user(body: ContactQueryRequest, user: AuthUser = Depends(get_current_user)):
+async def contact_user(body: ContactQueryRequest):
     """Save user support request query"""
     # Mimic strict validation from original Express backend
     if not body.name or not body.email or not body.message:

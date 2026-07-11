@@ -5,7 +5,7 @@ from app.integrations.supabase_client import supabase
 class ArticleRepository:
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
-        query = supabase.from_("articles").select("*")
+        query = supabase.from_("articles").select("*").eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
         res = query.order("created_at", desc=True)\
@@ -71,16 +71,16 @@ class ArticleRepository:
 
     def get_all_for_sitemap(self) -> list:
         res = supabase.from_("articles").select("id, title, created_at")\
-            .order("created_at", desc=True).execute()
+            .eq("status", "published").order("created_at", desc=True).execute()
         return res.data or []
 
     def get_by_slug(self, slug: str) -> dict | None:
-        res = supabase.from_("articles").select("*").eq("slug", slug).execute()
+        res = supabase.from_("articles").select("*").eq("slug", slug).eq("status", "published").execute()
         return res.data[0] if res.data else None
 
     def get_adjacent(self, current_created_at: str) -> dict:
-        prev_res = supabase.from_("articles").select("title, slug, created_at").lt("created_at", current_created_at).order("created_at", desc=True).limit(1).execute()
-        next_res = supabase.from_("articles").select("title, slug, created_at").gt("created_at", current_created_at).order("created_at", desc=False).limit(1).execute()
+        prev_res = supabase.from_("articles").select("title, slug, created_at").eq("status", "published").lt("created_at", current_created_at).order("created_at", desc=True).limit(1).execute()
+        next_res = supabase.from_("articles").select("title, slug, created_at").eq("status", "published").gt("created_at", current_created_at).order("created_at", desc=False).limit(1).execute()
         return {
             "previous": prev_res.data[0] if prev_res.data else None,
             "next": next_res.data[0] if next_res.data else None
