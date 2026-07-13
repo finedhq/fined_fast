@@ -909,7 +909,7 @@ function Hero() {
           <div className="footer-cta-content">
             <h2 className="footer-cta-title">Your financial journey<br />starts here.</h2>
             <p className="footer-cta-sub">Small steps today. Bigger opportunities tomorrow.</p>
-            <button className="btn-footer-cta" onClick={() => navigate("/articles")}>Register now</button>
+            <button className="btn-footer-cta" onClick={() => navigate("/articles")}>Explore Articles</button>
           </div>
         </RevealOnScroll>
       </section>

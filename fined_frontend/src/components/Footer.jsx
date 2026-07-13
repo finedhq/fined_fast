@@ -79,7 +79,6 @@ export default function Footer() {
                     <ul>
                         <li><Link to="/courses">Courses</Link></li>
                         <li><Link to="/articles">Articles</Link></li>
-                        <li><Link to="/fin-tools">FinTools</Link></li>
                         <li><Link to="/about">About Us</Link></li>
                     </ul>
                 </div>

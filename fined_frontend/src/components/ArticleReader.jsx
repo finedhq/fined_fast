@@ -160,7 +160,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   // Calculate indicator position whenever active heading changes
   useEffect(() => {
     if (!activeHeadingId || !tocListRef.current) return;
-    
+
     // Slight delay to ensure DOM has painted the updated active classes
     const timer = setTimeout(() => {
       const activeEl = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`)?.parentElement;
@@ -169,7 +169,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           top: activeEl.offsetTop,
           height: activeEl.offsetHeight
         });
-        
+
         // Auto scroll TOC
         // We use scrollTo with 'auto' instead of scrollIntoView to prevent cancelling 
         // the main article's smooth scroll (a known issue in Chrome)
@@ -226,7 +226,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     const el = scrollRef.current;
     if (!el) return;
     let lastY = el.scrollTop;
-    
+
     const onScroll = () => {
       const currentY = el.scrollTop;
 
@@ -238,7 +238,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
       // --- SCROLL SPY LOGIC ---
       const tocElements = tocItems.map(item => document.getElementById(item.id)).filter(Boolean);
-      
+
       if (tocElements.length) {
         const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
         if (isAtBottom) {
@@ -246,7 +246,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         } else {
           const scrollTopPos = el.getBoundingClientRect().top;
           const activationLine = scrollTopPos + Math.min(el.clientHeight * 0.35, 220);
-          
+
           const activeHeading = tocElements.reduce((current, heading) => {
             const headingTop = heading.getBoundingClientRect().top;
             const currentTop = current.getBoundingClientRect().top;
@@ -272,7 +272,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       }
       lastY = currentY;
     };
-    
+
     el.addEventListener("scroll", onScroll, { passive: true });
     // Call once to set initial state
     onScroll();
@@ -283,7 +283,33 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
   const scrollToSection = (event, id) => {
     event.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    
+    const el = document.getElementById(id);
+    const container = scrollRef.current;
+    
+    if (el && container) {
+      let collapseOffset = 0;
+      // If the TOC is open on mobile, it will collapse and shift the document UP.
+      // We must subtract its height from the target scroll position.
+      if (isMobileTocOpen && window.innerWidth <= 900) {
+        const tocContent = document.querySelector('.ar-toc-content-wrapper');
+        if (tocContent) {
+          collapseOffset = tocContent.offsetHeight;
+        }
+      }
+      
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      
+      // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
+      const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
+      
+      container.scrollTo({ top: offset, behavior: "smooth" });
+    } else {
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    
+    setIsMobileTocOpen(false);
   };
 
   const publishedDate = formatDate(article.created_at);
@@ -339,14 +365,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           {/* TOC */}
           <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''}`}>
             <nav className="ar-toc-nav" aria-label="Article of contents" ref={tocNavRef}>
-              <div 
+              <div
                 className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}
                 onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
               >
                 <p className="ar-toc-heading">Table of Contents</p>
                 <span className="ar-toc-icon">▼</span>
               </div>
-              
+
               <div className={`ar-toc-content-wrapper ${isMobileTocOpen ? 'open' : ''}`} style={{ position: "relative" }}>
                 <ul className="ar-toc-list" ref={tocListRef}>
                   {/* --- THE MOVING INDICATOR --- */}
@@ -397,7 +423,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               <div className="ar-meta">
                 {publishedDate && <time dateTime={article.created_at}>{publishedDate}</time>}
                 <span aria-hidden="true">•</span>
-                <span 
+                <span
                   style={{ cursor: 'pointer' }}
                   onClick={() => navigate(`/tags/${articleTag.toLowerCase()}`)}
                 >
@@ -426,14 +452,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               {blocks.map((block, i) => {
                 if (block.level === 2) {
                   return (
-                    <h2 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h2">
+                    <h2 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
                       {block.text}
                     </h2>
                   );
                 }
                 if (block.level === 3) {
                   return (
-                    <h3 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h3">
+                    <h3 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
                       {block.text}
                     </h3>
                   );

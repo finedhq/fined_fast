@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from app.integrations.supabase_client import supabase
+from app.services.article_service import article_service
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,8 @@ def publish_scheduled_articles():
         current_time_iso = now.isoformat()
         logger.info(f"Current UTC time: {current_time_iso}")
         
-        res = supabase.from_("articles").select("id")\
+        # Fetch title and slug along with id
+        res = supabase.from_("articles").select("id, title, slug")\
             .eq("status", "scheduled")\
             .lte("scheduled_at", current_time_iso).execute()
         
@@ -26,11 +28,22 @@ def publish_scheduled_articles():
         published_ids = []
         for article in articles:
             article_id = article["id"]
+            title = article.get("title", "")
+            slug = article.get("slug")
+            
+            update_payload = {
+                "status": "published",
+                "published_at": current_time_iso
+            }
+            
+            # If slug is missing/empty, auto-generate it before publishing
+            if not slug and title:
+                new_slug = article_service._generate_slug(title)
+                update_payload["slug"] = new_slug
+                logger.info(f"Generated missing slug for article {article_id}: {new_slug}")
+
             try:
-                supabase.from_("articles").update({
-                    "status": "published",
-                    "published_at": current_time_iso
-                }).eq("id", article_id).execute()
+                supabase.from_("articles").update(update_payload).eq("id", article_id).execute()
                 published_ids.append(article_id)
             except Exception as e:
                 logger.error(f"Failed to publish article {article_id}: {str(e)}")

@@ -270,7 +270,7 @@ function ArticlesPage() {
 
                         <div className="ap-row-body">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <p className="ap-row-date" style={{ margin: 0 }}>{formatDate(article.created_at)}</p>
+                            <p className="ap-row-date" style={{ margin: 0, fontSize: '12px' }}>{formatDate(article.created_at)}</p>
                             <span
                               className="ap-grid-category"
                               style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
@@ -282,8 +282,12 @@ function ArticlesPage() {
                               {article.tag?.toUpperCase()}
                             </span>
                           </div>
-                          <h3 className="ap-row-title">{article.title}</h3>
-
+                          <h3 className="ap-row-title" style={{ fontSize: '18px', WebkitLineClamp: 2, margin: '4px 0' }}>{article.title}</h3>
+                          {article.description && (
+                            <p className="ap-row-excerpt" style={{ fontSize: '13px', color: '#6b7280', WebkitLineClamp: 2, marginTop: '2px', lineHeight: 1.2 }}>
+                              {article.description}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))}
