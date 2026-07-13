@@ -5,7 +5,7 @@ from app.integrations.supabase_client import supabase
 class ArticleRepository:
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
-        query = supabase.from_("articles").select("*").eq("status", "published")
+        query = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
         res = query.order("created_at", desc=True)\
@@ -13,18 +13,22 @@ class ArticleRepository:
         return res.data or []
 
     def get_by_id(self, article_id: str) -> dict | None:
-        res = supabase.from_("articles").select("*").eq("id", article_id).execute()
+        res = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("id", article_id).execute()
         return res.data[0] if res.data else None
 
-    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "") -> dict:
-        res = supabase.from_("articles").insert([{
+    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "", author_id: str = None) -> dict:
+        payload = {
             "title": title,
             "content": content,
             "description": description,
             "image_url": image_url,
             "tag": tag,
             "slug": slug
-        }]).execute()
+        }
+        if author_id:
+            payload["author_id"] = author_id
+
+        res = supabase.from_("articles").insert([payload]).execute()
         return res.data[0] if res.data else {}
 
     def delete(self, article_id: str):
@@ -71,7 +75,21 @@ class ArticleRepository:
 
     def get_all_for_sitemap(self) -> list:
         res = supabase.from_("articles").select("id, title, created_at")\
-            .eq("status", "published").order("created_at", desc=True).execute()
+            .order("created_at", desc=True).execute()
+        return res.data or []
+
+    def get_all_authors(self) -> list:
+        res = supabase.from_("authors").select("*").order("name").execute()
+        return res.data or []
+
+    def get_author_by_slug(self, slug: str) -> dict | None:
+        res = supabase.from_("authors").select("*").eq("slug", slug).execute()
+        return res.data[0] if res.data else None
+
+    def get_articles_by_author(self, author_id: str) -> list:
+        res = supabase.from_("articles").select("*, authors(name, slug, image_url)")\
+            .eq("author_id", author_id).eq("status", "published")\
+            .order("created_at", desc=True).execute()
         return res.data or []
 
     def get_by_slug(self, slug: str) -> dict | None:

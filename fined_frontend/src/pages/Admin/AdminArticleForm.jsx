@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { postArticle } from "../../services/api";
+import { useState, useEffect } from "react";
+import { postArticle, fetchAuthors } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Deep Dives" });
+  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Deep Dives", author_id: "" });
+  const [authors, setAuthors] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
@@ -17,6 +18,10 @@ function AdminArticleForm() {
   "Economy",
 ];
 
+  useEffect(() => {
+    fetchAuthors().then(setAuthors).catch(console.error);
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSaving(true);
@@ -27,11 +32,12 @@ function AdminArticleForm() {
     formData.append("content", form.content);
     formData.append("description", form.description);
     formData.append("tag", form.tag);
+    if (form.author_id) formData.append("author_id", form.author_id);
     if (imageFile) formData.append("image", imageFile);
 
     try {
       await postArticle(formData);
-      setForm({ title: "", content: "", description: "", tag: "Deep Dives" });
+      setForm({ title: "", content: "", description: "", tag: "Deep Dives", author_id: form.author_id });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");
@@ -75,6 +81,20 @@ function AdminArticleForm() {
     ))}
   </select>
 </label>
+
+          <label>
+            Author (Optional)
+            <select
+              name="author_id"
+              value={form.author_id}
+              onChange={(event) => setForm((prev) => ({ ...prev, author_id: event.target.value }))}
+            >
+              <option value="">-- No Author (Fallback) --</option>
+              {authors.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          </label>
 
           <label>
             Custom Description (For article preview lists)
