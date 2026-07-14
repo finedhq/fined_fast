@@ -158,7 +158,8 @@ nav {
     display: block;
     margin-left: auto;
     position: relative;
-    z-index: 2001; /* Keep it above the overlay */
+    z-index: 2001;
+    /* Keep it above the overlay */
   }
 
   .nav-menu-wrapper {
@@ -167,22 +168,25 @@ nav {
 
   /* Full Screen Overlay for Mobile Menu */
   .mobile-menu-overlay {
-  flex-direction: column;
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: #fafbff;
-  z-index: 9999;
-  overflow-y: auto;
-  display: flex;                          /* always flex, not toggled */
-  transform: translateX(100%);           /* hidden off-screen to the right */
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    flex-direction: column;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #fafbff;
+    z-index: 9999;
+    overflow-y: auto;
+    display: flex;
+    /* always flex, not toggled */
+    transform: translateX(100%);
+    /* hidden off-screen to the right */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-.mobile-menu-overlay.open {
-  transform: translateX(0);              /* slides in */
-}
+  .mobile-menu-overlay.open {
+    transform: translateX(0);
+    /* slides in */
+  }
 
 
   .mobile-menu-header {
