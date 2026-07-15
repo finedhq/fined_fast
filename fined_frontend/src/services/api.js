@@ -159,6 +159,12 @@ export function updateCard(courseId, moduleId, cardId, body) {
   });
 }
 
+export function fetchAuthors() {
+  return request("/authors/");
+}
+
+export function fetchAuthorDetails(slug) {
+  return request(`/authors/${slug}`);
+}
 
 export { API_BASE_URL };
-

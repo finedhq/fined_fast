@@ -24,11 +24,19 @@ class ArticleService:
             return {"previous": None, "next": None}
         return article_repo.get_adjacent(article["created_at"])
 
-    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance") -> dict:
+    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", author_id: str = None) -> dict:
         """Admin adds article — equivalent to addArticle"""
         slug = self._generate_slug(title)
-        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=slug)
+        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=slug, author_id=author_id)
         
+    def get_all_authors(self) -> list:
+        return article_repo.get_all_authors()
+
+    def get_author_by_slug(self, slug: str) -> dict | None:
+        return article_repo.get_author_by_slug(slug)
+
+    def get_articles_by_author(self, author_id: str) -> list:
+        return article_repo.get_articles_by_author(author_id)
     def delete(self, article_id: str):
         """Admin deletes article — fixes the original bug where data was undefined"""
         article_repo.delete(article_id)

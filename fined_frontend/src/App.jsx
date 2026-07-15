@@ -13,6 +13,7 @@ const Hero = lazy(() => import("./pages/Home/Hero"));
 const ArticlesPage = lazy(() => import("./pages/Articles/ArticlesPage"));
 const SingleArticlePage = lazy(() => import("./pages/Articles/SingleArticlePage"));
 const TagArticlesPage = lazy(() => import("./pages/Articles/TagArticlesPage"));
+const AuthorPage = lazy(() => import("./pages/Articles/AuthorPage"));
 const Courses = lazy(() => import("./pages/CoursesPage/Courses"));
 const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
 const FeedbackPage = lazy(() => import("./pages/FeedbackPage/FeedbackPage"));
@@ -58,6 +59,9 @@ function App() {
                 <Route path="help" element={<StaticPage />} />
                 <Route path="privacy-policy" element={<StaticPage />} />
                 <Route path="termsofservice" element={<StaticPage />} />
+                
+                <Route path="authors/:slug" element={<AuthorPage />} />
+                <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
 
                 {/* Commented out to prevent unauthenticated users from breaking the app via direct URL access:
                 <Route path="/courses/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
