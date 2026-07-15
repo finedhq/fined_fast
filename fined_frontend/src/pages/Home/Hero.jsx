@@ -481,7 +481,7 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${test2})` , zIndex: 100 }}
+        style={{ backgroundImage: `url(${test2})` }}
       >
         <div className="hero-content">
           <RevealOnScroll delay={0}>
@@ -497,7 +497,7 @@ function Hero() {
             <p className="hero-sub">
               Bite-sized interactive personal finance courses built
               <br />
-              for 15–35 year olds.
+              for the youth.
               <br />
               No jargon, no fees, no excuses.
             </p>
@@ -508,7 +508,8 @@ function Hero() {
               {/* Commented out for now to disable the login/signin system
               <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
               */}
-              <button className="btn-hero-primary" onClick={() => navigate("/articles")}>Explore Articles</button>
+              <button className="btn-hero-primary">Join WaitList</button>
+              <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore Articles</button>
             </div>
           </RevealOnScroll>
 
@@ -591,7 +592,7 @@ function Hero() {
                 </svg>
               </div>
               <div>
-                <div className="feature-title">Personalized Recommendations</div>
+                <div className="feature-title-4">Personalized Recommendations</div>
                 <div className="feature-desc">Coming Soon!</div>
               </div>
             </div>
@@ -901,6 +902,7 @@ function Hero() {
       </section>
 
       {/* FOOTER CTA SECTION */}
+      <div className="footer-gradient-strip"></div>
       <section
         className="footer-cta-section"
         style={{ backgroundImage: `url(${newfooterImg})` }}

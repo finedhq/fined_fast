@@ -36,6 +36,15 @@ nav {
   transform: scale(1.1);
 }
 
+@media (min-width: 901px) {
+  .logo-icon-1 {
+    transform: scale(1.1);
+  }
+  .logo-icon-1:hover {
+    transform: scale(1.25);
+  }
+}
+
 .logo-wordmark {
   font-size: 18px;
   font-weight: 900;

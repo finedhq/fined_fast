@@ -264,8 +264,8 @@ button {
 }
 
 .ap-featured {
-  height: auto;
-  min-height: 600px;
+  height: 654px;
+  margin-top: 30px;
   overflow: hidden;
   border-radius: 8px;
   background: #ffffff;
@@ -348,7 +348,7 @@ button {
   min-height: auto;
 }
 
-.ap-scroll-arrows {
+/* .ap-scroll-arrows {
   position: absolute;
   right: 0;
   top: -68px;
@@ -356,9 +356,9 @@ button {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-}
+} */
 
-.ap-arrow {
+/* .ap-arrow {
   width: 36px;
   height: 36px;
   border: 0;
@@ -367,24 +367,24 @@ button {
   color: #9ca3af;
   font-size: 0;
   font-weight: 950;
-}
+} */
 
-.ap-arrow::before {
+/* .ap-arrow::before {
   font-size: 19px;
 }
 
 .ap-arrow[aria-label="Scroll up"]::before {
   content: "↑";
-}
+} */
 
-.ap-arrow[aria-label="Scroll down"]::before {
+/* .ap-arrow[aria-label="Scroll down"]::before {
   content: "↓";
-}
+} */
 
-.ap-arrow.active {
+/* .ap-arrow.active {
   background: #f59e0b;
   color: #ffffff;
-}
+} */
 
 .ap-carousel {
   height: 682px;
@@ -393,10 +393,12 @@ button {
   gap: 18px;
   padding: 14px;
   scrollbar-width: none;
+  background-color: transparent;
 }
 
 .ap-carousel::-webkit-scrollbar {
   display: none;
+  background-color: #fff;
 }
 
 
@@ -1443,10 +1445,10 @@ button {
     padding-right: 0;
   }
 
-  .ap-scroll-arrows {
+  /* .ap-scroll-arrows {
     position: static;
     margin-bottom: 12px;
-  }
+  } */
 
   .articles-feature-grid,
   .articles-list,
@@ -1567,9 +1569,9 @@ button {
     padding: 16px 0;
   }
 
-  .ap-scroll-arrows {
+  /* .ap-scroll-arrows {
     display: none !important;
-  }
+  } */
 
   .ap-featured-img-wrap {
     height: 220px;

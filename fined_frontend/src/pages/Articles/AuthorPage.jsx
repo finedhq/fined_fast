@@ -115,7 +115,7 @@ function AuthorPage() {
     <div className="ap-root">
       <RevealOnScroll>
         <div className="ap-hero-strip" style={{ display: 'flex', alignItems: 'center', textAlign: 'left', backgroundColor: '#d9e8ff', paddingTop: '140px', paddingBottom: '60px', color: '#000', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginBottom: '40px', marginTop: '-100px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px', width: 'min(1180px, 90%)', margin: '0 auto', paddingLeft: '5%' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto', paddingLeft: '10px' }}>
             {author?.image_url ? (
               <img 
                 src={author.image_url} 
@@ -127,21 +127,24 @@ function AuthorPage() {
                 {author?.name?.charAt(0) || "A"}
               </div>
             )}
-            <div>
-              <h1 className="ap-headline" style={{ margin: '0 0 10px 0', fontSize: '36px', fontWeight: 'bold', color: '#000' }}>{author?.name || "Loading..."}</h1>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '140px', justifyContent: 'space-between', padding: '5px 0' }}>
+              <h1 className="ap-headline" style={{ margin: '0', fontSize: '36px', fontWeight: 'bold', color: '#000', lineHeight: '1' }}>{author?.name || "Loading..."}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <a href={author?.linkedin_url || "https://www.linkedin.com/in/shravan-mutha-302247297/"} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                   <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                 </a>
-                <span style={{ fontSize: '18px', fontWeight: '500', color: '#000' }}>{author?.bio || "No bio available."}</span>
+                <a href="mailto:shravanmutha45@gmail.com" target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#333' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
+                </a>
               </div>
+              <span style={{ fontSize: '18px', fontWeight: '500', color: '#000', margin: '0' }}>{author?.bio || "No bio available."}</span>
             </div>
           </div>
         </div>
       </RevealOnScroll>
 
       {author?.description && (
-        <div style={{ backgroundColor: '#fff', color: '#000', padding: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 40px', textAlign: 'left', fontSize: '17px', lineHeight: '1.7', borderRadius: '8px' }}>
+        <div style={{ backgroundColor: '#fff', color: '#000', padding: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 40px', textAlign: 'left', fontSize: '17px', lineHeight: '1.7', borderRadius: '8px' , paddingLeft: "10px" }}>
           {author.description.split('\n').map((line, i) => (
              line.trim() === 'About' ? <h2 key={i} style={{ marginBottom: '24px', fontSize: '36px', fontWeight: 'bold' }}>{line}</h2> :
              line.trim() ? <p key={i} style={{ marginBottom: '16px' }}>{line}</p> : null
@@ -152,7 +155,7 @@ function AuthorPage() {
       {error && <div className="ap-error">{error}</div>}
 
       <div className="ap-explore-section" style={{ marginTop: '20px' }}>
-        <h2 style={{ color: '#000', marginBottom: '30px', fontSize: '36px', fontWeight: 'bold', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 30px', textAlign: 'left', paddingLeft: '40px' }}>
+        <h2 style={{ color: '#000', marginBottom: '30px', fontSize: '36px', fontWeight: 'bold', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 30px', textAlign: 'left', paddingLeft: '0px' }}>
           Articles Written
         </h2>
         
