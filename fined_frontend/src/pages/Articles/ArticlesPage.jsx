@@ -212,14 +212,18 @@ function ArticlesPage() {
                     {articles[0]?.authors ? (
                       <p 
                         className="ap-featured-date" 
-                        style={{ marginTop: '4px', cursor: 'pointer', color: '#10b981' }}
+                        style={{ marginTop: '4px', cursor: 'pointer', color: '#0ea5e9' }}
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/${articles[0].authors.slug}`); }}
                       >
-                        By {articles[0].authors.name}
+                        By <span style={{ textDecoration: 'underline' }}>{articles[0].authors.name}</span>
                       </p>
                     ) : (
-                      <p className="ap-featured-date" style={{ marginTop: '4px' }}>
-                        By {articles[0]?.author || "Shravan Mutha"}
+                      <p 
+                        className="ap-featured-date" 
+                        style={{ marginTop: '4px', cursor: 'pointer', color: '#0ea5e9' }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                      >
+                        By <span style={{ textDecoration: 'underline' }}>{articles[0]?.author || "Shravan Mutha"}</span>
                       </p>
                     )}
 
@@ -385,17 +389,17 @@ function ArticlesPage() {
                         <span>{formatDate(article.created_at)}</span>
                         {article.authors ? (
                           <span 
-                            style={{ cursor: 'pointer', color: '#10b981' }}
+                            style={{ cursor: 'pointer', color: '#0ea5e9' }}
                             onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
                           >
-                            By {article.authors.name}
+                            By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                           </span>
                         ) : (
                           <span 
-                            style={{ cursor: 'pointer', color: '#10b981' }}
+                            style={{ cursor: 'pointer', color: '#0ea5e9' }}
                             onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
                           >
-                            By {article.author || "Shravan Mutha"}
+                            By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
                           </span>
                         )}
                       </div>

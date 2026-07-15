@@ -434,18 +434,18 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               {article.authors ? (
                 <p 
                   className="ar-byline"
-                  style={{ cursor: 'pointer', color: '#10b981' }}
+                  style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/${article.authors.slug}`)}
                 >
-                  By {article.authors.name}
+                  By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                 </p>
               ) : (
                 <p 
                   className="ar-byline"
-                  style={{ cursor: 'pointer', color: '#10b981' }}
+                  style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/shravan-mutha`)}
                 >
-                  By {article?.author || "Shravan Mutha"}
+                  By <span style={{ textDecoration: 'underline' }}>{article?.author || "Shravan Mutha"}</span>
                 </p>
               )}
               <p className="ar-description" itemProp="description">{description}</p>

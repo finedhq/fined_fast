@@ -1904,3 +1904,184 @@ button {
     margin: -10px 0 10px 0;
   }
 }
+
+/* ========================================================= */
+/* Author Profile Page Responsive Styles                     */
+/* ========================================================= */
+
+.ap-author-hero {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  background-color: #d9e8ff;
+  padding-top: 140px;
+  padding-bottom: 60px;
+  color: #000;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-bottom: 40px;
+  margin-top: -100px;
+}
+
+.ap-author-hero-inner {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 40px;
+  width: min(1180px, 90%);
+  margin: 0 auto;
+  padding-left: 5%;
+}
+
+.ap-author-image {
+  width: 180px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ap-author-image-placeholder {
+  width: 180px;
+  height: 140px;
+  background-color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.ap-author-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ap-author-name {
+  margin: 0 0 10px 0;
+  font-size: 36px;
+  font-weight: bold;
+  color: #000;
+}
+
+.ap-author-bio-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ap-author-linkedin {
+  width: 36px;
+  height: 36px;
+  background-color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ap-author-bio {
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+}
+
+.ap-author-description {
+  background-color: #fff;
+  color: #000;
+  padding: 40px;
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto 40px;
+  text-align: left;
+  font-size: 17px;
+  line-height: 1.7;
+  border-radius: 8px;
+}
+
+.ap-author-description h2 {
+  margin-bottom: 24px;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.ap-author-description p {
+  margin-bottom: 16px;
+}
+
+.ap-author-explore {
+  margin-top: 20px;
+}
+
+.ap-author-articles-title {
+  color: #000;
+  margin-bottom: 30px;
+  font-size: 36px;
+  font-weight: bold;
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto 30px;
+  text-align: left;
+  padding-left: 40px;
+}
+
+.ap-author-articles-grid {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+/* ------------------------------------------- */
+/* Mobile Responsiveness for Author Profile    */
+/* ------------------------------------------- */
+@media (max-width: 768px) {
+  .ap-author-hero {
+    padding-top: 140px;
+    padding-bottom: 40px;
+  }
+
+  .ap-author-hero-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding-left: 0;
+  }
+
+  .ap-author-text {
+    align-items: center;
+  }
+
+  .ap-author-image,
+  .ap-author-image-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%; /* Make it circular on mobile for a better feel */
+  }
+
+  .ap-author-bio-wrap {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ap-author-name {
+    font-size: 28px;
+  }
+
+  .ap-author-bio {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .ap-author-description {
+    padding: 24px 20px; /* Reduced padding for mobile */
+    font-size: 16px;
+  }
+
+  .ap-author-description h2 {
+    font-size: 28px;
+  }
+
+  .ap-author-articles-title {
+    font-size: 28px;
+    padding-left: 0;
+    text-align: center;
+  }
+}

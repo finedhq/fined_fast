@@ -105,28 +105,28 @@ function AuthorPage() {
   return (
     <div className="ap-root">
       <RevealOnScroll>
-        <div className="ap-hero-strip" style={{ display: 'flex', alignItems: 'center', textAlign: 'left', backgroundColor: '#d9e8ff', paddingTop: '140px', paddingBottom: '60px', color: '#000', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginBottom: '40px', marginTop: '-100px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px', width: 'min(1180px, 90%)', margin: '0 auto', paddingLeft: '5%' }}>
+        <div className="ap-author-hero">
+          <div className="ap-author-hero-inner">
             {author?.image_url ? (
               <img 
                 src={author.image_url} 
                 alt={author?.name} 
-                style={{ width: '180px', height: '140px', objectFit: 'cover' }} 
+                className="ap-author-image"
               />
             ) : (
-              <div style={{ width: '180px', height: '140px', backgroundColor: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', color: '#fff' }}>
+              <div className="ap-author-image-placeholder">
                 {author?.name?.charAt(0) || "A"}
               </div>
             )}
-            <div>
-              <h1 className="ap-headline" style={{ margin: '0 0 10px 0', fontSize: '36px', fontWeight: 'bold', color: '#000' }}>{author?.name || "Loading..."}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="ap-author-text">
+              <h1 className="ap-author-name">{author?.name || "Loading..."}</h1>
+              <div className="ap-author-bio-wrap">
                 {author?.linkedin_url && (
-                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" className="ap-author-linkedin">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                   </a>
                 )}
-                <span style={{ fontSize: '18px', fontWeight: '500', color: '#000' }}>{author?.bio || "No bio available."}</span>
+                <span className="ap-author-bio">{author?.bio || "No bio available."}</span>
               </div>
             </div>
           </div>
@@ -134,25 +134,25 @@ function AuthorPage() {
       </RevealOnScroll>
 
       {author?.description && (
-        <div style={{ backgroundColor: '#fff', color: '#000', padding: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 40px', textAlign: 'left', fontSize: '17px', lineHeight: '1.7', borderRadius: '8px' }}>
+        <div className="ap-author-description">
           {author.description.split('\n').map((line, i) => (
-             line.trim() === 'About' ? <h2 key={i} style={{ marginBottom: '24px', fontSize: '36px', fontWeight: 'bold' }}>{line}</h2> :
-             line.trim() ? <p key={i} style={{ marginBottom: '16px' }}>{line}</p> : null
+             line.trim() === 'About' ? <h2 key={i}>{line}</h2> :
+             line.trim() ? <p key={i}>{line}</p> : null
           ))}
         </div>
       )}
 
       {error && <div className="ap-error">{error}</div>}
 
-      <div className="ap-explore-section" style={{ marginTop: '20px' }}>
-        <h2 style={{ color: '#000', marginBottom: '30px', fontSize: '36px', fontWeight: 'bold', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 30px', textAlign: 'left', paddingLeft: '40px' }}>
+      <div className="ap-explore-section ap-author-explore">
+        <h2 className="ap-author-articles-title">
           Articles Written
         </h2>
         
         {fetching ? (
           <p className="ap-loading-more" style={{ textAlign: 'center', marginTop: '20px' }}>Loading articles...</p>
         ) : (
-          <div className="ap-articles-grid" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
+          <div className="ap-articles-grid ap-author-articles-grid">
             {articles.map((article, idx) => (
               <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
                 <div

@@ -186,13 +186,18 @@ function TagArticlesPage() {
                     <span>{formatDate(article.created_at)}</span>
                     {article.authors ? (
                       <span 
-                        style={{ cursor: 'pointer', color: '#10b981' }} 
+                        style={{ cursor: 'pointer', color: '#0ea5e9' }} 
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
                       >
-                        By {article.authors.name}
+                        By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                       </span>
                     ) : (
-                      <span>By {article.author || "Shravan Mutha"}</span>
+                      <span
+                        style={{ cursor: 'pointer', color: '#0ea5e9' }} 
+                        onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                      >
+                        By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
+                      </span>
                     )}
                   </div>
                 </div>
