@@ -11,7 +11,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // This must be INSIDE the component function
-  const { loginWithRedirect } = useAuth0();
+  const { loginWithRedirect, isAuthenticated, logout } = useAuth0();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -73,39 +73,39 @@ export default function Navbar() {
         <div className="nav-menu-wrapper">
           <ul className="nav-links">
             <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
-            <li style={{ position: 'relative' }}>
+            <li>
               <NavLink to="/courses" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}>
                 <span className="cube-wrapper" data-text="Courses">Courses</span>
               </NavLink>
-              <span style={{
-                position: 'absolute',
-                top: '100%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                marginTop: '1px',
-                background: 'linear-gradient(90deg, #F5A623, #FF7B00)',
-                color: 'white',
-                fontSize: '9px',
-                fontWeight: '900',
-                padding: '2px 6px',
-                borderRadius: '12px',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                boxShadow: '0 2px 4px rgba(245, 166, 35, 0.3)',
-                letterSpacing: '0.2px'
-              }}>
-                Coming soon!
-              </span>
             </li>
             <li><NavLink to="/articles" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Articles">Articles</span></NavLink></li>
             <li><NavLink to="/contact" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Contact Us">Contact Us</span></NavLink></li>
           </ul>
 
           <div className="nav-right">
-            {isAdminUser() && (
-              <button className="btn-nav-register" onClick={() => navigate("/admin")}>
-                Admin Dashboard
-              </button>
+            {isAuthenticated ? (
+              <>
+                <button className="btn-signin" onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </button>
+                {isAdminUser() && (
+                  <button className="btn-signin" onClick={() => navigate("/admin")}>
+                    Admin
+                  </button>
+                )}
+                <button className="btn-nav-register" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn-signin" onClick={() => loginWithRedirect()}>
+                  Log in
+                </button>
+                <button className="btn-nav-register" onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}>
+                  Sign up
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -124,26 +124,26 @@ export default function Navbar() {
         <ul className="mobile-nav-links">
           <li><NavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</NavLink></li>
           <li>
-            <NavLink to="/courses" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <NavLink to="/courses" onClick={() => setIsMobileMenuOpen(false)}>
               Courses
-              <span style={{
-                background: 'linear-gradient(90deg, #F5A623, #FF7B00)',
-                color: 'white',
-                fontSize: '10px',
-                fontWeight: '900',
-                padding: '3px 8px',
-                borderRadius: '12px',
-                letterSpacing: '0.2px'
-              }}>
-                Coming soon!
-              </span>
             </NavLink>
           </li>
           <li><NavLink to="/articles" onClick={() => setIsMobileMenuOpen(false)}>Articles</NavLink></li>
-          {isAdminUser() && (
-            <li><NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</NavLink></li>
-          )}
           <li><NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</NavLink></li>
+          {isAuthenticated ? (
+            <>
+              <li><NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink></li>
+              {isAdminUser() && (
+                <li><NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</NavLink></li>
+              )}
+              <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); logout({ logoutParams: { returnTo: window.location.origin } }); }}>Logout</a></li>
+            </>
+          ) : (
+            <>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect(); }}>Log in</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect({ authorizationParams: { screen_hint: "signup" } }); }}>Sign up</a></li>
+            </>
+          )}
         </ul>
       </div>
     </>

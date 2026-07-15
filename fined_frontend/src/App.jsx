@@ -63,7 +63,6 @@ function App() {
                 <Route path="authors/:slug" element={<AuthorPage />} />
                 <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
 
-                {/* Commented out to prevent unauthenticated users from breaking the app via direct URL access:
                 <Route path="/courses/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
                 <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
@@ -77,7 +76,6 @@ function App() {
                 <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
                 <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />
                 <Route path="admin/newsletters" element={<AdminGuard><AdminNewsletter /></AdminGuard>} />
-                */}
 
                 {/* Catch-all route redirects unknown/hidden pages to the Coming Soon courses page */}
                 <Route path="*" element={<Navigate to="/courses" replace />} />
