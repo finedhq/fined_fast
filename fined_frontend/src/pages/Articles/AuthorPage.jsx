@@ -50,16 +50,7 @@ function AuthorPage() {
     setError("");
     fetchAuthorDetails(slug)
       .then((data) => {
-        let fetchedAuthor = data.author || {};
-        if (String(slug).toLowerCase().includes('shravan') || String(fetchedAuthor?.name).toLowerCase().includes('shravan')) {
-          fetchedAuthor = {
-            ...fetchedAuthor,
-            name: "Shravan Mutha",
-            bio: "Co-founder @FinEd | VJTI '27",
-            description: "About\nHey, I am Shravan Mutha, the co-founder of FinEd, a platform dedicated to making financial education free and accessible.\n\nI believe that understanding money should be simple and engaging for everyone. At FinEd, we transform complex financial concepts into interactive courses, quizzes, and articles that empower individuals to make informed decisions.\n\nI have a deep interest in startups and businesses in general. I enjoy exploring new ideas, understanding different business models, and learning from founders who are building innovative solutions. The process of turning an idea into a scalable venture excites me, and I’m always eager to discuss entrepreneurship, strategy, and growth.\n\nLet’s connect! I’d love to network with fellow entrepreneurs, innovators, and professionals passionate about fintech, startups, and financial education. Feel free to reach out!"
-          };
-        }
-        setAuthor(fetchedAuthor);
+        setAuthor(data.author || {});
         setArticles(data.articles || []);
       })
       .catch((err) => setError(err.message || "Failed to load author profile."))
@@ -130,9 +121,11 @@ function AuthorPage() {
             <div>
               <h1 className="ap-headline" style={{ margin: '0 0 10px 0', fontSize: '36px', fontWeight: 'bold', color: '#000' }}>{author?.name || "Loading..."}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <a href={author?.linkedin_url || "https://www.linkedin.com/in/shravan-mutha-302247297/"} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                </a>
+                {author?.linkedin_url && (
+                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
+                )}
                 <span style={{ fontSize: '18px', fontWeight: '500', color: '#000' }}>{author?.bio || "No bio available."}</span>
               </div>
             </div>
