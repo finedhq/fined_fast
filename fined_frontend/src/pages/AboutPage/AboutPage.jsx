@@ -45,26 +45,34 @@ export default function AboutPage() {
 
       <section className="about-stats-section">
         <div className="stats-container">
-          <div className="stat-item">
-            <img src={img50kLearner} alt="50K+ Active learners icon" className="stat-icon" />
-            <h3>50K+</h3>
-            <p>Active learners</p>
-          </div>
-          <div className="stat-item">
-            <img src={img150Lessons} alt="150+ Lesson icon" className="stat-icon" />
-            <h3>150+</h3>
-            <p>Lesson</p>
-          </div>
-          <div className="stat-item">
-            <img src={imgStar} alt="4.5/5 Learner Rating icon" className="stat-icon star-icon" />
-            <h3>4.5/5</h3>
-            <p>Learner Rating</p>
-          </div>
-          <div className="stat-item">
-            <img src={imgInstitute} alt="100+ Partner Institutions icon" className="stat-icon" />
-            <h3>100+</h3>
-            <p>Partner Institutions</p>
-          </div>
+          <RevealOnScroll delay={100}>
+            <div className="stat-item">
+              <img src={img50kLearner} alt="50K+ Active learners icon" className="stat-icon" />
+              <h3>50K+</h3>
+              <p>Active learners</p>
+            </div>
+          </RevealOnScroll>
+          <RevealOnScroll delay={200}>
+            <div className="stat-item">
+              <img src={img150Lessons} alt="150+ Lesson icon" className="stat-icon" />
+              <h3>150+</h3>
+              <p>Lesson</p>
+            </div>
+          </RevealOnScroll>
+          <RevealOnScroll delay={300}>
+            <div className="stat-item">
+              <img src={imgStar} alt="4.5/5 Learner Rating icon" className="stat-icon star-icon" />
+              <h3>4.5/5</h3>
+              <p>Learner Rating</p>
+            </div>
+          </RevealOnScroll>
+          <RevealOnScroll delay={400}>
+            <div className="stat-item">
+              <img src={imgInstitute} alt="100+ Partner Institutions icon" className="stat-icon" />
+              <h3>100+</h3>
+              <p>Partner Institutions</p>
+            </div>
+          </RevealOnScroll>
         </div>
       </section>
 

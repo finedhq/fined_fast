@@ -8,6 +8,10 @@ import retirementIncomePlanning2Img from "../../assets/retirement-income-plannin
 import featuredImg from "../../assets/featured-img.png";
 import savingRuleImg from "../../assets/500dollarsaving.png";
 import footerImg from "../../assets/new-footer-bg.png";
+import imgBiteSized from "../../assets/bite-sized-learning-abt-us.png";
+import imgInteractive from "../../assets/interactivelearning-abt-us.png";
+import imgRewards from "../../assets/realrewards-abtus.png";
+import imgLeaderboards from "../../assets/leaderboards-abtus.png";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
@@ -536,8 +540,8 @@ function Hero() {
         <RevealOnScroll delay={0}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-1').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-blue-soft"></div>
-              <div>
+              <img src={imgBiteSized} alt="Bite-sized learning" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)', marginTop: '-15px' }} />
+              <div style={{ paddingLeft: '20px' }}>
                 <div className="feature-title">Bite sized lessons</div>
                 <div className="feature-desc">Made for people with a busy schedule.</div>
               </div>
@@ -549,13 +553,8 @@ function Hero() {
         <RevealOnScroll delay={100}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-2').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-yellow-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
-                  <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div>
+              <img src={imgInteractive} alt="Interactive Learning" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)' }} />
+              <div style={{ paddingLeft: '20px' }}>
                 <div className="feature-title">Interactive Learning</div>
                 <div className="feature-desc">No boring lectures or monotonous content</div>
               </div>
@@ -567,12 +566,8 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-blue-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div>
+              <img src={imgRewards} alt="Rewards & Leaderboard" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)', marginTop: '-15px' }} />
+              <div style={{ paddingLeft: '20px' }}>
                 <div className="feature-title">Rewards & Leaderboard</div>
                 <div className="feature-desc">Exciting rewards for the most engaged learners</div>
               </div>
@@ -584,14 +579,8 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-yellow-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
-                  <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
-                  <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
-                </svg>
-              </div>
-              <div>
+              <img src={imgLeaderboards} alt="Personalized Recommendations" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)' }} />
+              <div style={{ paddingLeft: '20px' }}>
                 <div className="feature-title-4">Personalized Recommendations</div>
                 <div className="feature-desc">Coming Soon!</div>
               </div>

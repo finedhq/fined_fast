@@ -29,7 +29,6 @@ body {
 .hero-section {
   position: relative;
   z-index: 1;
-  /* Sit below the features strip */
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: 440px;
