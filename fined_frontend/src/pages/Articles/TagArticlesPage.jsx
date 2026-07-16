@@ -105,8 +105,8 @@ function TagArticlesPage() {
       document.title = `Articles tagged "${displayTag}" | FinEd`;
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
-    return () => { 
-      document.body.style.overflow = ""; 
+    return () => {
+      document.body.style.overflow = "";
       document.title = "FinEd";
     };
   }, [selectedArticle, tag]);
@@ -168,7 +168,7 @@ function TagArticlesPage() {
                   )}
                 </div>
                 <div className="ap-grid-card-content">
-                  <span 
+                  <span
                     className="ap-grid-category"
                     style={{ cursor: 'pointer' }}
                     onClick={(e) => {
@@ -185,15 +185,15 @@ function TagArticlesPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
                     <span>{formatDate(article.created_at)}</span>
                     {article.authors ? (
-                      <span 
-                        style={{ cursor: 'pointer', color: '#0ea5e9' }} 
+                      <span
+                        style={{ cursor: 'pointer', color: '#0ea5e9' }}
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
                       >
                         By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                       </span>
                     ) : (
                       <span
-                        style={{ cursor: 'pointer', color: '#0ea5e9' }} 
+                        style={{ cursor: 'pointer', color: '#0ea5e9' }}
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
                       >
                         By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>

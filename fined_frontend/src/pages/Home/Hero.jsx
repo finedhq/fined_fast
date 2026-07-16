@@ -205,17 +205,17 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
             autoplay={{ delay: 3000, disableOnInteraction: false }}
             style={{ paddingBottom: "40px" }}
           >
-          {TESTIMONIAL_DATA.map((item, idx) => (
-            <SwiperSlide key={idx}>
-              <div className="testimonial-card" style={{ margin: '0 auto', maxWidth: '300px' }}>
-                <p className="testimonial-quote">
-                  {item.quote}
-                </p>
-                <p className="testimonial-author">-{item.author}</p>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+            {TESTIMONIAL_DATA.map((item, idx) => (
+              <SwiperSlide key={idx}>
+                <div className="testimonial-card" style={{ margin: '0 auto', maxWidth: '300px' }}>
+                  <p className="testimonial-quote">
+                    {item.quote}
+                  </p>
+                  <p className="testimonial-author">-{item.author}</p>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </div>
     </div>
@@ -339,7 +339,7 @@ function Hero() {
         if (currentImgRect && nextImgRect) {
           const startCornerOffset = 130; // Tail inwards
           const endCornerOffset = 130; // Head rightwards/inwards
-          
+
           let endYOffset = 80;
           if (i === 2) endYOffset = 65;
 
@@ -481,7 +481,7 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${test2})` , zIndex: 100 }}
+        style={{ backgroundImage: `url(${test2})`, zIndex: 100 }}
       >
         <div className="hero-content">
           <RevealOnScroll delay={0}>

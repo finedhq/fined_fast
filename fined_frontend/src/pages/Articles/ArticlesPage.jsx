@@ -210,16 +210,16 @@ function ArticlesPage() {
                     </p>
                     <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.created_at)}</p>
                     {articles[0]?.authors ? (
-                      <p 
-                        className="ap-featured-date" 
+                      <p
+                        className="ap-featured-date"
                         style={{ marginTop: '4px', cursor: 'pointer', color: '#0ea5e9' }}
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/${articles[0].authors.slug}`); }}
                       >
                         By <span style={{ textDecoration: 'underline' }}>{articles[0].authors.name}</span>
                       </p>
                     ) : (
-                      <p 
-                        className="ap-featured-date" 
+                      <p
+                        className="ap-featured-date"
                         style={{ marginTop: '4px', cursor: 'pointer', color: '#0ea5e9' }}
                         onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
                       >
@@ -388,14 +388,14 @@ function ArticlesPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
                         <span>{formatDate(article.created_at)}</span>
                         {article.authors ? (
-                          <span 
+                          <span
                             style={{ cursor: 'pointer', color: '#0ea5e9' }}
                             onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
                           >
                             By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                           </span>
                         ) : (
-                          <span 
+                          <span
                             style={{ cursor: 'pointer', color: '#0ea5e9' }}
                             onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
                           >

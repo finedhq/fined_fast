@@ -283,10 +283,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
   const scrollToSection = (event, id) => {
     event.preventDefault();
-    
+
     const el = document.getElementById(id);
     const container = scrollRef.current;
-    
+
     if (el && container) {
       let collapseOffset = 0;
       // If the TOC is open on mobile, it will collapse and shift the document UP.
@@ -297,18 +297,18 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           collapseOffset = tocContent.offsetHeight;
         }
       }
-      
+
       const containerRect = container.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      
+
       // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
       const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
-      
+
       container.scrollTo({ top: offset, behavior: "smooth" });
     } else {
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    
+
     setIsMobileTocOpen(false);
   };
 
@@ -432,7 +432,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
               {article.authors ? (
-                <p 
+                <p
                   className="ar-byline"
                   style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/${article.authors.slug}`)}
@@ -440,7 +440,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                 </p>
               ) : (
-                <p 
+                <p
                   className="ar-byline"
                   style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/shravan-mutha`)}
