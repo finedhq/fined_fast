@@ -129,12 +129,12 @@ body {
 
 .hero-buttons > button {
   width: 100%;
-  max-width: 260px;
+  max-width: 200px;
   justify-content: center;
   text-align: center;
-  font-size: 18px;
-  padding: 12px 24px;
-  min-height: 56px;
+  font-size: 16px;
+  padding: 8px 16px;
+  min-height: 46px;
   display: flex;
   align-items: center;
 }
@@ -247,34 +247,40 @@ body {
 /* ─────────────── FEATURES STRIP ─────────────── */
 .features-strip {
   position: relative;
-  z-index: 20;
-  background: #F9FAFB;
+  z-index: 110;
+  background: transparent;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid #eaeaf0;
-  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.04);
+  gap: 0px;
   padding: 0 40px;
-  margin-top: 82px;
+  margin-top: 60px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .feature-item {
   position: relative;
   z-index: 25;
   display: flex;
-  background-color: #F9FAFB;
+  background-color: #fff;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 24px 40px;
-  border-right: 1px solid #eaeaf0;
+  padding: 24px 20px;
   transition: box-shadow 0.25s, transform 0.2s;
   cursor: pointer;
-  background: #fff;
-  border-radius: 15px;
+  border-radius: 0;
+  border-right: 1px solid #eaeaf0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.feature-item:first-child {
+  border-radius: 15px 0 0 15px;
 }
 
 .feature-item:last-child {
   border-right: none;
+  border-radius: 0 15px 15px 0;
 }
 
 .feature-item-inner {
@@ -619,8 +625,8 @@ body {
   }
 
   .hero-buttons > button {
-    max-width: 220px;
-    font-size: 15px;
+    max-width: 240px;
+    font-size: 16px;
     padding: 8px 16px;
     min-height: 48px;
   }

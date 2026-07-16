@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { IoStarOutline, IoStar } from "react-icons/io5";
+import { RiShareForwardLine } from "react-icons/ri";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -72,6 +74,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const description = useMemo(() => createDescription(article?.content), [article?.content]);
   const scrollRef = useRef(null);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
@@ -413,6 +417,63 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     </li>
                   ))}
                 </ul>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "28px",
+                  padding: "12px 24px",
+                  marginTop: "20px",
+                  width: "fit-content",
+                  backgroundColor: "#fff",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.05)"
+                }}>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <div
+                        key={star}
+                        style={{ 
+                          cursor: "pointer", 
+                          color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563", 
+                          fontSize: "22px", 
+                          display: "flex", 
+                          alignItems: "center",
+                          transition: "color 0.2s"
+                        }}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                      >
+                        {star <= (hoverRating || rating) ? <IoStar /> : <IoStarOutline />}
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({ title: article.title, url: window.location.href });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert("Link copied to clipboard!");
+                      }
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#4B5563",
+                      fontSize: "24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "4px"
+                    }}
+                    title="Share"
+                  >
+                    <RiShareForwardLine />
+                  </button>
+                </div>
               </div>
             </nav>
           </aside>
