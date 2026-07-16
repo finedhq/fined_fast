@@ -128,7 +128,6 @@ function AuthorPage() {
                 )}
                 <span className="ap-author-bio">{author?.bio || "No bio available."}</span>
               </div>
-              <span style={{ fontSize: '18px', fontWeight: '500', color: '#000', margin: '0' }}>{author?.bio || "No bio available."}</span>
             </div>
           </div>
         </div>
