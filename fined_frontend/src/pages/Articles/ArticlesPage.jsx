@@ -168,7 +168,7 @@ function ArticlesPage() {
           <div className="ap-body">
             {/* FEATURED CARD COLUMN */}
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>
+              <h2 style={{ margin: '0 0 16px 0', fontSize: '24px', fontWeight: 'bold' }}>
                 Today's Article
               </h2>
               <RevealOnScroll delay={100}>
@@ -236,13 +236,13 @@ function ArticlesPage() {
             <div className="ap-side-wrap">
 
               {/* New Right-Side Title with Arrows */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ margin: '0 0 16px 0', fontSize: '24px', fontWeight: 'bold', marginLeft: "16px" }}>
                   Featured Articles
                 </h2>
 
                 {/* We override the absolute positioning of the arrows so they sit nicely next to the title */}
-                <div className="ap-scroll-arrows" style={{ position: 'static' }}>
+                {/* <div className="ap-scroll-arrows" style={{ position: 'static' }}>
                   <button
                     className={`ap-arrow ${canScrollUp ? "active" : ""}`}
                     onClick={scrollUp}
@@ -255,7 +255,7 @@ function ArticlesPage() {
                     disabled={!canScrollDown}
                     aria-label="Scroll down"
                   >❯</button>
-                </div>
+                </div> */}
               </div>
 
               {/* FIX: ADDED EXTRA <div> HERE SO REVEALONSCROLL DOESN'T STEAL CAROUSEL REF */}
@@ -319,7 +319,7 @@ function ArticlesPage() {
           </div>
 
           {/* EXPLORE ARTICLES SECTION */}
-          <div className="ap-explore-section">
+          <div className="ap-explore-section" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
             <div className="ap-explore-header">
               <h2 className="exp-ar-button" style={{
                 fontSize: "34px", fontWeight: "bolder", marginLeft: "0px"
