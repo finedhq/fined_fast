@@ -41,7 +41,7 @@ main{
 }
 
 .about-stats-section {
-  background-color: #2130A2; 
+  background-color: #8889FC; 
   color: white;
   padding: 40px 0;
 }
@@ -191,11 +191,21 @@ main{
     display: none;
   }
 
+  .mission-title,
+  .why-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .mission-right {
+    border-top: 2px dashed #1A37AD;
+    padding-top: 40px;
+    margin-top: 10px;
+  }
+
   .why-content {
     border-left: none;
-    border-top: 2px dashed #1A37AD;
     padding-left: 0;
-    padding-top: 40px;
     margin-left: 0;
   }
 }
@@ -309,7 +319,11 @@ main{
   font-size: 42px;
   font-weight: 900;
   font-style: italic;
-  margin: 0 0 5px 0;
+  margin: 0;
+}
+
+.founders-underline {
+  margin-top: -10px;
 }
 
 .founders-grid {
@@ -466,5 +480,25 @@ main{
     flex-direction: column;
     text-align: center;
     gap: 40px;
+  }
+  
+  .institutional-left {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .institutional-left > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .institutional-image {
+    display: block !important;
+    margin: 0 auto !important;
+    transform: translateX(10%) !important; /* Move a bit more back to the left */
   }
 }

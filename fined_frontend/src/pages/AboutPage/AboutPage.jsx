@@ -115,7 +115,7 @@ export default function AboutPage() {
           
           <div className="mission-right">
             <RevealOnScroll delay={150}>
-              <h2 className="why-title">Why we built Fined ?</h2>
+              <h2 className="why-title">Why we built FinEd ?</h2>
             </RevealOnScroll>
             
             <RevealOnScroll delay={250}>
@@ -133,50 +133,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="about-whatwedo-section">
-        <div className="whatwedo-container">
-          <RevealOnScroll delay={100}>
-            <div className="whatwedo-header">
-              <h2>What we do</h2>
-              <div className="whatwedo-underline"></div>
-            </div>
-          </RevealOnScroll>
-
-          <div className="whatwedo-grid">
-            <RevealOnScroll delay={200}>
-              <div className="whatwedo-card">
-                <img src={imgBiteSized} alt="Bite-sized learning" className="whatwedo-icon" />
-                <h3>Bite-sized learning</h3>
-                <p>Learn complex financial topics through interactive flashcard decks and progress trackers that fit into your day.</p>
-              </div>
-            </RevealOnScroll>
-            
-            <RevealOnScroll delay={300}>
-              <div className="whatwedo-card">
-                <img src={imgInteractive} alt="Interactive Learning" className="whatwedo-icon" />
-                <h3>Interactive Learning</h3>
-                <p>Learn complex financial topics through interactive flashcard decks and progress trackers that fit into your day.</p>
-              </div>
-            </RevealOnScroll>
-            
-            <RevealOnScroll delay={400}>
-              <div className="whatwedo-card">
-                <img src={imgRewards} alt="Real Rewards" className="whatwedo-icon" />
-                <h3>Real Rewards</h3>
-                <p>Learn complex financial topics through interactive flashcard decks and progress trackers that fit into your day.</p>
-              </div>
-            </RevealOnScroll>
-            
-            <RevealOnScroll delay={500}>
-              <div className="whatwedo-card">
-                <img src={imgLeaderboards} alt="LeaderBoards" className="whatwedo-icon" />
-                <h3>LeaderBoards</h3>
-                <p>Learn complex financial topics through interactive flashcard decks and progress trackers that fit into your day.</p>
-              </div>
-            </RevealOnScroll>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Founders Section */}
       <section className="about-founders-section">
