@@ -963,7 +963,7 @@ button {
 }
 
 .ar-toc-list {
-  max-height: calc(100vh - 205px);
+  max-height: calc(100vh - 280px);
   margin: 0;
   padding: 0;
   border-left: 2px solid #f3f4f6;

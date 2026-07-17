@@ -33,6 +33,8 @@ import 'swiper/css/navigation';
 import planeImg1 from "../../assets/image 27.png";
 import planeImg2 from "../../assets/image 28.png";
 import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.png"
+import newBgImg from "../../assets/newnewbg-imgofhomepg.png";
+import newPlaneImg from "../../assets/newnewplane.png";
 import test1 from "../../assets/testbgimg1.png";
 import test2 from "../../assets/testbgimg2.png"
 const generateSlug = (title) => {
@@ -485,8 +487,30 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${test2})`, zIndex: 100 }}
+        style={{ backgroundImage: `url(${newBgImg})`, zIndex: 100 }}
       >
+        <div className="hero-plane-container">
+          <svg className="hero-plane-path-svg" viewBox="0 0 300 200">
+            <mask id="plane-path-mask">
+               <path
+                 className="hero-path-mask-line"
+                 d="M 280,180 C 200,150 150,150 140,100 C 130,40 210,40 210,100 C 210,150 130,140 80,100 C 50,70 30,40 10,20"
+                 fill="none"
+                 stroke="white"
+                 strokeWidth="5"
+               />
+            </mask>
+            <path
+              d="M 280,180 C 200,150 150,150 140,100 C 130,40 210,40 210,100 C 210,150 130,140 80,100 C 50,70 30,40 10,20"
+              fill="none"
+              stroke="#00b4d8"
+              strokeWidth="4"
+              strokeDasharray="8 8"
+              mask="url(#plane-path-mask)"
+            />
+          </svg>
+          <img src={newPlaneImg} alt="plane" className="hero-plane-img" />
+        </div>
         <div className="hero-content">
           <RevealOnScroll delay={0}>
             <h1 className="hero-title">
@@ -540,8 +564,8 @@ function Hero() {
         <RevealOnScroll delay={0}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-1').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <img src={imgBiteSized} alt="Bite-sized learning" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)', marginTop: '-15px' }} />
-              <div style={{ paddingLeft: '20px' }}>
+              <img src={imgBiteSized} alt="Bite-sized learning" className="feature-icon-img" />
+              <div>
                 <div className="feature-title">Bite sized lessons</div>
                 <div className="feature-desc">Made for people with a busy schedule.</div>
               </div>
@@ -549,12 +573,11 @@ function Hero() {
           </div>
         </RevealOnScroll>
 
-
         <RevealOnScroll delay={100}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-2').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <img src={imgInteractive} alt="Interactive Learning" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)' }} />
-              <div style={{ paddingLeft: '20px' }}>
+              <img src={imgInteractive} alt="Interactive Learning" className="feature-icon-img" />
+              <div>
                 <div className="feature-title">Interactive Learning</div>
                 <div className="feature-desc">No boring lectures or monotonous content</div>
               </div>
@@ -566,8 +589,8 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <img src={imgRewards} alt="Rewards & Leaderboard" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)', marginTop: '-15px' }} />
-              <div style={{ paddingLeft: '20px' }}>
+              <img src={imgRewards} alt="Rewards & Leaderboard" className="feature-icon-img" />
+              <div>
                 <div className="feature-title">Rewards & Leaderboard</div>
                 <div className="feature-desc">Exciting rewards for the most engaged learners</div>
               </div>
@@ -579,8 +602,8 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <img src={imgLeaderboards} alt="Personalized Recommendations" style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0, transform: 'scale(2.5)' }} />
-              <div style={{ paddingLeft: '20px' }}>
+              <img src={imgLeaderboards} alt="Personalized Recommendations" className="feature-icon-img" />
+              <div>
                 <div className="feature-title-4">Personalized Recommendations</div>
                 <div className="feature-desc">Coming Soon!</div>
               </div>

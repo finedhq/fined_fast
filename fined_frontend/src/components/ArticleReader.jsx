@@ -427,7 +427,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   width: "fit-content",
                   backgroundColor: "#fff",
                   borderRadius: "16px",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.05)"
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+                  flexShrink: 0
                 }}>
                   <div style={{ display: "flex", gap: "6px" }}>
                     {[1, 2, 3, 4, 5].map((star) => (
