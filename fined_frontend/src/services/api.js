@@ -167,4 +167,12 @@ export function fetchAuthorDetails(slug) {
   return request(`/authors/${slug}`);
 }
 
+export function joinWaitlist(email) {
+  return request("/home/waitlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+}
+
 export { API_BASE_URL };

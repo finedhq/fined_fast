@@ -208,7 +208,7 @@ function ArticlesPage() {
                     <p className="ap-featured-excerpt">
                       {articles[0]?.description || ""}
                     </p>
-                    <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.created_at)}</p>
+                    <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.published_at || articles[0]?.created_at)}</p>
                     {articles[0]?.authors ? (
                       <p
                         className="ap-featured-date"
@@ -284,7 +284,7 @@ function ArticlesPage() {
 
                         <div className="ap-row-body">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <p className="ap-row-date" style={{ margin: 0, fontSize: '12px' }}>{formatDate(article.created_at)}</p>
+                            <p className="ap-row-date" style={{ margin: 0, fontSize: '12px' }}>{formatDate(article.published_at || article.created_at)}</p>
                             <span
                               className="ap-grid-category"
                               style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
@@ -386,7 +386,7 @@ function ArticlesPage() {
 
                       {/* Date and Author */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                        <span>{formatDate(article.created_at)}</span>
+                        <span>{formatDate(article.published_at || article.created_at)}</span>
                         {article.authors ? (
                           <span
                             style={{ cursor: 'pointer', color: '#0ea5e9' }}

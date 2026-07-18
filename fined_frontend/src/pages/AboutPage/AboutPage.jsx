@@ -140,7 +140,7 @@ export default function AboutPage() {
         <div className="founders-container">
           <RevealOnScroll delay={100}>
             <div className="founders-header">
-              <h2>About the founders</h2>
+              <h2>Meet the founders</h2>
               <svg width="220" height="15" viewBox="0 0 220 15" fill="none" className="founders-underline">
                 <path d="M2 12C50 4 150 -2 218 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
               </svg>
@@ -153,9 +153,8 @@ export default function AboutPage() {
               <div className="founder-card">
                 <div className="founder-image-placeholder"></div>
                 <div className="founder-info">
-                  <h3>Founder Name</h3>
-                  <h4>Founder & CEO</h4>
-                  <p>Some more information about the founders and more informationabout them . Some more information about the foundersand more informationabout them . Some more information about the founders and more informationabout them . Some more information about the founders and more informationabout them</p>
+                  <h3>Shravan Mutha</h3>
+                  <p>Shravan is passionate about making financial education simple and accessible. He leads the product, technology, and content at FinEd, working on everything from building the platform to creating easy-to-understand courses and articles. His goal is to help young people develop the financial knowledge needed to make better money decisions throughout their lives.</p>
                   <div className="founder-socials">
                     <div className="social-placeholder"></div>
                     <div className="social-placeholder"></div>
@@ -171,9 +170,8 @@ export default function AboutPage() {
               <div className="founder-card">
                 <div className="founder-image-placeholder"></div>
                 <div className="founder-info">
-                  <h3>Founder Name</h3>
-                  <h4>Founder & CEO</h4>
-                  <p>Some more information about the founders and more informationabout them . Some more information about the foundersand more informationabout them . Some more information about the founders and more informationabout them . Some more information about the founders and more informationabout them</p>
+                  <h3>Anish Pujari</h3>
+                  <p>Anish leads the design, branding, and marketing. He focuses on creating an engaging user experience while growing FinEd's reach through creative campaigns and storytelling. His goal is to make learning about finance feel approachable, enjoyable, and relevant for the next generation.</p>
                   <div className="founder-socials">
                     <div className="social-placeholder"></div>
                     <div className="social-placeholder"></div>

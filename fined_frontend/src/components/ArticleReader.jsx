@@ -316,7 +316,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     setIsMobileTocOpen(false);
   };
 
-  const publishedDate = formatDate(article.created_at);
+  const publishedDate = formatDate(article.published_at || article.created_at);
   const articleTag = article.tag;
 
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
@@ -334,7 +334,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     headline: article.title,
     description,
     image: article.image_url || undefined,
-    datePublished: article.created_at || undefined,
+    datePublished: article.published_at || article.created_at || undefined,
     author: { "@type": "Organization", name: "FinEd" },
     publisher: { "@type": "Organization", name: "FinEd" },
   };
@@ -483,7 +483,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           <article className="ar-article" itemScope itemType="https://schema.org/Article">
             <header className="ar-header">
               <div className="ar-meta">
-                {publishedDate && <time dateTime={article.created_at}>{publishedDate}</time>}
+                {publishedDate && <time dateTime={article.published_at || article.created_at}>{publishedDate}</time>}
                 <span aria-hidden="true">•</span>
                 <span
                   style={{ cursor: 'pointer' }}
