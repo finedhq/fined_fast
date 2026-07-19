@@ -190,6 +190,16 @@ body {
   align-items: center;
 }
 
+@media (min-width: 901px) {
+  .hero-buttons input.waitlist-email-input[type="email"] {
+    max-width: 320px;
+    width: 320px;
+    min-width: 320px;
+    min-height: 36px;
+    height: 36px;
+  }
+}
+
 
 .btn-hero-primary {
   background: var(--brand-yellow);
@@ -203,6 +213,8 @@ body {
   border-radius: var(--radius-pill);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 8px;
   width: fit-content;
   letter-spacing: 0.1px;
@@ -682,11 +694,13 @@ body {
 
   .hero-buttons button,
   .hero-buttons input[type="email"] {
-    max-width: 240px;
-    min-width: 220px;
+    width: 100%;
+    max-width: 340px;
+    min-width: 0;
     font-size: 16px;
-    padding: 10px 16px;
+    padding: 12px 32px;
     min-height: 48px;
+    height: auto;
   }
 
   .small-cards-grid {
@@ -1322,7 +1336,10 @@ body {
   font-size: 21px;
   font-weight: 600;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   padding: 8px 40px;
   border-radius: 50px;
   box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.25);
@@ -1638,6 +1655,20 @@ body {
   /* Shrink article cards and text on mobile to prevent clipping */
   .articles-swiper .swiper-slide {
     width: 330px;
+  }
+
+  .article-swiper-card {
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #4a3aff !important;
+  }
+
+  .article-swiper-img {
+    border-radius: 0 !important;
+  }
+
+  .article-swiper-meta {
+    border-radius: 0 !important;
   }
 
   .article-swiper-title {

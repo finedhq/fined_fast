@@ -581,7 +581,8 @@ function Hero() {
                     placeholder="Enter your email"
                     value={waitlistEmail}
                     onChange={(e) => setWaitlistEmail(e.target.value)}
-                    style={{ padding: '0 12px', height: '48px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', minWidth: '180px', fontSize: '18px', textAlign: 'center' }}
+                    className="waitlist-email-input"
+                    style={{ padding: '0 12px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', fontSize: '18px', textAlign: 'center' }}
                     disabled={waitlistLoading}
                     required
                     autoFocus
