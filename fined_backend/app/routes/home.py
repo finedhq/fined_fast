@@ -11,6 +11,7 @@ from app.repositories.article_repo import article_repo
 from app.repositories.course_repo import course_repo
 from app.repositories.user_repo import user_repo
 from app.dependencies import get_current_user, AuthUser
+from app.services.article_service import article_service
 
 router = APIRouter(prefix="/home", tags=["Home"])
 
@@ -30,8 +31,27 @@ class RecommendationsRequest(BaseModel):
     email: str
     course_id: Optional[str] = None
 
+class WaitlistRequest(BaseModel):
+    email: str
+
 
 # --- Route Endpoints ---
+
+@router.post("/waitlist")
+async def join_waitlist(body: WaitlistRequest):
+    """Add an email to the waitlist."""
+    try:
+        # Note: Depending on your use case, this might be a thread-safe call
+        # but supabase client is generally sync in Python unless using async client.
+        import asyncio
+        await asyncio.to_thread(article_service.save_waitlist_email, body.email)
+        return {"message": "Successfully joined the waitlist"}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to join waitlist: {str(e)}"
+        )
 
 @router.post("/getdata")
 async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_current_user)):

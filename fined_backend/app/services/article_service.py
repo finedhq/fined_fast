@@ -125,6 +125,10 @@ class ArticleService:
         """Admin: get all subscriber emails — for newsletter sending"""
         return article_repo.get_all_newsletter_emails()
 
+    def save_waitlist_email(self, email: str):
+        """Save waitlist email subscription"""
+        article_repo.save_waitlist_email(email)
+
     def _generate_slug(self, title: str) -> str:
         # Must exactly match generateSlug() in ArticlesPage.jsx
         slug = re.sub(r'[^a-z0-9]+', '-', title.lower())
@@ -146,7 +150,8 @@ class ArticleService:
         for a in articles:
             slug = self._generate_slug(a["title"])
             loc = escape(f"https://myfined.com/articles/{slug}")
-            lastmod = a["created_at"][:10] if a.get("created_at") else ""
+            lastmod_raw = a.get("published_at") or a.get("created_at")
+            lastmod = lastmod_raw[:10] if lastmod_raw else ""
             entries.append(
                 f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>"
             )
