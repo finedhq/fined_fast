@@ -106,19 +106,19 @@ function AuthorPage() {
     <div className="ap-root">
       <RevealOnScroll>
         <div className="ap-hero-strip" style={{ display: 'flex', alignItems: 'center', textAlign: 'left', backgroundColor: '#d9e8ff', paddingTop: '140px', paddingBottom: '60px', color: '#000', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginBottom: '40px', marginTop: '-100px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto', paddingLeft: '10px' }}>
+          <div className="author-profile-container">
             {author?.image_url ? (
               <img 
                 src={author.image_url} 
                 alt={author?.name} 
-                style={{ width: '180px', height: '140px', objectFit: 'cover' }} 
+                className="author-profile-image" 
               />
             ) : (
-              <div style={{ width: '180px', height: '140px', backgroundColor: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', color: '#fff' }}>
+              <div className="author-profile-image-placeholder">
                 {author?.name?.charAt(0) || "A"}
               </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', height: '140px', justifyContent: 'space-between', padding: '5px 0' }}>
+            <div className="author-profile-info">
               <h1 className="ap-headline" style={{ margin: '0', fontSize: '36px', fontWeight: 'bold', color: '#000', lineHeight: '1' }}>{author?.name || "Loading..."}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <a href={author?.linkedin_url || "https://www.linkedin.com/in/shravan-mutha-302247297/"} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
@@ -128,7 +128,7 @@ function AuthorPage() {
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
                 </a>
               </div>
-              <span style={{ fontSize: '18px', fontWeight: '500', color: '#000', margin: '0' }}>{author?.bio || "No bio available."}</span>
+              <span className="author-profile-bio">{author?.bio || "No bio available."}</span>
             </div>
           </div>
         </div>

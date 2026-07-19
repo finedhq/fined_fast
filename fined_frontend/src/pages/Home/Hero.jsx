@@ -518,9 +518,9 @@ function Hero() {
 
           <RevealOnScroll delay={100}>
             <p className="hero-sub">
-              Bite-sized interactive personal finance courses built
+              Bite-sized interactive personal finance courses
               <br />
-              for the youth.
+              built for the youth.
               <br />
               No jargon, no fees, no excuses.
             </p>
