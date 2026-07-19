@@ -135,10 +135,10 @@ function AuthorPage() {
       </RevealOnScroll>
 
       {author?.description && (
-        <div style={{ backgroundColor: '#fff', color: '#000', padding: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 40px', textAlign: 'left', fontSize: '17px', lineHeight: '1.7', borderRadius: '8px' , paddingLeft: "10px" }}>
+        <div className="author-about-section">
           {author.description.split('\n').map((line, i) => (
-             line.trim() === 'About' ? <h2 key={i} style={{ marginBottom: '24px', fontSize: '36px', fontWeight: 'bold' }}>{line}</h2> :
-             line.trim() ? <p key={i} style={{ marginBottom: '16px' }}>{line}</p> : null
+             line.trim() === 'About' ? <h2 key={i} className="author-about-title">{line}</h2> :
+             line.trim() ? <p key={i} className="author-about-text">{line}</p> : null
           ))}
         </div>
       )}
