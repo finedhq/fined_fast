@@ -124,77 +124,49 @@ const TESTIMONIAL_DATA = [
 ];
 
 const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
-  const cardRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
-  const trackRef = useRef(null);
-  const [dots, setDots] = useState([]);
-
-  useEffect(() => {
-    function calcDots() {
-      if (!trackRef.current) return;
-      const trackRect = trackRef.current.getBoundingClientRect();
-      const positions = cardRefs.map((ref) => {
-        if (!ref.current) return null;
-        const r = ref.current.getBoundingClientRect();
-        return { x: r.left - trackRect.left + r.width / 2 };
-      });
-      setDots(positions.filter(Boolean));
-    }
-    calcDots();
-    window.addEventListener("resize", calcDots);
-    return () => window.removeEventListener("resize", calcDots);
-  }, []);
-
-  const svgHeight = 100;
-  const dotY = [65, 55, 55, 65];
-
-  const pathD = dots.length === 4
-    ? `M ${dots[0].x} ${dotY[0]}
-     C ${dots[0].x + 120} ${dotY[0] - 50}, ${dots[1].x - 120} ${dotY[1] - 50}, ${dots[1].x} ${dotY[1]}
-     C ${dots[1].x + 120} ${dotY[1] + 50}, ${dots[2].x - 120} ${dotY[2] + 50}, ${dots[2].x} ${dotY[2]}
-     C ${dots[2].x + 120} ${dotY[2] - 50}, ${dots[3].x - 120} ${dotY[3] - 50}, ${dots[3].x} ${dotY[3]}`
-    : "";
+  const desktopPrevRef = useRef(null);
+  const desktopNextRef = useRef(null);
 
   return (
     <div ref={ref} className={className} style={style}>
-      {/* DESKTOP VIEW */}
       <div className="testimonials-carousel-wrapper desktop-testimonials">
-        <button className="carousel-arrow carousel-arrow-left">‹</button>
+        <button className="carousel-arrow carousel-arrow-left" ref={desktopPrevRef} aria-label="Previous testimonial">‹</button>
 
         <div className="testimonials-track-wrapper">
-          <div className="testimonials-track" ref={trackRef}>
+          <Swiper
+            modules={[Pagination, Autoplay, Navigation]}
+            spaceBetween={20}
+            slidesPerView={4}
+            loop={true}
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            navigation={{
+              prevEl: desktopPrevRef.current,
+              nextEl: desktopNextRef.current,
+            }}
+            onBeforeInit={(swiper) => {
+              swiper.params.navigation.prevEl = desktopPrevRef.current;
+              swiper.params.navigation.nextEl = desktopNextRef.current;
+            }}
+            breakpoints={{
+              0: { slidesPerView: 1 },
+              900: { slidesPerView: 4 },
+            }}
+            className="testimonials-swiper"
+          >
             {TESTIMONIAL_DATA.map((item, idx) => (
-              <div className="testimonial-card" key={idx} ref={cardRefs[idx]}>
-                <p className="testimonial-quote">
-                  {item.quote}
-                </p>
-                <p className="testimonial-author">-{item.author}</p>
-              </div>
+              <SwiperSlide key={`${item.author}-${idx}`}>
+                <div className="testimonial-card">
+                  <p className="testimonial-quote">{item.quote}</p>
+                  <p className="testimonial-author">-{item.author}</p>
+                </div>
+              </SwiperSlide>
             ))}
-          </div>
-
-          {dots.length === 4 && (
-            <svg
-              style={{ width: "100%", height: svgHeight, display: "block", overflow: "visible" }}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {dots.map((d, i) => (
-                <line key={i} x1={d.x} y1={0} x2={d.x} y2={dotY[i]} stroke="#c7d2fe" strokeWidth="1.5" />
-              ))}
-              <path d={pathD} stroke="#4A3AFF" strokeWidth="2.5" strokeDasharray="10 6" fill="none" strokeLinecap="round" />
-              {dots.map((d, i) => (
-                <g key={i}>
-                  <circle cx={d.x} cy={dotY[i]} r="10" fill="#4A3AFF" />
-                  <circle cx={d.x} cy={dotY[i]} r="5" fill="white" />
-                </g>
-              ))}
-            </svg>
-          )}
+          </Swiper>
         </div>
 
-        <button className="carousel-arrow carousel-arrow-right">›</button>
+        <button className="carousel-arrow carousel-arrow-right" ref={desktopNextRef} aria-label="Next testimonial">›</button>
       </div>
 
-      {/* MOBILE VIEW (SWIPER) */}
       <div className="mobile-testimonials">
         <div className="mobile-testimonials-container">
           <div className="swiper-custom-prev-mobile">❮</div>
@@ -203,6 +175,7 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
             modules={[Pagination, Autoplay, Navigation]}
             spaceBetween={20}
             slidesPerView={1}
+            loop={true}
             pagination={{ clickable: true }}
             navigation={{
               prevEl: '.swiper-custom-prev-mobile',
@@ -212,11 +185,9 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
             style={{ paddingBottom: "40px" }}
           >
             {TESTIMONIAL_DATA.map((item, idx) => (
-              <SwiperSlide key={idx}>
+              <SwiperSlide key={`${item.author}-${idx}`}>
                 <div className="testimonial-card" style={{ margin: '0 auto', maxWidth: '300px' }}>
-                  <p className="testimonial-quote">
-                    {item.quote}
-                  </p>
+                  <p className="testimonial-quote">{item.quote}</p>
                   <p className="testimonial-author">-{item.author}</p>
                 </div>
               </SwiperSlide>

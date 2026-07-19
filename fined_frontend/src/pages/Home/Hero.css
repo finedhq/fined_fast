@@ -1574,6 +1574,21 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.testimonials-swiper {
+  width: 100%;
+}
+
+.testimonials-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
+.testimonials-swiper .testimonial-card {
+  width: 100%;
+  height: 100%;
 }
 
 .journey-line-wrapper {
