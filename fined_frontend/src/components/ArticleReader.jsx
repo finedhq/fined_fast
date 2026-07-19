@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { IoStarOutline, IoStar } from "react-icons/io5";
+import { RiShareForwardLine } from "react-icons/ri";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -72,6 +74,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const description = useMemo(() => createDescription(article?.content), [article?.content]);
   const scrollRef = useRef(null);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
@@ -283,10 +287,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
   const scrollToSection = (event, id) => {
     event.preventDefault();
-    
+
     const el = document.getElementById(id);
     const container = scrollRef.current;
-    
+
     if (el && container) {
       let collapseOffset = 0;
       // If the TOC is open on mobile, it will collapse and shift the document UP.
@@ -297,22 +301,22 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           collapseOffset = tocContent.offsetHeight;
         }
       }
-      
+
       const containerRect = container.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      
+
       // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
       const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
-      
+
       container.scrollTo({ top: offset, behavior: "smooth" });
     } else {
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    
+
     setIsMobileTocOpen(false);
   };
 
-  const publishedDate = formatDate(article.created_at);
+  const publishedDate = formatDate(article.published_at || article.created_at);
   const articleTag = article.tag;
 
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
@@ -330,7 +334,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     headline: article.title,
     description,
     image: article.image_url || undefined,
-    datePublished: article.created_at || undefined,
+    datePublished: article.published_at || article.created_at || undefined,
     author: { "@type": "Organization", name: "FinEd" },
     publisher: { "@type": "Organization", name: "FinEd" },
   };
@@ -413,6 +417,64 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     </li>
                   ))}
                 </ul>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: "28px",
+                  padding: "12px 24px",
+                  marginTop: "20px",
+                  width: "fit-content",
+                  backgroundColor: "#fff",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+                  flexShrink: 0
+                }}>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <div
+                        key={star}
+                        style={{ 
+                          cursor: "pointer", 
+                          color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563", 
+                          fontSize: "22px", 
+                          display: "flex", 
+                          alignItems: "center",
+                          transition: "color 0.2s"
+                        }}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                      >
+                        {star <= (hoverRating || rating) ? <IoStar /> : <IoStarOutline />}
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({ title: article.title, url: window.location.href });
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert("Link copied to clipboard!");
+                      }
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#4B5563",
+                      fontSize: "24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "4px"
+                    }}
+                    title="Share"
+                  >
+                    <RiShareForwardLine />
+                  </button>
+                </div>
               </div>
             </nav>
           </aside>
@@ -421,7 +483,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           <article className="ar-article" itemScope itemType="https://schema.org/Article">
             <header className="ar-header">
               <div className="ar-meta">
-                {publishedDate && <time dateTime={article.created_at}>{publishedDate}</time>}
+                {publishedDate && <time dateTime={article.published_at || article.created_at}>{publishedDate}</time>}
                 <span aria-hidden="true">•</span>
                 <span
                   style={{ cursor: 'pointer' }}
@@ -432,7 +494,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
               {article.authors ? (
-                <p 
+                <p
                   className="ar-byline"
                   style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/${article.authors.slug}`)}
@@ -440,7 +502,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
                 </p>
               ) : (
-                <p 
+                <p
                   className="ar-byline"
                   style={{ cursor: 'pointer', color: '#0ea5e9' }}
                   onClick={() => navigate(`/authors/shravan-mutha`)}

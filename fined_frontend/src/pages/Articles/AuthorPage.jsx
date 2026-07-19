@@ -25,7 +25,7 @@ function formatDate(date) {
 function AuthorPage() {
   const { slug, articleSlug } = useParams(); // /authors/:slug or /authors/:slug/:articleSlug
   const navigate = useNavigate();
-  
+
   const [author, setAuthor] = useState(null);
   const [articles, setArticles] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -70,8 +70,8 @@ function AuthorPage() {
       }
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
-    return () => { 
-      document.body.style.overflow = ""; 
+    return () => {
+      document.body.style.overflow = "";
       document.title = "FinEd";
     };
   }, [selectedArticle, author]);
@@ -105,59 +105,55 @@ function AuthorPage() {
   return (
     <div className="ap-root">
       <RevealOnScroll>
-        <div className="ap-author-hero">
-          <div className="ap-author-hero-inner">
+        <div className="ap-hero-strip" style={{ display: 'flex', alignItems: 'center', textAlign: 'left', backgroundColor: '#d9e8ff', paddingTop: '140px', paddingBottom: '60px', color: '#000', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginBottom: '40px', marginTop: '-100px' }}>
+          <div className="author-profile-container">
             {author?.image_url ? (
               <img 
                 src={author.image_url} 
                 alt={author?.name} 
-                className="ap-author-image"
+                className="author-profile-image" 
               />
             ) : (
-              <div className="ap-author-image-placeholder">
+              <div className="author-profile-image-placeholder">
                 {author?.name?.charAt(0) || "A"}
               </div>
             )}
-            <div className="ap-author-text">
-              <h1 className="ap-author-name">{author?.name || "Loading..."}</h1>
-              <div className="ap-author-bio-wrap">
-                {author?.linkedin_url && (
-                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" className="ap-author-linkedin">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                  </a>
-                )}
-                {author?.email && (
-                  <a href={`mailto:${author.email}`} target="_blank" rel="noopener noreferrer" className="ap-author-linkedin" style={{ color: '#333' }}>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
-                  </a>
-                )}
+            <div className="author-profile-info">
+              <h1 className="ap-headline" style={{ margin: '0', fontSize: '36px', fontWeight: 'bold', color: '#000', lineHeight: '1' }}>{author?.name || "Loading..."}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <a href={author?.linkedin_url || "https://www.linkedin.com/in/shravan-mutha-302247297/"} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+                <a href="mailto:shravanmutha45@gmail.com" target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#333' }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
+                </a>
               </div>
-              <span className="ap-author-bio">{author?.bio || "No bio available."}</span>
+              <span className="author-profile-bio">{author?.bio || "No bio available."}</span>
             </div>
           </div>
         </div>
       </RevealOnScroll>
 
       {author?.description && (
-        <div className="ap-author-description">
+        <div style={{ backgroundColor: '#fff', color: '#000', padding: '40px', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 40px', textAlign: 'left', fontSize: '17px', lineHeight: '1.7', borderRadius: '8px' , paddingLeft: "10px" }}>
           {author.description.split('\n').map((line, i) => (
-             line.trim() === 'About' ? <h2 key={i}>{line}</h2> :
-             line.trim() ? <p key={i}>{line}</p> : null
+             line.trim() === 'About' ? <h2 key={i} style={{ marginBottom: '24px', fontSize: '36px', fontWeight: 'bold' }}>{line}</h2> :
+             line.trim() ? <p key={i} style={{ marginBottom: '16px' }}>{line}</p> : null
           ))}
         </div>
       )}
 
       {error && <div className="ap-error">{error}</div>}
 
-      <div className="ap-explore-section ap-author-explore">
-        <h2 className="ap-author-articles-title">
+      <div className="ap-explore-section" style={{ marginTop: '20px' }}>
+        <h2 style={{ color: '#000', marginBottom: '30px', fontSize: '36px', fontWeight: 'bold', width: 'min(1180px, calc(100% - 32px))', margin: '0 auto 30px', textAlign: 'left', paddingLeft: '0px' }}>
           Articles Written
         </h2>
-        
+
         {fetching ? (
           <p className="ap-loading-more" style={{ textAlign: 'center', marginTop: '20px' }}>Loading articles...</p>
         ) : (
-          <div className="ap-articles-grid ap-author-articles-grid">
+          <div className="ap-articles-grid" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
             {articles.map((article, idx) => (
               <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
                 <div
@@ -176,7 +172,7 @@ function AuthorPage() {
                     )}
                   </div>
                   <div className="ap-grid-card-content">
-                    <span 
+                    <span
                       className="ap-grid-category"
                       style={{ cursor: 'pointer' }}
                       onClick={(e) => {
@@ -191,7 +187,7 @@ function AuthorPage() {
                       {article.description || ""}
                     </p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                      <span>{formatDate(article.created_at)}</span>
+                      <span>{formatDate(article.published_at || article.created_at)}</span>
                       <span>By {author?.name}</span>
                     </div>
                   </div>

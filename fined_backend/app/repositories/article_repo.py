@@ -73,8 +73,14 @@ class ArticleRepository:
         res = supabase.from_("newsletter_gmails").select("enteredEmail").execute()
         return [r["enteredEmail"] for r in (res.data or [])]
 
+    def save_waitlist_email(self, email: str):
+        supabase.from_("waitlist_emails").upsert(
+            [{"email": email}],
+            on_conflict="email"
+        ).execute()
+
     def get_all_for_sitemap(self) -> list:
-        res = supabase.from_("articles").select("id, title, created_at")\
+        res = supabase.from_("articles").select("id, title, created_at, published_at")\
             .order("created_at", desc=True).execute()
         return res.data or []
 

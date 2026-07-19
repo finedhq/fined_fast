@@ -8,6 +8,10 @@ import retirementIncomePlanning2Img from "../../assets/retirement-income-plannin
 import featuredImg from "../../assets/featured-img.png";
 import savingRuleImg from "../../assets/500dollarsaving.png";
 import footerImg from "../../assets/new-footer-bg.png";
+import imgBiteSized from "../../assets/bite-sized-learning-abt-us.png";
+import imgInteractive from "../../assets/interactivelearning-abt-us.png";
+import imgRewards from "../../assets/realrewards-abtus.png";
+import imgLeaderboards from "../../assets/leaderboards-abtus.png";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
@@ -18,7 +22,7 @@ import wfInteractiveLearning from "../../assets/wf-interactivelearning.png";
 import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
 import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
 import satvikImg from "../../assets/satvik-img.png"
-import { fetchArticles } from "../../services/api";
+import { fetchArticles, joinWaitlist } from "../../services/api";
 import newLandingpagebgm from "../../assets/newlandingpagebg.png";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -29,6 +33,8 @@ import 'swiper/css/navigation';
 import planeImg1 from "../../assets/image 27.png";
 import planeImg2 from "../../assets/image 28.png";
 import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.png"
+import newBgImg from "../../assets/newnewbg-imgofhomepg.png";
+import newPlaneImg from "../../assets/newnewplane.png";
 import test1 from "../../assets/testbgimg1.png";
 import test2 from "../../assets/testbgimg2.png"
 const generateSlug = (title) => {
@@ -118,77 +124,49 @@ const TESTIMONIAL_DATA = [
 ];
 
 const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
-  const cardRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
-  const trackRef = useRef(null);
-  const [dots, setDots] = useState([]);
-
-  useEffect(() => {
-    function calcDots() {
-      if (!trackRef.current) return;
-      const trackRect = trackRef.current.getBoundingClientRect();
-      const positions = cardRefs.map((ref) => {
-        if (!ref.current) return null;
-        const r = ref.current.getBoundingClientRect();
-        return { x: r.left - trackRect.left + r.width / 2 };
-      });
-      setDots(positions.filter(Boolean));
-    }
-    calcDots();
-    window.addEventListener("resize", calcDots);
-    return () => window.removeEventListener("resize", calcDots);
-  }, []);
-
-  const svgHeight = 100;
-  const dotY = [65, 55, 55, 65];
-
-  const pathD = dots.length === 4
-    ? `M ${dots[0].x} ${dotY[0]}
-     C ${dots[0].x + 120} ${dotY[0] - 50}, ${dots[1].x - 120} ${dotY[1] - 50}, ${dots[1].x} ${dotY[1]}
-     C ${dots[1].x + 120} ${dotY[1] + 50}, ${dots[2].x - 120} ${dotY[2] + 50}, ${dots[2].x} ${dotY[2]}
-     C ${dots[2].x + 120} ${dotY[2] - 50}, ${dots[3].x - 120} ${dotY[3] - 50}, ${dots[3].x} ${dotY[3]}`
-    : "";
+  const desktopPrevRef = useRef(null);
+  const desktopNextRef = useRef(null);
 
   return (
     <div ref={ref} className={className} style={style}>
-      {/* DESKTOP VIEW */}
       <div className="testimonials-carousel-wrapper desktop-testimonials">
-        <button className="carousel-arrow carousel-arrow-left">‹</button>
+        <button className="carousel-arrow carousel-arrow-left" ref={desktopPrevRef} aria-label="Previous testimonial">‹</button>
 
         <div className="testimonials-track-wrapper">
-          <div className="testimonials-track" ref={trackRef}>
+          <Swiper
+            modules={[Pagination, Autoplay, Navigation]}
+            spaceBetween={20}
+            slidesPerView={4}
+            loop={true}
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            navigation={{
+              prevEl: desktopPrevRef.current,
+              nextEl: desktopNextRef.current,
+            }}
+            onBeforeInit={(swiper) => {
+              swiper.params.navigation.prevEl = desktopPrevRef.current;
+              swiper.params.navigation.nextEl = desktopNextRef.current;
+            }}
+            breakpoints={{
+              0: { slidesPerView: 1 },
+              900: { slidesPerView: 4 },
+            }}
+            className="testimonials-swiper"
+          >
             {TESTIMONIAL_DATA.map((item, idx) => (
-              <div className="testimonial-card" key={idx} ref={cardRefs[idx]}>
-                <p className="testimonial-quote">
-                  {item.quote}
-                </p>
-                <p className="testimonial-author">-{item.author}</p>
-              </div>
+              <SwiperSlide key={`${item.author}-${idx}`}>
+                <div className="testimonial-card">
+                  <p className="testimonial-quote">{item.quote}</p>
+                  <p className="testimonial-author">-{item.author}</p>
+                </div>
+              </SwiperSlide>
             ))}
-          </div>
-
-          {dots.length === 4 && (
-            <svg
-              style={{ width: "100%", height: svgHeight, display: "block", overflow: "visible" }}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {dots.map((d, i) => (
-                <line key={i} x1={d.x} y1={0} x2={d.x} y2={dotY[i]} stroke="#c7d2fe" strokeWidth="1.5" />
-              ))}
-              <path d={pathD} stroke="#4A3AFF" strokeWidth="2.5" strokeDasharray="10 6" fill="none" strokeLinecap="round" />
-              {dots.map((d, i) => (
-                <g key={i}>
-                  <circle cx={d.x} cy={dotY[i]} r="10" fill="#4A3AFF" />
-                  <circle cx={d.x} cy={dotY[i]} r="5" fill="white" />
-                </g>
-              ))}
-            </svg>
-          )}
+          </Swiper>
         </div>
 
-        <button className="carousel-arrow carousel-arrow-right">›</button>
+        <button className="carousel-arrow carousel-arrow-right" ref={desktopNextRef} aria-label="Next testimonial">›</button>
       </div>
 
-      {/* MOBILE VIEW (SWIPER) */}
       <div className="mobile-testimonials">
         <div className="mobile-testimonials-container">
           <div className="swiper-custom-prev-mobile">❮</div>
@@ -197,6 +175,7 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
             modules={[Pagination, Autoplay, Navigation]}
             spaceBetween={20}
             slidesPerView={1}
+            loop={true}
             pagination={{ clickable: true }}
             navigation={{
               prevEl: '.swiper-custom-prev-mobile',
@@ -206,11 +185,9 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
             style={{ paddingBottom: "40px" }}
           >
             {TESTIMONIAL_DATA.map((item, idx) => (
-              <SwiperSlide key={idx}>
+              <SwiperSlide key={`${item.author}-${idx}`}>
                 <div className="testimonial-card" style={{ margin: '0 auto', maxWidth: '300px' }}>
-                  <p className="testimonial-quote">
-                    {item.quote}
-                  </p>
+                  <p className="testimonial-quote">{item.quote}</p>
                   <p className="testimonial-author">-{item.author}</p>
                 </div>
               </SwiperSlide>
@@ -296,6 +273,30 @@ function Hero() {
   const [pathOffsets, setPathOffsets] = useState([]);
   const [pathProgresses, setPathProgresses] = useState([]);
   const [articles, setArticles] = useState([]);
+
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [waitlistMessage, setWaitlistMessage] = useState({ text: "", type: "" });
+
+  const [showWaitlistForm, setShowWaitlistForm] = useState(false);
+
+  const handleWaitlistSubmit = async (e) => {
+    e.preventDefault();
+    if (!waitlistEmail) return;
+    setWaitlistLoading(true);
+    setWaitlistMessage({ text: "", type: "" });
+    try {
+      await joinWaitlist(waitlistEmail);
+      setWaitlistMessage({ text: "Thanks for joining the waitlist!", type: "success" });
+      setWaitlistEmail("");
+      setShowWaitlistForm(false); // Hide the input form immediately to show the success button
+    } catch (error) {
+      setWaitlistMessage({ text: "Something went wrong. Please try again.", type: "error" });
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
 
   useEffect(() => {
     async function getHeroArticles() {
@@ -481,8 +482,30 @@ function Hero() {
       {/* HERO */}
       <section
         className="hero-section"
-        style={{ backgroundImage: `url(${test2})`, zIndex: 100 }}
+        style={{ backgroundImage: `url(${newBgImg})`, zIndex: 100 }}
       >
+        <div className="hero-plane-container">
+          <svg className="hero-plane-path-svg" viewBox="0 0 300 200">
+            <mask id="plane-path-mask">
+              <path
+                className="hero-path-mask-line"
+                d="M 280,180 C 200,150 150,150 140,100 C 130,40 210,40 210,100 C 210,150 130,140 80,100 C 50,70 30,40 10,20"
+                fill="none"
+                stroke="white"
+                strokeWidth="5"
+              />
+            </mask>
+            <path
+              d="M 280,180 C 200,150 150,150 140,100 C 130,40 210,40 210,100 C 210,150 130,140 80,100 C 50,70 30,40 10,20"
+              fill="none"
+              stroke="#00b4d8"
+              strokeWidth="4"
+              strokeDasharray="8 8"
+              mask="url(#plane-path-mask)"
+            />
+          </svg>
+          <img src={newPlaneImg} alt="plane" className="hero-plane-img" />
+        </div>
         <div className="hero-content">
           <RevealOnScroll delay={0}>
             <h1 className="hero-title">
@@ -495,48 +518,85 @@ function Hero() {
 
           <RevealOnScroll delay={100}>
             <p className="hero-sub">
-              Bite-sized interactive personal finance courses built
+              Bite-sized interactive personal finance courses
               <br />
-              for the youth.
+              built for the youth.
               <br />
               No jargon, no fees, no excuses.
             </p>
           </RevealOnScroll>
 
           <RevealOnScroll delay={200}>
-            <div className="hero-buttons">
-              {/* Commented out for now to disable the login/signin system
-              <button className="btn-hero-primary" onClick={() => loginWithRedirect({ appState: { returnTo: "/dashboard" } })}>Register now →</button>
-              */}
-              <button className="btn-hero-primary">Join WaitList</button>
+          <div className="hero-buttons" style={{ flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
+              {!showWaitlistForm ? (
+                <button 
+                  className="btn-hero-primary" 
+                  onClick={() => {
+                    // Only allow clicking if not already joined
+                    if (waitlistMessage.type !== 'success') {
+                      setShowWaitlistForm(true);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: waitlistMessage.type === 'success' ? '#10b981' : undefined,
+                    cursor: waitlistMessage.type === 'success' ? 'default' : 'pointer',
+                  }}
+                >
+                  {waitlistMessage.type === 'success' ? "Joined the waitlist! 🎉" : "Join WaitList"}
+                </button>
+              ) : (
+                <form onSubmit={handleWaitlistSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', animation: 'fadeIn 0.3s ease-in-out' }}>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    className="waitlist-email-input"
+                    style={{ padding: '0 12px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', fontSize: '18px', textAlign: 'center' }}
+                    disabled={waitlistLoading}
+                    required
+                    autoFocus
+                  />
+                  <button type="submit" className="btn-hero-primary" disabled={waitlistLoading}>
+                    {waitlistLoading ? "Joining..." : "Submit"}
+                  </button>
+                </form>
+              )}
               <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore Articles</button>
             </div>
-          </RevealOnScroll>
+            {waitlistMessage.type === 'error' && (
+              <p style={{ marginTop: '12px', fontSize: '14px', color: '#ef4444' }}>
+                {waitlistMessage.text}
+              </p>
+            )}
+          </div>
+        </RevealOnScroll>
 
-          <RevealOnScroll delay={300}>
-            <div className="learners-row">
-              <div className="avatars">
-                <div className="avatar a1">A</div>
-                <div className="avatar a2">B</div>
-                <div className="avatar a3">C</div>
-                <div className="avatar-count">2k+</div>
-              </div>
-              <span className="in-learners-row">
-                Join 2000+ learners building
-                <br />
-                their financial future
-              </span>
+        <RevealOnScroll delay={300}>
+          <div className="learners-row">
+            <div className="avatars">
+              <div className="avatar a1">A</div>
+              <div className="avatar a2">B</div>
+              <div className="avatar a3">C</div>
+              <div className="avatar-count">2k+</div>
             </div>
-          </RevealOnScroll>
-        </div>
-      </section>
+            <span className="in-learners-row">
+              Join 2000+ learners building
+              <br />
+              their financial future
+            </span>
+          </div>
+        </RevealOnScroll>
+      </div>
+    </section >
 
-      {/* FEATURES STRIP */}
-      <div className="features-strip">
+      {/* FEATURES STRIP */ }
+      < div className = "features-strip" >
         <RevealOnScroll delay={0}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-1').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-blue-soft"></div>
+              <img src={imgBiteSized} alt="Bite-sized learning" className="feature-icon-img" />
               <div>
                 <div className="feature-title">Bite sized lessons</div>
                 <div className="feature-desc">Made for people with a busy schedule.</div>
@@ -545,16 +605,10 @@ function Hero() {
           </div>
         </RevealOnScroll>
 
-
         <RevealOnScroll delay={100}>
           <div className="feature-item" onClick={() => document.getElementById('wf-row-2').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-yellow-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" />
-                  <path d="M9 12l2 2 4-4" stroke="#F5A623" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
+              <img src={imgInteractive} alt="Interactive Learning" className="feature-icon-img" />
               <div>
                 <div className="feature-title">Interactive Learning</div>
                 <div className="feature-desc">No boring lectures or monotonous content</div>
@@ -567,11 +621,7 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-3').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-blue-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#4A3AFF" strokeWidth="2" strokeLinejoin="round" />
-                </svg>
-              </div>
+              <img src={imgRewards} alt="Rewards & Leaderboard" className="feature-icon-img" />
               <div>
                 <div className="feature-title">Rewards & Leaderboard</div>
                 <div className="feature-desc">Exciting rewards for the most engaged learners</div>
@@ -584,13 +634,7 @@ function Hero() {
           <div className="feature-item"
             onClick={() => document.getElementById('wf-row-4').scrollIntoView({ behavior: 'smooth', block: 'center' })}>
             <div className="feature-item-inner">
-              <div className="feature-icon-box fi-yellow-soft">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="8" width="6" height="13" rx="1" stroke="#F5A623" strokeWidth="2" />
-                  <rect x="9" y="5" width="6" height="16" rx="1" stroke="#F5A623" strokeWidth="2" />
-                  <rect x="16" y="2" width="6" height="19" rx="1" stroke="#F5A623" strokeWidth="2" />
-                </svg>
-              </div>
+              <img src={imgLeaderboards} alt="Personalized Recommendations" className="feature-icon-img" />
               <div>
                 <div className="feature-title-4">Personalized Recommendations</div>
                 <div className="feature-desc">Coming Soon!</div>
@@ -599,10 +643,10 @@ function Hero() {
           </div>
         </RevealOnScroll>
 
-      </div>
+      </div >
 
-      {/* POPULAR COURSES SECTION */}
-      {/*< section className="popular-courses-section" >
+    {/* POPULAR COURSES SECTION
+      <section className="popular-courses-section">
         <RevealOnScroll>
           <div className="pc-header">
             <span className="pc-eyebrow">Popular Courses</span>
@@ -612,8 +656,7 @@ function Hero() {
         </RevealOnScroll>
 
         <div className="pc-grid">
-          {/* Featured Card */}
-      {/*<RevealOnScroll delay={100}>
+          <RevealOnScroll delay={100}>
             <div className="featured-card" id="featured-course">
               <img
                 src={investingImg}
@@ -623,8 +666,7 @@ function Hero() {
             </div>
           </RevealOnScroll>
 
-          {/* 2x2 Small Cards Grid */}
-      {/*<div className="small-cards-grid">
+          <div className="small-cards-grid">
             {SMALL_COURSES.map((course, idx) => (
               <RevealOnScroll key={course.id} delay={100 + (idx * 100)}>
                 <SmallCourseCard course={course} />
@@ -637,271 +679,271 @@ function Hero() {
           <div className="pc-view-all">
             <button className="btn-hero-secondary" onClick={() => navigate("/courses")}>View all courses →</button>
           </div>
-
         </RevealOnScroll>
-      </section >
+      </section>
+    */}
       
       {/* WHY FINED SECTION */}
-      {/* WHY FINED SECTION */}
-      <section className="why-fined-section" ref={whyFinedRef}>
-        <RevealOnScroll>
-          <div className="wf-header">
-            {/* <span className="pc-eyebrow">Popular Courses</span> */}
-            <h2 className="wf-title">Everything you need to build a <br /> <span className="wf-highlight">strong financial future</span></h2>
-            <div className="wf-title-underline"></div>
-            <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
-          </div>
+  {/* WHY FINED SECTION */ }
+  <section className="why-fined-section" ref={whyFinedRef}>
+    <RevealOnScroll>
+      <div className="wf-header">
+        {/* <span className="pc-eyebrow">Popular Courses</span> */}
+        <h2 className="wf-title">Everything you need to build a <br /> <span className="wf-highlight">strong financial future</span></h2>
+        <div className="wf-title-underline"></div>
+        <p className="pc-subtitle">Practical paths . Real skills . Lifelong effect .</p>
+      </div>
+    </RevealOnScroll>
+
+    <div className="wf-rows-container">
+      {/* SVG overlay for connecting paths */}
+      <svg className="wf-path-svg" ref={pathSvgRef} aria-hidden="true">
+        <defs>
+          {svgPaths.map((d, i) => (
+            <mask id={`path-mask-${i}`} key={`mask-${i}`}>
+              <path
+                className="wf-mask-path"
+                d={d}
+                fill="none"
+                stroke="white"
+                strokeWidth="10"
+                strokeLinecap="butt"
+              />
+            </mask>
+          ))}
+        </defs>
+        {svgPaths.map((d, i) => (
+          <g key={`connector-group-${i}`}>
+            <path
+              className="wf-connector-path"
+              d={d}
+              mask={`url(#path-mask-${i})`}
+              style={{ strokeDasharray: '12 12', strokeDashoffset: 0 }}
+            />
+            <path
+              className="wf-dynamic-tail"
+              d={d}
+              fill="none"
+              stroke="#4A3AFF"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              style={{ strokeDasharray: '16 10000', strokeDashoffset: 0, opacity: 0 }}
+            />
+            <polygon
+              className="wf-dynamic-arrow"
+              points="0,-8 18,0 0,8"
+              fill="#4A3AFF"
+              style={{ opacity: 0, transition: 'opacity 0.15s ease' }}
+            />
+          </g>
+        ))}
+      </svg>
+
+      {/* 01 - image left, text right */}
+
+      <div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
+        <RevealOnScroll delay={0}>
+          <div className="wf-img-placeholder"><img src={wfBiteSizeLessson} alt="Bite-sized lessons" className="wf-img" /></div>
         </RevealOnScroll>
 
-        <div className="wf-rows-container">
-          {/* SVG overlay for connecting paths */}
-          <svg className="wf-path-svg" ref={pathSvgRef} aria-hidden="true">
-            <defs>
-              {svgPaths.map((d, i) => (
-                <mask id={`path-mask-${i}`} key={`mask-${i}`}>
-                  <path
-                    className="wf-mask-path"
-                    d={d}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="10"
-                    strokeLinecap="butt"
-                  />
-                </mask>
-              ))}
-            </defs>
-            {svgPaths.map((d, i) => (
-              <g key={`connector-group-${i}`}>
-                <path
-                  className="wf-connector-path"
-                  d={d}
-                  mask={`url(#path-mask-${i})`}
-                  style={{ strokeDasharray: '12 12', strokeDashoffset: 0 }}
-                />
-                <path
-                  className="wf-dynamic-tail"
-                  d={d}
-                  fill="none"
-                  stroke="#4A3AFF"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  style={{ strokeDasharray: '16 10000', strokeDashoffset: 0, opacity: 0 }}
-                />
-                <polygon
-                  className="wf-dynamic-arrow"
-                  points="0,-8 18,0 0,8"
-                  fill="#4A3AFF"
-                  style={{ opacity: 0, transition: 'opacity 0.15s ease' }}
-                />
-              </g>
-            ))}
-          </svg>
-
-          {/* 01 - image left, text right */}
-
-          <div className="wf-row" id="wf-row-1" ref={el => wfRowRefs.current[0] = el}>
-            <RevealOnScroll delay={0}>
-              <div className="wf-img-placeholder"><img src={wfBiteSizeLessson} alt="Bite-sized lessons" className="wf-img" /></div>
-            </RevealOnScroll>
-
-            <div className="wf-content">
-              <RevealOnScroll delay={150}>
-                <div className="wf-step-header">
-                  <h3 className="wf-step-title">Bite-sized lessons</h3>
-                </div>
-              </RevealOnScroll>
-
-              <div className="wf-tick-list">
-                <TickItem delay={300}>Built for short attention spans (we get it)</TickItem>
-                <TickItem delay={400}>One money topic at a time. No information overload</TickItem>
-                <TickItem delay={500}>No boring 45-minute lectures or endless videos</TickItem>
-                <TickItem delay={600}>From budgeting to SIPs, taxes and credit scores</TickItem>
-              </div>
+        <div className="wf-content">
+          <RevealOnScroll delay={150}>
+            <div className="wf-step-header">
+              <h3 className="wf-step-title">Bite-sized lessons</h3>
             </div>
-          </div>
-
-
-          {/* 02 - text left, image right */}
-          <div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
-            <div className="wf-content">
-              <RevealOnScroll delay={150}>
-                <div className="wf-step-header">
-                  <h3 className="wf-step-title">Interactive Learning</h3>
-                </div>
-              </RevealOnScroll>
-              <div className="wf-tick-list">
-                <TickItem delay={300}>Learn by doing, not just scrolling</TickItem>
-                <TickItem delay={400}>Make money decisions without real-life consequences</TickItem>
-                <TickItem delay={500}>Quick quizzes that keep things interesting</TickItem>
-                <TickItem delay={600}>Feels more like a game than a finance class</TickItem>
-              </div>
-            </div>
-            <RevealOnScroll delay={0}>
-              <div className="wf-img-placeholder">
-                <img src={wfInteractiveLearning} alt="Interactive learning" className="wf-img" />
-              </div>
-            </RevealOnScroll>
-          </div>
-
-
-          {/* 03 - image left, text right */}
-          <div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
-            <RevealOnScroll delay={0}>
-              <div className="wf-img-placeholder">
-                <img src={wfRewardnLeaderBoard} alt="Rewards & Leaderboards" className="wf-img" />
-              </div>
-            </RevealOnScroll>
-            <div className="wf-content">
-              <RevealOnScroll delay={150}>
-                <div className="wf-step-header">
-                  <h3 className="wf-step-title">Rewards & Leaderboards</h3>
-                </div>
-              </RevealOnScroll>
-              <div className="wf-tick-list">
-                <TickItem delay={300}>Every lesson earns you rewards</TickItem>
-                <TickItem delay={400}>Friendly competition keeps you motivated</TickItem>
-                <TickItem delay={500}>Don't break the streak 👀</TickItem>
-                <TickItem delay={600}>Build your FinScore by staying consistent</TickItem>
-              </div>
-            </div>
-          </div>
-
-
-          {/* 04 - text left, image right */}
-          <div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
-            <div className="wf-content">
-              <RevealOnScroll delay={150}>
-                <div className="wf-step-header">
-                  <h3 className="wf-step-title">Personalized Recommendations</h3>
-                </div>
-              </RevealOnScroll>
-              <div className="wf-tick-list">
-                <TickItem delay={300}>No one-size-fits-all money advice</TickItem>
-                <TickItem delay={400}>We recommend what actually fits you</TickItem>
-                <TickItem delay={500}>Zero spam, Zero random product pushes</TickItem>
-                <TickItem delay={600}>The more you learn, the better we get</TickItem>
-              </div>
-            </div>
-            <RevealOnScroll delay={0}>
-              <div className="wf-img-placeholder">
-                <img src={wfPersonalRecommend} alt="Personalized Recommendations" className="wf-img" />
-              </div>
-            </RevealOnScroll>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ARTICLES SECTION */}
-      {/* ARTICLES SECTION */}
-      {/* ARTICLES SECTION */}
-      <section className="articles-section">
-        <RevealOnScroll>
-          <div className="articles-header">
-            <span className="pc-eyebrow-1">From our articles</span>
-            <h2 className="articles-title">Insights to grow your money</h2>
-            <p className="pc-subtitle-ar">Short reads . Big takeaways .</p>
-          </div>
-        </RevealOnScroll>
-
-
-
-        <div className="articles-swiper-container">
-          <div className="swiper-custom-prev">❮</div>
-          <div className="swiper-custom-next">❯</div>
-
-          <RevealOnScroll delay={100}>
-            <Swiper
-              effect={'coverflow'}
-              grabCursor={true}
-              centeredSlides={true}
-              slidesPerView={'auto'}
-              loop={true}
-              speed={500}
-              navigation={{
-                prevEl: '.swiper-custom-prev',
-                nextEl: '.swiper-custom-next',
-              }}
-              coverflowEffect={{
-                rotate: 0,
-                stretch: 0,
-                depth: 100,
-                modifier: 2,
-                slideShadows: false,
-              }}
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
-              }}
-              modules={[EffectCoverflow, Pagination, Autoplay, Navigation]}
-              className="articles-swiper"
-            >
-              {(articles.length > 0 ? articles : [null, null, null, null, null]).map((article, index) => {
-                const isPlaceholder = !article;
-                const articleData = isPlaceholder ? null : article;
-                return (
-                  <SwiperSlide key={index}>
-                    <div
-                      className="article-swiper-card"
-                      onClick={() => !isPlaceholder ? navigate(`/articles/${generateSlug(articleData.title)}`) : null}
-                    >
-                      <img
-                        src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg}
-                        alt={!isPlaceholder ? articleData.title : "Article"}
-                        className="article-swiper-img"
-                      />
-                      <div className="article-swiper-meta">
-                        <div className="article-swiper-footer-top">
-                          <span className="article-swiper-author">By {!isPlaceholder ? (articleData.author || "Shravan Mutha") : 'Shravan Mutha'}</span>
-                          <span className="article-swiper-date">
-                            {!isPlaceholder ? new Date(articleData.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }) : "Jul 1, 2026"}
-                          </span>
-                        </div>
-                        <h3 className="article-swiper-title">
-                          {!isPlaceholder ? articleData.title : "The $500 saving rule students should know"}
-                        </h3>
-                        <p className="article-swiper-desc">
-                          {!isPlaceholder && articleData.content
-                            ? `${articleData.content.substring(0, 100)}...`
-                            : "The saving rule that will change your financial future. The saving rule that will change your financial future. The saving rule that will change your financial future."}
-                        </p>
-                      </div>
-                    </div>
-                  </SwiperSlide>
-                );
-              })}
-            </Swiper>
           </RevealOnScroll>
-        </div>
 
-        <RevealOnScroll delay={100}>
-          {/* <div className="pc-view-all">
+          <div className="wf-tick-list">
+            <TickItem delay={300}>Built for short attention spans (we get it)</TickItem>
+            <TickItem delay={400}>One money topic at a time. No information overload</TickItem>
+            <TickItem delay={500}>No boring 45-minute lectures or endless videos</TickItem>
+            <TickItem delay={600}>From budgeting to SIPs, taxes and credit scores</TickItem>
+          </div>
+        </div>
+      </div>
+
+
+      {/* 02 - text left, image right */}
+      <div className="wf-row" id="wf-row-2" ref={el => wfRowRefs.current[1] = el}>
+        <div className="wf-content">
+          <RevealOnScroll delay={150}>
+            <div className="wf-step-header">
+              <h3 className="wf-step-title">Interactive Learning</h3>
+            </div>
+          </RevealOnScroll>
+          <div className="wf-tick-list">
+            <TickItem delay={300}>Learn by doing, not just scrolling</TickItem>
+            <TickItem delay={400}>Make money decisions without real-life consequences</TickItem>
+            <TickItem delay={500}>Quick quizzes that keep things interesting</TickItem>
+            <TickItem delay={600}>Feels more like a game than a finance class</TickItem>
+          </div>
+        </div>
+        <RevealOnScroll delay={0}>
+          <div className="wf-img-placeholder">
+            <img src={wfInteractiveLearning} alt="Interactive learning" className="wf-img" />
+          </div>
+        </RevealOnScroll>
+      </div>
+
+
+      {/* 03 - image left, text right */}
+      <div className="wf-row" id="wf-row-3" ref={el => wfRowRefs.current[2] = el}>
+        <RevealOnScroll delay={0}>
+          <div className="wf-img-placeholder">
+            <img src={wfRewardnLeaderBoard} alt="Rewards & Leaderboards" className="wf-img" />
+          </div>
+        </RevealOnScroll>
+        <div className="wf-content">
+          <RevealOnScroll delay={150}>
+            <div className="wf-step-header">
+              <h3 className="wf-step-title">Rewards & Leaderboards</h3>
+            </div>
+          </RevealOnScroll>
+          <div className="wf-tick-list">
+            <TickItem delay={300}>Every lesson earns you rewards</TickItem>
+            <TickItem delay={400}>Friendly competition keeps you motivated</TickItem>
+            <TickItem delay={500}>Don't break the streak 👀</TickItem>
+            <TickItem delay={600}>Build your FinScore by staying consistent</TickItem>
+          </div>
+        </div>
+      </div>
+
+
+      {/* 04 - text left, image right */}
+      <div className="wf-row" id="wf-row-4" ref={el => wfRowRefs.current[3] = el}>
+        <div className="wf-content">
+          <RevealOnScroll delay={150}>
+            <div className="wf-step-header">
+              <h3 className="wf-step-title">Personalized Recommendations</h3>
+            </div>
+          </RevealOnScroll>
+          <div className="wf-tick-list">
+            <TickItem delay={300}>No one-size-fits-all money advice</TickItem>
+            <TickItem delay={400}>We recommend what actually fits you</TickItem>
+            <TickItem delay={500}>Zero spam, Zero random product pushes</TickItem>
+            <TickItem delay={600}>The more you learn, the better we get</TickItem>
+          </div>
+        </div>
+        <RevealOnScroll delay={0}>
+          <div className="wf-img-placeholder">
+            <img src={wfPersonalRecommend} alt="Personalized Recommendations" className="wf-img" />
+          </div>
+        </RevealOnScroll>
+      </div>
+
+    </div>
+  </section>
+
+  {/* ARTICLES SECTION */ }
+  {/* ARTICLES SECTION */ }
+  {/* ARTICLES SECTION */ }
+  <section className="articles-section">
+    <RevealOnScroll>
+      <div className="articles-header">
+        <span className="pc-eyebrow-1">From our articles</span>
+        <h2 className="articles-title">Insights to grow your money</h2>
+        <p className="pc-subtitle-ar">Short reads . Big takeaways .</p>
+      </div>
+    </RevealOnScroll>
+
+
+
+    <div className="articles-swiper-container">
+      <div className="swiper-custom-prev">❮</div>
+      <div className="swiper-custom-next">❯</div>
+
+      <RevealOnScroll delay={100}>
+        <Swiper
+          effect={'coverflow'}
+          grabCursor={true}
+          centeredSlides={true}
+          slidesPerView={'auto'}
+          loop={true}
+          speed={500}
+          navigation={{
+            prevEl: '.swiper-custom-prev',
+            nextEl: '.swiper-custom-next',
+          }}
+          coverflowEffect={{
+            rotate: 0,
+            stretch: 0,
+            depth: 100,
+            modifier: 2,
+            slideShadows: false,
+          }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+          }}
+          modules={[EffectCoverflow, Pagination, Autoplay, Navigation]}
+          className="articles-swiper"
+        >
+          {(articles.length > 0 ? articles : [null, null, null, null, null]).map((article, index) => {
+            const isPlaceholder = !article;
+            const articleData = isPlaceholder ? null : article;
+            return (
+              <SwiperSlide key={index}>
+                <div
+                  className="article-swiper-card"
+                  onClick={() => !isPlaceholder ? navigate(`/articles/${generateSlug(articleData.title)}`) : null}
+                >
+                  <img
+                    src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg}
+                    alt={!isPlaceholder ? articleData.title : "Article"}
+                    className="article-swiper-img"
+                  />
+                  <div className="article-swiper-meta">
+                    <div className="article-swiper-footer-top">
+                      <span className="article-swiper-author">By {!isPlaceholder ? (articleData.author || "Shravan Mutha") : 'Shravan Mutha'}</span>
+                      <span className="article-swiper-date">
+                        {!isPlaceholder ? new Date(articleData.published_at || articleData.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' }) : "Jul 1, 2026"}
+                      </span>
+                    </div>
+                    <h3 className="article-swiper-title">
+                      {!isPlaceholder ? articleData.title : "The $500 saving rule students should know"}
+                    </h3>
+                    <p className="article-swiper-desc">
+                      {!isPlaceholder && articleData.content
+                        ? `${articleData.content.substring(0, 100)}...`
+                        : "The saving rule that will change your financial future. The saving rule that will change your financial future. The saving rule that will change your financial future."}
+                    </p>
+                  </div>
+                </div>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+      </RevealOnScroll>
+    </div>
+
+    <RevealOnScroll delay={100}>
+      {/* <div className="pc-view-all">
             <a href="/articles" className="view-all-articles">View all articles →</a>
           </div> */}
-          <div className="pc-view-all">
-            <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles</button>
-          </div>
+      <div className="pc-view-all">
+        <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore all articles</button>
+      </div>
 
-        </RevealOnScroll>
-      </section>
-      {/* TESTIMONIALS SECTION */}
-      {/* TESTIMONIALS SECTION */}
-      <section className="testimonials-section">
-        <RevealOnScroll>
-          <div className="testimonials-header">
-            <span className="pc-eyebrow">What learners have to say</span>
-            <h2 className="testimonials-title">
-              Every path leads <span className="testimonials-highlight">somewhere</span>
-            </h2>
-            <p className="pc-subtitle">See what learners achieved after taking their first step.</p>
-          </div>
-        </RevealOnScroll>
-        <RevealOnScroll delay={100}>
-          <TestimonialsCarousel />
-        </RevealOnScroll>
-      </section>
+    </RevealOnScroll>
+  </section>
+  {/* TESTIMONIALS SECTION */ }
+  {/* TESTIMONIALS SECTION */ }
+  <section className="testimonials-section">
+    <RevealOnScroll>
+      <div className="testimonials-header">
+        <span className="pc-eyebrow">What learners have to say</span>
+        <h2 className="testimonials-title">
+          Every path leads <span className="testimonials-highlight">somewhere</span>
+        </h2>
+        <p className="pc-subtitle">See what learners achieved after taking their first step.</p>
+      </div>
+    </RevealOnScroll>
+    <RevealOnScroll delay={100}>
+      <TestimonialsCarousel />
+    </RevealOnScroll>
+  </section>
 
-      {/* FOOTER CTA SECTION */}
+  {/* FOOTER CTA SECTION */ }
       <div className="footer-gradient-strip"></div>
       <section
         className="footer-cta-section"

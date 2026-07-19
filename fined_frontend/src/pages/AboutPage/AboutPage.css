@@ -1,224 +1,504 @@
+main{
+  background-color: #EDECFC;
+}
 .about-page-wrapper {
-  background: #fdfdfd;
-  min-height: 100vh;
   font-family: 'Nunito', sans-serif;
-  color: #0f172a;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: EDECFC;
 }
 
-/* 1. Hero Section */
-.about-hero {
-  padding: 120px 24px 100px;
-  background: #0f172a;
-  color: #ffffff;
+.about-hero-section {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 70vh;
+  padding-top: 80px; 
+}
+
+.about-hero-content {
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-size: 54px;
+  font-weight: 800;
+  color: #1A37AD; /* Dark blue from the mock */
+  line-height: 1.3;
+  margin: 0;
+}
+
+.hero-title .highlight-yellow {
+  color: #FFB600; 
+}
+
+.about-stats-section {
+  background-color: #8889FC; 
+  color: white;
+  padding: 40px 0;
+}
+
+.stats-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 15px;
+  min-width: 150px;
+}
+
+.stat-icon {
+  margin-bottom: 12px;
+  color: white;
+}
+
+.star-icon {
+  /* color is set inline for this SVG */
+}
+
+.stat-item h3 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 5px 0;
+}
+
+.stat-item p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 36px;
+  }
+  
+  .stats-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+}
+
+/* Mission Section */
+.about-mission-section {
+  background-color: #F1F4FF; /* Very light blue background based on image */
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.mission-card {
+  background: white;
+  border-radius: 16px;
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  padding: 50px 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  gap: 40px;
+}
+
+.mission-left {
+  flex: 1;
+}
+
+.mission-title {
+  color: #1A37AD;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 40px;
   text-align: center;
 }
 
-.about-hero-container {
-  max-width: 850px;
-  margin: 0 auto;
+.mission-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 30px;
 }
 
-.brand-label {
-  color: #818cf8;
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  display: inline-block;
-  margin-bottom: 20px;
+.mission-plus {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
-.about-hero-container h1 {
-  font-size: 44px;
-  font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 24px;
-  letter-spacing: -0.5px;
-  color: #ffffff;
-}
-
-.hero-subtitle {
+.mission-item p {
+  color: #8C8C8C; /* Grey text from image */
   font-size: 18px;
   line-height: 1.6;
-  color: #94a3b8;
-  max-width: 680px;
-  margin: 0 auto;
+  margin: 0;
+  font-weight: 600;
 }
 
-/* Container */
-.about-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 24px;
+.mission-divider {
+  width: 2px;
+  background-color: #E2E8F0;
+  margin: 0 10px;
 }
 
-/* 2. Narrative Section (Two Column) */
-.about-narrative-section {
-  padding: 90px 0;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
+.mission-right {
+  flex: 1;
 }
 
-.narrative-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 48px;
-  align-items: start;
-}
-
-.narrative-left h2 {
-  font-size: 28px;
+.why-title {
+  color: #FFB600;
+  font-size: 36px;
   font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 16px;
-  line-height: 1.2;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
-.narrative-accent-line {
-  width: 48px;
+.why-content {
+  border-left: 2px dashed #1A37AD;
+  padding-left: 40px;
+  margin-left: -20px;
+}
+
+.why-content p {
+  color: #8C8C8C;
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .mission-card {
+    flex-direction: column;
+    padding: 30px 20px;
+  }
+
+  .mission-divider {
+    display: none;
+  }
+
+  .mission-title,
+  .why-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .mission-right {
+    border-top: 2px dashed #1A37AD;
+    padding-top: 40px;
+    margin-top: 10px;
+  }
+
+  .why-content {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+
+/* What we do Section */
+.about-whatwedo-section {
+  background-color: #F1F4FF;
+  padding: 60px 20px 100px;
+}
+
+.whatwedo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.whatwedo-header {
+  text-align: center;
+  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.whatwedo-header h2 {
+  color: #1A37AD;
+  font-size: 40px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.whatwedo-underline {
+  width: 100px;
   height: 4px;
-  background: var(--brand-indigo, #4a3aff);
+  background-color: #4A6BFF; /* Underline color */
+  margin-top: 8px;
   border-radius: 2px;
 }
 
-.narrative-right p {
-  font-size: 16px;
-  line-height: 1.75;
-  color: #475569;
-  margin-bottom: 24px;
-}
-
-.narrative-right p:last-child {
-  margin-bottom: 0;
-}
-
-/* 3. The FinEd Approach Section */
-.about-approach-section {
-  padding: 95px 0;
-  background: #fafafb;
-}
-
-.approach-header {
-  text-align: center;
-  margin-bottom: 56px;
-}
-
-.approach-header h2 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.approach-grid {
+.whatwedo-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
 }
 
-.approach-card {
-  background: #ffffff;
-  padding: 36px 28px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.approach-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
-
-.approach-icon-wrapper {
-  color: var(--brand-indigo, #4a3aff);
-  margin-bottom: 20px;
-  display: inline-block;
-  background: #f5f3ff;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.approach-card h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 12px;
-}
-
-.approach-card p {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #475569;
-}
-
-/* 4. Action Banner Section */
-.about-action-section {
-  padding: 90px 0;
-  background: #ffffff;
-}
-
-.about-action-banner {
-  background: #0f172a;
-  border-radius: 16px;
-  padding: 60px 40px;
-  color: #ffffff;
+.whatwedo-card {
+  background: white;
+  border-radius: 24px;
+  padding: 50px 24px;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.about-action-banner h2 {
-  font-size: 32px;
+.whatwedo-icon {
+  height: 150px;
+  margin-bottom: 30px;
+  object-fit: contain;
+}
+
+.whatwedo-card h3 {
+  color: #1A37AD;
+  font-size: 26px;
   font-weight: 800;
   margin-bottom: 16px;
-  letter-spacing: -0.5px;
+  line-height: 1.3;
 }
 
-.about-action-banner p {
+.whatwedo-card p {
+  color: #8C8C8C;
   font-size: 16px;
-  color: #94a3b8;
-  max-width: 550px;
-  margin: 0 auto 32px;
   line-height: 1.6;
+  font-weight: 600;
+  margin: 0;
 }
 
-.btn-about-action {
-  background: var(--brand-indigo, #4a3aff);
-  color: #ffffff;
-  font-weight: 700;
-  padding: 14px 28px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 15px;
-  display: inline-block;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-about-action:hover {
-  background: #3728db;
-  transform: translateY(-1px);
-}
-
-/* Responsive Media Queries */
-@media (max-width: 960px) {
-  .approach-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .narrative-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+@media (max-width: 1024px) {
+  .whatwedo-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .about-hero h1 {
-    font-size: 32px;
+  .whatwedo-grid {
+    grid-template-columns: 1fr;
   }
-  .about-hero {
-    padding: 80px 16px 60px;
+}
+
+/* Founders Section */
+.about-founders-section {
+  background-color: #041454; 
+  padding: 80px 20px 100px;
+}
+
+.founders-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.founders-header {
+  text-align: center;
+  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.founders-header h2 {
+  color: #FFB600;
+  font-size: 42px;
+  font-weight: 900;
+  font-style: italic;
+  margin: 0;
+}
+
+.founders-underline {
+  margin-top: -10px;
+}
+
+.founders-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.founder-card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 30px;
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.founder-image-placeholder {
+  width: 180px;
+  height: 180px;
+  background-color: #D9D9D9;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.founder-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.founder-info h3 {
+  color: #1A37AD;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 5px 0;
+}
+
+.founder-info h4 {
+  color: #5A4BFF; 
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 15px 0;
+}
+
+.founder-info p {
+  color: #8C8C8C;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+  margin: 0 0 20px 0;
+}
+
+.founder-socials {
+  display: flex;
+  gap: 10px;
+}
+
+.social-placeholder {
+  width: 32px;
+  height: 32px;
+  background-color: #D9D9D9;
+  border-radius: 6px;
+}
+
+@media (max-width: 1024px) {
+  .founders-grid {
+    grid-template-columns: 1fr;
   }
-  .about-action-banner {
-    padding: 40px 24px;
+}
+
+@media (max-width: 640px) {
+  .founder-card {
+    flex-direction: column;
+    text-align: center;
   }
-  .about-action-banner h2 {
-    font-size: 24px;
+  
+  .founder-socials {
+    justify-content: center;
+  }
+}
+
+/* Institutional Partnerships Section */
+.about-institutional-section {
+  background: linear-gradient(180deg, #CCD6FF 0%, #FFFFFF 100%);
+  padding: 80px 20px 100px;
+}
+
+.institutional-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.institutional-left {
+  flex: 1.5;
+  display: flex;
+  justify-content: center;
+}
+
+.institutional-image {
+  max-width: 100%;
+  height: auto;
+  transform: scale(1.6);
+}
+
+.institutional-right {
+  flex: 1;
+}
+
+.institutional-right h2 {
+  color: #1A37AD; 
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.institutional-right p {
+  color: #1C1C1C; /* Dark text based on image */
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.btn-partner-with-us {
+  background-color: #FFB600;
+  color: #000000;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 12px 28px;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000000;
+  margin-top: 10px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn-partner-with-us:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.btn-partner-with-us:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+@media (max-width: 960px) {
+  .institutional-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 40px;
+  }
+  
+  .institutional-left {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .institutional-left > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .institutional-image {
+    display: block !important;
+    margin: 0 auto !important;
+    transform: translateX(10%) !important; /* Move a bit more back to the left */
   }
 }
