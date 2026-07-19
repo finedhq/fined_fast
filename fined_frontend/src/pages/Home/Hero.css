@@ -176,17 +176,20 @@ body {
   width: 100%;
 }
 
-.hero-buttons > button {
+.hero-buttons button,
+.hero-buttons input[type="email"] {
   width: 100%;
   max-width: 200px;
+  min-width: 180px;
   justify-content: center;
   text-align: center;
   font-size: 16px;
-  padding: 8px 16px;
-  min-height: 46px;
+  padding: 10px 12px;
+  min-height: 48px;
   display: flex;
   align-items: center;
 }
+
 
 .btn-hero-primary {
   background: var(--brand-yellow);
@@ -675,17 +678,14 @@ body {
   .btn-hero-secondary-blue,
   .btn-footer-cta {
     font-size: 15px;
-    padding: 8px 20px;
   }
 
-  .btn-hero-secondary-blue {
-    padding: 8px 12px;
-  }
-
-  .hero-buttons > button {
+  .hero-buttons button,
+  .hero-buttons input[type="email"] {
     max-width: 240px;
+    min-width: 220px;
     font-size: 16px;
-    padding: 8px 16px;
+    padding: 10px 16px;
     min-height: 48px;
   }
 
@@ -702,6 +702,7 @@ body {
 @media (max-width: 480px) {
   .features-strip {
     grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
     padding: 0 12px;
     margin-top: 0;
   }
@@ -711,13 +712,13 @@ body {
     outline: none;
     border-right: 1px solid #eaeaf0;
     border-top: 1px solid #eaeaf0;
-    padding: 12px 8px;
+    padding: 8px 4px;
   }
 
   .feature-item-inner {
     flex-direction: column;
     text-align: center;
-    gap: 6px;
+    gap: 4px;
   }
 
   .feature-icon-box {
@@ -727,11 +728,9 @@ body {
   }
 
   .feature-icon-img {
-    width: 48px;
-    height: 48px;
-    transform: scale(1.5);
-    margin-top: 5px;
-    margin-bottom: 5px;
+    width: 75px;
+    height: 75px;
+    transform: none;
   }
 
   .feature-icon-box svg {
@@ -741,18 +740,20 @@ body {
 
   .feature-title,
   .feature-title-4 {
-    font-size: 15px;
-    line-height: 1.3;
+    font-size: 16px;
+    line-height: 1.2;
+    margin-top: 1px;
   }
   
   .feature-desc {
-    font-size: 13px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1.3;
   }
 
   .feature-item:nth-child(2n) {
     border-right: none;
   }
+
 
   .feature-item:nth-child(1),
   .feature-item:nth-child(2) {
@@ -1751,5 +1752,16 @@ body {
 
   .article-swiper-footer-top {
     font-size: 0.75rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -308,6 +308,8 @@ function Hero() {
   const [waitlistLoading, setWaitlistLoading] = useState(false);
   const [waitlistMessage, setWaitlistMessage] = useState({ text: "", type: "" });
 
+  const [showWaitlistForm, setShowWaitlistForm] = useState(false);
+
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
     if (!waitlistEmail) return;
@@ -317,6 +319,7 @@ function Hero() {
       await joinWaitlist(waitlistEmail);
       setWaitlistMessage({ text: "Thanks for joining the waitlist!", type: "success" });
       setWaitlistEmail("");
+      setShowWaitlistForm(false); // Hide the input form immediately to show the success button
     } catch (error) {
       setWaitlistMessage({ text: "Something went wrong. Please try again.", type: "error" });
     } finally {
@@ -553,26 +556,45 @@ function Hero() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={200}>
-          <div className="hero-buttons" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <form onSubmit={handleWaitlistSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={waitlistEmail}
-                  onChange={(e) => setWaitlistEmail(e.target.value)}
-                  style={{ padding: '0 20px', height: '48px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', minWidth: '220px', fontSize: '16px' }}
-                  disabled={waitlistLoading}
-                  required
-                />
-                <button type="submit" className="btn-hero-primary" disabled={waitlistLoading}>
-                  {waitlistLoading ? "Joining..." : "Join WaitList"}
+          <div className="hero-buttons" style={{ flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
+              {!showWaitlistForm ? (
+                <button 
+                  className="btn-hero-primary" 
+                  onClick={() => {
+                    // Only allow clicking if not already joined
+                    if (waitlistMessage.type !== 'success') {
+                      setShowWaitlistForm(true);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: waitlistMessage.type === 'success' ? '#10b981' : undefined,
+                    cursor: waitlistMessage.type === 'success' ? 'default' : 'pointer',
+                  }}
+                >
+                  {waitlistMessage.type === 'success' ? "Joined the waitlist! 🎉" : "Join WaitList"}
                 </button>
-              </form>
+              ) : (
+                <form onSubmit={handleWaitlistSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', animation: 'fadeIn 0.3s ease-in-out' }}>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    style={{ padding: '0 12px', height: '48px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', minWidth: '180px', fontSize: '18px', textAlign: 'center' }}
+                    disabled={waitlistLoading}
+                    required
+                    autoFocus
+                  />
+                  <button type="submit" className="btn-hero-primary" disabled={waitlistLoading}>
+                    {waitlistLoading ? "Joining..." : "Submit"}
+                  </button>
+                </form>
+              )}
               <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore Articles</button>
             </div>
-            {waitlistMessage.text && (
-              <p style={{ marginTop: '12px', fontSize: '14px', color: waitlistMessage.type === 'error' ? '#ef4444' : '#10b981' }}>
+            {waitlistMessage.type === 'error' && (
+              <p style={{ marginTop: '12px', fontSize: '14px', color: '#ef4444' }}>
                 {waitlistMessage.text}
               </p>
             )}
