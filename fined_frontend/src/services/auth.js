@@ -1,5 +1,5 @@
-export function isAdminUser() {
-  const role = localStorage.getItem("fined_role") || localStorage.getItem("role");
-  const roles = localStorage.getItem("fined_roles") || localStorage.getItem("roles");
-  return role === "Admin" || roles?.includes("Admin");
+export function isAdminUser(user) {
+  if (!user) return false;
+  const roles = user["https://fined.com/roles"] || user["https://myfined.com/roles"] || [];
+  return roles.includes("Admin");
 }

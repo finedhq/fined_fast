@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
 import { getCard, updateCard } from "../../../services/api";
+import { useAuth0 } from "@auth0/auth0-react";
 import "./CardViewer.css";
 
 function CardViewer() {
@@ -12,12 +13,17 @@ function CardViewer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const { user } = useAuth0();
+  const email = user?.email || "";
+
   useEffect(() => {
+    if (!email) return;
+
     let cancelled = false;
     setLoading(true);
     setError("");
 
-    getCard(courseId, moduleId, cardId)
+    getCard(courseId, moduleId, cardId, email)
       .then((data) => {
         if (!cancelled) setCard(data);
       })
@@ -31,11 +37,10 @@ function CardViewer() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, moduleId, cardId]);
+  }, [courseId, moduleId, cardId, email]);
 
   const handleContinue = async () => {
     try {
-      const email = localStorage.getItem("fined_email") || "";
       await updateCard(courseId, moduleId, cardId, { status: "completed", email });
     } catch {
       // Non-blocking — navigation should not stall on a logging failure

@@ -102,7 +102,7 @@ async def get_adjacent_articles(slug: str):
 async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Save newsletter email subscription"""
     try:
-        article_service.save_newsletter_email(body.email, body.entered_email)
+        article_service.save_newsletter_email(user.email, body.entered_email)
         return {"message": "Email saved successfully."}
     except Exception as e:
         raise HTTPException(
@@ -114,7 +114,7 @@ async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_curren
 async def remove_email(body: RemoveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Remove newsletter email subscription"""
     try:
-        article_service.remove_newsletter_email(body.email, body.entered_email)
+        article_service.remove_newsletter_email(user.email, body.entered_email)
         return {"message": "Email removed successfully."}
     except Exception as e:
         raise HTTPException(
@@ -126,7 +126,7 @@ async def remove_email(body: RemoveEmailRequest, user: AuthUser = Depends(get_cu
 async def get_entered_email(body: GetEnteredEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Get newsletter email subscribed by the user"""
     try:
-        return article_service.get_newsletter_email(body.email)
+        return article_service.get_newsletter_email(user.email)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -137,7 +137,7 @@ async def get_entered_email(body: GetEnteredEmailRequest, user: AuthUser = Depen
 async def update_task(body: UpdateTaskRequest, user: AuthUser = Depends(get_current_user)):
     """Mark article read to update user score/consistency metrics"""
     try:
-        res = article_service.mark_read(body.email)
+        res = article_service.mark_read(user.email)
         if not res.get("updated", False):
             return res
         # Match Javascript response keys (Express: articleCount, pointsEarned, newScore)
@@ -167,7 +167,7 @@ async def fetch_rating(body: FetchRatingRequest, user: AuthUser = Depends(get_cu
         except ValueError:
             return {"rating": 0}
 
-        rating_data = article_service.get_user_rating(body.email, body.article_id)
+        rating_data = article_service.get_user_rating(user.email, body.article_id)
         # Returns user rating or standard placeholder matching React expectations
         return rating_data if rating_data else {"rating": 0}
     except Exception as e:
@@ -190,7 +190,7 @@ async def rate_article(body: RateRequest, user: AuthUser = Depends(get_current_u
         )
 
     try:
-        article_service.rate(body.email, body.article_id, body.rating)
+        article_service.rate(user.email, body.article_id, body.rating)
         return {"message": "Rating saved."}
     except Exception as e:
         raise HTTPException(

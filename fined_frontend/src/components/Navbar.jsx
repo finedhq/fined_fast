@@ -11,7 +11,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // This must be INSIDE the component function
-  const { loginWithRedirect, isAuthenticated, logout } = useAuth0();
+  const { user, loginWithRedirect, isAuthenticated, logout } = useAuth0();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -88,7 +88,7 @@ export default function Navbar() {
                 <button className="btn-signin" onClick={() => navigate("/dashboard")}>
                   Dashboard
                 </button>
-                {isAdminUser() && (
+                {isAdminUser(user) && (
                   <button className="btn-signin" onClick={() => navigate("/admin")}>
                     Admin
                   </button>
@@ -133,7 +133,7 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <li><NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink></li>
-              {isAdminUser() && (
+              {isAdminUser(user) && (
                 <li><NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</NavLink></li>
               )}
               <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); logout({ logoutParams: { returnTo: window.location.origin } }); }}>Logout</a></li>

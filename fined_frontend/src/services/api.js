@@ -127,11 +127,11 @@ export function getCourses() {
   });
 }
 
-export function getCourseDetails(courseId) {
+export function getCourseDetails(courseId, email) {
   return request(`/courses/course/${courseId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: localStorage.getItem("fined_email") || "" }),
+    body: JSON.stringify({ email: email || "" }),
   });
 }
 
@@ -143,11 +143,11 @@ export function addCard(payload) {
   });
 }
 
-export function getCard(courseId, moduleId, cardId) {
+export function getCard(courseId, moduleId, cardId, email) {
   return request(`/courses/course/${courseId}/module/${moduleId}/card/${cardId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: localStorage.getItem("fined_email") || "" }),
+    body: JSON.stringify({ email: email || "" }),
   });
 }
 

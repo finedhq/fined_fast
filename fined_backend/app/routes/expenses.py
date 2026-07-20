@@ -13,7 +13,7 @@ from app.repositories.transaction_repo import transaction_repo
 from app.repositories.user_repo import user_repo
 from app.services.score_service import score_service
 from app.config import settings
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, AuthUser
 from googleapiclient.discovery import build
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"], dependencies=[Depends(get_current_user)])
@@ -151,10 +151,10 @@ async def bank_callback(code: str, state: str):
         )
 
 @router.post("/fetchBankEmail")
-async def fetch_bank_email(body: FetchBankEmailRequest):
+async def fetch_bank_email(body: FetchBankEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch user's Gmail connection status and bank email"""
     try:
-        res = supabase.from_("userToken").select("bankEmail, autofetchStatus").eq("email", body.email).execute()
+        res = supabase.from_("userToken").select("bankEmail, autofetchStatus").eq("email", user.email).execute()
         return {"message": "Bank email fetched successfully", "data": res.data or []}
     except Exception as e:
         raise HTTPException(
@@ -163,15 +163,15 @@ async def fetch_bank_email(body: FetchBankEmailRequest):
         )
 
 @router.post("/checkandfetch")
-async def check_and_fetch(body: FetchBankEmailRequest):
+async def check_and_fetch(body: FetchBankEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch parsed but uncommitted transaction records from Gmail"""
-    res_data = gmail_service.fetch_transactions(body.email)
+    res_data = gmail_service.fetch_transactions(user.email)
     if "error" in res_data:
         raise HTTPException(status_code=401, detail=res_data["error"])
     return res_data.get("parsed", [])
 
 @router.post("/budgets")
-async def budgets(body: BudgetsRequest):
+async def budgets(body: BudgetsRequest, user: AuthUser = Depends(get_current_user)):
     """Set budgets, recalculate spent values, and apply gamified scores"""
     try:
         cleaned_budgets = []
@@ -179,7 +179,7 @@ async def budgets(body: BudgetsRequest):
         curr_month = today.strftime("%B")
         curr_year = today.year
         score = 0
-        user_email = body.budgets[0].email if body.budgets else None
+        user_email = user.email if body.budgets else None
 
         if not user_email:
             raise HTTPException(status_code=400, detail="No budgets provided")
@@ -288,10 +288,10 @@ async def budgets(body: BudgetsRequest):
         )
 
 @router.post("/fetchcategories")
-async def fetch_categories(body: FetchBankEmailRequest):
+async def fetch_categories(body: FetchBankEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch all user categories"""
     try:
-        res = supabase.from_("userCategories").select("category").eq("email", body.email).execute()
+        res = supabase.from_("userCategories").select("category").eq("email", user.email).execute()
         categories = [item["category"] for item in (res.data or [])]
         return {"categories": categories}
     except Exception as e:
@@ -301,14 +301,14 @@ async def fetch_categories(body: FetchBankEmailRequest):
         )
 
 @router.post("/fetchcategorybudgets")
-async def fetch_category_budgets(body: FetchCategoryBudgetsRequest):
+async def fetch_category_budgets(body: FetchCategoryBudgetsRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch budgets for a specific month and alert user if threshold exceeded"""
     try:
         today = date.today()
         year = today.year
         
         query = supabase.from_("budgets").select("*").match({
-            "email": body.email,
+            "email": user.email,
             "month": body.month,
             "year": year
         })
@@ -321,7 +321,7 @@ async def fetch_category_budgets(body: FetchCategoryBudgetsRequest):
         monthly_idx = next((i for i, b in enumerate(data) if b["category"] == "Monthly"), -1)
         if monthly_idx != -1:
             sum_res = supabase.from_("transaction_summary").select("expense").match({
-                "email": body.email,
+                "email": user.email,
                 "month": body.month,
                 "year": year
             }).maybe_single().execute()
@@ -339,12 +339,12 @@ async def fetch_category_budgets(body: FetchCategoryBudgetsRequest):
                 # Check duplicate warnings in past week
                 seven_days_ago = (datetime.utcnow() - timedelta(days=7)).isoformat()
                 notif_res = supabase.from_("notifications").select("id").match({
-                    "email": body.email,
+                    "email": user.email,
                     "content": content
                 }).gte("created_at", seven_days_ago).maybe_single().execute()
                 
                 if not notif_res.data:
-                    notification_service.send(body.email, content)
+                    notification_service.send(user.email, content)
 
         return {"message": "Budgets fetched successfully", "data": data}
 
@@ -355,14 +355,14 @@ async def fetch_category_budgets(body: FetchCategoryBudgetsRequest):
         )
 
 @router.post("/fetchmonthlybudget")
-async def fetch_monthly_budget(body: FetchBankEmailRequest):
+async def fetch_monthly_budget(body: FetchBankEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch overall Monthly budget limit for current month"""
     try:
         today = date.today()
         month = today.strftime("%B")
         year = today.year
         res = supabase.from_("budgets").select("*").match({
-            "email": body.email,
+            "email": user.email,
             "month": month,
             "year": year,
             "category": "Monthly"
@@ -375,11 +375,11 @@ async def fetch_monthly_budget(body: FetchBankEmailRequest):
         )
 
 @router.post("/transaction")
-async def save_transaction(body: TransactionRequest):
+async def save_transaction(body: TransactionRequest, user: AuthUser = Depends(get_current_user)):
     """Add a transaction manually, apply daily logging scores, and update totals"""
     try:
         txn = body.transaction
-        email = txn.email
+        email = user.email
         txn_date = date.fromisoformat(txn.date)
         today_str = date.today().isoformat()
         month = txn_date.strftime("%B")
@@ -393,16 +393,16 @@ async def save_transaction(body: TransactionRequest):
         supabase.from_("transactions").upsert([txn_dict]).execute()
 
         # 2. Score calculations
-        user = user_repo.get_by_email(email)
-        if not user:
+        db_user = user_repo.get_by_email(email)
+        if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
 
         score_delta = 0
-        streak = user.get("transaction_streak_count") or 0
-        last_date_str = user.get("last_transaction_date")
-        last_score_date = user.get("last_transaction_score_date")
+        streak = db_user.get("transaction_streak_count") or 0
+        last_date_str = db_user.get("last_transaction_date")
+        last_score_date = db_user.get("last_transaction_score_date")
         should_score_today = (last_score_date != today_str)
-        old_total = score_service.compute_total(user)
+        old_total = score_service.compute_total(db_user)
 
         if should_score_today:
             streak = 1
@@ -411,7 +411,7 @@ async def save_transaction(body: TransactionRequest):
                 last_date = date.fromisoformat(last_date_str[:10])
                 gap = (date.today() - last_date).days
                 if gap == 1:
-                    streak = (user.get("transaction_streak_count") or 0) + 1
+                    streak = (db_user.get("transaction_streak_count") or 0) + 1
                     if streak == 7:
                         score_delta += 10
                 elif gap > 1:
@@ -420,7 +420,7 @@ async def save_transaction(body: TransactionRequest):
                     if gap >= 7:
                         score_delta -= 10
             
-            new_expense_score = max(0, min(150, (user.get("expense_score") or 0) + score_delta))
+            new_expense_score = max(0, min(150, (db_user.get("expense_score") or 0) + score_delta))
             
             supabase.from_("users").update({
                 "transaction_streak_count": streak,
@@ -429,7 +429,7 @@ async def save_transaction(body: TransactionRequest):
                 "expense_score": new_expense_score
             }).eq("email", email).execute()
 
-            updated_user = {**user, "expense_score": new_expense_score}
+            updated_user = {**db_user, "expense_score": new_expense_score}
             new_total = score_service.compute_total(updated_user)
             delta = new_total - old_total
 
@@ -505,7 +505,7 @@ async def save_transaction(body: TransactionRequest):
         )
 
 @router.post("/transactions-bulk")
-async def save_transactions_bulk(body: TransactionsBulkRequest):
+async def save_transactions_bulk(body: TransactionsBulkRequest, user: AuthUser = Depends(get_current_user)):
     """Import multiple transaction records concurrently, re-aggregating month totals"""
     try:
         txns_dict = [t.model_dump(by_alias=True, exclude_none=True) for t in body.transactions]
@@ -520,22 +520,22 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
         for txn in body.transactions:
             try:
                 dt = date.fromisoformat(txn.date)
-                unique_user_dates.add((txn.email, dt.isoformat()))
+                unique_user_dates.add((user.email, dt.isoformat()))
             except Exception:
                 continue
 
         for email, date_str in unique_user_dates:
-            user = user_repo.get_by_email(email)
-            if not user:
+            db_user = user_repo.get_by_email(email)
+            if not db_user:
                 continue
             
-            last_score_date = user.get("last_transaction_score_date")
+            last_score_date = db_user.get("last_transaction_score_date")
             should_score_today = (last_score_date != today_str)
 
             if should_score_today:
                 streak = 1
                 score_delta = 3
-                last_date_str = user.get("last_transaction_date")
+                last_date_str = db_user.get("last_transaction_date")
                 last_date = date.fromisoformat(last_date_str[:10]) if last_date_str else None
                 
                 is_yesterday_tracked = (last_date == yesterday) if last_date else False
@@ -548,14 +548,14 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
                         score_delta -= 10
                 
                 if is_yesterday_tracked:
-                    streak = (user.get("transaction_streak_count") or 1) + 1
+                    streak = (db_user.get("transaction_streak_count") or 1) + 1
                     if streak == 7:
                         score_delta += 10
                 elif last_date and gap > 1:
                     streak = 1
 
-                old_total = score_service.compute_total(user)
-                updated_expense = max(0, min(150, (user.get("expense_score") or 0) + score_delta))
+                old_total = score_service.compute_total(db_user)
+                updated_expense = max(0, min(150, (db_user.get("expense_score") or 0) + score_delta))
 
                 supabase.from_("users").update({
                     "transaction_streak_count": streak,
@@ -565,7 +565,7 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
                     "expense_score": updated_expense
                 }).eq("email", email).execute()
 
-                updated_user = {**user, "expense_score": updated_expense}
+                updated_user = {**db_user, "expense_score": updated_expense}
                 new_total = score_service.compute_total(updated_user)
                 delta = new_total - old_total
 
@@ -594,10 +594,10 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
                 txn_date = date.fromisoformat(txn.date)
                 month = txn_date.strftime("%B")
                 year = txn_date.year
-                key = (txn.email, txn.category, month, year)
+                key = (user.email, txn.category, month, year)
                 if key not in groups:
                     groups[key] = {
-                        "email": txn.email,
+                        "email": user.email,
                         "category": txn.category,
                         "month": month,
                         "year": year,
@@ -624,7 +624,7 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
                 txn_date = date.fromisoformat(txn.date)
                 month = txn_date.strftime("%B")
                 year = txn_date.year
-                key = (txn.email, month, year)
+                key = (user.email, month, year)
                 if key not in summary_groups:
                     summary_groups[key] = {"expense": 0.0, "income": 0.0, "saving": 0.0, "investment": 0.0}
                 
@@ -657,10 +657,10 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
         seen = set()
         for txn in body.transactions:
             if txn.category not in common_categories:
-                pair = (txn.email, txn.category)
+                pair = (user.email, txn.category)
                 if pair not in seen:
                     seen.add(pair)
-                    category_pairs.append({"email": txn.email, "category": txn.category})
+                    category_pairs.append({"email": user.email, "category": txn.category})
         
         if category_pairs:
             supabase.from_("userCategories").upsert(category_pairs, on_conflict="email,category").execute()
@@ -674,7 +674,7 @@ async def save_transactions_bulk(body: TransactionsBulkRequest):
         )
 
 @router.post("/fetchexpenses")
-async def fetch_expenses(body: FetchExpensesRequest):
+async def fetch_expenses(body: FetchExpensesRequest, user: AuthUser = Depends(get_current_user)):
     """Retrieve monthly totals for a given month range back"""
     try:
         now = date.today()
@@ -689,7 +689,7 @@ async def fetch_expenses(body: FetchExpensesRequest):
             dt = date(y, m, 1)
             summaries.append({"month": dt.strftime("%B"), "year": dt.year})
 
-        res = supabase.from_("transaction_summary").select("*").eq("email", body.email)\
+        res = supabase.from_("transaction_summary").select("*").eq("email", user.email)\
             .in_("month", [s["month"] for s in summaries])\
             .in_("year", [s["year"] for s in summaries])\
             .order("year", desc=True).execute()
@@ -702,7 +702,7 @@ async def fetch_expenses(body: FetchExpensesRequest):
         )
 
 @router.post("/fetchexpensesPie")
-async def fetch_expenses_pie(body: FetchExpensesPieRequest):
+async def fetch_expenses_pie(body: FetchExpensesPieRequest, user: AuthUser = Depends(get_current_user)):
     """Retrieve all transaction details in a month for category distributions"""
     try:
         now = date.today()
@@ -721,7 +721,7 @@ async def fetch_expenses_pie(body: FetchExpensesPieRequest):
             next_year += 1
         to_date = date(next_year, next_month, 1)
 
-        res = supabase.from_("transactions").select("*").eq("email", body.email)\
+        res = supabase.from_("transactions").select("*").eq("email", user.email)\
             .gte("date", from_date.isoformat()).lt("date", to_date.isoformat())\
             .order("date", desc=True).execute()
 
@@ -733,7 +733,7 @@ async def fetch_expenses_pie(body: FetchExpensesPieRequest):
         )
 
 @router.post("/fetchexpensesnew")
-async def fetch_expenses_new(body: FetchExpensesNewRequest):
+async def fetch_expenses_new(body: FetchExpensesNewRequest, user: AuthUser = Depends(get_current_user)):
     """Paginated transaction lookup reverse-chronologically"""
     try:
         page = body.page or 0
@@ -741,7 +741,7 @@ async def fetch_expenses_new(body: FetchExpensesNewRequest):
         start = page * limit
         end = start + limit - 1
 
-        res = supabase.from_("transactions").select("*").eq("email", body.email)\
+        res = supabase.from_("transactions").select("*").eq("email", user.email)\
             .order("date", desc=True).range(start, end).execute()
 
         return {"message": "Transactions fetched successfully", "data": res.data or []}
@@ -752,10 +752,10 @@ async def fetch_expenses_new(body: FetchExpensesNewRequest):
         )
 
 @router.post("/deletetransaction")
-async def delete_transaction(body: DeleteTransactionRequest):
+async def delete_transaction(body: DeleteTransactionRequest, user: AuthUser = Depends(get_current_user)):
     """Delete a transaction, adjust category spent levels, and recalculate month aggregates"""
     try:
-        email = body.email
+        email = user.email
         txn_id = body.transactionId
 
         # 1. Fetch details
@@ -815,10 +815,10 @@ async def delete_transaction(body: DeleteTransactionRequest):
         )
 
 @router.post("/disconnect")
-async def disconnect(body: FetchBankEmailRequest):
+async def disconnect(body: FetchBankEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Disconnect user's Gmail integrations and delete saved credentials"""
     try:
-        supabase.from_("userToken").delete().match({"email": body.email}).execute()
+        supabase.from_("userToken").delete().match({"email": user.email}).execute()
         return {"message": "Disconnected and deleted token successfully."}
     except Exception as e:
         raise HTTPException(
@@ -827,10 +827,10 @@ async def disconnect(body: FetchBankEmailRequest):
         )
 
 @router.post("/statuschange")
-async def status_change(body: StatusChangeRequest):
+async def status_change(body: StatusChangeRequest, user: AuthUser = Depends(get_current_user)):
     """Toggle the autofetch background sync status for Gmail connections"""
     try:
-        supabase.from_("userToken").update({"autofetchStatus": body.isAutoFetch}).match({"email": body.email}).execute()
+        supabase.from_("userToken").update({"autofetchStatus": body.isAutoFetch}).match({"email": user.email}).execute()
         return {"message": "Auto-fetch status updated successfully."}
     except Exception as e:
         raise HTTPException(

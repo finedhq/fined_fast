@@ -14,9 +14,9 @@ export const AuthenticationGuard = ({ component: Component, ...props }) => {
   }
 
   // For deployment without login system, comment out the redirection so all guarded pages are publicly accessible:
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/" replace />;
-  // }
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return <Component {...props} />;
 };

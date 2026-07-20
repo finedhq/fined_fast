@@ -15,12 +15,17 @@ class AuthUser(BaseModel):
     sub:str #auth0 userid
     roles:list[str]=[] #auth0 roles claim
 
+_jwks = None
+
 async def get_jwks() -> dict:
-    """Fetch Auth0 public keys to verify JWT signatures"""
-    url = f"https://{settings.AUTH0_DOMAIN}/.well-known/jwks.json"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        return response.json()
+    """Fetch Auth0 public keys to verify JWT signatures (Cached)"""
+    global _jwks
+    if _jwks is None:
+        url = f"https://{settings.AUTH0_DOMAIN}/.well-known/jwks.json"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            _jwks = response.json()
+    return _jwks
 
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     token=credentials.credentials
@@ -43,10 +48,10 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
         sub:str=payload.get("sub")
         email:str=payload.get(
             "email",
-            payload.get("https://myfined.com/email", "")
+            payload.get("https://fined.com/email", payload.get("https://myfined.com/email", ""))
         )
         roles: list[str] = payload.get(
-            "https://myfined.com/roles", []
+            "https://fined.com/roles", payload.get("https://myfined.com/roles", [])
         )
 
 
@@ -65,7 +70,7 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
 
 
 async def require_admin(user:AuthUser=Depends(get_current_user))->AuthUser:
-    if "Admin" not in user.roles and user.email != "gauravexpert456@gmail.com":
+    if "Admin" not in user.roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"

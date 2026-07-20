@@ -20,6 +20,8 @@ export const Auth0ProviderWithNavigate = ({ children }) => {
     <Auth0Provider
       domain={domain}
       clientId={clientId}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience: audience,

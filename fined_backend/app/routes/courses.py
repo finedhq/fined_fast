@@ -100,11 +100,11 @@ async def delete_course(id: str, user: AuthUser = Depends(require_admin)):
 
 
 @router.post("/getongoingcourse")
-async def get_ongoing_course(body: GetOngoingCourseRequest):
+async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Depends(get_current_user)):
     """Fetch user's current in-progress course"""
     try:
         # Get user's ongoing course ID
-        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("ongoing_course_id").eq("email", body.email).limit(1).execute())
+        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("ongoing_course_id").eq("email", user.email).limit(1).execute())
         user_data = user_res.data[0] if user_res and user_res.data else None
         course_id = user_data.get("ongoing_course_id") if user_data else None
         
@@ -130,7 +130,7 @@ async def get_a_course(course_id: str, body: GetCourseRequest, user: AuthUser = 
         # Sequential database requests (Thread-safe)
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("title").eq("id", course_id).single().execute())
         modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title").eq("course_id", course_id).execute())
-        progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", body.email).eq("progress_type", "card").execute())
+        progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
         modules = modules_res.data or []
         if not modules:
@@ -192,7 +192,7 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
         # 1. Fetch current cards, user progress, and update active state sequentially (Thread-safe)
         cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("status, user_answer").match({
-            "email": body.email,
+            "email": user.email,
             "module_id": module_id,
             "card_id": card_id,
             "progress_type": "card"
@@ -200,7 +200,7 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
         await asyncio.to_thread(lambda: supabase.from_("users").update({
             "ongoing_module_id": module_id,
             "ongoing_course_id": course_id
-        }).eq("email", body.email).execute())
+        }).eq("email", user.email).execute())
         modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title").eq("course_id", course_id).order("order_index").execute())
         
         all_cards = cards_res.data or []
@@ -274,16 +274,16 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         
         # 1. Fetch card details and user scoring metrics concurrently
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("card_id", card_id).single().execute())
-        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", body.email).limit(1).execute())
+        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute())
         existing_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id").match({
-            "email": body.email,
+            "email": user.email,
             "module_id": module_id,
             "card_id": card_id,
             "progress_type": "card"
         }).limit(1).execute())
         
         card_data = card_res.data
-        user = user_res.data[0] if user_res and user_res.data else {}
+        db_user = user_res.data[0] if user_res and user_res.data else {}
         existing_progress = existing_res.data[0] if existing_res and existing_res.data else None
         
         # Parse answer tag if a valid option index is provided
@@ -311,7 +311,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             await asyncio.to_thread(lambda: supabase.from_("userCourses").update(payload).eq("id", existing_progress["id"]).execute())
         else:
             payload_insert = {
-                "email": body.email,
+                "email": user.email,
                 "course_id": course_id,
                 "module_id": module_id,
                 "card_id": card_id,
@@ -321,15 +321,15 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             await asyncio.to_thread(lambda: supabase.from_("userCourses").insert([payload_insert]).execute())
             
         # 3. Update stars if earned
-        current_stars = user.get("fin_stars") or 0
+        current_stars = db_user.get("fin_stars") or 0
         if body.finStars:
             current_stars += body.finStars
-            await asyncio.to_thread(lambda: supabase.from_("users").update({"fin_stars": current_stars}).eq("email", body.email).execute())
+            await asyncio.to_thread(lambda: supabase.from_("users").update({"fin_stars": current_stars}).eq("email", user.email).execute())
             
         # 4. Fetch module details to calculate module completion progress
         all_cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("module_id", module_id).order("order_index").execute())
         completed_cards_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id").match({
-            "email": body.email,
+            "email": user.email,
             "module_id": module_id,
             "progress_type": "card",
             "status": "completed"
@@ -347,11 +347,11 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         logs = []
         
         # 5. Award Module completion bonus
-        course_count = user.get("course_count") or 0
-        course_score = user.get("course_score") or 0
-        consistency_score = user.get("consistency_score") or 0
-        article_score = user.get("article_score") or 0
-        expense_score = user.get("expense_score") or 0
+        course_count = db_user.get("course_count") or 0
+        course_score = db_user.get("course_score") or 0
+        consistency_score = db_user.get("consistency_score") or 0
+        article_score = db_user.get("article_score") or 0
+        expense_score = db_user.get("expense_score") or 0
         
         # Only award bonus if this is the first time they completed this specific card to reach 100%
         was_already_completed = existing_progress and existing_progress.get("status") == "completed"
@@ -362,12 +362,12 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             new_total = new_course_score + consistency_score + article_score + expense_score
             delta = new_total - old_score
             
-            await asyncio.to_thread(lambda: supabase.from_("users").update({"course_score": new_course_score}).eq("email", body.email).execute())
+            await asyncio.to_thread(lambda: supabase.from_("users").update({"course_score": new_course_score}).eq("email", user.email).execute())
             course_score = new_course_score  # Update reference
             
             if delta != 0:
                 logs.append({
-                    "email": body.email,
+                    "email": user.email,
                     "old_score": old_score,
                     "new_score": new_total,
                     "change": delta,
@@ -381,7 +381,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         
         all_course_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").in_("module_id", module_ids).execute())
         completed_course_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id").match({
-            "email": body.email,
+            "email": user.email,
             "course_id": course_id,
             "progress_type": "card",
             "status": "completed"
@@ -389,7 +389,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         
         if len(all_course_res.data or []) == len(completed_course_res.data or []) and not was_already_completed and course_count < 5:
             # Course completed! Fetch answers and correct keys to compute score
-            answers_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("user_answer, card_id").match({"email": body.email, "course_id": course_id, "progress_type": "card"}).execute())
+            answers_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("user_answer, card_id").match({"email": user.email, "course_id": course_id, "progress_type": "card"}).execute())
             keys_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, correct_answer").in_("module_id", module_ids).execute())
             
             correct_map = {c["card_id"]: c["correct_answer"].strip().lower() for c in (keys_res.data or []) if c.get("correct_answer")}
@@ -426,11 +426,11 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             await asyncio.to_thread(lambda: supabase.from_("users").update({
                 "course_score": new_course_score,
                 "course_count": course_count + 1
-            }).eq("email", body.email).execute())
+            }).eq("email", user.email).execute())
             
             if delta != 0:
                 logs.append({
-                    "email": body.email,
+                    "email": user.email,
                     "old_score": old_score,
                     "new_score": new_total,
                     "change": delta,
