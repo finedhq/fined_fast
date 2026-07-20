@@ -419,61 +419,67 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </ul>
                 <div style={{
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  gap: "28px",
-                  padding: "12px 24px",
-                  marginTop: "20px",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  marginTop: "0px",
                   width: "fit-content",
                   backgroundColor: "#fff",
                   borderRadius: "16px",
                   boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
                   flexShrink: 0
                 }}>
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <div
-                        key={star}
-                        style={{ 
-                          cursor: "pointer", 
-                          color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563", 
-                          fontSize: "22px", 
-                          display: "flex", 
-                          alignItems: "center",
-                          transition: "color 0.2s"
-                        }}
-                        onMouseEnter={() => setHoverRating(star)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => setRating(star)}
-                      >
-                        {star <= (hoverRating || rating) ? <IoStar /> : <IoStarOutline />}
-                      </div>
-                    ))}
+                  <span style={{ fontSize: "16px", fontWeight: "600", color: "#4B5563" }}>
+                    Rate & Share this article
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <div
+                          key={star}
+                          style={{ 
+                            cursor: "pointer", 
+                            color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563", 
+                            fontSize: "22px", 
+                            display: "flex", 
+                            alignItems: "center",
+                            transition: "color 0.2s"
+                          }}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => setRating(star)}
+                        >
+                          {star <= (hoverRating || rating) ? <IoStar /> : <IoStarOutline />}
+                        </div>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({ title: article.title, url: window.location.href });
+                        } else {
+                          navigator.clipboard.writeText(window.location.href);
+                          alert("Link copied to clipboard!");
+                        }
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#4B5563",
+                        fontSize: "24px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "4px"
+                      }}
+                      title="Share"
+                    >
+                      <RiShareForwardLine />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({ title: article.title, url: window.location.href });
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert("Link copied to clipboard!");
-                      }
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "#4B5563",
-                      fontSize: "24px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "4px"
-                    }}
-                    title="Share"
-                  >
-                    <RiShareForwardLine />
-                  </button>
                 </div>
               </div>
             </nav>
