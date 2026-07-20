@@ -37,6 +37,7 @@ const Dashboard = () => {
     }).catch(err => {
       console.error("Error fetching access token", err);
       setError("Authentication error. Please log in again.");
+      setLoadingData(false);
     });
   }, [isLoading, isAuthenticated, user, getAccessTokenSilently]);
 
@@ -60,6 +61,24 @@ const Dashboard = () => {
       <div className="dash-loading-container">
         <div className="dash-spinner"></div>
         <p>Loading Dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dash-loading-container">
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
+          <h2 style={{ fontSize: '1.5rem', color: '#dc2626', marginBottom: '0.5rem' }}>Oops! Something went wrong</h2>
+          <p style={{ color: '#4b5563', marginBottom: '1.5rem' }}>{error}</p>
+          <button 
+            onClick={() => navigate('/')}
+            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#3b82f6', color: 'white', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     );
   }

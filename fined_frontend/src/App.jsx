@@ -63,7 +63,7 @@ function App() {
                 <Route path="authors/:slug" element={<AuthorPage />} />
                 <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
 
-                <Route path="/courses/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
+                <Route path="/courses/course/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
                 <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                 <Route path="courses/course/:courseId" element={<AuthenticationGuard component={CourseOverview} />} />

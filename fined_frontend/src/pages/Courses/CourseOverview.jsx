@@ -92,7 +92,7 @@ export default function CourseOverview() {
                           onClick={() => {
                             if (isClickable) {
                               sessionStorage.removeItem('quiz_score');
-                              navigate(`/courses/${courseId}/module/${module.moduleId}/card/${card.card_id}`);
+                              navigate(`/courses/course/${courseId}/module/${module.moduleId}/card/${card.card_id}`);
                             } else {
                               setShowLockedAlert(true);
                             }

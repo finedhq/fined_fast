@@ -1,155 +1,278 @@
-import { useState, useEffect } from "react";
-import RevealOnScroll from "../../components/RevealOnScroll";
-import Lenis from 'lenis';
-import { Link, useNavigate } from "react-router-dom";
-import { getCourses, getCourseDetails } from "../../services/api";
-import "./Courses.css";
+import React, { useEffect, useState, useRef } from "react"
+import instance from "../../lib/axios"
+import toast from 'react-hot-toast'
+import { useAuth0 } from "@auth0/auth0-react"
+import { useNavigate } from "react-router-dom"
+import SmartImage from "../../uiComponents/SmartImage"
 
-function Courses() {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const [fetchingCourseId, setFetchingCourseId] = useState(null);
+export default function Courses() {
+	const navigate = useNavigate()
 
-  const handleCourseClick = async (courseId) => {
-    if (fetchingCourseId) return;
-    setFetchingCourseId(courseId);
-    try {
-      const details = await getCourseDetails(courseId);
-      
-      let targetModuleId = null;
-      let targetCardId = null;
+	const { user, isLoading, isAuthenticated } = useAuth0();
+	const [email, setEmail] = useState("")
+	const [courses, setCourses] = useState([])
+	const [ongoingCourse, setOngoingCourse] = useState({})
+	const [isFetchingOngoing, setIsFetchingOngoing] = useState(false)
+	const [loading, setLoading] = useState(true)
+	const [warning, setWarning] = useState("")
+	const [error, setError] = useState("")
 
-      if (details.data && details.data.length > 0) {
-        // Find the first incompleted card to resume
-        for (const mod of details.data) {
-          const cards = mod.cards || [];
-          for (const c of cards) {
-            if (c.status !== "completed") {
-              targetModuleId = mod.moduleId;
-              targetCardId = c.card_id;
-              break;
-            }
-          }
-          if (targetCardId) break;
-        }
+	const carouselRef = useRef(null)
 
-        // If all are completed or no incompleted found, default to the very first card
-        if (!targetCardId) {
-          const firstMod = details.data[0];
-          if (firstMod.cards && firstMod.cards.length > 0) {
-            targetModuleId = firstMod.moduleId;
-            targetCardId = firstMod.cards[0].card_id;
-          }
-        }
-      }
+    useEffect(() => {
+        if (isLoading || !isAuthenticated || !user) return;
+        setEmail(user.email || '');
+    }, [isLoading, isAuthenticated, user]);
 
-      if (targetModuleId && targetCardId) {
-        navigate(`/courses/${courseId}/module/${targetModuleId}/card/${targetCardId}`);
-      } else {
-        alert("This course doesn't have any modules yet.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to fetch course details from Supabase.");
-    } finally {
-      setFetchingCourseId(null);
-    }
-  };
+	async function fetchCourses() {
+		setLoading(true)
+		try {
+			const res = await instance.get("/courses/getall")
+			if (res.data.length > 0) {
+				setCourses(res.data)
+				setLoading(false)
+			}
+		} catch (err) {
+			setError("Failed to load courses.")
+		}
+	}
 
-  useEffect(() => {
-    const lenis = new Lenis()
-    function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-    requestAnimationFrame(raf)
-    return () => {
-      lenis.destroy()
-    }
-  }, [])
+	async function fetchOngoingCourses() {
+		setIsFetchingOngoing(true)
+		try {
+			const res = await instance.post("/courses/getongoingcourse", { email })
+			if (res.data?.title) {
+				setOngoingCourse(res.data)
+			}
+		} catch (err) {
+			setWarning("Failed to load ongoing course.")
+		} finally {
+			setIsFetchingOngoing(false)
+		}
+	}
 
-  useEffect(() => {
-    async function loadCourses() {
-      try {
-        const data = await getCourses();
-        setCourses(data);
-      } catch (err) {
-        setError("Failed to load courses. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadCourses();
-  }, []);
+	useEffect(() => {
+		fetchCourses()
+	}, [email])
 
-  return (
-    <div className="courses-page">
-      {/* HERO STRIP */}
-      <div className="ap-hero-strip">
-        <h1 className="ap-headline">Courses</h1>
-        <p className="ap-sub">Gain practical financial literacy with our bite-sized courses. Start learning today!</p>
-      </div>
+	useEffect(() => {
+		if (!email) return
+		fetchOngoingCourses()
+	}, [email])
 
-      <main className="courses-container">
-        {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p>Fetching pathways...</p>
-          </div>
-        ) : error ? (
-          <div className="error-message">
-            <p>{error}</p>
-          </div>
-        ) : (
-          <div className="recommended-section">
-            <h2 className="recommended-title" style={{ color: 'black', fontSize: '1.5rem', fontWeight: '500', marginBottom: '20px' }}>Recommended Courses</h2>
-            <div className="ap-articles-grid">
-              {courses.map((course, idx) => (
-                <RevealOnScroll key={course.id || course.course_id} delay={100 + (idx % 4) * 50}>
-                  <div 
-                    className="ap-grid-card" 
-                    onClick={() => handleCourseClick(course.id || course.course_id)}
-                    style={{ opacity: fetchingCourseId === (course.id || course.course_id) ? 0.5 : 1, pointerEvents: fetchingCourseId === (course.id || course.course_id) ? 'none' : 'auto' }}
-                  >
-                    <div className="ap-grid-card-img-wrap" style={{ position: 'relative' }}>
-                      {course.thumbnail_url ? (
-                        <img src={course.thumbnail_url} alt={course.title} className="ap-grid-card-img" />
-                      ) : (
-                        <div className="ap-grid-card-img-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                          </svg>
-                        </div>
-                      )}
-                      <span className="badge-duration" style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>{course.duration} mins</span>
-                      {fetchingCourseId === (course.id || course.course_id) && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.7)' }}>
-                          <div className="spinner" style={{ width: '24px', height: '24px', borderTopColor: '#0284c7' }}></div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="ap-grid-card-content">
-                      <span className="ap-grid-category">
-                        {course.modules_count || 0} MODULES
-                      </span>
-                      <h3 className="ap-grid-title">{course.title}</h3>
-                      <p className="ap-grid-excerpt">
-                        {course.description?.slice(0, 100) || ""}
-                        {course.description?.length > 100 ? "..." : ""}
-                      </p>
-                    </div>
-                  </div>
-                </RevealOnScroll>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
-  );
+	return (
+		<div className="bg-gray-100 min-h-screen flex flex-col pb-5">
+			{isAuthenticated ?
+				<main className="grow px-4 sm:px-10 sm:pt-5">
+					{loading ?
+						<div className="min-h-screen w-full px-4 sm:px-10 pt-5 bg-gray-100 space-y-12 animate-pulse">
+							<div>
+								<div className="h-6 bg-gray-300 rounded w-1/3 mb-4"></div>
+								<div className="flex gap-12 mb-6">
+									{[...Array(1)].map((_, i) => (
+										<div key={i} className="bg-gray-100 rounded-xl px-4 py-3 w-full sm:w-1/4 h-44 space-y-3 shrink-0 ml-1 border border-gray-300">
+											<div>
+												<div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+												<div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+												<div className="h-3 bg-gray-200 rounded w-5/6"></div>
+											</div>
+											<div className="flex justify-between">
+												<div className="w-2/5 h-20 bg-gray-300 rounded-md"></div>
+												<div className="flex flex-col justify-center items-center w-3/5">
+													<div className="flex gap-2 mb-2">
+														<div className="h-3 w-14 bg-gray-300 rounded"></div>
+														<div className="h-3 w-2 bg-gray-300 rounded"></div>
+														<div className="h-3 w-14 bg-gray-300 rounded"></div>
+													</div>
+													<div className="h-8 w-24 bg-gray-300 rounded-full mt-2"></div>
+												</div>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+
+							<div>
+								<div className="flex justify-between items-center mb-4">
+									<div className="h-6 bg-gray-300 rounded w-1/3"></div>
+									<div className="flex space-x-2">
+										<div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+										<div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+									</div>
+								</div>
+								<div className="flex flex-wrap gap-y-6 gap-x-8.5 mx-4 mb-10 h-185 overflow-hidden">
+									{[...Array(6)].map((_, i) => (
+										<div key={i} className="bg-white h-90 w-72 rounded-xl shadow">
+											<div className="h-40 bg-gray-300 rounded-t-xl"></div>
+											<div className="p-4 space-y-3">
+												<div className="h-3 w-1/2 bg-gray-300 rounded"></div>
+												<div className="h-4 w-full bg-gray-300 rounded"></div>
+												<div className="h-3 w-5/6 bg-gray-300 rounded"></div>
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+						:
+						<div>
+							<h2 className="text-xl font-semibold mb-4">Continue Learning</h2>
+							<div className="flex gap-12 w-full mb-6 px-4" >
+								{isFetchingOngoing ? (
+									<div className="bg-white rounded-xl px-4 py-3 w-full sm:w-1/4 space-y-3 sm:shrink-0 border border-gray-300 animate-pulse">
+										<div>
+											<div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+											<div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+											<div className="h-3 bg-gray-200 rounded w-5/6"></div>
+										</div>
+										<div className="flex justify-between">
+											<div className="w-2/5 h-20 bg-gray-300 rounded-md"></div>
+											<div className="flex flex-col justify-center items-center w-3/5">
+												<div className="flex gap-2 mb-2">
+													<div className="h-3 w-14 bg-gray-300 rounded"></div>
+													<div className="h-3 w-2 bg-gray-300 rounded"></div>
+													<div className="h-3 w-14 bg-gray-300 rounded"></div>
+												</div>
+												<div className="h-8 w-24 bg-gray-300 rounded-full mt-2"></div>
+											</div>
+										</div>
+									</div>
+								) : (
+									<div className="bg-white rounded-xl hover:shadow-md transition px-4 py-3 w-full sm:w-1/4 h-fit space-y-3 sm:shrink-0 border border-gray-300">
+										<div>
+											<h3 className="font-semibold text-cyan-800 text-base tracking-wide sm:mb-2">
+												{ongoingCourse?.title || courses[courses.length - 1]?.title}
+											</h3>
+											<p className="text-xs text-gray-600 mb-2 max-h-16 whitespace-pre-wrap truncate">
+												{ongoingCourse?.description || courses[courses.length - 1]?.description}
+											</p>
+										</div>
+										<div className="flex gap-5">
+											<SmartImage
+												src={ongoingCourse?.thumbnail_url || courses[courses.length - 1]?.thumbnail_url}
+												alt={ongoingCourse?.title || courses[courses.length - 1]?.title}
+												className="object-cover w-full h-full"
+												containerClassName="w-2/5 h-20 rounded-md overflow-hidden relative"
+											/>
+											<div className="flex flex-col justify-center items-center w-full">
+												<div className="flex gap-1">
+													<p className="text-xs text-gray-500 mb-1">
+														{ongoingCourse?.modules_count || courses[courses.length - 1]?.modules_count} Modules
+													</p>
+													<p className="text-xs text-gray-500 mb-1">&bull;</p>
+													<p className="text-xs text-gray-500 mb-1">
+														{ongoingCourse?.duration || courses[courses.length - 1]?.duration} mins
+													</p>
+												</div>
+												<div className="w-full" >
+													<button
+														onClick={() => navigate(`/courses/course/${ongoingCourse?.id || courses[courses.length - 1]?.id}`)}
+														className="bg-amber-400 text-white px-4 py-1 w-full sm:px-4 sm:py-2 rounded-full self-end mt-2 cursor-pointer"
+													>
+														{ongoingCourse?.id ? "Continue" : "Start Now"}
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
+
+							<div className="w-full pb-10">
+								<div className="flex justify-between" >
+									<h2 className="text-xl font-semibold mb-4">Recommended Courses</h2>
+								</div>
+								<div ref={carouselRef} className="flex flex-col sm:flex-row gap-6">
+									{courses.map((course) => (
+										<CourseCard key={course.id} course={course} isAuthenticated={isAuthenticated} navigate={navigate} />
+									))}
+								</div>
+							</div>
+						</div>
+					}
+				</main>
+				:
+				<div className="w-full px-4 sm:px-10 py-5">
+					<div className="flex justify-between" >
+						<h2 className="text-xl font-semibold">Recommended Courses</h2>
+					</div>
+					<div ref={carouselRef} className="flex flex-col sm:flex-row gap-6 mt-4">
+						{courses.map((course) => (
+							<CourseCard key={course.id} course={course} isAuthenticated={isAuthenticated} navigate={navigate} />
+						))}
+					</div>
+				</div>
+			}
+			{warning && (
+				<div className="fixed inset-0 z-20 bg-black/40 flex items-center justify-center">
+					<div className="bg-white p-6 rounded-2xl shadow-xl w-125 space-y-4">
+						<p className="text-xl font-bold text-red-600">⚠️ Alert</p>
+						<p className="text-md font-semibold text-gray-700">
+							{warning}
+						</p>
+						<div className="flex justify-end pt-4">
+							<button
+								onClick={() => setWarning("")}
+								className={`bg-amber-400 hover:bg-amber-500 transition-all duration-200 text-white px-4 py-2 rounded-lg cursor-pointer`}
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{error && (
+				<div className="fixed inset-0 z-20 bg-black/40 flex items-center justify-center">
+					<div className="bg-white p-6 rounded-2xl shadow-xl w-125 space-y-4">
+						<p className="text-xl font-bold text-red-600">⚠️ Alert</p>
+						<p className="text-md font-semibold text-gray-700">
+							{error}
+						</p>
+						<div className="flex justify-end pt-4">
+							<button
+								onClick={() => { setError(""); setLoading(false); navigate("/") }}
+								className={`bg-amber-400 hover:bg-amber-500 transition-all duration-200 text-white px-4 py-2 rounded-lg cursor-pointer`}
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+		</div>
+	);
 }
 
-export default Courses;
+function CourseCard({ course, isAuthenticated, navigate }) {
+	return (
+		<div
+			onClick={() => {
+				if (isAuthenticated) {
+					navigate(`/courses/course/${course.id}`);
+				} else {
+					toast.error("Please sign in");
+				}
+			}}
+			className="bg-white rounded-xl border border-gray-300 hover:shadow-md transition h-80 sm:w-80 sm:h-90 cursor-pointer overflow-hidden flex flex-col">
+			<SmartImage
+				src={course.thumbnail_url}
+				alt={course.title}
+				className="object-cover w-full h-full"
+				containerClassName="w-full h-40 sm:h-48 mb-2 relative"
+			/>
+			<div className="p-4 space-y-2 flex-grow" >
+				<div className="flex gap-1" >
+					<p className="text-xs text-gray-500 mb-1">{course.modules_count}  Modules</p>
+					<p className="text-xs text-gray-500 mb-1">&bull;</p>
+					<p className="text-xs text-gray-500 mb-1">{course.duration} mins</p>
+				</div>
+				<h3 className="font-semibold text-cyan-800 text-base tracking-wide mb-2">
+					{course.title}
+				</h3>
+				<p className="text-xs text-gray-600 mb-2 whitespace-pre-wrap h-16 truncate">{course.description}</p>
+			</div>
+		</div>
+	);
+}
