@@ -47,12 +47,12 @@ function CardViewer() {
     }
 
     if (card?.nextCardId) {
-      navigate(`/courses/${courseId}/module/${moduleId}/card/${card.nextCardId}`);
+      navigate(`/courses/course/${courseId}/module/${moduleId}/card/${card.nextCardId}`);
     } else if (card?.nextModuleFirstCard) {
       const { moduleId: nextModuleId, cardId: nextCardId } = card.nextModuleFirstCard;
-      navigate(`/courses/${courseId}/module/${nextModuleId}/card/${nextCardId}`);
+      navigate(`/courses/course/${courseId}/module/${nextModuleId}/card/${nextCardId}`);
     } else {
-      navigate(`/courses/${courseId}`);
+      navigate(`/courses/course/${courseId}`);
     }
   };
 
