@@ -26,6 +26,9 @@ const AddCardForm = lazy(() => import("./pages/Admin/AddCardForm"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const CourseOverview = lazy(() => import("./pages/Courses/CourseOverview"));
 const AddCourseForm = lazy(() => import("./pages/Admin/AddCourseForm"));
+const AdminCourseList = lazy(() => import("./pages/Admin/AdminCourseList"));
+const AdminModuleList = lazy(() => import("./pages/Admin/AdminModuleList"));
+const AddModuleForm = lazy(() => import("./pages/Admin/AddModuleForm"));
 const FinToolsPage = lazy(() => import("./pages/FinTools/FinToolsPage"));
 const ExpenseTracker = lazy(() => import("./pages/FinTools/ExpenseTracker/ExpenseTracker"));
 const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
@@ -67,6 +70,9 @@ function App() {
                 <Route path="/courses/course/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
                 <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
+                <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />
+                <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
+                <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
                 <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                 <Route path="courses/course/:courseId" element={<AuthenticationGuard component={CourseOverview} />} />
                 <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />

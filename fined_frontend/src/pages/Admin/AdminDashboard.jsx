@@ -16,7 +16,7 @@ function AdminDashboard() {
     {
       label: "View All Courses",
       icon: "📖",
-      action: null,
+      action: () => navigate("/admin/courses"),
     },
     {
       label: "View All Articles",
