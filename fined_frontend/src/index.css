@@ -2053,7 +2053,8 @@ button {
   .ap-author-image-placeholder {
     width: 120px;
     height: 120px;
-    border-radius: 50%; /* Make it circular on mobile for a better feel */
+    border-radius: 50%;
+    /* Make it circular on mobile for a better feel */
   }
 
   .ap-author-bio-wrap {
@@ -2071,7 +2072,8 @@ button {
   }
 
   .ap-author-description {
-    padding: 24px 20px; /* Reduced padding for mobile */
+    padding: 24px 20px;
+    /* Reduced padding for mobile */
     font-size: 16px;
   }
 

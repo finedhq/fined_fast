@@ -67,14 +67,14 @@ function App() {
                 <Route path="authors/:slug" element={<AuthorPage />} />
                 <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
 
-                <Route path="/courses/course/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
+                <Route path="courses/:courseSlug/:moduleSlug/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
                 <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
                 <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />
                 <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
                 <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
                 <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
-                <Route path="courses/course/:courseId" element={<AuthenticationGuard component={CourseOverview} />} />
+                <Route path="courses/:courseSlug" element={<AuthenticationGuard component={CourseOverview} />} />
                 <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />
                 <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
                 <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />

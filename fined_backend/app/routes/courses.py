@@ -56,13 +56,19 @@ async def add_course(
                 title=title
             )
         
+        # Generate slug
+        slug = title.lower().strip()
+        slug = re.sub(r'[^\w\s-]', '', slug)
+        slug = re.sub(r'[\s_-]+', '-', slug)
+        
         # Insert course row
         res = await asyncio.to_thread(lambda: supabase.from_("courses").insert([{
             "title": title,
             "description": description,
             "modules_count": int(modules_count),
             "duration": int(duration),
-            "thumbnail_url": thumbnail_url
+            "thumbnail_url": thumbnail_url,
+            "slug": slug
         }]).execute())
         
         return res.data[0] if res.data else {}
@@ -120,25 +126,34 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
         )
 
 
-@router.post("/course/{course_id}")
-async def get_a_course(course_id: str, body: GetCourseRequest, user: AuthUser = Depends(get_current_user)):
+@router.post("/course/{course_slug}")
+async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser = Depends(get_current_user)):
     """
     Fetch course overview with modules and card completion progress.
     Optimized: consolidated card lookups and executed in parallel.
     """
     try:
         # Sequential database requests (Thread-safe)
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("title").eq("id", course_id).single().execute())
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title").eq("course_id", course_id).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title").eq("slug", course_slug).execute())
+        if not course_res.data:
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title").eq("id", course_slug).execute())
+        
+        if not course_res.data:
+            return {"title": "", "data": []}
+            
+        course_id = course_res.data[0]["id"]
+        course_title = course_res.data[0]["title"]
+            
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug").eq("course_id", course_id).execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
         modules = modules_res.data or []
         if not modules:
-            return {"title": course_res.data.get("title") if course_res.data else "", "data": []}
+            return {"title": course_title, "data": []}
             
         # Optimization: Fetch only cards belonging to the modules in this course (Latency Win 1)
         module_ids = [m["id"] for m in modules]
-        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, content_text, content_type, order_index, image_url").in_("module_id", module_ids).execute())
+        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, slug, content_text, content_type, order_index, image_url").in_("module_id", module_ids).execute())
         cards = cards_res.data or []
         
         # Build user progress map
@@ -153,6 +168,7 @@ async def get_a_course(course_id: str, body: GetCourseRequest, user: AuthUser = 
             
             cards_by_module[mod_id].append({
                 "card_id": card["card_id"],
+                "cardSlug": card.get("slug"),
                 "module_id": card["module_id"],
                 "title": card["title"],
                 "content_text": card["content_text"],
@@ -171,10 +187,11 @@ async def get_a_course(course_id: str, body: GetCourseRequest, user: AuthUser = 
             formatted_data.append({
                 "moduleTitle": module["title"],
                 "moduleId": mod_id,
+                "moduleSlug": module.get("slug"),
                 "cards": module_cards
             })
             
-        return {"title": course_res.data.get("title"), "data": formatted_data}
+        return {"title": course_title, "data": formatted_data}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -182,13 +199,35 @@ async def get_a_course(course_id: str, body: GetCourseRequest, user: AuthUser = 
         )
 
 
-@router.post("/course/{course_id}/module/{module_id}/card/{card_id}")
-async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCardRequest, user: AuthUser = Depends(get_current_user)):
+@router.post("/course/{course_slug}/module/{module_slug}/card/{card_slug}")
+async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: GetCardRequest, user: AuthUser = Depends(get_current_user)):
     """
     Fetch card metadata and adjacent navigation indicators.
     Optimized: Released event loop and parallelized I/O lookups.
     """
     try:
+        # Resolve slugs to IDs
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("slug", course_slug).execute())
+        if not course_res.data:
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("id", course_slug).execute())
+        if not course_res.data:
+            raise HTTPException(status_code=404, detail="Course not found")
+        course_id = course_res.data[0]["id"]
+            
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_slug).execute())
+        if not module_res.data:
+            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("id", module_slug).execute())
+        if not module_res.data:
+            raise HTTPException(status_code=404, detail="Module not found")
+        module_id = module_res.data[0]["id"]
+        
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_slug).execute())
+        if not card_res.data:
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
+        if not card_res.data:
+            raise HTTPException(status_code=404, detail="Card not found")
+        card_id = card_res.data[0]["card_id"]
+
         # 1. Fetch current cards, user progress, and update active state sequentially (Thread-safe)
         cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("status, user_answer").match({
@@ -224,28 +263,30 @@ async def get_a_card(course_id: str, module_id: str, card_id: str, body: GetCard
         
         nav_results = []
         if prev_module:
-            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
+            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
         if next_module:
-            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
+            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
         
         nav_idx = 0
         if prev_module:
             prev_cards = nav_results[nav_idx].data
             if prev_cards:
-                prev_module_first_card = {"moduleId": prev_module["id"], "cardId": prev_cards[0]["card_id"]}
+                prev_module_first_card = {"moduleId": prev_module["id"], "moduleSlug": prev_module.get("slug"), "cardId": prev_cards[0]["card_id"], "cardSlug": prev_cards[0].get("slug")}
             nav_idx += 1
             
         if next_module:
             next_cards = nav_results[nav_idx].data
             if next_cards:
-                next_module_first_card = {"moduleId": next_module["id"], "cardId": next_cards[0]["card_id"]}
+                next_module_first_card = {"moduleId": next_module["id"], "moduleSlug": next_module.get("slug"), "cardId": next_cards[0]["card_id"], "cardSlug": next_cards[0].get("slug")}
                 
         return {
             **current_card,
             "status": user_progress.get("status", "incompleted"),
             "userAnswer": user_progress.get("user_answer"),
             "prevCardId": all_cards[current_index - 1]["card_id"] if current_index > 0 else None,
+            "prevCardSlug": all_cards[current_index - 1].get("slug") if current_index > 0 else None,
             "nextCardId": all_cards[current_index + 1]["card_id"] if current_index < len(all_cards) - 1 else None,
+            "nextCardSlug": all_cards[current_index + 1].get("slug") if current_index < len(all_cards) - 1 else None,
             "module_total_cards": len(all_cards),
             "module_title": current_module_title,
             "module_progress": current_card.get("order_index", 0),
@@ -485,13 +526,19 @@ async def add_card(body: AddCardRequest):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
  
     try:
+        import re
+        slug = body.title.lower().strip()
+        slug = re.sub(r'[^\w\s-]', '', slug)
+        slug = re.sub(r'[\s_-]+', '-', slug)
+        
         res = await asyncio.to_thread(
             lambda: supabase.from_("cards")
             .insert([{
                 "module_id": body.module_id,
                 "order_index": body.order_index,
-                "card_template": body.card_type,  # NEW column — separate from content_type
+                "card_template": body.card_type,  
                 "title": body.title,
+                "slug": slug,
                 "card_data": validated_data,
             }])
             .execute()

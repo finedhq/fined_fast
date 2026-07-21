@@ -119,22 +119,41 @@ class CourseService:
             "course_done":     course_done,
         }
 
+    def _generate_slug(self, title: str) -> str:
+        import re
+        slug = title.lower().strip()
+        slug = re.sub(r'[^\w\s-]', '', slug)
+        slug = re.sub(r'[\s_-]+', '-', slug)
+        return slug
+
     def get_ongoing(self, email: str) -> dict | None:
         """Most recent in-progress course — equivalent to getOngoingCourse"""
         return progress_repo.get_ongoing(email)
+
     def create_course(self, title: str, description: str, thumbnail_url: str = "") -> dict:
-        return course_repo.insert(title, description, thumbnail_url)
+        slug = self._generate_slug(title)
+        return course_repo.insert(title, description, thumbnail_url, slug)
+
     def delete_course(self, course_id: str):
         course_repo.delete(course_id)
+
     def add_module(self, course_id: str, title: str, description: str, order_index: int) -> dict:
-        return course_repo.insert_module(course_id, title, description, order_index)
+        slug = self._generate_slug(title)
+        return course_repo.insert_module(course_id, title, description, order_index, slug)
+
     def delete_module(self, module_id: str):
         course_repo.delete_module(module_id)
+
     def get_cards(self, module_id: str) -> list:
         return course_repo.get_cards(module_id)
+
     def add_card(self, module_id: str, card_data: dict) -> dict:
+        if "title" in card_data and card_data["title"]:
+            card_data["slug"] = self._generate_slug(card_data["title"])
         return course_repo.insert_card(module_id, card_data)
+
     def delete_card(self, card_id: str):
         course_repo.delete_card(card_id)
+
 course_service = CourseService()
 

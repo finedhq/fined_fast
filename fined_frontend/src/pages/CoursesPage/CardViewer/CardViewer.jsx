@@ -6,7 +6,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import "./CardViewer.css";
 
 function CardViewer() {
-  const { courseId, moduleId, cardId } = useParams();
+  const { courseSlug, moduleSlug, cardSlug } = useParams();
   const navigate = useNavigate();
 
   const [card, setCard] = useState(null);
@@ -23,7 +23,7 @@ function CardViewer() {
     setLoading(true);
     setError("");
 
-    getCard(courseId, moduleId, cardId, email)
+    getCard(courseSlug, moduleSlug, cardSlug, email)
       .then((data) => {
         if (!cancelled) setCard(data);
       })
@@ -37,22 +37,23 @@ function CardViewer() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, moduleId, cardId, email]);
+  }, [courseSlug, moduleSlug, cardSlug, email]);
 
   const handleContinue = async () => {
     try {
-      await updateCard(courseId, moduleId, cardId, { status: "completed", email });
+      await updateCard(courseSlug, moduleSlug, cardSlug, { status: "completed", email });
     } catch {
       // Non-blocking — navigation should not stall on a logging failure
     }
 
-    if (card?.nextCardId) {
-      navigate(`/courses/course/${courseId}/module/${moduleId}/card/${card.nextCardId}`);
+    if (card?.nextCardSlug || card?.nextCardId) {
+      navigate(`/courses/${courseSlug}/${moduleSlug}/${card.nextCardSlug || card.nextCardId}`);
     } else if (card?.nextModuleFirstCard) {
-      const { moduleId: nextModuleId, cardId: nextCardId } = card.nextModuleFirstCard;
-      navigate(`/courses/course/${courseId}/module/${nextModuleId}/card/${nextCardId}`);
+      const nextModSlug = card.nextModuleFirstCard.moduleSlug || card.nextModuleFirstCard.moduleId;
+      const nextCardSlug = card.nextModuleFirstCard.cardSlug || card.nextModuleFirstCard.cardId;
+      navigate(`/courses/${courseSlug}/${nextModSlug}/${nextCardSlug}`);
     } else {
-      navigate(`/courses/course/${courseId}`);
+      navigate(`/courses/${courseSlug}`);
     }
   };
 
@@ -68,7 +69,7 @@ function CardViewer() {
     return (
       <div className="cv-status">
         <p>{error}</p>
-        <Link to={`/courses/${courseId}`}>Back to course</Link>
+        <Link to={`/courses/${courseSlug}`}>Back to course</Link>
       </div>
     );
   }

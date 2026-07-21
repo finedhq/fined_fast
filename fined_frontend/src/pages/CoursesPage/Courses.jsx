@@ -166,7 +166,10 @@ export default function Courses() {
 												</div>
 												<div className="w-full" >
 													<button
-														onClick={() => navigate(`/courses/course/${ongoingCourse?.id || courses[courses.length - 1]?.id}`)}
+														onClick={() => {
+															const targetCourse = ongoingCourse || courses[courses.length - 1];
+															navigate(`/courses/${targetCourse?.slug || targetCourse?.id}`);
+														}}
 														className="bg-amber-400 text-white px-4 py-1 w-full sm:px-4 sm:py-2 rounded-full self-end mt-2 cursor-pointer"
 													>
 														{ongoingCourse?.id ? "Continue" : "Start Now"}
@@ -250,7 +253,7 @@ function CourseCard({ course, isAuthenticated, navigate }) {
 		<div
 			onClick={() => {
 				if (isAuthenticated) {
-					navigate(`/courses/course/${course.id}`);
+					navigate(`/courses/${course.slug || course.id}`);
 				} else {
 					toast.error("Please sign in");
 				}

@@ -14,7 +14,7 @@ const imageAssets = {
 
 export default function CourseOverview() {
   const navigate = useNavigate();
-  const { courseId } = useParams();
+  const { courseSlug } = useParams();
 
   const { user, isLoading, isAuthenticated } = useAuth0();
   const [email, setEmail] = useState("");
@@ -33,7 +33,7 @@ export default function CourseOverview() {
     if (!email) return;
     setLoading(true);
     try {
-      const res = await instance.post(`/courses/course/${courseId}`, { email });
+      const res = await instance.post(`/courses/course/${courseSlug}`, { email });
       setCourseTitle(res.data.title);
       setCourse(res.data.data || []);
     } catch (err) {
@@ -47,7 +47,7 @@ export default function CourseOverview() {
     if (email) {
       fetchCourse();
     }
-  }, [email, courseId]);
+  }, [email, courseSlug]);
 
   return (
     <div className="min-h-screen pb-5 bg-gray-100 overflow-x-hidden font-inter text-[#1e1e1e]">
@@ -91,7 +91,7 @@ export default function CourseOverview() {
                       onClick={() => {
                         if (isClickable && cardToResume) {
                           sessionStorage.removeItem('quiz_score');
-                          navigate(`/courses/course/${courseId}/module/${module.moduleId}/card/${cardToResume.card_id}`);
+                          navigate(`/courses/${courseSlug}/${module.moduleSlug || module.moduleId}/${cardToResume.cardSlug || cardToResume.card_id}`);
                         } else if (!cardToResume) {
                           setWarning("This module has no cards yet!");
                         } else {
