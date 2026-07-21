@@ -6,7 +6,7 @@ function AdminDashboard() {
     {
       label: "Add New Course",
       icon: "📚",
-      action: null,
+      action: () => navigate("/admin/courses/add"),
     },
     {
       label: "Add New Article",

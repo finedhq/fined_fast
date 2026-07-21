@@ -25,6 +25,7 @@ const CardViewer = lazy(() => import("./pages/CoursesPage/CardViewer/CardViewer"
 const AddCardForm = lazy(() => import("./pages/Admin/AddCardForm"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const CourseOverview = lazy(() => import("./pages/Courses/CourseOverview"));
+const AddCourseForm = lazy(() => import("./pages/Admin/AddCourseForm"));
 const FinToolsPage = lazy(() => import("./pages/FinTools/FinToolsPage"));
 const ExpenseTracker = lazy(() => import("./pages/FinTools/ExpenseTracker/ExpenseTracker"));
 const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
@@ -65,6 +66,7 @@ function App() {
 
                 <Route path="/courses/course/:courseId/module/:moduleId/card/:cardId" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
+                <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
                 <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                 <Route path="courses/course/:courseId" element={<AuthenticationGuard component={CourseOverview} />} />
                 <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />
