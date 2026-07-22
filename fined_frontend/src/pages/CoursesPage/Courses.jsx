@@ -17,6 +17,11 @@ export default function Courses() {
 	const [warning, setWarning] = useState("")
 	const [error, setError] = useState("")
 
+	const [currentPage, setCurrentPage] = useState(1);
+	const coursesPerPage = 8;
+	const currentCourses = courses.slice((currentPage - 1) * coursesPerPage, currentPage * coursesPerPage);
+	const totalPages = Math.ceil(courses.length / coursesPerPage);
+
 	const carouselRef = useRef(null)
 
     useEffect(() => {
@@ -61,9 +66,9 @@ export default function Courses() {
 	}, [email])
 
 	return (
-		<div className="bg-gray-100 min-h-screen flex flex-col pb-5">
+		<div className="bg-white min-h-screen w-full flex flex-col items-center pb-5 overflow-x-hidden">
 			{isAuthenticated ?
-				<main className="grow px-4 sm:px-10 sm:pt-5">
+				<main className="w-full max-w-7xl flex-1 px-6 sm:px-10 pt-16 pb-12">
 					{loading ?
 						<div className="min-h-screen w-full px-4 sm:px-10 pt-5 bg-gray-100 space-y-12 animate-pulse">
 							<div>
@@ -116,10 +121,10 @@ export default function Courses() {
 						</div>
 						:
 						<div>
-							<h2 className="text-xl font-semibold mb-4">Continue Learning</h2>
-							<div className="flex gap-12 w-full mb-6 px-4" >
+							<h2 className="text-2xl font-semibold mt-4 mb-6 text-gray-800">Continue Learning</h2>
+							<div className="flex gap-12 w-full mb-16" >
 								{isFetchingOngoing ? (
-									<div className="bg-white rounded-xl px-4 py-3 w-full sm:w-1/4 space-y-3 sm:shrink-0 border border-gray-300 animate-pulse">
+									<div className="bg-white rounded-xl px-4 py-3 w-full sm:w-96 space-y-3 sm:shrink-0 border border-gray-300 animate-pulse">
 										<div>
 											<div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
 											<div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
@@ -138,29 +143,31 @@ export default function Courses() {
 										</div>
 									</div>
 								) : (
-									<div className="bg-white rounded-xl hover:shadow-md transition px-4 py-3 w-full sm:w-1/4 h-fit space-y-3 sm:shrink-0 border border-gray-300">
+									<div className="bg-white rounded-xl hover:shadow-md transition px-4 py-3 w-full max-w-3xl lg:w-2/3 h-fit space-y-3 shrink-0 border border-gray-300">
 										<div>
-											<h3 className="font-semibold text-cyan-800 text-base tracking-wide sm:mb-2">
+											<h3 className="font-semibold text-cyan-800 text-lg tracking-wide sm:mb-2">
 												{ongoingCourse?.title || courses[courses.length - 1]?.title}
 											</h3>
-											<p className="text-xs text-gray-600 mb-2 max-h-16 whitespace-pre-wrap truncate">
+											<p className="text-sm text-gray-600 mb-2 max-h-16 whitespace-pre-wrap truncate">
 												{ongoingCourse?.description || courses[courses.length - 1]?.description}
 											</p>
 										</div>
-										<div className="flex gap-5">
-											<SmartImage
-												src={ongoingCourse?.thumbnail_url || courses[courses.length - 1]?.thumbnail_url}
-												alt={ongoingCourse?.title || courses[courses.length - 1]?.title}
-												className="object-cover w-full h-full"
-												containerClassName="w-2/5 h-20 rounded-md overflow-hidden relative"
-											/>
+										<div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+											<div className="w-full sm:w-1/3 rounded-md overflow-hidden relative shrink-0" style={{ aspectRatio: "4/3" }}>
+												<SmartImage
+													src={ongoingCourse?.thumbnail_url || courses[courses.length - 1]?.thumbnail_url}
+													alt={ongoingCourse?.title || courses[courses.length - 1]?.title}
+													className="object-fill w-full h-full bg-gray-50"
+													containerClassName="w-full h-full"
+												/>
+											</div>
 											<div className="flex flex-col justify-center items-center w-full">
 												<div className="flex gap-1">
-													<p className="text-xs text-gray-500 mb-1">
+													<p className="text-sm text-gray-500 mb-1">
 														{ongoingCourse?.modules_count || courses[courses.length - 1]?.modules_count} Modules
 													</p>
-													<p className="text-xs text-gray-500 mb-1">&bull;</p>
-													<p className="text-xs text-gray-500 mb-1">
+													<p className="text-sm text-gray-500 mb-1">&bull;</p>
+													<p className="text-sm text-gray-500 mb-1">
 														{ongoingCourse?.duration || courses[courses.length - 1]?.duration} mins
 													</p>
 												</div>
@@ -183,27 +190,81 @@ export default function Courses() {
 
 							<div className="w-full pb-10">
 								<div className="flex justify-between" >
-									<h2 className="text-xl font-semibold mb-4">Recommended Courses</h2>
+									<h2 className="text-2xl font-semibold mb-6 text-gray-800">Recommended Courses</h2>
 								</div>
-								<div ref={carouselRef} className="flex flex-col sm:flex-row gap-6">
-									{courses.map((course) => (
+								<div ref={carouselRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-2">
+									{currentCourses.map((course) => (
 										<CourseCard key={course.id} course={course} isAuthenticated={isAuthenticated} navigate={navigate} />
 									))}
 								</div>
+								{totalPages > 1 && (
+									<div className="flex justify-center items-center gap-2 mt-8">
+										<button 
+											disabled={currentPage === 1}
+											onClick={() => setCurrentPage(p => p - 1)}
+											className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer"
+										>
+											Previous
+										</button>
+										{[...Array(totalPages)].map((_, i) => (
+											<button
+												key={i}
+												onClick={() => setCurrentPage(i + 1)}
+												className={`w-10 h-10 rounded-lg font-medium transition cursor-pointer ${currentPage === i + 1 ? 'bg-amber-400 text-white shadow-sm' : 'border border-gray-300 hover:bg-gray-50 text-gray-700'}`}
+											>
+												{i + 1}
+											</button>
+										))}
+										<button 
+											disabled={currentPage === totalPages}
+											onClick={() => setCurrentPage(p => p + 1)}
+											className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer"
+										>
+											Next
+										</button>
+									</div>
+								)}
 							</div>
 						</div>
 					}
 				</main>
 				:
-				<div className="w-full px-4 sm:px-10 py-5">
+				<div className="w-full max-w-7xl flex-1 px-6 sm:px-10 pt-16 pb-12">
 					<div className="flex justify-between" >
-						<h2 className="text-xl font-semibold">Recommended Courses</h2>
+						<h2 className="text-2xl font-semibold mb-6 text-gray-800">Recommended Courses</h2>
 					</div>
-					<div ref={carouselRef} className="flex flex-col sm:flex-row gap-6 mt-4">
-						{courses.map((course) => (
+					<div ref={carouselRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-2">
+						{currentCourses.map((course) => (
 							<CourseCard key={course.id} course={course} isAuthenticated={isAuthenticated} navigate={navigate} />
 						))}
 					</div>
+					{totalPages > 1 && (
+						<div className="flex justify-center items-center gap-2 mt-8">
+							<button 
+								disabled={currentPage === 1}
+								onClick={() => setCurrentPage(p => p - 1)}
+								className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer"
+							>
+								Previous
+							</button>
+							{[...Array(totalPages)].map((_, i) => (
+								<button
+									key={i}
+									onClick={() => setCurrentPage(i + 1)}
+									className={`w-10 h-10 rounded-lg font-medium transition cursor-pointer ${currentPage === i + 1 ? 'bg-amber-400 text-white shadow-sm' : 'border border-gray-300 hover:bg-gray-50 text-gray-700'}`}
+								>
+									{i + 1}
+								</button>
+							))}
+							<button 
+								disabled={currentPage === totalPages}
+								onClick={() => setCurrentPage(p => p + 1)}
+								className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 hover:bg-gray-50 transition cursor-pointer"
+							>
+								Next
+							</button>
+						</div>
+					)}
 				</div>
 			}
 			{warning && (
@@ -258,23 +319,25 @@ function CourseCard({ course, isAuthenticated, navigate }) {
 					toast.error("Please sign in");
 				}
 			}}
-			className="bg-white rounded-xl border border-gray-300 hover:shadow-md transition h-80 sm:w-80 sm:h-90 cursor-pointer overflow-hidden flex flex-col">
-			<SmartImage
-				src={course.thumbnail_url}
-				alt={course.title}
-				className="object-cover w-full h-full"
-				containerClassName="w-full h-40 sm:h-48 mb-2 relative"
-			/>
+			className="bg-white rounded-xl border border-gray-300 hover:shadow-md transition w-full cursor-pointer overflow-hidden flex flex-col shrink-0">
+			<div className="w-full mb-2 relative shrink-0 overflow-hidden" style={{ aspectRatio: "4/3" }}>
+				<SmartImage
+					src={course.thumbnail_url}
+					alt={course.title}
+					className="object-fill w-full h-full bg-gray-50"
+					containerClassName="w-full h-full"
+				/>
+			</div>
 			<div className="p-4 space-y-2 flex-grow" >
 				<div className="flex gap-1" >
-					<p className="text-xs text-gray-500 mb-1">{course.modules_count}  Modules</p>
-					<p className="text-xs text-gray-500 mb-1">&bull;</p>
-					<p className="text-xs text-gray-500 mb-1">{course.duration} mins</p>
+					<p className="text-sm text-gray-500 mb-1">{course.modules_count}  Modules</p>
+					<p className="text-sm text-gray-500 mb-1">&bull;</p>
+					<p className="text-sm text-gray-500 mb-1">{course.duration} mins</p>
 				</div>
-				<h3 className="font-semibold text-cyan-800 text-base tracking-wide mb-2">
+				<h3 className="font-semibold text-cyan-800 text-lg tracking-wide mb-2">
 					{course.title}
 				</h3>
-				<p className="text-xs text-gray-600 mb-2 whitespace-pre-wrap h-16 truncate">{course.description}</p>
+				<p className="text-sm text-gray-600 mb-2 whitespace-pre-wrap h-16 truncate">{course.description}</p>
 			</div>
 		</div>
 	);

@@ -2,21 +2,64 @@
 .cv-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
   background: #f4f6fb;
 }
 
+/* ── Logo ── */
+.cv-logo {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #111827;
+}
+.cv-logo img {
+  width: 32px;
+  height: 32px;
+}
+
 /* ── The bounding box every card type renders inside ── */
-.cv-card-box {
+.cv-main-container {
   width: 100%;
-  max-width: 640px;
+  max-width: 1000px;
+  min-height: 600px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(15, 14, 42, 0.08);
-  padding: 24px 24px 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-top-section {
+  width: 100%;
+  max-width: 1000px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(15, 14, 42, 0.04);
+  margin-bottom: 24px;
+}
+
+.cv-card-box {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.cv-card-box > * {
+  flex-grow: 1;
+  width: 100%;
 }
 
 /* ── Header row: module name + "2/7" ── */
@@ -48,7 +91,6 @@
   background: #e8eaf2;
   border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 4px;
 }
 
 .cv-progress-fill {
@@ -56,11 +98,6 @@
   background: #4A3AFF;
   border-radius: 3px;
   transition: width 0.35s ease;
-}
-
-/* ── Wrapper around whatever CardRenderer outputs ── */
-.cv-card-content {
-  margin: 0 -24px; /* let the card's own background bleed to the box edges */
 }
 
 /* ── Loading / error states ── */

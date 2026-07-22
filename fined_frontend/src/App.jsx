@@ -14,7 +14,7 @@ const ArticlesPage = lazy(() => import("./pages/Articles/ArticlesPage"));
 const SingleArticlePage = lazy(() => import("./pages/Articles/SingleArticlePage"));
 const TagArticlesPage = lazy(() => import("./pages/Articles/TagArticlesPage"));
 const AuthorPage = lazy(() => import("./pages/Articles/AuthorPage"));
-const Courses = lazy(() => import("./pages/CoursesPage/Courses"));
+import Courses from "./pages/CoursesPage/Courses";
 const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
 const FeedbackPage = lazy(() => import("./pages/FeedbackPage/FeedbackPage"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -43,12 +43,15 @@ const PageLoader = () => null;
 function App() {
   return (
     <BrowserRouter>
+      {/* Dummy div to force Tailwind to preload classes missing on first dev load */}
+      <div className="hidden pt-16 pb-12 mb-16 text-2xl gap-8 aspect-[4/3] object-fill object-contain lg:w-2/3 max-w-[1280px] items-center max-w-7xl flex-1 px-6 text-gray-800 sm:w-1/3"></div>
       <ScrollToTop />
       <Auth0ProviderWithNavigate>
         <AuthLoader>
           <ApiTokenProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
+                <Route path="/courses/:courseSlug/:moduleSlug/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="/" element={<MainLayout />}>
                 <Route index element={<Hero />} />
                 <Route path="articles" element={<ArticlesPage />} />  
@@ -66,8 +69,7 @@ function App() {
                 
                 <Route path="authors/:slug" element={<AuthorPage />} />
                 <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
-
-                <Route path="courses/:courseSlug/:moduleSlug/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                
                 <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
                 <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
                 <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />

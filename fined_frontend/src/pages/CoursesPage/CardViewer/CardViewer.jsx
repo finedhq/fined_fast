@@ -82,8 +82,11 @@ function CardViewer() {
 
   return (
     <div className="cv-page">
-      <div className="cv-card-box">
-        {/* ── Header: module name + progress fraction ── */}
+      <Link to="/" className="cv-logo">
+        <img src="/logo.ico" alt="FinEd" />
+        <span>FinEd</span>
+      </Link>
+      <div className="cv-top-section">
         <div className="cv-header">
           <span className="cv-module-name">{card?.module_title || "Module"}</span>
           <span className="cv-progress-fraction">
@@ -95,9 +98,11 @@ function CardViewer() {
         <div className="cv-progress-track">
           <div className="cv-progress-fill" style={{ width: `${percent}%` }} />
         </div>
+      </div>
 
+      <div className="cv-main-container">
         {/* ── The card itself, rendered by the dispatcher ── */}
-        <div className="cv-card-content">
+        <div className="cv-card-box">
           <CardRenderer card={card} onContinue={handleContinue} />
         </div>
       </div>
