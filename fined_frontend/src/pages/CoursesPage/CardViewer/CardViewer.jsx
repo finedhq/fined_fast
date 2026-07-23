@@ -82,9 +82,8 @@ function CardViewer() {
 
   return (
     <div className="cv-page">
-      <Link to="/" className="cv-logo">
+      <Link to="/" className="cv-logo" aria-label="FinEd Home">
         <img src="/logo.ico" alt="FinEd" />
-        <span>FinEd</span>
       </Link>
       <div className="cv-top-section">
         <div className="cv-header">

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import instance from "../../lib/axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router-dom";
+import RevealOnScroll from "../../components/RevealOnScroll";
 import "./CourseOverview.css";
+
 
 // SVG Icons for statuses
 const CheckIcon = () => (
@@ -97,149 +99,174 @@ export default function CourseOverview() {
           
           <div className="course-main-content">
             {/* Hero Banner */}
-            <div className="course-hero-banner">
-              <button onClick={() => navigate('/courses')} className="hero-back-btn">
-                ←
-              </button>
-              <div className="hero-header">
-                <span className="hero-tag">{courseTitle}</span>
-              </div>
-              <h1 className="hero-title">Building Your Money Mindset</h1>
-              <p className="hero-desc">
-                Learn the essential money habits and foundations that set you up for financial success.
-              </p>
-              
-              <div className="hero-progress-section">
-                <span className="hero-progress-label">Module Progress</span>
-                <div className="hero-progress-bar-container">
-                  <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
+            <RevealOnScroll>
+              <div className="course-hero-banner">
+                <button onClick={() => navigate('/courses')} className="hero-back-btn">
+                  ←
+                </button>
+                <div className="hero-header">
+                  <span className="hero-tag">{courseTitle}</span>
                 </div>
-                <span className="hero-progress-text">{completedModulesCount} / {totalModulesCount} Modules</span>
+                <h1 className="hero-title">Building Your Money Mindset</h1>
+                <p className="hero-desc">
+                  Learn the essential money habits and foundations that set you up for financial success.
+                </p>
+                
+                <div className="hero-progress-section">
+                  <span className="hero-progress-label">Module Progress</span>
+                  <div className="hero-progress-bar-container">
+                    <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
+                  </div>
+                  <span className="hero-progress-text">{completedModulesCount} / {totalModulesCount} Modules</span>
+                </div>
               </div>
-            </div>
+            </RevealOnScroll>
 
             {/* Modules Path */}
             <div className="course-path-container">
-              {course.map((module, i) => {
-                // Determine module status based on cards
-                const isFirstModule = i === 0;
-                let isPreviousCompleted = true;
+              {(() => {
+                const xOffsets = [24, 76, 24, 76];
+                const getX = (index) => xOffsets[index % xOffsets.length];
+                const rowHeight = 180;
+                const totalSvgHeight = course.length > 0 ? (course.length - 1) * rowHeight + 64 : 0;
 
-                if (!isFirstModule) {
-                  // Ensure all previous modules are completed
-                  for (let j = 0; j < i; j++) {
-                    const prevMod = course[j];
-                    const isModCompleted = prevMod.cards?.length > 0 && prevMod.cards.every(c => c.status?.toLowerCase() === "completed");
-                    if (!isModCompleted) {
-                      isPreviousCompleted = false;
-                      break;
-                    }
+                let pathD = "";
+                if (course.length > 1) {
+                  pathD = `M ${getX(0)} 32`;
+                  for (let i = 0; i < course.length - 1; i++) {
+                    const currX = getX(i);
+                    const currY = i * rowHeight + 32;
+                    const nextX = getX(i + 1);
+                    const nextY = (i + 1) * rowHeight + 32;
+                    const cp1Y = currY + rowHeight * 0.75;
+                    const cp2Y = nextY - rowHeight * 0.75;
+                    pathD += ` C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${nextY}`;
                   }
                 }
 
-                const isCompleted = module.cards?.length > 0 && module.cards.every(c => c.status?.toLowerCase() === "completed");
-                const isClickable = isFirstModule || isPreviousCompleted;
-                const isOngoing = isClickable && !isCompleted;
-
-                // Status mapping
-                let statusStr = "locked";
-                let StatusIcon = LockIcon;
-                
-                if (isCompleted) {
-                  statusStr = "completed";
-                  StatusIcon = CheckIcon;
-                } else if (isOngoing) {
-                  statusStr = "ongoing";
-                  StatusIcon = PlantIcon;
-                }
-
-                const cardToResume = module.cards.find(c => c.status !== "completed") || module.cards[0];
-                
-                // Path curve generation
-                const xOffsets = [15, 60, 25, 65, 10, 55, 20];
-                const getX = (index) => xOffsets[index % xOffsets.length];
-                const x1 = getX(i);
-                const x2 = getX(i + 1);
-                
-                // Card alignment: if node is on the left, card pops right, and vice versa
-                const alignmentClass = x1 < 50 ? "card-right" : "card-left";
-
                 return (
-                  <React.Fragment key={i}>
-                    {/* Node Row */}
-                    <div className="module-node-row">
-                      <div className={`module-node ${alignmentClass}`} style={{ left: `${x1}%` }}>
-                        <div className="module-base-label">
-                          <div className="module-base-number">Module {i + 1}</div>
-                          <div className="module-base-title">{module.moduleTitle}</div>
-                          <div className={`module-base-badge badge-${statusStr}`}>
-                            {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
-                          </div>
-                        </div>
-
-                        <div className={`module-circle ${statusStr}`}>
-                          <StatusIcon />
-                        </div>
-
-                        {/* Hover Popover Card */}
-                        <div className="module-hover-card">
-                          <div className="hc-header">
-                            <div className={`hc-icon-placeholder ${statusStr}`}>
-                              <StatusIcon />
-                            </div>
-                            <button 
-                              className="hc-arrow-btn"
-                              disabled={!isClickable}
-                              onClick={() => {
-                                if (isClickable && cardToResume) {
-                                  sessionStorage.removeItem('quiz_score');
-                                  navigate(`/courses/${courseSlug}/${module.moduleSlug || module.moduleId}/${cardToResume.cardSlug || cardToResume.card_id}`);
-                                } else if (!cardToResume) {
-                                  setWarning("This module has no cards yet!");
-                                } else {
-                                  setShowLockedAlert(true);
-                                }
-                              }}
-                            >
-                              <ArrowRightIcon />
-                            </button>
-                          </div>
-                          <div className="hc-content">
-                            <div className="hc-module-num">Module {i + 1}</div>
-                            <div className="hc-title">{module.moduleTitle}</div>
-                            <div className={`hc-badge badge-${statusStr}`}>
-                              {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
-                            </div>
-                            <p className="hc-desc">
-                              {module.cards.filter(c => c.status?.toLowerCase() === 'completed').length} / {module.cards.length} Cards Completed. 
-                              {isCompleted ? " You've successfully finished this module." : 
-                               isOngoing ? " Continue learning to finish this module." :
-                               " Complete previous modules to unlock."}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* SVG Connector to Next Node */}
-                    {i < course.length - 1 && (
-                      <div style={{ height: '60px', width: '100%', position: 'relative' }}>
-                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                          <path
-                            d={`M ${x1} 0 C ${x1} 50, ${x2} 50, ${x2} 100`}
-                            fill="none"
-                            stroke="#c7d2fe"
-                            strokeWidth="4"
-                            strokeDasharray="10 10"
-                            strokeLinecap="round"
-                            vectorEffect="non-scaling-stroke"
-                          />
-                        </svg>
-                      </div>
+                  <>
+                    {course.length > 1 && (
+                      <svg
+                        className="course-path-svg-bg"
+                        viewBox={`0 0 100 ${totalSvgHeight}`}
+                        preserveAspectRatio="none"
+                      >
+                        <path
+                          d={pathD}
+                          fill="none"
+                          stroke="#c7d2fe"
+                          strokeWidth="4"
+                          strokeDasharray="10 10"
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
                     )}
-                  </React.Fragment>
+
+                    {course.map((module, i) => {
+                      const isFirstModule = i === 0;
+                      let isPreviousCompleted = true;
+
+                      if (!isFirstModule) {
+                        for (let j = 0; j < i; j++) {
+                          const prevMod = course[j];
+                          const isModCompleted = prevMod.cards?.length > 0 && prevMod.cards.every(c => c.status?.toLowerCase() === "completed");
+                          if (!isModCompleted) {
+                            isPreviousCompleted = false;
+                            break;
+                          }
+                        }
+                      }
+
+                      const isCompleted = module.cards?.length > 0 && module.cards.every(c => c.status?.toLowerCase() === "completed");
+                      const isClickable = isFirstModule || isPreviousCompleted;
+                      const isOngoing = isClickable && !isCompleted;
+
+                      let statusStr = "locked";
+                      let StatusIcon = LockIcon;
+                      
+                      if (isCompleted) {
+                        statusStr = "completed";
+                        StatusIcon = CheckIcon;
+                      } else if (isOngoing) {
+                        statusStr = "ongoing";
+                        StatusIcon = PlantIcon;
+                      }
+
+                      const cardToResume = module.cards?.find(c => c.status?.toLowerCase() !== "completed") || module.cards?.[0];
+                      const x1 = getX(i);
+                      const alignmentClass = x1 < 50 ? "pop-left" : "pop-right";
+
+                      const handleLaunchModule = () => {
+                        if (isClickable && cardToResume) {
+                          sessionStorage.removeItem('quiz_score');
+                          navigate(`/courses/${courseSlug}/${module.moduleSlug || module.moduleId}/${cardToResume.cardSlug || cardToResume.card_id}`);
+                        } else if (!cardToResume) {
+                          setWarning("This module has no cards yet!");
+                        } else {
+                          setShowLockedAlert(true);
+                        }
+                      };
+
+                      return (
+                        <RevealOnScroll key={i} delay={i * 80}>
+                          <div className="module-node-row">
+                            <div className={`module-node ${alignmentClass}`} style={{ left: `${x1}%` }}>
+                              <div className="module-base-label">
+                                <div className="module-base-number">Module {i + 1}</div>
+                                <div className="module-base-title">{module.moduleTitle}</div>
+                                <div className={`module-base-badge badge-${statusStr}`}>
+                                  {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
+                                </div>
+                              </div>
+
+                              <div 
+                                className={`module-circle ${statusStr}`}
+                                onClick={handleLaunchModule}
+                                role="button"
+                                tabIndex={0}
+                                title={isClickable ? "Click to open module" : "Module Locked"}
+                              >
+                                <StatusIcon />
+                              </div>
+
+                              <div className="module-hover-card">
+                                <div className="hc-header">
+                                  <div className={`hc-icon-placeholder ${statusStr}`}>
+                                    <StatusIcon />
+                                  </div>
+                                  <button 
+                                    className="hc-arrow-btn"
+                                    disabled={!isClickable}
+                                    onClick={handleLaunchModule}
+                                  >
+                                    <ArrowRightIcon />
+                                  </button>
+                                </div>
+
+                                <div className="hc-content">
+                                  <div className="hc-module-num">Module {i + 1}</div>
+                                  <div className="hc-title">{module.moduleTitle}</div>
+                                  <div className={`hc-badge badge-${statusStr}`}>
+                                    {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
+                                  </div>
+                                  <p className="hc-desc">
+                                    {module.cards.filter(c => c.status?.toLowerCase() === 'completed').length} / {module.cards.length} Cards Completed. 
+                                    {isCompleted ? " You've successfully finished this module." : 
+                                     isOngoing ? " Continue learning to finish this module." :
+                                     " Complete previous modules to unlock."}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </RevealOnScroll>
+                      );
+                    })}
+                  </>
                 );
-              })}
+              })()}
 
               {course.length === 0 && (
                 <div className="no-modules">
@@ -254,51 +281,57 @@ export default function CourseOverview() {
           {/* Sidebar */}
           <div className="course-sidebar">
             {/* FinScore Card */}
-            <div className="sidebar-card">
-              <div className="sidebar-card-header">
-                FinScore <span className="info-icon">ⓘ</span>
+            <RevealOnScroll delay={100}>
+              <div className="sidebar-card">
+                <div className="sidebar-card-header">
+                  FinScore <span className="info-icon">ⓘ</span>
+                </div>
+                <div className="finscore-value-row">
+                  <span className="finscore-number">{userData?.fin_score || 0}</span>
+                  <span className="finscore-trend">▲ 24</span>
+                </div>
+                <div className="finscore-chart-mock">
+                  <div className="bar-mock"></div>
+                  <div className="bar-mock"></div>
+                  <div className="bar-mock"></div>
+                  <div className="bar-mock"></div>
+                  <div className="bar-mock"></div>
+                  <div className="bar-mock"></div>
+                </div>
+                <p className="finscore-msg">
+                  Great progress! Keep learning consistently.
+                </p>
               </div>
-              <div className="finscore-value-row">
-                <span className="finscore-number">{userData?.fin_score || 0}</span>
-                <span className="finscore-trend">▲ 24</span>
-              </div>
-              <div className="finscore-chart-mock">
-                <div className="bar-mock"></div>
-                <div className="bar-mock"></div>
-                <div className="bar-mock"></div>
-                <div className="bar-mock"></div>
-                <div className="bar-mock"></div>
-                <div className="bar-mock"></div>
-              </div>
-              <p className="finscore-msg">
-                Great progress! Keep learning consistently.
-              </p>
-            </div>
+            </RevealOnScroll>
 
             {/* Stats Box (Points, Rank, Streak) */}
-            <div className="sidebar-card">
-              <div className="stats-box-container">
-                <div className="stat-column">
-                  <span className="stat-icon-top" style={{ color: '#fbbf24' }}>⭐</span>
-                  <span className="stat-value-large">{userData?.fin_stars || 0}</span>
-                  <span className="stat-label-small">POINTS</span>
-                </div>
-                <div className="stat-column">
-                  <span className="stat-icon-top" style={{ color: '#818cf8' }}>🎖️</span>
-                  <span className="stat-value-large">Top 10%</span>
-                  <span className="stat-label-small">YOUR RANK</span>
-                </div>
-                <div className="stat-column">
-                  <span className="stat-icon-top" style={{ color: '#ef4444' }}>🔥</span>
-                  <span className="stat-value-large">{userData?.streak_count || 0} Days</span>
-                  <span className="stat-label-small">STREAK</span>
+            <RevealOnScroll delay={200}>
+              <div className="sidebar-card">
+                <div className="stats-box-container">
+                  <div className="stat-column">
+                    <span className="stat-icon-top" style={{ color: '#fbbf24' }}>⭐</span>
+                    <span className="stat-value-large">{userData?.fin_stars || 0}</span>
+                    <span className="stat-label-small">POINTS</span>
+                  </div>
+                  <div className="stat-column">
+                    <span className="stat-icon-top" style={{ color: '#818cf8' }}>🎖️</span>
+                    <span className="stat-value-large">Top 10%</span>
+                    <span className="stat-label-small">YOUR RANK</span>
+                  </div>
+                  <div className="stat-column">
+                    <span className="stat-icon-top" style={{ color: '#ef4444' }}>🔥</span>
+                    <span className="stat-value-large">{userData?.streak_count || 0} Days</span>
+                    <span className="stat-label-small">STREAK</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
+            </RevealOnScroll>
           </div>
         </div>
       )}
+
+
+
 
       {/* Alert Modals */}
       {warning && (

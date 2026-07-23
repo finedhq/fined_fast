@@ -68,19 +68,23 @@
   font-weight: 500;
 }
 
-.hero-title {
+.course-hero-banner .hero-title {
   font-size: 2rem;
   font-weight: 700;
+  color: #ffffff;
   margin: 0 0 0.5rem 0;
 }
 
-.hero-desc {
+
+.course-hero-banner .hero-desc {
   font-size: 1rem;
+  color: #ffffff;
   opacity: 0.9;
   max-width: 600px;
   margin-bottom: 2rem;
   line-height: 1.5;
 }
+
 
 .hero-progress-section {
   display: flex;
@@ -124,8 +128,19 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 2rem 0;
+  padding: 0;
   width: 100%;
+}
+
+.course-path-svg-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
 }
 
 .module-node-row {
@@ -133,11 +148,17 @@
   height: 64px;
   width: 100%;
   z-index: 10;
+  margin-bottom: 116px;
+}
+
+.module-node-row:last-child {
+  margin-bottom: 0;
 }
 
 .module-node-row:hover {
   z-index: 50;
 }
+
 
 .module-node {
   position: absolute;
@@ -199,6 +220,12 @@
   text-align: left;
 }
 
+.card-left .module-base-label {
+  left: auto;
+  right: calc(100% + 20px);
+  text-align: right;
+}
+
 .module-base-number {
   font-size: 0.75rem;
   color: #64748b;
@@ -256,16 +283,34 @@
   flex-direction: column;
 }
 
-/* Positioning the hover card */
-.card-right .module-hover-card {
-  left: calc(100% + -32px);
+/* Positioning the hover card & base label */
+.pop-left .module-hover-card {
+  right: calc(100% + 16px);
+  left: auto;
+  transform-origin: right center;
+}
+
+.pop-left .module-base-label {
+  left: calc(100% + 16px);
+  right: auto;
+  text-align: left;
+}
+
+.pop-right .module-hover-card {
+  left: calc(100% + 16px);
+  right: auto;
   transform-origin: left center;
 }
 
-.card-left .module-hover-card {
-  right: calc(100% + -32px);
-  transform-origin: right center;
+.pop-right .module-base-label {
+  right: calc(100% + 16px);
+  left: auto;
+  text-align: right;
 }
+
+
+
+
 
 /* When hovering the node */
 .module-node:hover .module-hover-card {

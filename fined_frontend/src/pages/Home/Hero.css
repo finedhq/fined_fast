@@ -7,13 +7,7 @@
   --radius-pill: 50px;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+
 
 
 body {
@@ -112,13 +106,14 @@ body {
   margin-top: -8%;
 }
 
-.hero-title {
+.hero-content .hero-title {
   margin-top: 0px;
   font-size: clamp(27px, 4vw, 50px);
   font-weight: 900;
   line-height: 1.1;
   font-family: 'Nunito', sans-serif;
   color: #000;
+
   margin-bottom: clamp(14px, 2vw, 28px);
   letter-spacing: 1.5px;
   width: min(800px, 100%);

@@ -23,8 +23,12 @@
   color: #111827;
 }
 .cv-logo img {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
+  transition: transform 0.2s ease;
+}
+.cv-logo img:hover {
+  transform: scale(1.08);
 }
 
 /* ── The bounding box every card type renders inside ── */
