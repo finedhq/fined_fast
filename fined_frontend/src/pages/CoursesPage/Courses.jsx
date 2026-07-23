@@ -76,11 +76,6 @@ export default function Courses() {
     ? ongoingCourse
     : courses[courses.length - 1];
 
-  const courseRows = [];
-  for (let i = 0; i < currentCourses.length; i += 3) {
-    courseRows.push(currentCourses.slice(i, i + 3));
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans w-full flex flex-col items-center">
       <main className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 flex-1 flex flex-col">
@@ -180,19 +175,15 @@ export default function Courses() {
                 </h2>
               </RevealOnScroll>
               
-              <div ref={carouselRef} className="w-full flex flex-col gap-8 sm:gap-10">
-                {courseRows.map((row, rowIndex) => (
-                  <RevealOnScroll key={rowIndex}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-                      {row.map((course) => (
-                        <div key={course.id} className="h-full flex flex-col">
-                          <CourseCard
-                            course={course}
-                            isAuthenticated={isAuthenticated}
-                            navigate={navigate}
-                          />
-                        </div>
-                      ))}
+              <div ref={carouselRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+                {currentCourses.map((course, index) => (
+                  <RevealOnScroll key={course.id} delay={(index % 3) * 150}>
+                    <div className="h-full flex flex-col">
+                      <CourseCard
+                        course={course}
+                        isAuthenticated={isAuthenticated}
+                        navigate={navigate}
+                      />
                     </div>
                   </RevealOnScroll>
                 ))}

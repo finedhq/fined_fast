@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import instance from "../../lib/axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -128,39 +128,60 @@ export default function CourseOverview() {
                 const xOffsets = [24, 76, 24, 76];
                 const getX = (index) => xOffsets[index % xOffsets.length];
                 const rowHeight = 180;
-                const totalSvgHeight = course.length > 0 ? (course.length - 1) * rowHeight + 64 : 0;
+                const topPadding = 75;
+                const totalSvgHeight = course.length > 0 ? (course.length - 1) * rowHeight + 64 + topPadding : 0;
 
-                let pathD = "";
+                const segments = [];
                 if (course.length > 1) {
-                  pathD = `M ${getX(0)} 32`;
                   for (let i = 0; i < course.length - 1; i++) {
                     const currX = getX(i);
-                    const currY = i * rowHeight + 32;
+                    const currY = i * rowHeight + 32 + topPadding;
                     const nextX = getX(i + 1);
-                    const nextY = (i + 1) * rowHeight + 32;
+                    const nextY = (i + 1) * rowHeight + 32 + topPadding;
                     const cp1Y = currY + rowHeight * 0.75;
                     const cp2Y = nextY - rowHeight * 0.75;
-                    pathD += ` C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${nextY}`;
+                    const d = `M ${currX} ${currY} C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${nextY}`;
+                    segments.push({ d, index: i });
                   }
                 }
 
                 return (
                   <>
-                    {course.length > 1 && (
+                    {segments.length > 0 && (
                       <svg
                         className="course-path-svg-bg"
                         viewBox={`0 0 100 ${totalSvgHeight}`}
                         preserveAspectRatio="none"
                       >
-                        <path
-                          d={pathD}
-                          fill="none"
-                          stroke="#c7d2fe"
-                          strokeWidth="4"
-                          strokeDasharray="10 10"
-                          strokeLinecap="round"
-                          vectorEffect="non-scaling-stroke"
-                        />
+                        {segments.map((seg, i) => (
+                          <RevealOnScroll key={i} delay={60}>
+                            <g className="path-segment-group">
+                              <defs>
+                                <mask id={`course-path-mask-${i}`} maskUnits="userSpaceOnUse">
+                                  <path
+                                    d={seg.d}
+                                    fill="none"
+                                    stroke="white"
+                                    strokeWidth="30"
+                                    strokeLinecap="round"
+                                    vectorEffect="non-scaling-stroke"
+                                    className="segment-mask-line"
+                                  />
+                                </mask>
+                              </defs>
+                              <path
+                                d={seg.d}
+                                fill="none"
+                                stroke="#c7d2fe"
+                                strokeWidth="4"
+                                strokeDasharray="10 10"
+                                strokeLinecap="round"
+                                vectorEffect="non-scaling-stroke"
+                                mask={`url(#course-path-mask-${i})`}
+                              />
+                            </g>
+                          </RevealOnScroll>
+                        ))}
                       </svg>
                     )}
 
@@ -210,7 +231,7 @@ export default function CourseOverview() {
                       };
 
                       return (
-                        <RevealOnScroll key={i} delay={i * 80}>
+                        <RevealOnScroll key={i} delay={i === 0 ? 0 : 200}>
                           <div className="module-node-row">
                             <div className={`module-node ${alignmentClass}`} style={{ left: `${x1}%` }}>
                               <div className="module-base-label">

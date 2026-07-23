@@ -82,9 +82,17 @@ function CardViewer() {
 
   return (
     <div className="cv-page">
-      <Link to="/" className="cv-logo" aria-label="FinEd Home">
-        <img src="/logo.ico" alt="FinEd" />
-      </Link>
+      <div className="cv-top-left-nav">
+        <Link to="/" className="cv-logo" aria-label="FinEd Home">
+          <img src="/logo.ico" alt="FinEd" />
+        </Link>
+        <Link to={`/courses/${courseSlug}`} className="cv-back-btn" title="Back to Course Overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span>Back to Course</span>
+        </Link>
+      </div>
       <div className="cv-top-section">
         <div className="cv-header">
           <span className="cv-module-name">{card?.module_title || "Module"}</span>

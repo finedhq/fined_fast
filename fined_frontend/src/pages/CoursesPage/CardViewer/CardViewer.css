@@ -9,26 +9,62 @@
   background: #f4f6fb;
 }
 
-/* ── Logo ── */
-.cv-logo {
+/* ── Top Left Nav & Logo ── */
+.cv-top-left-nav {
   position: absolute;
   top: 24px;
   left: 32px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  z-index: 20;
+}
+
+.cv-logo {
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  font-weight: 800;
-  font-size: 1.5rem;
-  color: #111827;
 }
 .cv-logo img {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   transition: transform 0.2s ease;
 }
 .cv-logo img:hover {
   transform: scale(1.08);
+}
+
+.cv-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(15, 14, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.cv-back-btn:hover {
+  background: #ffffff;
+  color: #4A3AFF;
+  border-color: #c7d2fe;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 14px rgba(74, 58, 255, 0.15);
+}
+
+.cv-back-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.cv-back-btn:hover svg {
+  transform: translateX(-3px);
 }
 
 /* ── The bounding box every card type renders inside ── */
@@ -124,6 +160,17 @@
 }
 
 @media (max-width: 560px) {
+  .cv-top-left-nav {
+    top: 14px;
+    left: 14px;
+    gap: 8px;
+  }
+
+  .cv-back-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
   .cv-card-box {
     padding: 18px 18px 0;
     border-radius: 16px;
