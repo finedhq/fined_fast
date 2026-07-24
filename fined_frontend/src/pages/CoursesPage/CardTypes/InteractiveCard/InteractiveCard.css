@@ -9,7 +9,7 @@
 }
 
 .ie-title {
-  font-size: 1.4rem;
+  font-size: 1.68rem;
   font-weight: 700;
   color: #4A3AFF; /* Indigo */
   margin: 0;
@@ -17,7 +17,7 @@
 }
 
 .ie-intro {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   line-height: 1.6;
   color: #4b5563;
   margin: 0;
@@ -74,12 +74,12 @@
 }
 
 .ie-tab-icon-large {
-  font-size: 1.8rem;
+  font-size: 2.16rem;
   line-height: 1;
 }
 
 .ie-tab-tile .ie-tab-name {
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: #374151;
 }
@@ -89,7 +89,7 @@
 }
 
 .ie-tab-value-small {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #6b7280;
   font-weight: 500;
 }
@@ -131,7 +131,7 @@
 }
 
 .ie-tab-row .ie-tab-name {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #111827;
 }
@@ -141,7 +141,7 @@
 }
 
 .ie-tab-value-right {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   font-weight: 700;
   color: #4b5563; /* Can be overridden inline */
 }
@@ -158,14 +158,14 @@
 }
 
 .ie-content-title {
-  font-size: 1.15rem;
+  font-size: 1.38rem;
   font-weight: 700;
   color: #111827;
   margin: 0 0 12px 0;
 }
 
 .ie-content-text {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   line-height: 1.6;
   color: #374151;
 }
@@ -201,7 +201,7 @@
   border: none;
   padding: 14px 24px;
   border-radius: 9999px; /* pill shape */
-  font-size: 1.05rem;
+  font-size: 1.26rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;

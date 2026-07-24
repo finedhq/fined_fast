@@ -6,7 +6,7 @@
 }
 
 .sc-intro {
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   color: #4b5563;
   margin-bottom: 32px;
@@ -66,7 +66,7 @@
 }
 
 .sc-stage-name {
-  font-size: 1.1rem;
+  font-size: 1.32rem;
   font-weight: 700;
   margin: 0 0 8px 0;
   color: #111827;
@@ -94,7 +94,7 @@
 }
 
 .sc-detail-text {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   line-height: 1.6;
   color: #374151;
   margin-bottom: 16px;
@@ -104,7 +104,7 @@
   background: #f3f4f6;
   border-left: 3px solid #F5A623; /* Amber */
   padding: 10px 14px;
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   color: #4b5563;
   border-radius: 0 8px 8px 0;
   font-weight: 500;
@@ -163,13 +163,13 @@
 
 .sc-glossary-tooltip strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 1.08rem;
   color: #F5A623;
   margin-bottom: 6px;
 }
 
 .sc-glossary-tooltip p {
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   line-height: 1.5;
   margin-bottom: 8px;
   color: #e5e7eb;
@@ -198,7 +198,7 @@
 }
 
 .sc-reflection-q {
-  font-size: 1.05rem;
+  font-size: 1.26rem;
   font-weight: 700;
   color: #111827;
   margin-bottom: 16px;
@@ -216,7 +216,7 @@
   border: 1px solid #d1d5db;
   padding: 14px 20px;
   border-radius: 12px;
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   color: #374151;
   cursor: pointer;
   text-align: left;

@@ -6,7 +6,7 @@
 }
 
 .slider-title {
-  font-size: 1.35rem;
+  font-size: 1.62rem;
   font-weight: 800;
   color: #111827;
   margin-bottom: 16px;
@@ -14,7 +14,7 @@
 }
 
 .slider-body {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   line-height: 1.6;
   color: #4b5563;
   margin-bottom: 24px;
@@ -60,7 +60,7 @@
   color: #f3f4f6;
   padding: 12px 16px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   line-height: 1.5;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 10;
@@ -81,7 +81,7 @@
 .slider-glossary-tooltip strong {
   display: block;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 1.08rem;
   margin-bottom: 4px;
 }
 
@@ -111,7 +111,7 @@
 .calc-field label {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   font-weight: 600;
   color: #4b5563;
   margin-bottom: 12px;
@@ -176,7 +176,7 @@
 }
 
 .crb-label {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #6b7280;
   font-weight: 600;
   text-transform: uppercase;
@@ -185,7 +185,7 @@
 }
 
 .crb-val {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #111827;
 }
@@ -195,12 +195,12 @@
 }
 
 .calc-result-box.highlight .crb-val {
-  font-size: 1.8rem;
+  font-size: 2.16rem;
   color: #4A3AFF;
 }
 
 .crb-sub {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #9ca3af;
   margin-top: 4px;
 }
@@ -211,7 +211,7 @@
 }
 
 .slider-disclaimer {
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   color: #9ca3af;
   text-align: center;
   margin-top: 16px;
@@ -220,7 +220,7 @@
 
 /* Highlight line */
 .slider-highlight-line {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #111827;
   background: rgba(245, 158, 11, 0.1);
@@ -241,7 +241,7 @@
   border-radius: 12px;
   padding: 16px 24px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 24px;

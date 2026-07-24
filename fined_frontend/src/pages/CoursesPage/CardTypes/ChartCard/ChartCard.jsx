@@ -89,23 +89,32 @@ function hexToRgba(hex, alpha) {
 
 function ChartCard({ card, onContinue }) {
   const {
+    card_label,
     title = "",
+    quote,
     body_text_top = "",
+    chart_data,
     labels = [],
     datasets = [],
     chart_caption,
+    stats,
     stat_chips = [],
     body_text_bottom,
+    highlight_line,
     glossary_terms = [],
     cta_text = "Continue",
   } = card?.card_data || {};
 
   const [activeTermIndex, setActiveTermIndex] = useState(null);
 
+  const actualLabels = chart_data?.labels || labels || [];
+  const actualDatasets = chart_data?.datasets || datasets || [];
+  const chartHeight = chart_data?.height || "250px";
+
   // Build the chart.js data object
-  const chartData = {
-    labels: labels,
-    datasets: datasets.map((ds) => ({
+  const chartDataObj = {
+    labels: actualLabels,
+    datasets: actualDatasets.map((ds) => ({
       label: ds.label,
       data: ds.data,
       borderColor: ds.color,
@@ -162,48 +171,104 @@ function ChartCard({ card, onContinue }) {
     },
   };
 
+  // Determine stats fallback
+  const finalStatsLayout = stats?.layout || (stat_chips?.length > 0 ? "grid" : null);
+  const finalStatItems = stats?.items || stat_chips || [];
+
   return (
     <div className="ch-root" onClick={() => setActiveTermIndex(null)}>
+      {card_label && <div className="ch-card-label">{card_label}</div>}
+      
       <h2 className="ch-title">{title}</h2>
       
+      {quote && (
+        <div className="ch-quote-box">
+          "{quote.text}"
+          {quote.author && <cite>— {quote.author}</cite>}
+        </div>
+      )}
+
       {body_text_top && (
         <p className="ch-body">
           {renderDetailWithGlossary(body_text_top, glossary_terms, activeTermIndex, setActiveTermIndex)}
         </p>
       )}
 
-      <div className="ch-chart-container">
-        <Line data={chartData} options={chartOptions} />
+      <div className="ch-chart-container" style={{ height: chartHeight }}>
+        <Line data={chartDataObj} options={chartOptions} />
       </div>
       
       {chart_caption && <p className="ch-chart-caption">{chart_caption}</p>}
 
-      {stat_chips.length > 0 && (
+      {finalStatsLayout === "row" && finalStatItems.length > 0 && (
+        <div className="ch-stat-cards-row">
+          {finalStatItems.map((item, idx) => {
+            const hColor = item.highlight_color || "#00e5a0";
+            const highlightStyle = item.is_highlighted ? {
+              borderColor: hexToRgba(hColor, 0.3),
+              background: hexToRgba(hColor, 0.05)
+            } : {};
+            return (
+              <div key={idx} className="ch-stat-card" style={highlightStyle}>
+                {item.emoji && <div className="ch-emoji">{item.emoji}</div>}
+                <div className="ch-amount" style={item.is_highlighted ? { fontSize: "1.1rem" } : {}}>
+                  {item.value}
+                </div>
+                <div className="ch-desc">{item.label}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {finalStatsLayout === "grid" && finalStatItems.length > 0 && (
         <div className="ch-stat-grid">
-          {stat_chips.map((chip, idx) => (
-            <div 
-              key={idx} 
-              className="ch-stat-chip"
-              style={{
-                background: hexToRgba(chip.color, 0.06),
-                borderColor: hexToRgba(chip.color, 0.25)
-              }}
-            >
-              <div className="ch-stat-val" style={{ color: chip.color }}>{chip.value}</div>
-              <div className="ch-stat-lbl">{chip.label}</div>
-            </div>
-          ))}
+          {finalStatItems.map((item, idx) => {
+            const hColor = item.highlight_color || item.color || "#00e5a0";
+            // For backward compatibility: if item.color is provided, use it (old stat_chips logic)
+            // But if it's explicitly highlighted, use the highlight colors.
+            let highlightStyle = {};
+            if (item.is_highlighted) {
+              highlightStyle = {
+                background: hexToRgba(hColor, 0.06),
+                borderColor: hexToRgba(hColor, 0.25)
+              };
+            } else if (item.color) { // Legacy style
+               highlightStyle = {
+                background: hexToRgba(item.color, 0.06),
+                borderColor: hexToRgba(item.color, 0.25)
+               }
+            }
+
+            const valColor = item.is_highlighted ? { color: "var(--accent, #111827)" } : (item.color ? { color: item.color } : {});
+            if (item.is_highlighted && hColor !== "#00e5a0") {
+              valColor.color = hColor;
+            }
+
+            return (
+              <div key={idx} className="ch-stat-chip" style={highlightStyle}>
+                <div className="ch-stat-val" style={valColor}>{item.value}</div>
+                <div className="ch-stat-lbl">{item.label}</div>
+              </div>
+            );
+          })}
         </div>
       )}
 
       {body_text_bottom && (
-        <p className="ch-body">
+        <p className="ch-body" style={{ marginTop: finalStatsLayout === "row" ? "18px" : "0" }}>
           {renderDetailWithGlossary(body_text_bottom, glossary_terms, activeTermIndex, setActiveTermIndex)}
         </p>
       )}
 
+      {highlight_line && (
+        <div className="ch-highlight-line">
+          {renderDetailWithGlossary(highlight_line, glossary_terms, activeTermIndex, setActiveTermIndex)}
+        </div>
+      )}
+
       <button className="ch-btn-primary" onClick={onContinue}>
-        {cta_text} →
+        {cta_text}
       </button>
     </div>
   );

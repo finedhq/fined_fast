@@ -72,7 +72,7 @@
   position: relative;
   z-index: 1;
   max-width: 46ch;
-  font-size: 1.05rem;
+  font-size: 1.26rem;
   color: #5a5a7a;
   line-height: 1.65;
   margin: 0 0 32px;
@@ -94,7 +94,7 @@
   border-radius: 999px;
   background: #4A3AFF;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   opacity: 0;
@@ -121,7 +121,7 @@
   position: relative;
   z-index: 1;
   margin-top: 18px;
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   color: #8a8aa3;
   opacity: 0;
   transition: opacity 0.5s ease;

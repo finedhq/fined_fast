@@ -53,44 +53,44 @@ function App() {
               <Routes>
                 <Route path="/courses/:courseSlug/:moduleSlug/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="/" element={<MainLayout />}>
-                <Route index element={<Hero />} />
-                <Route path="articles" element={<ArticlesPage />} />  
-                <Route path="articles/:slug" element={<SingleArticlePage />} />
-                <Route path="tags/:tag" element={<TagArticlesPage />} />
-                <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
-                <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
-                <Route path="contact" element={<ContactPage />} />
-                <Route path="feedback" element={<FeedbackPage />} />
-                
-                <Route path="about" element={<AboutPage />} />
-                <Route path="help" element={<StaticPage />} />
-                <Route path="privacy-policy" element={<StaticPage />} />
-                <Route path="termsofservice" element={<StaticPage />} />
-                
-                <Route path="authors/:slug" element={<AuthorPage />} />
-                <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
-                
-                <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
-                <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
-                <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />
-                <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
-                <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
-                <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
-                <Route path="courses/:courseSlug" element={<AuthenticationGuard component={CourseOverview} />} />
-                <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />
-                <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
-                <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
-                <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
-                <Route path=":productType" element={<AuthenticationGuard component={ProductPage} />} />
-                <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
-                <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
-                <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />
-                <Route path="admin/newsletters" element={<AdminGuard><AdminNewsletter /></AdminGuard>} />
+                  <Route index element={<Hero />} />
+                  <Route path="articles" element={<ArticlesPage />} />
+                  <Route path="articles/:slug" element={<SingleArticlePage />} />
+                  <Route path="tags/:tag" element={<TagArticlesPage />} />
+                  <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
+                  <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
+                  <Route path="contact" element={<ContactPage />} />
+                  <Route path="feedback" element={<FeedbackPage />} />
 
-                {/* Catch-all route redirects unknown/hidden pages to the Coming Soon courses page */}
-                <Route path="*" element={<Navigate to="/courses" replace />} />
-              </Route>
-            </Routes>
+                  <Route path="about" element={<AboutPage />} />
+                  <Route path="help" element={<StaticPage />} />
+                  <Route path="privacy-policy" element={<StaticPage />} />
+                  <Route path="termsofservice" element={<StaticPage />} />
+
+                  <Route path="authors/:slug" element={<AuthorPage />} />
+                  <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
+
+                  <Route path="admin/cards/add" element={<AdminGuard><AddCardForm /></AdminGuard>} />
+                  <Route path="admin/courses/add" element={<AdminGuard><AddCourseForm /></AdminGuard>} />
+                  <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />
+                  <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
+                  <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
+                  <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
+                  <Route path="courses/:courseSlug" element={<AuthenticationGuard component={CourseOverview} />} />
+                  <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />
+                  <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
+                  <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
+                  <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
+                  <Route path=":productType" element={<AuthenticationGuard component={ProductPage} />} />
+                  <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+                  <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
+                  <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />
+                  <Route path="admin/newsletters" element={<AdminGuard><AdminNewsletter /></AdminGuard>} />
+
+                  {/* Catch-all route redirects unknown/hidden pages to the Coming Soon courses page */}
+                  <Route path="*" element={<Navigate to="/courses" replace />} />
+                </Route>
+              </Routes>
             </Suspense>
           </ApiTokenProvider>
         </AuthLoader>

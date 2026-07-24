@@ -7,15 +7,45 @@
 }
 
 .ch-title {
-  font-size: 1.35rem;
+  font-size: 1.62rem;
   font-weight: 800;
   color: #111827;
   margin-bottom: 16px;
   line-height: 1.25;
 }
 
+.ch-card-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.ch-quote-box {
+  background: #f9fafb;
+  border-left: 4px solid #e5e7eb;
+  padding: 16px;
+  font-style: italic;
+  color: #4b5563;
+  font-size: 1.14rem;
+  line-height: 1.5;
+  border-radius: 4px 8px 8px 4px;
+  margin-bottom: 24px;
+}
+
+.ch-quote-box cite {
+  display: block;
+  font-style: normal;
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-top: 8px;
+}
+
 .ch-body {
-  font-size: 0.95rem;
+  font-size: 1.14rem;
   line-height: 1.6;
   color: #4b5563;
   margin-bottom: 24px;
@@ -28,7 +58,7 @@
 }
 
 .ch-chart-caption {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   color: #9ca3af;
   text-align: center;
   line-height: 1.4;
@@ -42,6 +72,43 @@
   margin-bottom: 24px;
 }
 
+.ch-stat-cards-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ch-stat-card {
+  flex: 1;
+  min-width: 100px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ch-stat-card .ch-emoji {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.ch-stat-card .ch-amount {
+  font-size: 1.38rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.ch-stat-card .ch-desc {
+  font-size: 0.96rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
 .ch-stat-chip {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -51,20 +118,32 @@
 }
 
 .ch-stat-val {
-  font-size: 1.15rem;
+  font-size: 1.38rem;
   font-weight: 800;
   color: #111827;
   margin-bottom: 4px;
 }
 
 .ch-stat-lbl {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #6b7280;
   line-height: 1.2;
 }
 
 /* Glossary Tooltip Support */
+.ch-highlight-line {
+  background: rgba(74, 58, 255, 0.05);
+  border-left: 4px solid #4A3AFF;
+  padding: 16px;
+  border-radius: 4px 8px 8px 4px;
+  font-size: 1.14rem;
+  color: #111827;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 24px;
+}
+
 .ch-glossary-wrapper {
   position: relative;
   display: inline-block;
@@ -106,7 +185,7 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   z-index: 100;
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 1.02rem;
   line-height: 1.5;
   animation: chTooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
@@ -126,7 +205,7 @@
 .ch-glossary-tooltip strong {
   display: block;
   font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 8px;
   color: #4A3AFF;
@@ -138,7 +217,7 @@
   border-top: 1px solid rgba(255,255,255,0.1);
   color: #9ca3af;
   font-style: italic;
-  font-size: 0.8rem;
+  font-size: 0.96rem;
 }
 
 @keyframes chTooltipFadeIn {
@@ -156,7 +235,7 @@
   border-radius: 12px;
   padding: 16px 24px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
