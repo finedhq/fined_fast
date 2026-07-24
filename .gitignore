@@ -168,4 +168,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+error_log.txt
 

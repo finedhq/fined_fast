@@ -24,6 +24,7 @@
   text-align: center;
 }
 
+/* Base Explorer styles */
 .ie-explorer {
   display: flex;
   flex-direction: column;
@@ -35,41 +36,117 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
-.ie-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* === GRID VARIANT === */
+.ie-tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
   border-bottom: 2px solid #f3f4f6;
-  padding-bottom: 12px;
+  padding-bottom: 16px;
 }
 
-.ie-tab-btn {
+.ie-tab-tile {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 16px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  text-align: center;
+}
+
+.ie-tab-tile:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.ie-tab-tile.active {
+  background: rgba(74, 58, 255, 0.05);
+  border-color: #4A3AFF;
+  box-shadow: 0 0 0 1px #4A3AFF;
+}
+
+.ie-tab-icon-large {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.ie-tab-tile .ie-tab-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.ie-tab-tile.active .ie-tab-name {
+  color: #4A3AFF;
+}
+
+.ie-tab-value-small {
+  font-size: 0.75rem;
   color: #6b7280;
+  font-weight: 500;
+}
+
+/* === LIST VARIANT === */
+.ie-tabs-list {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.ie-tab-row {
+  background: #ffffff;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   font-family: inherit;
 }
 
-.ie-tab-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
+.ie-tab-row:last-child {
+  border-bottom: none;
 }
 
-.ie-tab-btn.active {
-  background: rgba(74, 58, 255, 0.1);
-  border-color: #4A3AFF;
+.ie-tab-row:hover {
+  background: #f9fafb;
+}
+
+.ie-tab-row.active {
+  background: rgba(74, 58, 255, 0.05);
+  border-left: 4px solid #4A3AFF;
+  padding-left: 12px; /* compensate for border */
+}
+
+.ie-tab-row .ie-tab-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ie-tab-row.active .ie-tab-name {
   color: #4A3AFF;
 }
 
+.ie-tab-value-right {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4b5563; /* Can be overridden inline */
+}
+
+/* === CONTENT PANE === */
 .ie-content-pane {
   padding: 12px 8px;
   animation: fadeIn 0.3s ease-in-out;
@@ -87,21 +164,35 @@
   margin: 0 0 12px 0;
 }
 
-.ie-content-def {
+.ie-content-text {
   font-size: 0.95rem;
   line-height: 1.6;
   color: #374151;
+}
+
+.ie-content-text p {
   margin-bottom: 12px;
 }
 
-.ie-content-example {
-  font-size: 0.85rem;
-  color: #4b5563;
-  font-style: italic;
-  background: rgba(245, 166, 35, 0.1); /* Light amber */
-  border-radius: 8px;
-  padding: 10px 14px;
-  border-left: 3px solid #F5A623;
+.ie-content-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Jargon and Citations (from HTML examples) */
+.ie-intro .jargon,
+.ie-content-text .jargon {
+  border-bottom: 1px dashed #4A3AFF;
+  color: #4A3AFF;
+  cursor: help;
+  position: relative;
+}
+
+.ie-intro .cite,
+.ie-content-text .cite {
+  color: #6b7280;
+  font-size: 0.75em;
+  margin-left: 2px;
+  vertical-align: super;
 }
 
 .ie-continue-btn {
