@@ -928,8 +928,11 @@ button {
   position: sticky;
   top: 60px;
   max-height: calc(100vh - 130px);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   padding-top: 12px;
+  padding-bottom: 24px;
 }
 
 @media (min-width: 1400px) {
@@ -941,15 +944,29 @@ button {
 .ar-toc-nav {
   position: static;
   z-index: auto;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   padding: 0;
   background: transparent;
   border: 0;
 }
 
+.ar-toc-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 .ar-toc-heading {
   margin: 0 0 16px 1.25rem;
+  width: 100%;
   color: #9ca3af;
   text-align: left;
   font-size: 14px;
@@ -958,14 +975,20 @@ button {
   font-weight: 700;
 }
 
-.ar-toc-header-wrapper {}
+.ar-toc-header-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+}
 
 .ar-toc-icon {
   display: none;
 }
 
 .ar-toc-list {
-  max-height: calc(100vh - 280px);
+  flex: 1;
+  width: 100%;
+  min-height: 0;
   margin: 0;
   padding: 0;
   border-left: 2px solid #f3f4f6;
@@ -979,14 +1002,16 @@ button {
   margin: 0;
 }
 
+
+
 .ar-toc-link {
   display: block;
   border-radius: 0 6px 6px 0;
   color: #4b5563;
   text-decoration: none;
-  font-size: 16px !important;
-  line-height: 1.28 !important;
-  padding: 0.22rem 0.95rem !important;
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 0.4rem 0.95rem;
   overflow-wrap: anywhere;
   transition: all 0.2s ease;
 }
@@ -1508,7 +1533,7 @@ button {
   }
 
   .ar-toc-content-wrapper.open {
-    display: block;
+    display: flex;
   }
 
   .ar-toc-list {

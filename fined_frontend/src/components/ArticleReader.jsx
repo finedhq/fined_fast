@@ -320,13 +320,13 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const articleTag = article.tag;
 
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
-  const tocLineHeight = tocItems.length > 16 ? "1.25" : tocItems.length > 11 ? "1.3" : "1.35";
+  const tocLineHeight = tocItems.length > 16 ? "1.3" : tocItems.length > 11 ? "1.35" : "1.4";
   const tocRowPadding =
     tocItems.length > 16
-      ? "0.18rem 1rem"
+      ? "0.24rem 1rem"
       : tocItems.length > 11
-        ? "0.25rem 1rem"
-        : "0.4rem 1rem";
+        ? "0.32rem 1rem"
+        : "0.48rem 1rem";
 
   const schema = {
     "@context": "https://schema.org",
@@ -416,6 +416,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       </a>
                     </li>
                   ))}
+                  {/* Spacer to prevent bottom items from being cut off during scroll */}
+                  <div style={{ height: "20px", flexShrink: 0, width: "100%" }} />
                 </ul>
                 <div style={{
                   display: "flex",
@@ -424,7 +426,9 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   justifyContent: "center",
                   gap: "8px",
                   padding: "8px 16px",
-                  marginTop: "0px",
+                  marginTop: "16px",
+                  marginBottom: "8px",
+                  marginLeft: "1.25rem",
                   width: "fit-content",
                   backgroundColor: "#fff",
                   borderRadius: "16px",

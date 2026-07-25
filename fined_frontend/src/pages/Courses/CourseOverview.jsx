@@ -45,6 +45,13 @@ export default function CourseOverview() {
   const [showLockedAlert, setShowLockedAlert] = useState(false);
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;
@@ -125,7 +132,7 @@ export default function CourseOverview() {
             {/* Modules Path */}
             <div className="course-path-container">
               {(() => {
-                const xOffsets = [24, 76, 24, 76];
+                const xOffsets = isMobile ? [50, 50, 50, 50] : [35, 65, 35, 65];
                 const getX = (index) => xOffsets[index % xOffsets.length];
                 const rowHeight = 180;
                 const topPadding = 75;
@@ -137,53 +144,64 @@ export default function CourseOverview() {
                     const currX = getX(i);
                     const currY = i * rowHeight + 32 + topPadding;
                     const nextX = getX(i + 1);
-                    const nextY = (i + 1) * rowHeight + 32 + topPadding;
-                    const cp1Y = currY + rowHeight * 0.75;
-                    const cp2Y = nextY - rowHeight * 0.75;
-                    const d = `M ${currX} ${currY} C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${nextY}`;
-                    segments.push({ d, index: i });
+                    
+                    const localCurrY = 0;
+                    const localNextY = rowHeight;
+                    const cp1Y = localCurrY + rowHeight * 0.75;
+                    const cp2Y = localNextY - rowHeight * 0.75;
+                    
+                    const d = `M ${currX} ${localCurrY} C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${localNextY}`;
+                    segments.push({ d, index: i, top: currY, height: rowHeight });
                   }
                 }
 
                 return (
                   <>
-                    {segments.length > 0 && (
-                      <svg
-                        className="course-path-svg-bg"
-                        viewBox={`0 0 100 ${totalSvgHeight}`}
-                        preserveAspectRatio="none"
-                      >
-                        {segments.map((seg, i) => (
-                          <RevealOnScroll key={i} delay={60}>
-                            <g className="path-segment-group">
-                              <defs>
-                                <mask id={`course-path-mask-${i}`} maskUnits="userSpaceOnUse">
-                                  <path
-                                    d={seg.d}
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="30"
-                                    strokeLinecap="round"
-                                    vectorEffect="non-scaling-stroke"
-                                    className="segment-mask-line"
-                                  />
-                                </mask>
-                              </defs>
-                              <path
-                                d={seg.d}
-                                fill="none"
-                                stroke="#c7d2fe"
-                                strokeWidth="4"
-                                strokeDasharray="10 10"
-                                strokeLinecap="round"
-                                vectorEffect="non-scaling-stroke"
-                                mask={`url(#course-path-mask-${i})`}
-                              />
-                            </g>
-                          </RevealOnScroll>
-                        ))}
-                      </svg>
-                    )}
+                    {segments.map((seg, i) => (
+                      <RevealOnScroll key={i} delay={150} threshold={0.75} rootMargin="0px">
+                        <svg
+                          className="course-path-svg-segment"
+                          style={{
+                            position: 'absolute',
+                            top: `${seg.top}px`,
+                            left: 0,
+                            width: '100%',
+                            height: `${seg.height}px`,
+                            pointerEvents: 'none',
+                            overflow: 'visible',
+                            zIndex: 1
+                          }}
+                          viewBox={`0 0 100 ${seg.height}`}
+                          preserveAspectRatio="none"
+                        >
+                          <g className="path-segment-group">
+                            <defs>
+                              <mask id={`course-path-mask-${i}`} maskUnits="userSpaceOnUse">
+                                <path
+                                  d={seg.d}
+                                  fill="none"
+                                  stroke="white"
+                                  strokeWidth="30"
+                                  strokeLinecap="round"
+                                  vectorEffect="non-scaling-stroke"
+                                  className="segment-mask-line"
+                                />
+                              </mask>
+                            </defs>
+                            <path
+                              d={seg.d}
+                              fill="none"
+                              stroke="#c7d2fe"
+                              strokeWidth="4"
+                              strokeDasharray="10 10"
+                              strokeLinecap="round"
+                              vectorEffect="non-scaling-stroke"
+                              mask={`url(#course-path-mask-${i})`}
+                            />
+                          </g>
+                        </svg>
+                      </RevealOnScroll>
+                    ))}
 
                     {course.map((module, i) => {
                       const isFirstModule = i === 0;
@@ -217,7 +235,10 @@ export default function CourseOverview() {
 
                       const cardToResume = module.cards?.find(c => c.status?.toLowerCase() !== "completed") || module.cards?.[0];
                       const x1 = getX(i);
-                      const alignmentClass = x1 < 50 ? "pop-left" : "pop-right";
+                      
+                      const alignmentClass = isMobile 
+                        ? (i % 2 === 0 ? "pop-right" : "pop-left") 
+                        : (x1 < 50 ? "pop-left" : "pop-right");
 
                       const handleLaunchModule = () => {
                         if (isClickable && cardToResume) {
