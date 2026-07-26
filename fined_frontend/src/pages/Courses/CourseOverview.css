@@ -33,23 +33,24 @@
 }
 
 .hero-back-btn-outside {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #f59e0b; /* Amber 500 */
+  border: 3px solid #fef3c7; /* Amber 100 */
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0f172a;
+  color: white;
   font-size: 1.25rem;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .hero-back-btn-outside:hover {
-  background: #f8fafc;
+  background: #d97706; /* Amber 600 */
+  border-color: #fde68a; /* Amber 200 */
   transform: scale(1.05);
 }
 

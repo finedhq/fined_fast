@@ -105,17 +105,15 @@ export default function CourseOverview() {
         <div className="course-layout-container">
 
           <div className="course-main-content">
-            {/* Back Button */}
-            <div className="course-header-actions" style={{ marginBottom: '-39px', marginLeft: '-3.25rem' }}>
-              <button onClick={() => navigate('/courses')} className="hero-back-btn-outside">
-                ←
-              </button>
-            </div>
-            
             {/* Hero Banner */}
             <RevealOnScroll>
               <div className="course-hero-banner">
-                <h1 className="hero-title">{courseTitle}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <button onClick={() => navigate('/courses')} className="hero-back-btn-outside" style={{ flexShrink: 0 }}>
+                    ←
+                  </button>
+                  <h1 className="hero-title" style={{ marginBottom: 0 }}>{courseTitle}</h1>
+                </div>
 
                 <div className="hero-progress-section" style={{ marginTop: '1.5rem' }}>
                   <span className="hero-progress-label">Module Progress</span>
