@@ -70,7 +70,7 @@ export default function CourseOverview() {
 
       setCourseTitle(courseRes.data.title);
       setCourse(courseRes.data.data || []);
-      
+
       if (userRes.data?.userData) {
         setUserData(userRes.data.userData);
       }
@@ -87,7 +87,7 @@ export default function CourseOverview() {
     }
   }, [email, courseSlug]);
 
-  const completedModulesCount = course.filter(module => 
+  const completedModulesCount = course.filter(module =>
     module.cards.length > 0 && module.cards.every(c => c.status === "completed")
   ).length;
 
@@ -103,23 +103,21 @@ export default function CourseOverview() {
         </div>
       ) : (
         <div className="course-layout-container">
-          
+
           <div className="course-main-content">
+            {/* Back Button */}
+            <div className="course-header-actions" style={{ marginBottom: '-39px', marginLeft: '-3.25rem' }}>
+              <button onClick={() => navigate('/courses')} className="hero-back-btn-outside">
+                ←
+              </button>
+            </div>
+            
             {/* Hero Banner */}
             <RevealOnScroll>
               <div className="course-hero-banner">
-                <button onClick={() => navigate('/courses')} className="hero-back-btn">
-                  ←
-                </button>
-                <div className="hero-header">
-                  <span className="hero-tag">{courseTitle}</span>
-                </div>
-                <h1 className="hero-title">Building Your Money Mindset</h1>
-                <p className="hero-desc">
-                  Learn the essential money habits and foundations that set you up for financial success.
-                </p>
-                
-                <div className="hero-progress-section">
+                <h1 className="hero-title">{courseTitle}</h1>
+
+                <div className="hero-progress-section" style={{ marginTop: '1.5rem' }}>
                   <span className="hero-progress-label">Module Progress</span>
                   <div className="hero-progress-bar-container">
                     <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
@@ -144,12 +142,12 @@ export default function CourseOverview() {
                     const currX = getX(i);
                     const currY = i * rowHeight + 32 + topPadding;
                     const nextX = getX(i + 1);
-                    
+
                     const localCurrY = 0;
                     const localNextY = rowHeight;
                     const cp1Y = localCurrY + rowHeight * 0.75;
                     const cp2Y = localNextY - rowHeight * 0.75;
-                    
+
                     const d = `M ${currX} ${localCurrY} C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${localNextY}`;
                     segments.push({ d, index: i, top: currY, height: rowHeight });
                   }
@@ -158,7 +156,7 @@ export default function CourseOverview() {
                 return (
                   <>
                     {segments.map((seg, i) => (
-                      <RevealOnScroll key={i} delay={150} threshold={0.75} rootMargin="0px">
+                      <RevealOnScroll key={i} delay={0} threshold={0.75} rootMargin="0px">
                         <svg
                           className="course-path-svg-segment"
                           style={{
@@ -224,7 +222,7 @@ export default function CourseOverview() {
 
                       let statusStr = "locked";
                       let StatusIcon = LockIcon;
-                      
+
                       if (isCompleted) {
                         statusStr = "completed";
                         StatusIcon = CheckIcon;
@@ -235,9 +233,9 @@ export default function CourseOverview() {
 
                       const cardToResume = module.cards?.find(c => c.status?.toLowerCase() !== "completed") || module.cards?.[0];
                       const x1 = getX(i);
-                      
-                      const alignmentClass = isMobile 
-                        ? (i % 2 === 0 ? "pop-right" : "pop-left") 
+
+                      const alignmentClass = isMobile
+                        ? (i % 2 === 0 ? "pop-right" : "pop-left")
                         : (x1 < 50 ? "pop-left" : "pop-right");
 
                       const handleLaunchModule = () => {
@@ -252,7 +250,7 @@ export default function CourseOverview() {
                       };
 
                       return (
-                        <RevealOnScroll key={i} delay={i === 0 ? 0 : 200}>
+                        <RevealOnScroll key={i} delay={0}>
                           <div className="module-node-row">
                             <div className={`module-node ${alignmentClass}`} style={{ left: `${x1}%` }}>
                               <div className="module-base-label">
@@ -263,7 +261,7 @@ export default function CourseOverview() {
                                 </div>
                               </div>
 
-                              <div 
+                              <div
                                 className={`module-circle ${statusStr}`}
                                 onClick={handleLaunchModule}
                                 role="button"
@@ -278,7 +276,7 @@ export default function CourseOverview() {
                                   <div className={`hc-icon-placeholder ${statusStr}`}>
                                     <StatusIcon />
                                   </div>
-                                  <button 
+                                  <button
                                     className="hc-arrow-btn"
                                     disabled={!isClickable}
                                     onClick={handleLaunchModule}
@@ -294,10 +292,10 @@ export default function CourseOverview() {
                                     {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
                                   </div>
                                   <p className="hc-desc">
-                                    {module.cards.filter(c => c.status?.toLowerCase() === 'completed').length} / {module.cards.length} Cards Completed. 
-                                    {isCompleted ? " You've successfully finished this module." : 
-                                     isOngoing ? " Continue learning to finish this module." :
-                                     " Complete previous modules to unlock."}
+                                    {module.cards.filter(c => c.status?.toLowerCase() === 'completed').length} / {module.cards.length} Cards Completed.
+                                    {isCompleted ? " You've successfully finished this module." :
+                                      isOngoing ? " Continue learning to finish this module." :
+                                        " Complete previous modules to unlock."}
                                   </p>
                                 </div>
                               </div>

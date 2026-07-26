@@ -8,7 +8,6 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden !important;
   max-width: 100vw;
 }
 
@@ -17,7 +16,6 @@ body {
   font-family: 'Nunito', sans-serif;
   background: #fafbff;
   color: #111827;
-  overflow-x: hidden !important;
   max-width: 100vw;
 }
 
@@ -2201,7 +2199,6 @@ button {
 #root {
   width: 100vw;
   max-width: 100%;
-  overflow-x: hidden;
 }
 
 /* ── Scroll Reveal Utilities ── */
@@ -2215,4 +2212,4 @@ button {
 .reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translateY(0);
-}
+}
