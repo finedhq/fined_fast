@@ -22,7 +22,11 @@
 
 /* Hero Banner */
 .course-hero-banner {
-  background: #3c38b8;
+  background-image: url('../../assets/bluestrip.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  aspect-ratio: 1697 / 750;
   border-radius: 1rem;
   padding: 2rem;
   color: white;
@@ -30,6 +34,9 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .hero-back-btn-outside {
