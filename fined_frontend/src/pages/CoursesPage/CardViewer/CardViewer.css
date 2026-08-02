@@ -75,7 +75,7 @@
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(15, 14, 42, 0.08);
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -99,7 +99,10 @@
 
 .cv-card-box > * {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  border-radius: inherit;
 }
 
 /* ── Header row: module name + "2/7" ── */

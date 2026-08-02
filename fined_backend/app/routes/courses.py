@@ -313,6 +313,28 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
     try:
         today_iso = datetime.utcnow().isoformat() + "Z"
         
+        # Resolve slugs to IDs
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("slug", course_id).execute())
+        if not course_res.data:
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("id", course_id).execute())
+        if not course_res.data:
+            raise HTTPException(status_code=404, detail="Course not found")
+        course_id = course_res.data[0]["id"]
+            
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_id).execute())
+        if not module_res.data:
+            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("id", module_id).execute())
+        if not module_res.data:
+            raise HTTPException(status_code=404, detail="Module not found")
+        module_id = module_res.data[0]["id"]
+        
+        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_id).execute())
+        if not card_res_id.data:
+            card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
+        if not card_res_id.data:
+            raise HTTPException(status_code=404, detail="Card not found")
+        card_id = card_res_id.data[0]["card_id"]
+        
         # 1. Fetch card details and user scoring metrics concurrently
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("card_id", card_id).single().execute())
         user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute())

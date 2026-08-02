@@ -80,7 +80,7 @@ function ScenarioCard({ card, onContinue }) {
             <div 
               key={idx} 
               className={`sc-stage ${isActive ? "sc-stage--active" : ""} ${isPast ? "sc-stage--past" : ""}`}
-              onClick={() => setActiveStage(idx)}
+              onClick={() => setActiveStage(prev => prev === idx ? null : idx)}
             >
               <div className="sc-stage-icon">
                 {stage.icon}

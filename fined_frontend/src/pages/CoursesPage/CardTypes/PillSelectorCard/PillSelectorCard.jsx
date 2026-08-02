@@ -1,34 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import "./PillSelectorCard.css";
 
-// Profile engine hardcoded for the FinEd platform based on Equity exposure
-function getProfile(eq) {
-  if (eq >= 70) {
-    return {
-      label: "🚀 Aggressive Investor",
-      color: "#ef4444", // var(--danger)
-      note: "High equity exposure suits your profile — stay invested through volatility and resist the urge to book profits early."
-    };
-  }
-  if (eq >= 50) {
-    return {
-      label: "⚖️ Moderate Investor",
-      color: "#f59e0b", // var(--accent3)
-      note: "Balanced approach — enough equity for meaningful growth, enough stability to reduce anxiety during market corrections."
-    };
-  }
-  return {
-    label: "🛡️ Conservative Investor",
-    color: "#3b82f6", // var(--accent2)
-    note: "Conservative mix — prioritises capital preservation. Suitable if your time horizon is shorter or your risk tolerance is genuinely low."
-  };
-}
-
 function PillSelectorCard({ card, onContinue }) {
   const {
     title = "",
     body_text = "",
-    base_allocation = { eq: 70, fd: 20, gold: 10 },
+    output_categories = [],
+    profiles = [],
+    base_allocation = {},
     groups = [],
     cta_text = "Continue",
   } = card?.card_data || {};
@@ -49,36 +28,67 @@ function PillSelectorCard({ card, onContinue }) {
 
   // Compute final allocation
   const alloc = useMemo(() => {
-    let eq = base_allocation.eq || 0;
-    let fd = base_allocation.fd || 0;
-    let gold = base_allocation.gold || 0;
+    // 1. Start with base allocation
+    let scores = { ...base_allocation };
 
-    // Apply impacts from selections
+    // 2. Apply impacts from selections
     groups.forEach((group) => {
       const selectedValue = selections[group.group_id];
-      const selectedOption = group.options.find(opt => opt.value === selectedValue);
+      const selectedOption = group.options?.find(opt => opt.value === selectedValue);
       if (selectedOption && selectedOption.impact) {
-        eq += selectedOption.impact.eq || 0;
-        fd += selectedOption.impact.fd || 0;
-        gold += selectedOption.impact.gold || 0;
+        Object.entries(selectedOption.impact).forEach(([key, val]) => {
+          scores[key] = (scores[key] || 0) + val;
+        });
       }
     });
 
-    // Clamp values (matching the prototype's boundaries)
-    eq = Math.max(10, Math.min(85, eq));
-    fd = Math.max(10, Math.min(70, fd));
-    gold = Math.max(5, Math.min(30, gold));
+    // 3. Optional clamping if needed in future, but for now we just normalize to 100%
+    let total = 0;
+    output_categories.forEach(cat => {
+      // prevent negative scores
+      scores[cat.id] = Math.max(0, scores[cat.id] || 0);
+      total += scores[cat.id];
+    });
 
-    // Normalize to 100%
-    const total = eq + fd + gold;
-    const finalEq = Math.round((eq / total) * 100) || 0;
-    const finalFd = Math.round((fd / total) * 100) || 0;
-    const finalGold = 100 - finalEq - finalFd;
+    // 4. Normalize to 100%
+    const finalAlloc = {};
+    let accumulatedPct = 0;
+    
+    if (total === 0) {
+      // fallback if all 0
+      output_categories.forEach(cat => finalAlloc[cat.id] = 0);
+      return finalAlloc;
+    }
 
-    return { eq: finalEq, fd: finalFd, gold: finalGold };
-  }, [selections, groups, base_allocation]);
+    output_categories.forEach((cat, idx) => {
+      if (idx === output_categories.length - 1) {
+        finalAlloc[cat.id] = 100 - accumulatedPct;
+      } else {
+        const pct = Math.round((scores[cat.id] / total) * 100);
+        finalAlloc[cat.id] = pct;
+        accumulatedPct += pct;
+      }
+    });
 
-  const profile = getProfile(alloc.eq);
+    return finalAlloc;
+  }, [selections, groups, base_allocation, output_categories]);
+
+  // Determine active profile dynamically
+  const activeProfile = useMemo(() => {
+    if (!profiles || profiles.length === 0) return null;
+    
+    // Sort descending by min_value to catch highest thresholds first
+    const sortedProfiles = [...profiles].sort((a, b) => b.min_value - a.min_value);
+    
+    for (const p of sortedProfiles) {
+      const score = alloc[p.threshold_key] || 0;
+      if (score >= p.min_value) {
+        return p;
+      }
+    }
+    // Fallback to lowest threshold if none match perfectly
+    return sortedProfiles[sortedProfiles.length - 1];
+  }, [alloc, profiles]);
 
   const handleSelect = (groupId, value) => {
     setSelections(prev => ({ ...prev, [groupId]: value }));
@@ -109,42 +119,30 @@ function PillSelectorCard({ card, onContinue }) {
       </div>
 
       <div className="ps-alloc-output">
-        <div className="ps-alloc-profile" style={{ color: profile.color }}>
-          {profile.label}
-        </div>
+        {activeProfile && (
+          <div className="ps-alloc-profile" style={{ color: activeProfile.color_hex }}>
+            {activeProfile.label}
+          </div>
+        )}
+        
         <div className="ps-alloc-bars">
-          <div className="ps-alloc-bar-row">
-            <span className="ps-alloc-bar-lbl">📈 Equities</span>
-            <div className="ps-alloc-bar-track">
-              <div
-                className="ps-alloc-bar-fill"
-                style={{ width: `${alloc.eq}%`, background: "rgba(0,229,160,0.7)" }}
-              ></div>
+          {output_categories.map((cat) => (
+            <div key={cat.id} className="ps-alloc-bar-row">
+              <span className="ps-alloc-bar-lbl">{cat.label}</span>
+              <div className="ps-alloc-bar-track">
+                <div
+                  className="ps-alloc-bar-fill"
+                  style={{ width: `${alloc[cat.id] || 0}%`, background: cat.color_hex, opacity: 0.8 }}
+                ></div>
+              </div>
+              <span className="ps-alloc-bar-pct" style={{ color: cat.color_hex }}>{alloc[cat.id] || 0}%</span>
             </div>
-            <span className="ps-alloc-bar-pct" style={{ color: "#00c07a" }}>{alloc.eq}%</span>
-          </div>
-          <div className="ps-alloc-bar-row">
-            <span className="ps-alloc-bar-lbl">🏦 Fixed Income</span>
-            <div className="ps-alloc-bar-track">
-              <div
-                className="ps-alloc-bar-fill"
-                style={{ width: `${alloc.fd}%`, background: "rgba(59,130,246,0.7)" }}
-              ></div>
-            </div>
-            <span className="ps-alloc-bar-pct" style={{ color: "#2563eb" }}>{alloc.fd}%</span>
-          </div>
-          <div className="ps-alloc-bar-row">
-            <span className="ps-alloc-bar-lbl">🥇 Gold / Safe</span>
-            <div className="ps-alloc-bar-track">
-              <div
-                className="ps-alloc-bar-fill"
-                style={{ width: `${alloc.gold}%`, background: "rgba(245,158,11,0.7)" }}
-              ></div>
-            </div>
-            <span className="ps-alloc-bar-pct" style={{ color: "#d97706" }}>{alloc.gold}%</span>
-          </div>
+          ))}
         </div>
-        <div className="ps-alloc-note">{profile.note}</div>
+        
+        {activeProfile && activeProfile.note && (
+          <div className="ps-alloc-note">{activeProfile.note}</div>
+        )}
       </div>
 
       <p className="ps-footnote">

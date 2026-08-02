@@ -7,6 +7,7 @@ import QuizCard from "../CardTypes/QuizCard/QuizCard";
 import ChartCard from "../CardTypes/ChartCard/ChartCard";
 import ConceptCard from "../CardTypes/ConceptCard/ConceptCard";
 import InteractiveCard from "../CardTypes/InteractiveCard/InteractiveCard";
+import CompletionCard from "../CardTypes/CompletionCard/CompletionCard";
 
 // As new card types are built, add one import above and one case below.
 // Every case receives the same (card, onContinue) props.
@@ -31,6 +32,8 @@ function CardRenderer({ card, onContinue }) {
       return <ConceptCard card={card} onContinue={onContinue} />;
     case "interactive":
       return <InteractiveCard card={card} onContinue={onContinue} />;
+    case "completion":
+      return <CompletionCard card={card} onContinue={onContinue} />;
 
     default:
       return (

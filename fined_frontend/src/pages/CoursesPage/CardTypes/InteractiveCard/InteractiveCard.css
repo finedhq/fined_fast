@@ -215,3 +215,48 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(74, 58, 255, 0.2);
 }
+
+
+/* === ASSET METRICS (for HTML injected in content) === */
+.asset-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
+.metric-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.metric-val {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: #111827;
+}
+
+.metric-lbl {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.metric-box.good .metric-val {
+  color: #10b981; /* emerald-500 */
+}
+
+.metric-box.mid .metric-val {
+  color: #f59e0b; /* amber-500 */
+}
+
+.metric-box.low .metric-val {
+  color: #6b7280; /* gray-500 */
+}

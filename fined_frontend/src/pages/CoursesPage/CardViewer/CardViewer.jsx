@@ -77,8 +77,8 @@ function CardViewer() {
   const total = card?.module_total_cards || 0;
   const current = card?.module_progress || 0;
   const percent = total ? (current / total) * 100 : 0;
-  console.log("current", current)
-  console.log("total", total)
+  // console.log("current", current)
+  // console.log("total", total)
 
   return (
     <div className="cv-page">

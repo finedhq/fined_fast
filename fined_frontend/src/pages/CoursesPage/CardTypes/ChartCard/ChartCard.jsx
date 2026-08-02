@@ -5,11 +5,12 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import "./ChartCard.css";
 
 // Register Chart.js components
@@ -18,6 +19,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -92,6 +94,7 @@ function ChartCard({ card, onContinue }) {
     card_label,
     title = "",
     quote,
+    chart_style = "line",
     body_text_top = "",
     chart_data,
     labels = [],
@@ -100,6 +103,8 @@ function ChartCard({ card, onContinue }) {
     stats,
     stat_chips = [],
     body_text_bottom,
+    value_prefix = "",
+    value_suffix = "",
     highlight_line,
     glossary_terms = [],
     cta_text = "Continue",
@@ -117,10 +122,11 @@ function ChartCard({ card, onContinue }) {
     datasets: actualDatasets.map((ds) => ({
       label: ds.label,
       data: ds.data,
-      borderColor: ds.color,
-      backgroundColor: hexToRgba(ds.color, 0.06),
-      borderWidth: 2.5,
-      pointRadius: 3,
+      borderColor: ds.colors || ds.color,
+      backgroundColor: ds.colors ? ds.colors.map(c => hexToRgba(c, chart_style === "bar" ? 0.7 : 0.06)) : hexToRgba(ds.color, chart_style === "bar" ? 0.7 : 0.06),
+      borderWidth: chart_style === "bar" ? 1.5 : 2.5,
+      borderRadius: chart_style === "bar" ? 8 : 0,
+      pointRadius: chart_style === "bar" ? 0 : 3,
       tension: 0.4,
       fill: false,
     })),
@@ -143,8 +149,9 @@ function ChartCard({ card, onContinue }) {
           label: function (context) {
             return (
               context.dataset.label +
-              ": ₹" +
-              Math.round(context.raw).toLocaleString("en-IN")
+              ": " + value_prefix +
+              context.raw.toLocaleString("en-IN", { maximumFractionDigits: 2 }) +
+              value_suffix
             );
           },
         },
@@ -162,9 +169,9 @@ function ChartCard({ card, onContinue }) {
           font: { family: "DM Sans, sans-serif", size: 11 },
           color: "#6b7280",
           callback: function (value) {
-            if (value >= 1e7) return "₹" + (value / 1e7).toFixed(1) + "Cr";
-            if (value >= 1e5) return "₹" + (value / 1e5).toFixed(1) + "L";
-            return "₹" + value.toLocaleString("en-IN");
+            if (value >= 1e7) return value_prefix + (value / 1e7).toFixed(1) + "Cr" + value_suffix;
+            if (value >= 1e5) return value_prefix + (value / 1e5).toFixed(1) + "L" + value_suffix;
+            return value_prefix + value.toLocaleString("en-IN") + value_suffix;
           },
         },
       },
@@ -195,7 +202,11 @@ function ChartCard({ card, onContinue }) {
       )}
 
       <div className="ch-chart-container" style={{ height: chartHeight }}>
-        <Line data={chartDataObj} options={chartOptions} />
+        {chart_style === "bar" ? (
+          <Bar data={chartDataObj} options={chartOptions} />
+        ) : (
+          <Line data={chartDataObj} options={chartOptions} />
+        )}
       </div>
       
       {chart_caption && <p className="ch-chart-caption">{chart_caption}</p>}

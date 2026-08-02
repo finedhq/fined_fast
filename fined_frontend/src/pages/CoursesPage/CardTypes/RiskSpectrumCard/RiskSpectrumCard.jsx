@@ -29,7 +29,7 @@ function RiskSpectrumCard({ card, onContinue }) {
   return (
     <div className="rr-root">
       <h2 className="rr-title">{title}</h2>
-      {body_text && <p className="rr-body">{body_text}</p>}
+      {body_text && <p className="rr-body" dangerouslySetInnerHTML={{ __html: body_text }}></p>}
 
       <p className="rr-hint">Tap any asset on the spectrum:</p>
 
@@ -69,9 +69,10 @@ function RiskSpectrumCard({ card, onContinue }) {
       )}
 
       {highlight_line && (
-        <div className="rr-highlight-line">
-          {highlight_line}
-        </div>
+        <div 
+          className="rr-highlight-line"
+          dangerouslySetInnerHTML={{ __html: highlight_line }}
+        ></div>
       )}
 
       <button className="rr-btn-primary" onClick={onContinue}>

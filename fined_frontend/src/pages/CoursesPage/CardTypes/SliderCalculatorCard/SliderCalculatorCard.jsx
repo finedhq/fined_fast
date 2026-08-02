@@ -60,7 +60,8 @@ function SliderCalculatorCard({ card, onContinue }) {
     cta_text = "Continue",
     default_monthly_investment = 5000,
     default_investment_period = 10,
-    default_expected_return = 12.0
+    default_expected_return = 12.0,
+    comparison_rate = null,
   } = card?.card_data || {};
 
   const [activeTermIndex, setActiveTermIndex] = useState(null);
@@ -71,11 +72,11 @@ function SliderCalculatorCard({ card, onContinue }) {
   const [rate, setRate] = useState(default_expected_return);
 
   // SIP Math Calculation
-  const { invested, gains, corpus, multiplier } = useMemo(() => {
+  const { invested, gains, corpus, multiplier, savingsCorpus } = useMemo(() => {
     const n = years * 12; // total months
     const i = rate / 100 / 12; // monthly interest rate
     
-    // M = P × ({[1 + i]^n – 1} / i) × (1 + i)
+    // M = P * ({[1 + i]^n - 1} / i) * (1 + i)
     let M = 0;
     if (i === 0) {
       M = monthly * n;
@@ -86,14 +87,26 @@ function SliderCalculatorCard({ card, onContinue }) {
     const totalInvested = monthly * n;
     const totalGains = M - totalInvested;
     const mult = totalInvested > 0 ? (M / totalInvested).toFixed(1) : 0;
+    
+    // Savings comparison
+    let sCorpus = 0;
+    if (comparison_rate !== null) {
+      const s_i = comparison_rate / 100 / 12;
+      if (s_i === 0) {
+        sCorpus = monthly * n;
+      } else {
+        sCorpus = monthly * ((Math.pow(1 + s_i, n) - 1) / s_i) * (1 + s_i);
+      }
+    }
 
     return {
       invested: totalInvested,
       gains: totalGains,
       corpus: M,
-      multiplier: mult
+      multiplier: mult,
+      savingsCorpus: sCorpus
     };
-  }, [monthly, years, rate]);
+  }, [monthly, years, rate, comparison_rate]);
 
   // Format Large Numbers (Lakhs/Crores)
   const formatCurrency = (val) => {
@@ -144,7 +157,25 @@ function SliderCalculatorCard({ card, onContinue }) {
             />
           </div>
         </div>
+      </div>
 
+      {comparison_rate !== null ? (
+        <>
+          <div className="comp-results-row">
+            <div className="comp-result-box savings">
+              <div className="r-label">💤 In savings ({comparison_rate}%)</div>
+              <div className="r-amount">{formatCurrency(savingsCorpus)}</div>
+            </div>
+            <div className="comp-result-box invested">
+              <div className="r-label">📈 Invested ({rate}% CAGR)</div>
+              <div className="r-amount">{formatCurrency(corpus)}</div>
+            </div>
+          </div>
+          <div className="comp-difference-line">
+            By not investing, you could be leaving <strong>{formatCurrency(corpus - savingsCorpus)}</strong> on the table.
+          </div>
+        </>
+      ) : (
         <div className="calc-results-grid">
           <div className="calc-result-box">
             <div className="crb-label">Total Invested</div>
@@ -158,15 +189,17 @@ function SliderCalculatorCard({ card, onContinue }) {
           </div>
           <div className="calc-result-box highlight">
             <div className="crb-label">Final Corpus</div>
-            <div className="crb-val accent">{formatCurrency(corpus)}</div>
-            <div className="crb-sub">{multiplier}× your investment</div>
+            <div className="crb-val">{formatCurrency(corpus)}</div>
+            <div className="crb-sub">
+              {multiplier}x your money
+            </div>
           </div>
         </div>
-        
-        <p className="slider-disclaimer">
-          Illustrative only. Assumes constant returns which don't reflect actual market volatility. Not investment advice.
-        </p>
-      </div>
+      )}
+      
+      <p className="slider-disclaimer">
+        Illustrative only. Assumes constant returns which don't reflect actual market volatility. Not investment advice.
+      </p>
 
       {highlight_line && (
         <div className="slider-highlight-line">
