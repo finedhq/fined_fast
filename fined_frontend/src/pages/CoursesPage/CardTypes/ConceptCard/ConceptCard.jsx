@@ -75,6 +75,7 @@ function ConceptCard({ card, onContinue }) {
     grid_cards = [],
     reasons = [], // legacy
     comparison_panels = [],
+    bar_panels = [],
     body_text_2 = "",
     table,
     simple_list = [],
@@ -114,15 +115,44 @@ function ConceptCard({ card, onContinue }) {
               <div key={idx} className="conc-bar-row">
                 <div className="conc-bar-label">{bar.label}</div>
                 <div className="conc-bar-track-wrap">
-                  <div className="conc-bar-fill" style={{ width: bar.percent_width || "0%", background: bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "rgba(255,255,255,0.15)" }}></div>
+                  <div className="conc-bar-fill" style={{ width: bar.percent_width || "0%", background: bar.color || (bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "rgba(255,255,255,0.15)") }}></div>
                 </div>
-                <div className="conc-bar-value" style={{ color: bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "inherit" }}>
+                <div className="conc-bar-value" style={{ color: bar.color || (bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "inherit") }}>
                   {bar.value}
                 </div>
               </div>
             ))}
           </div>
           {bar_scenario.summary && <div className="conc-bar-summary">{bar_scenario.summary}</div>}
+        </div>
+      )}
+
+      {/* 1b. Bar Panels */}
+      {bar_panels && bar_panels.length > 0 && (
+        <div className="conc-bar-panels">
+          {bar_panels.map((panel, idx) => (
+            <div key={idx} className="conc-bp-card">
+              <div className="conc-bp-header">
+                {panel.icon && <span className="conc-bp-icon">{panel.icon}</span>}
+                <span className="conc-bp-title">{panel.title}</span>
+              </div>
+              {panel.subtitle && <div className="conc-bp-subtitle">{panel.subtitle}</div>}
+              <div className="conc-bp-tracks">
+                {panel.bars?.map((bar, bIdx) => (
+                  <div key={bIdx} className="conc-bp-row">
+                    <div className="conc-bp-dot" style={{ background: bar.color || (bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "var(--accent)") }}></div>
+                    <div className="conc-bp-label">{bar.label}</div>
+                    <div className="conc-bp-track-wrap">
+                      <div className="conc-bp-fill" style={{ width: bar.percent_width || "0%", background: bar.color || (bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "var(--accent)") }}></div>
+                    </div>
+                    <div className="conc-bp-value" style={{ color: bar.color || (bar.color_var ? `var(${bar.color_var}, ${bar.color_var})` : "inherit") }}>
+                      {bar.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

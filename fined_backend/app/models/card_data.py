@@ -32,9 +32,12 @@ class CinematicCardData(BaseModel):
 
 class ScenarioCardData(BaseModel):
     card_type: Literal["scenario"] = "scenario"
+    card_label: Optional[str] = None
+    title: Optional[str] = None
     intro_text: str
     stages: list[ScenarioStage] = Field(min_length=2, max_length=6)
-    reflection_question: str
+    reflection_question: Optional[str] = None
+    reflection_label: Optional[str] = None
     reflection_options: list[str] = Field(min_length=2, max_length=5)
 
 class RiskSpectrumDot(BaseModel):
@@ -49,6 +52,7 @@ class RiskSpectrumDot(BaseModel):
 
 class RiskSpectrumCardData(BaseModel):
     card_type: Literal["risk_spectrum"] = "risk_spectrum"
+    card_label: Optional[str] = None
     title: str
     body_text: str
     dots: list[RiskSpectrumDot] = Field(min_length=2, max_length=7)
@@ -91,6 +95,7 @@ class PillGroup(BaseModel):
 
 class PillSelectorCardData(BaseModel):
     card_type: Literal["pill_selector"] = "pill_selector"
+    card_label: Optional[str] = None
     title: str
     body_text: str
     output_categories: list[OutputCategory]
@@ -176,12 +181,19 @@ class BarItem(BaseModel):
     label: str
     percent_width: str
     color_var: Optional[str] = None
+    color: Optional[str] = None
     value: str
 
 class BarScenario(BaseModel):
     title: Optional[str] = None
     bars: list[BarItem] = Field(default_factory=list)
     summary: Optional[str] = None
+
+class BarPanel(BaseModel):
+    icon: Optional[str] = None
+    title: str
+    subtitle: Optional[str] = None
+    bars: list[BarItem] = Field(default_factory=list)
 
 class DataRow(BaseModel):
     label: str
@@ -220,6 +232,7 @@ class ConceptCardData(BaseModel):
     grid_cards: list[GridCard] = Field(default_factory=list)
     reasons: list[ConceptReason] = Field(default_factory=list)
     comparison_panels: list[ComparisonPanel] = Field(default_factory=list)
+    bar_panels: list[BarPanel] = Field(default_factory=list)
     body_text_2: Optional[str] = None
     table: Optional[TableData] = None
     simple_list: list[str] = Field(default_factory=list)
@@ -240,6 +253,7 @@ class ExplorerItem(BaseModel):
 
 class InteractiveCardData(BaseModel):
     card_type: Literal["interactive"] = "interactive"
+    card_label: Optional[str] = None
     title: str
     intro_text: str
     variant: Literal["list", "grid"] = "list"

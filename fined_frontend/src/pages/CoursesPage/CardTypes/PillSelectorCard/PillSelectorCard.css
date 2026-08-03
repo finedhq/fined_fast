@@ -5,11 +5,22 @@
   color: #111827;
 }
 
+.ps-card-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
 .ps-title {
   font-size: 1.62rem;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
+  text-align: left;
   line-height: 1.25;
 }
 

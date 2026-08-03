@@ -3,6 +3,7 @@ import "./InteractiveCard.css";
 
 function InteractiveCard({ card, onContinue }) {
   const { 
+    card_label,
     title = "", 
     intro_text = "", 
     items = [], 
@@ -15,6 +16,7 @@ function InteractiveCard({ card, onContinue }) {
 
   return (
     <div className="ie-root">
+      {card_label && <div className="ie-card-label">{card_label}</div>}
       {title && <h2 className="ie-title">{title}</h2>}
       {intro_text && <p className="ie-intro" dangerouslySetInnerHTML={{ __html: intro_text }}></p>}
 

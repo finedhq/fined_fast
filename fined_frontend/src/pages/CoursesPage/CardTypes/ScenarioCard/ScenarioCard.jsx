@@ -58,7 +58,9 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
 }
 
 function ScenarioCard({ card, onContinue }) {
-  const { intro_text = "", stages = [], reflection_question = "", reflection_options = [] } = card?.card_data || {};
+  const { card_label, title, intro_text = "", stages = [], reflection_question = "", reflection_label = "", reflection_options = [] } = card?.card_data || {};
+  
+  const actualQuestion = reflection_label || reflection_question;
 
   const [activeStage, setActiveStage] = useState(0);
   const [activeTermObj, setActiveTermObj] = useState(null); // { stageIdx, termIdx }
@@ -69,6 +71,8 @@ function ScenarioCard({ card, onContinue }) {
 
   return (
     <div className="sc-root" onClick={() => setActiveTermObj(null)}>
+      {card_label && <div className="sc-card-label">{card_label}</div>}
+      {title && <h2 className="sc-title">{title}</h2>}
       {intro_text && <p className="sc-intro">{intro_text}</p>}
 
       <div className="sc-timeline">
@@ -90,7 +94,7 @@ function ScenarioCard({ card, onContinue }) {
               <div className="sc-stage-content">
                 <h3 className="sc-stage-name">{stage.name}</h3>
                 
-                <div className={`sc-stage-detail-wrapper ${isActive ? "open" : ""}`}>
+                <div className={`sc-stage-detail-wrapper ${isActive ? "open" : ""} ${activeTermObj?.stageIdx === idx && activeTermObj?.termIdx !== null ? "tooltip-open" : ""}`}>
                   <div className="sc-stage-detail-inner">
                     {renderDetailWithGlossary(
                       stage.detail, 
@@ -114,7 +118,7 @@ function ScenarioCard({ card, onContinue }) {
       </div>
 
       <div className="sc-reflection">
-        <p className="sc-reflection-q">{reflection_question}</p>
+        <p className="sc-reflection-q">{actualQuestion}</p>
         <div className="sc-reflection-opts">
           {reflection_options.map((opt, idx) => (
             <button key={idx} className="sc-btn-opt" onClick={onContinue}>

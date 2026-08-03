@@ -3,6 +3,7 @@ import "./PillSelectorCard.css";
 
 function PillSelectorCard({ card, onContinue }) {
   const {
+    card_label,
     title = "",
     body_text = "",
     output_categories = [],
@@ -96,7 +97,8 @@ function PillSelectorCard({ card, onContinue }) {
 
   return (
     <div className="ps-root">
-      <h2 className="ps-title">{title}</h2>
+      {card_label && <div className="ps-card-label">{card_label}</div>}
+      {title && <h2 className="ps-title">{title}</h2>}
       {body_text && <p className="ps-body">{body_text}</p>}
 
       <div className="ps-selectors">

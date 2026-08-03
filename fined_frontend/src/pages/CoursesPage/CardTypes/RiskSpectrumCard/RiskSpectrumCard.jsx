@@ -13,7 +13,7 @@ function getColorClass(colorStr) {
 }
 
 function RiskSpectrumCard({ card, onContinue }) {
-  const { title = "", body_text = "", dots = [], highlight_line, cta_text = "Continue" } = card?.card_data || {};
+  const { card_label, title = "", body_text = "", dots = [], highlight_line, cta_text = "Continue" } = card?.card_data || {};
   
   const [activeDotId, setActiveDotId] = useState(null);
 
@@ -28,7 +28,8 @@ function RiskSpectrumCard({ card, onContinue }) {
 
   return (
     <div className="rr-root">
-      <h2 className="rr-title">{title}</h2>
+      {card_label && <div className="rs-card-label">{card_label}</div>}
+      {title && <h2 className="rr-title">{title}</h2>}
       {body_text && <p className="rr-body" dangerouslySetInnerHTML={{ __html: body_text }}></p>}
 
       <p className="rr-hint">Tap any asset on the spectrum:</p>
