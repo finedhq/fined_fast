@@ -5,6 +5,15 @@
   color: #111827;
 }
 
+.quiz-card-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4A3AFF;
+  margin-bottom: 12px;
+}
+
 .quiz-title {
   font-size: 1.62rem;
   font-weight: 800;

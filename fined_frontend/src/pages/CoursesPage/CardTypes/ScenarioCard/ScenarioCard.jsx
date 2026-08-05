@@ -58,7 +58,7 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
 }
 
 function ScenarioCard({ card, onContinue }) {
-  const { card_label, title, intro_text = "", stages = [], reflection_question = "", reflection_label = "", reflection_options = [] } = card?.card_data || {};
+  const { card_label, title, intro_text = "", stages = [], reflection_question = "", reflection_label = "", reflection_options = [], cta_text = "Continue →", callouts = [] } = card?.card_data || {};
   
   const actualQuestion = reflection_label || reflection_question;
 
@@ -117,16 +117,37 @@ function ScenarioCard({ card, onContinue }) {
         })}
       </div>
 
-      <div className="sc-reflection">
-        <p className="sc-reflection-q">{actualQuestion}</p>
-        <div className="sc-reflection-opts">
-          {reflection_options.map((opt, idx) => (
-            <button key={idx} className="sc-btn-opt" onClick={onContinue}>
-              {opt}
-            </button>
+      {callouts && callouts.length > 0 && (
+        <div className="sc-callouts">
+          {callouts.map((callout, idx) => (
+            <div key={idx} className={`sc-callout type-${callout.style || "note"}`}>
+              <div className="sc-callout-inner">
+                {callout.icon && <div className="sc-callout-icon">{callout.icon}</div>}
+                <div className="sc-callout-text">
+                  {renderDetailWithGlossary(callout.text, [], null, () => {}, idx + 100)}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
+      )}
+
+      {reflection_options && reflection_options.length > 0 ? (
+        <div className="sc-reflection">
+          <p className="sc-reflection-q">{actualQuestion}</p>
+          <div className="sc-reflection-opts">
+            {reflection_options.map((opt, idx) => (
+              <button key={idx} className="sc-btn-opt" onClick={onContinue}>
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <button className="sc-continue-btn" onClick={onContinue}>
+          {cta_text}
+        </button>
+      )}
     </div>
   );
 }

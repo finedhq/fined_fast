@@ -27,7 +27,12 @@ ChartJS.register(
 
 // Helper to replace terms in text with interactive spans
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0) return <span className="ch-detail-text">{detailText}</span>;
+  if (!glossaryTerms || glossaryTerms.length === 0 || typeof detailText !== "string") {
+    if (typeof detailText === "string") {
+      return <span className="ch-detail-text" dangerouslySetInnerHTML={{ __html: detailText }} />;
+    }
+    return <span className="ch-detail-text">{detailText}</span>;
+  }
 
   let elements = [detailText];
 
@@ -65,7 +70,7 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
             </span>
           );
         } else if (part) {
-          newElements.push(part);
+          newElements.push(<span key={Math.random()} dangerouslySetInnerHTML={{ __html: part }} />);
         }
       });
     });

@@ -9,6 +9,15 @@
   text-align: center;
 }
 
+.comp-card-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4A3AFF;
+  margin-bottom: 24px;
+}
+
 .comp-badge {
   width: 80px;
   height: 80px;

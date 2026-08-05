@@ -12,7 +12,7 @@ import "./CinematicCard.css";
 const LINE_STAGGER_MS = 700;
 
 function CinematicCard({ card, onContinue }) {
-  const { lines = [], tagline = "", cta_text = "Continue", finstars = 0 } = card?.card_data || {};
+  const { card_label, lines = [], tagline = "", cta_text = "Continue", finstars = 0 } = card?.card_data || {};
 
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTagline, setShowTagline] = useState(false);
@@ -44,6 +44,7 @@ function CinematicCard({ card, onContinue }) {
 
   return (
     <div className="cc-root">
+      {card_label && <div className="cc-card-label">{card_label}</div>}
       <div className="cc-lines">
         {lines.map((line, i) => (
           <p

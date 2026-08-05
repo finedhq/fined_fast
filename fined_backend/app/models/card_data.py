@@ -25,6 +25,8 @@ class ScenarioStage(BaseModel):
 
 class CinematicCardData(BaseModel):
     card_type: Literal["cinematic"] = "cinematic"
+    card_label: Optional[str] = None
+    title: Optional[str] = None
     lines: list[CinematicLine] = Field(min_length=2, max_length=5)
     tagline: str
     cta_text: str = "Continue"
@@ -38,7 +40,8 @@ class ScenarioCardData(BaseModel):
     stages: list[ScenarioStage] = Field(min_length=2, max_length=6)
     reflection_question: Optional[str] = None
     reflection_label: Optional[str] = None
-    reflection_options: list[str] = Field(min_length=2, max_length=5)
+    reflection_options: list[str] = Field(min_length=2, max_length=5, default_factory=list)
+    callouts: list["Callout"] = Field(default_factory=list)
 
 class RiskSpectrumDot(BaseModel):
     id: str  # internal identifier
@@ -61,6 +64,7 @@ class RiskSpectrumCardData(BaseModel):
 
 class SliderCalculatorCardData(BaseModel):
     card_type: Literal["slider_calculator"] = "slider_calculator"
+    card_label: Optional[str] = None
     title: str
     body_text: str
     glossary_terms: list[ScenarioGlossaryTerm] = []
@@ -111,6 +115,7 @@ class QuizOption(BaseModel):
 
 class QuizCardData(BaseModel):
     card_type: Literal["quiz"] = "quiz"
+    card_label: Optional[str] = None
     title: str
     question: str
     options: list[QuizOption] = Field(min_length=2, max_length=5)
@@ -135,6 +140,7 @@ class ChartQuote(BaseModel):
 class ChartCardData(BaseModel):
     card_type: Literal["chart"] = "chart"
     chart_style: Literal["line", "bar"] = "line"
+    card_label: Optional[str] = None
     title: str
     quote: Optional[ChartQuote] = None
     body_text_top: str
@@ -267,6 +273,7 @@ class NextModuleTeaser(BaseModel):
 
 class CompletionCardData(BaseModel):
     card_type: Literal["completion"] = "completion"
+    card_label: Optional[str] = None
     title: str
     subtitle: str
     badge_icon: str = "🔔"

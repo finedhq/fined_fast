@@ -53,6 +53,7 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
 
 function SliderCalculatorCard({ card, onContinue }) {
   const {
+    card_label,
     title = "",
     body_text = "",
     glossary_terms = [],
@@ -117,6 +118,7 @@ function SliderCalculatorCard({ card, onContinue }) {
 
   return (
     <div className="slider-root" onClick={() => setActiveTermIndex(null)}>
+      {card_label && <div className="slider-card-label">{card_label}</div>}
       <h2 className="slider-title">{title}</h2>
       {body_text && (
         <p className="slider-body">

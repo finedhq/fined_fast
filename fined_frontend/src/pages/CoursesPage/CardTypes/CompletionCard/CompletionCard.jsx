@@ -3,6 +3,7 @@ import "./CompletionCard.css";
 
 function CompletionCard({ card, onContinue }) {
   const {
+    card_label,
     badge_icon = "🔔",
     title = "Module Completed",
     subtitle = "You have successfully finished all topics in this module.",
@@ -14,6 +15,7 @@ function CompletionCard({ card, onContinue }) {
 
   return (
     <div className="comp-root">
+      {card_label && <div className="comp-card-label">{card_label}</div>}
       <div className="comp-badge">{badge_icon}</div>
       <h2 className="comp-title">{title}</h2>
       <p className="comp-sub">{subtitle}</p>
