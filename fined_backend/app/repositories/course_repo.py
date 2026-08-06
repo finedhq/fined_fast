@@ -70,7 +70,7 @@ class CourseRepository:
         return res.data[0] if res and res.data else None
 
     def get_card_by_slug(self, slug: str, module_id: str = None) -> dict | None:
-        query = supabase.from_("cards").select("*").eq("slug", slug)
+        query = supabase.from_("cards").select("*").eq("card_id", slug)
         if module_id:
             query = query.eq("module_id", module_id)
         res = query.limit(1).execute()

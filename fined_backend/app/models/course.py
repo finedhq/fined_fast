@@ -27,21 +27,10 @@ class CardOut(BaseModel):
     """Individual learning card inside a module"""
     card_id: str
     module_id: str
-    slug: str
     title: str
-    content_type: str
-    content_text: Optional[str] = None
-    image_url: Optional[str] = None
-    audio_url: Optional[str] = None
-    video_url: Optional[str] = None
-    question_type: Optional[str] = None
-    options: Optional[List[str]] = None
-    options_tags: Optional[List[str]] = None
-    correct_answer: Optional[str] = None
-    correct_answer_exists: Optional[bool] = None
-    answer_compulsory: Optional[bool] = None
+    card_template: str
+    card_data: dict
     allotted_finstars: Optional[int] = None
-    finstars_involved: Optional[bool] = None
     order_index: int
 
 

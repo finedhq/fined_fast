@@ -144,7 +144,7 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
         course_id = course_res.data[0]["id"]
         course_title = course_res.data[0]["title"]
             
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug").eq("course_id", course_id).execute())
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug").eq("course_id", course_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
         modules = modules_res.data or []
@@ -153,7 +153,7 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
             
         # Optimization: Fetch only cards belonging to the modules in this course (Latency Win 1)
         module_ids = [m["id"] for m in modules]
-        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, slug, content_text, content_type, order_index, image_url").in_("module_id", module_ids).execute())
+        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, card_template, order_index").in_("module_id", module_ids).execute())
         cards = cards_res.data or []
         
         # Build user progress map
@@ -171,10 +171,10 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
                 "cardSlug": card.get("slug"),
                 "module_id": card["module_id"],
                 "title": card["title"],
-                "content_text": card["content_text"],
-                "content_type": card["content_type"],
+                "content_text": card.get("content_text"),
+                "content_type": card.get("content_type") or card.get("card_template"),
                 "order_index": card["order_index"],
-                "image_url": card["image_url"],
+                "image_url": card.get("image_url"),
                 "status": progress_map.get(card["card_id"], "incompleted")
             })
             
@@ -221,9 +221,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
         
-        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_slug).execute())
-        if not card_res.data:
-            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res.data[0]["card_id"]
@@ -263,21 +261,21 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
         
         nav_results = []
         if prev_module:
-            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
+            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
         if next_module:
-            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
+            nav_results.append(await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
         
         nav_idx = 0
         if prev_module:
             prev_cards = nav_results[nav_idx].data
             if prev_cards:
-                prev_module_first_card = {"moduleId": prev_module["id"], "moduleSlug": prev_module.get("slug"), "cardId": prev_cards[0]["card_id"], "cardSlug": prev_cards[0].get("slug")}
+                prev_module_first_card = {"moduleId": prev_module["id"], "moduleSlug": prev_module.get("slug"), "cardId": prev_cards[0]["card_id"], "cardSlug": None}
             nav_idx += 1
             
         if next_module:
             next_cards = nav_results[nav_idx].data
             if next_cards:
-                next_module_first_card = {"moduleId": next_module["id"], "moduleSlug": next_module.get("slug"), "cardId": next_cards[0]["card_id"], "cardSlug": next_cards[0].get("slug")}
+                next_module_first_card = {"moduleId": next_module["id"], "moduleSlug": next_module.get("slug"), "cardId": next_cards[0]["card_id"], "cardSlug": None}
                 
         return {
             **current_card,
@@ -328,9 +326,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
         
-        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_id).execute())
-        if not card_res_id.data:
-            card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
+        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
         if not card_res_id.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res_id.data[0]["card_id"]
@@ -453,9 +449,13 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         if len(all_course_res.data or []) == len(completed_course_res.data or []) and not was_already_completed and course_count < 5:
             # Course completed! Fetch answers and correct keys to compute score
             answers_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("user_answer, card_id").match({"email": user.email, "course_id": course_id, "progress_type": "card"}).execute())
-            keys_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, correct_answer").in_("module_id", module_ids).execute())
+            keys_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, card_data").in_("module_id", module_ids).execute())
             
-            correct_map = {c["card_id"]: c["correct_answer"].strip().lower() for c in (keys_res.data or []) if c.get("correct_answer")}
+            correct_map = {
+                c["card_id"]: c["card_data"].get("correct_answer").strip().lower() 
+                for c in (keys_res.data or []) 
+                if c.get("card_data") and c["card_data"].get("correct_answer")
+            }
             
             correct = 0
             total = 0
