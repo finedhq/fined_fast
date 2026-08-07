@@ -323,10 +323,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const tocLineHeight = tocItems.length > 16 ? "1.3" : tocItems.length > 11 ? "1.35" : "1.4";
   const tocRowPadding =
     tocItems.length > 16
-      ? "0.24rem 1rem"
+      ? "0.15rem 1rem"
       : tocItems.length > 11
-        ? "0.32rem 1rem"
-        : "0.48rem 1rem";
+        ? "0.2rem 1rem"
+        : "0.25rem 1rem";
 
   const schema = {
     "@context": "https://schema.org",
