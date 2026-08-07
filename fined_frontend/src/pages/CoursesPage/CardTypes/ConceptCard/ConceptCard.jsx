@@ -49,12 +49,19 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
             </span>
           );
         } else if (part) {
-          // Wrap text chunks in dangerouslySetInnerHTML to preserve strong tags from backend
-          newElements.push(<span key={Math.random()} dangerouslySetInnerHTML={{ __html: part }} />);
+          newElements.push(part);
         }
       });
     });
     elements = newElements;
+  });
+
+  // At the very end, map any remaining strings to dangerouslySetInnerHTML
+  elements = elements.map((el, i) => {
+    if (typeof el === "string") {
+      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
+    }
+    return el;
   });
 
   return <span className="conc-text-span">{elements}</span>;

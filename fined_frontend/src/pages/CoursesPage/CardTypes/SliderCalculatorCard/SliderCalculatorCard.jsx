@@ -3,7 +3,12 @@ import "./SliderCalculatorCard.css";
 
 // Helper to replace terms in text with interactive spans
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0) return <span className="slider-detail-text">{detailText}</span>;
+  if (!glossaryTerms || glossaryTerms.length === 0) {
+    if (typeof detailText === "string") {
+      return <span className="slider-detail-text" dangerouslySetInnerHTML={{ __html: detailText }} />;
+    }
+    return <span className="slider-detail-text">{detailText}</span>;
+  }
 
   let elements = [detailText];
 
@@ -46,6 +51,14 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
       });
     });
     elements = newElements;
+  });
+
+  // At the very end, map any remaining strings to dangerouslySetInnerHTML
+  elements = elements.map((el, i) => {
+    if (typeof el === "string") {
+      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
+    }
+    return el;
   });
 
   return <span className="slider-detail-text">{elements}</span>;

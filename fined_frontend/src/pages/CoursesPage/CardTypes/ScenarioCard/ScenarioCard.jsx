@@ -3,7 +3,12 @@ import "./ScenarioCard.css";
 
 // Helper to replace terms in text with interactive spans
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, stageIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0) return <p className="sc-detail-text">{detailText}</p>;
+  if (!glossaryTerms || glossaryTerms.length === 0) {
+    if (typeof detailText === "string") {
+      return <p className="sc-detail-text" dangerouslySetInnerHTML={{ __html: detailText }} />;
+    }
+    return <p className="sc-detail-text">{detailText}</p>;
+  }
 
   // We want to find the first occurrence of each term and wrap it.
   // A simple approach is splitting the string based on terms.
@@ -52,6 +57,14 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
       });
     });
     elements = newElements;
+  });
+
+  // At the very end, map any remaining strings to dangerouslySetInnerHTML
+  elements = elements.map((el, i) => {
+    if (typeof el === "string") {
+      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
+    }
+    return el;
   });
 
   return <p className="sc-detail-text">{elements}</p>;
