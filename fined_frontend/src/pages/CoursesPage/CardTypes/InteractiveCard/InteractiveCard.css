@@ -271,3 +271,9 @@
 .metric-box.low .metric-val {
   color: #6b7280; /* gray-500 */
 }
+
+@media (max-width: 480px) {
+  .asset-metrics {
+    grid-template-columns: 1fr;
+  }
+}

@@ -189,3 +189,9 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(74, 58, 255, 0.2);
 }
+
+@media (max-width: 480px) {
+  .rr-label:not(.active) {
+    display: none;
+  }
+}

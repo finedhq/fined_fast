@@ -2213,3 +2213,52 @@ button {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =========================================
+   GLOBAL MOBILE TYPOGRAPHY SCALING (<= 480px)
+   ========================================= */
+@media (max-width: 480px) {
+  /* 1. Card Titles (1.62rem -> 1.4rem) */
+  .ch-title, .conc-title, .ie-title, .ps-title, 
+  .quiz-title, .rr-title, .sc-title, .slider-title {
+    font-size: 1.4rem !important;
+  }
+
+  /* 2. Body Text (1.14rem -> 1.0rem) */
+  .ch-body, .ch-highlight-line, .conc-body-text, 
+  .conc-sl-item, .conc-callout, .ie-intro, .ie-tab-name, 
+  .ie-tab-value-right, .ie-content-text, .ps-body, 
+  .quiz-question, .quiz-finstars-reward, .rr-body, 
+  .rr-highlight-line, .sc-intro, .sc-detail-text, 
+  .sc-btn-opt, .slider-body, .slider-highlight-line {
+    font-size: 1.0rem !important;
+  }
+
+  /* 3. Secondary Text / Labels (1.02rem / 1.08rem -> 0.9rem) */
+  .ch-quote-box, .conc-bar-title, .conc-bar-value, 
+  .conc-bar-summary, .conc-day-event, .conc-book-header, 
+  .conc-book-row, .conc-dr-row, .conc-grid-desc, 
+  .conc-comp-header, .conc-comp-body, .conc-table, 
+  .conc-takeaway-label, .conc-bp-title, .ps-selector-label, 
+  .ps-pill, .ps-alloc-bar-lbl, .ps-alloc-bar-pct, 
+  .ps-alloc-note, .quiz-option-btn, .quiz-explanation-box, 
+  .rr-info-desc, .sc-stat-line {
+    font-size: 0.9rem !important;
+  }
+
+  /* 4. Primary Buttons (1.2rem -> 1.1rem) */
+  .ch-btn-primary, .cc-cta, .comp-btn-primary, 
+  .comp-next-title, .conc-continue-btn, .ie-continue-btn, 
+  .ps-btn-primary, .quiz-btn-primary, .rr-btn-primary, 
+  .sc-continue-btn, .slider-btn-primary {
+    font-size: 1.1rem !important;
+  }
+
+  /* 5. Stat Box Numbers (1.5rem / 2.16rem -> 1.25rem / 1.75rem) */
+  .ch-amount, .ch-stat-val, .conc-stat-val, .r-amount {
+    font-size: 1.25rem !important;
+  }
+  .conc-day-label, .crb-val {
+    font-size: 1.75rem !important;
+  }
+}

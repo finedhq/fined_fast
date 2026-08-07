@@ -36,8 +36,7 @@ function QuizCard({ card, onContinue }) {
       {card_label && <div className="quiz-card-label">{card_label}</div>}
       <h2 className="quiz-title">{title}</h2>
       
-      <div className="quiz-question">
-        {question}
+      <div className="quiz-question" dangerouslySetInnerHTML={{ __html: question }}>
       </div>
 
       <div className="quiz-options-grid">
@@ -59,7 +58,7 @@ function QuizCard({ card, onContinue }) {
           <div className="quiz-exp-title">
             {isAnsweredCorrectly() ? "✅ Correct" : "❌ Incorrect"}
           </div>
-          <p>{explanation}</p>
+          <p dangerouslySetInnerHTML={{ __html: explanation }}></p>
           <div className="quiz-finstars-reward">⭐ +10 FinStars earned</div>
           
           <button className="quiz-btn-primary" onClick={onContinue} style={{ marginTop: "16px" }}>

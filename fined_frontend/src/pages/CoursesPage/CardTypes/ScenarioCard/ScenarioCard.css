@@ -166,7 +166,7 @@
   transform: translateX(-50%);
   background: #111827;
   color: white;
-  padding: 16px;
+  padding: 12px 14px;
   border-radius: 12px;
   width: 280px;
   z-index: 10;
@@ -188,14 +188,14 @@
 
 .sc-glossary-tooltip strong {
   display: block;
-  font-size: 1.08rem;
+  font-size: 0.9rem;
   color: #F5A623;
   margin-bottom: 6px;
 }
 
 .sc-glossary-tooltip p {
-  font-size: 1.02rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  line-height: 1.4;
   margin-bottom: 8px;
   color: #e5e7eb;
 }
@@ -203,6 +203,7 @@
 .sc-glossary-tooltip .sc-example {
   font-style: italic;
   color: #9ca3af;
+  font-size: 0.8rem;
   margin-bottom: 0;
   border-top: 1px solid rgba(255,255,255,0.1);
   padding-top: 8px;
@@ -304,4 +305,23 @@
 }
 .sc-callout-text {
   flex: 1;
+}
+
+@media (max-width: 480px) {
+  .sc-root {
+    padding: 24px 16px;
+  }
+  .sc-stage {
+    gap: 12px;
+  }
+  .sc-stage-icon {
+    width: 26px;
+  }
+  .sc-stage-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .sc-stage-content {
+    padding-bottom: 20px;
+  }
 }

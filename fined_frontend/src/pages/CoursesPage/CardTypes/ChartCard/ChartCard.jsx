@@ -94,6 +94,19 @@ function hexToRgba(hex, alpha) {
   return hex;
 }
 
+// Helper to parse Key Takeaway and other special blocks
+function parseSpecialText(text) {
+  if (typeof text !== "string") return { type: "normal", content: text };
+  
+  if (text.trim().startsWith("**Key Takeaway:**")) {
+    return {
+      type: "takeaway",
+      content: text.replace("**Key Takeaway:**", "").trim()
+    };
+  }
+  return { type: "normal", content: text };
+}
+
 function ChartCard({ card, onContinue }) {
   const {
     card_label,
@@ -200,11 +213,24 @@ function ChartCard({ card, onContinue }) {
         </div>
       )}
 
-      {body_text_top && (
-        <p className="ch-body">
-          {renderDetailWithGlossary(body_text_top, glossary_terms, activeTermIndex, setActiveTermIndex)}
-        </p>
-      )}
+      {body_text_top && (() => {
+        const parsed = parseSpecialText(body_text_top);
+        if (parsed.type === "takeaway") {
+          return (
+            <div className="ch-takeaway-box">
+              <div className="ch-takeaway-label">Key Takeaway</div>
+              <div className="ch-takeaway-content">
+                {renderDetailWithGlossary(parsed.content, glossary_terms, activeTermIndex, setActiveTermIndex)}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <p className="ch-body">
+            {renderDetailWithGlossary(body_text_top, glossary_terms, activeTermIndex, setActiveTermIndex)}
+          </p>
+        );
+      })()}
 
       <div className="ch-chart-container" style={{ height: chartHeight }}>
         {chart_style === "bar" ? (
@@ -271,17 +297,44 @@ function ChartCard({ card, onContinue }) {
         </div>
       )}
 
-      {body_text_bottom && (
-        <p className="ch-body" style={{ marginTop: finalStatsLayout === "row" ? "18px" : "0" }}>
-          {renderDetailWithGlossary(body_text_bottom, glossary_terms, activeTermIndex, setActiveTermIndex)}
-        </p>
-      )}
+      {body_text_bottom && (() => {
+        const parsed = parseSpecialText(body_text_bottom);
+        const mTop = finalStatsLayout === "row" ? "18px" : "0";
+        if (parsed.type === "takeaway") {
+          return (
+            <div className="ch-takeaway-box" style={{ marginTop: mTop }}>
+              <div className="ch-takeaway-label">Key Takeaway</div>
+              <div className="ch-takeaway-content">
+                {renderDetailWithGlossary(parsed.content, glossary_terms, activeTermIndex, setActiveTermIndex)}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <p className="ch-body" style={{ marginTop: mTop }}>
+            {renderDetailWithGlossary(body_text_bottom, glossary_terms, activeTermIndex, setActiveTermIndex)}
+          </p>
+        );
+      })()}
 
-      {highlight_line && (
-        <div className="ch-highlight-line">
-          {renderDetailWithGlossary(highlight_line, glossary_terms, activeTermIndex, setActiveTermIndex)}
-        </div>
-      )}
+      {highlight_line && (() => {
+        const parsed = parseSpecialText(highlight_line);
+        if (parsed.type === "takeaway") {
+          return (
+            <div className="ch-takeaway-box" style={{ marginTop: "24px", marginBottom: "0" }}>
+              <div className="ch-takeaway-label">Key Takeaway</div>
+              <div className="ch-takeaway-content">
+                {renderDetailWithGlossary(parsed.content, glossary_terms, activeTermIndex, setActiveTermIndex)}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="ch-highlight-line">
+            {renderDetailWithGlossary(highlight_line, glossary_terms, activeTermIndex, setActiveTermIndex)}
+          </div>
+        );
+      })()}
 
       <button className="ch-btn-primary" onClick={onContinue}>
         {cta_text}

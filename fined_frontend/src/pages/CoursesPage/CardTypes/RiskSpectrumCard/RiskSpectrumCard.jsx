@@ -53,8 +53,8 @@ function RiskSpectrumCard({ card, onContinue }) {
           })}
         </div>
         <div className="rr-axis">
-          <span>← Lower Risk, Lower Return</span>
-          <span>Higher Risk, Higher Return →</span>
+          <span>← Lower Risk<br/>Lower Return</span>
+          <span style={{ textAlign: "right" }}>Higher Risk<br/>Higher Return →</span>
         </div>
       </div>
 

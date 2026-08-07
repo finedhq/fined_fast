@@ -503,6 +503,201 @@
   text-decoration-style: solid;
 }
 .conc-glossary-tooltip {
+  font-size: 1.02rem;
+  color: #4b5563;
+}
+.conc-comp-body ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 7. Table */
+.conc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.02rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.conc-table th {
+  background: #f9fafb;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+}
+.conc-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+}
+
+/* 8. Simple List */
+.conc-simple-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.conc-sl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 1.14rem;
+  color: #374151;
+}
+.conc-sl-bullet {
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* 9. Stat Boxes */
+.conc-stat-boxes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.conc-stat-box {
+  flex: 1;
+  min-width: 90px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.conc-stat-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 4px;
+}
+.conc-stat-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* 10. Callouts */
+.conc-callouts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.conc-callout {
+  padding: 16px;
+  border-radius: 4px 8px 8px 4px;
+  font-size: 1.14rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+.conc-callout-inner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.conc-callout-icon {
+  font-size: 1.44rem;
+  flex-shrink: 0;
+}
+.conc-callout-text {
+  flex: 1;
+}
+
+/* Callout Types */
+.conc-callout.type-highlight {
+  background: rgba(74, 58, 255, 0.05);
+  border-left: 4px solid #4A3AFF;
+  color: #111827;
+}
+.conc-callout.type-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid #f59e0b;
+  color: #92400e;
+}
+.conc-callout.type-info {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 4px solid #3b82f6;
+  color: #1e3a8a;
+}
+.conc-callout.type-note {
+  background: #f3f4f6;
+  border-left: 4px solid #9ca3af;
+  color: #374151;
+}
+.conc-callout.type-takeaway {
+  background: rgba(74, 58, 255, 0.05);
+  border: 1px dashed #4A3AFF;
+  border-radius: 12px;
+  text-align: center;
+  align-items: center;
+}
+.conc-callout.type-takeaway .conc-callout-inner {
+  justify-content: center;
+  text-align: center;
+}
+.conc-takeaway-label {
+  display: block;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #4A3AFF;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* Button & Glossary from original */
+.conc-continue-btn {
+  background: #4A3AFF;
+  color: #ffffff;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+  width: 100%;
+  text-align: center;
+}
+.conc-continue-btn:hover {
+  background: #3a2bd1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 58, 255, 0.2);
+}
+
+.conc-glossary-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.conc-glossary-term {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #4A3AFF;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all 0.2s ease;
+}
+.conc-glossary-term:hover,
+.conc-glossary-term.active {
+  color: #3a2bd1;
+  background: rgba(74, 58, 255, 0.1);
+  border-radius: 4px;
+  text-decoration-style: solid;
+}
+.conc-glossary-tooltip {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
@@ -510,13 +705,13 @@
   width: 260px;
   background: #111827;
   color: #ffffff;
-  padding: 16px;
+  padding: 12px 14px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   z-index: 100;
   text-align: left;
-  font-size: 1.02rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  line-height: 1.4;
   animation: concTooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
@@ -533,7 +728,7 @@
 .conc-glossary-tooltip strong {
   display: block;
   font-family: 'Nunito', sans-serif;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 8px;
   color: #4A3AFF;
@@ -544,7 +739,7 @@
   border-top: 1px solid rgba(255,255,255,0.1);
   color: #9ca3af;
   font-style: italic;
-  font-size: 0.96rem;
+  font-size: 0.8rem;
 }
 @keyframes concTooltipFadeIn {
   from { opacity: 0; transform: translate(-50%, 10px); }
