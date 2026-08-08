@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./RiskSpectrumCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 // Helper to map backend color strings to CSS classes
 function getColorClass(colorStr) {
@@ -29,8 +30,8 @@ function RiskSpectrumCard({ card, onContinue }) {
   return (
     <div className="rr-root">
       {card_label && <div className="rs-card-label">{card_label}</div>}
-      {title && <h2 className="rr-title">{title}</h2>}
-      {body_text && <p className="rr-body" dangerouslySetInnerHTML={{ __html: body_text }}></p>}
+      {title && <h2 className="rr-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
+      {body_text && <p className="rr-body" dangerouslySetInnerHTML={{ __html: parseBoldText(body_text) }}></p>}
 
       <p className="rr-hint">Tap any asset on the spectrum:</p>
 
@@ -45,8 +46,7 @@ function RiskSpectrumCard({ card, onContinue }) {
                   className={`rr-dot ${isActive ? "active" : ""} ${colorClass}`}
                   onClick={() => setActiveDotId(dot.id)}
                 ></div>
-                <div className={`rr-label ${isActive ? "active" : ""}`}>
-                  {dot.label}
+                <div className={`rr-label ${isActive ? "active" : ""}`} dangerouslySetInnerHTML={{ __html: parseBoldText(dot.label) }}>
                 </div>
               </div>
             );
@@ -60,11 +60,11 @@ function RiskSpectrumCard({ card, onContinue }) {
 
       {activeDot && (
         <div className="rr-info">
-          <div className={`rr-info-title ${getColorClass(activeDot.color)}-text`}>{activeDot.title}</div>
-          <div className="rr-info-desc">{activeDot.desc}</div>
+          <div className={`rr-info-title ${getColorClass(activeDot.color)}-text`} dangerouslySetInnerHTML={{ __html: parseBoldText(activeDot.title) }}></div>
+          <div className="rr-info-desc" dangerouslySetInnerHTML={{ __html: parseBoldText(activeDot.desc) }}></div>
           <div className="rr-info-stat-row">
-            <div className="rr-stat-chip">Return: <span>{activeDot.return_text}</span></div>
-            <div className="rr-stat-chip">Risk: <span className="rr-color-amber-text">{activeDot.risk_text}</span></div>
+            <div className="rr-stat-chip">Return: <span dangerouslySetInnerHTML={{ __html: parseBoldText(activeDot.return_text) }}></span></div>
+            <div className="rr-stat-chip">Risk: <span className="rr-color-amber-text" dangerouslySetInnerHTML={{ __html: parseBoldText(activeDot.risk_text) }}></span></div>
           </div>
         </div>
       )}
@@ -72,7 +72,7 @@ function RiskSpectrumCard({ card, onContinue }) {
       {highlight_line && (
         <div 
           className="rr-highlight-line"
-          dangerouslySetInnerHTML={{ __html: highlight_line }}
+          dangerouslySetInnerHTML={{ __html: parseBoldText(highlight_line) }}
         ></div>
       )}
 

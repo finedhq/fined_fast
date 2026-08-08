@@ -1,5 +1,6 @@
 import React from "react";
 import "./CompletionCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 function CompletionCard({ card, onContinue }) {
   const {
@@ -17,8 +18,8 @@ function CompletionCard({ card, onContinue }) {
     <div className="comp-root">
       {card_label && <div className="comp-card-label">{card_label}</div>}
       <div className="comp-badge">{badge_icon}</div>
-      <h2 className="comp-title">{title}</h2>
-      <p className="comp-sub">{subtitle}</p>
+      <h2 className="comp-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>
+      <p className="comp-sub" dangerouslySetInnerHTML={{ __html: parseBoldText(subtitle) }}></p>
 
       {total_finstars != null && (
         <div className="comp-finstars-total">
@@ -32,7 +33,7 @@ function CompletionCard({ card, onContinue }) {
           {learnings.map((learning, idx) => (
             <div key={idx} className="comp-learning-item">
               <span className="comp-check">✓</span>
-              <span>{learning}</span>
+              <span dangerouslySetInnerHTML={{ __html: parseBoldText(learning) }} />
             </div>
           ))}
         </div>
@@ -41,8 +42,8 @@ function CompletionCard({ card, onContinue }) {
       {next_module_teaser && (
         <div className="comp-next-teaser">
           <div className="comp-next-label">{next_module_teaser.label || "Up next"}</div>
-          <div className="comp-next-title">{next_module_teaser.title}</div>
-          <div className="comp-next-desc">{next_module_teaser.description}</div>
+          <div className="comp-next-title" dangerouslySetInnerHTML={{ __html: parseBoldText(next_module_teaser.title) }}></div>
+          <div className="comp-next-desc" dangerouslySetInnerHTML={{ __html: parseBoldText(next_module_teaser.description) }}></div>
         </div>
       )}
 

@@ -1,70 +1,11 @@
 import { useState } from "react";
 import "./ConceptCard.css";
 
+import { renderDetailWithGlossary as renderDetailWithGlossaryCore } from "../../../../utils/textFormatters";
+
 // Helper for jargon
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0 || typeof detailText !== "string") {
-    if (typeof detailText === "string") {
-      // Allow raw HTML like <strong> via dangerouslySetInnerHTML if it doesn't have glossary
-      // But we must wrap in span if doing raw HTML? Actually let's just return it as dangerouslySetInnerHTML if we must, 
-      // but the old code used dangerouslySetInnerHTML for `key_takeaway` and `reason.description`.
-      // To keep it simple and unified, if it has HTML we should use dangerouslySetInnerHTML.
-      return <span className="conc-text-span" dangerouslySetInnerHTML={{ __html: detailText }} />;
-    }
-    return <span className="conc-text-span">{detailText}</span>;
-  }
-
-  let elements = [detailText];
-  glossaryTerms.forEach((gTerm, termIdx) => {
-    const newElements = [];
-    const termRegex = new RegExp(`\\b(${gTerm.term})\\b`, "i");
-
-    elements.forEach((el) => {
-      if (typeof el !== "string") {
-        newElements.push(el);
-        return;
-      }
-      const parts = el.split(termRegex);
-      parts.forEach((part) => {
-        if (part.toLowerCase() === gTerm.term.toLowerCase()) {
-          const isActive = activeTermIndex === termIdx;
-          newElements.push(
-            <span key={`${termIdx}-${part}`} className="conc-glossary-wrapper">
-              <button
-                className={`conc-glossary-term ${isActive ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTermIndex(isActive ? null : termIdx);
-                }}
-              >
-                {part}
-              </button>
-              {isActive && (
-                <div className="conc-glossary-tooltip">
-                  <strong>{gTerm.term}</strong>
-                  <p>{gTerm.definition}</p>
-                  {gTerm.example && <p className="conc-example">e.g., {gTerm.example}</p>}
-                </div>
-              )}
-            </span>
-          );
-        } else if (part) {
-          newElements.push(part);
-        }
-      });
-    });
-    elements = newElements;
-  });
-
-  // At the very end, map any remaining strings to dangerouslySetInnerHTML
-  elements = elements.map((el, i) => {
-    if (typeof el === "string") {
-      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
-    }
-    return el;
-  });
-
-  return <span className="conc-text-span">{elements}</span>;
+  return renderDetailWithGlossaryCore(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, "", "conc", "conc-text-span");
 }
 
 function ConceptCard({ card, onContinue }) {

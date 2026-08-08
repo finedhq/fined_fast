@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./QuizCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 function QuizCard({ card, onContinue }) {
   const {
@@ -36,7 +37,7 @@ function QuizCard({ card, onContinue }) {
       {card_label && <div className="quiz-card-label">{card_label}</div>}
       <h2 className="quiz-title">{title}</h2>
       
-      <div className="quiz-question" dangerouslySetInnerHTML={{ __html: question }}>
+      <div className="quiz-question" dangerouslySetInnerHTML={{ __html: parseBoldText(question) }}>
       </div>
 
       <div className="quiz-options-grid">
@@ -48,7 +49,7 @@ function QuizCard({ card, onContinue }) {
             disabled={selectedOptionId !== null}
           >
             <span className="quiz-opt-letter">{String.fromCharCode(65 + idx)}</span>
-            {opt.text}
+            <span dangerouslySetInnerHTML={{ __html: parseBoldText(opt.text) }} />
           </button>
         ))}
       </div>
@@ -58,7 +59,7 @@ function QuizCard({ card, onContinue }) {
           <div className="quiz-exp-title">
             {isAnsweredCorrectly() ? "✅ Correct" : "❌ Incorrect"}
           </div>
-          <p dangerouslySetInnerHTML={{ __html: explanation }}></p>
+          <p dangerouslySetInnerHTML={{ __html: parseBoldText(explanation) }}></p>
           <div className="quiz-finstars-reward">⭐ +10 FinStars earned</div>
           
           <button className="quiz-btn-primary" onClick={onContinue} style={{ marginTop: "16px" }}>

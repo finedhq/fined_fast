@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./InteractiveCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 function InteractiveCard({ card, onContinue }) {
   const { 
@@ -17,8 +18,8 @@ function InteractiveCard({ card, onContinue }) {
   return (
     <div className="ie-root">
       {card_label && <div className="ie-card-label">{card_label}</div>}
-      {title && <h2 className="ie-title">{title}</h2>}
-      {intro_text && <p className="ie-intro" dangerouslySetInnerHTML={{ __html: intro_text }}></p>}
+      {title && <h2 className="ie-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
+      {intro_text && <p className="ie-intro" dangerouslySetInnerHTML={{ __html: parseBoldText(intro_text) }}></p>}
 
       {items.length > 0 && (
         <div className={`ie-explorer ${variant === "grid" ? "ie-explorer-grid" : "ie-explorer-list"}`}>
@@ -34,8 +35,8 @@ function InteractiveCard({ card, onContinue }) {
                     onClick={() => setActiveIndex(idx)}
                   >
                     {item.icon && <div className="ie-tab-icon-large">{item.icon}</div>}
-                    <div className="ie-tab-name">{item.label}</div>
-                    {item.value && <div className="ie-tab-value-small">{item.value}</div>}
+                    <div className="ie-tab-name" dangerouslySetInnerHTML={{ __html: parseBoldText(item.label) }}></div>
+                    {item.value && <div className="ie-tab-value-small" dangerouslySetInnerHTML={{ __html: parseBoldText(item.value) }}></div>}
                   </button>
                 );
               }
@@ -47,13 +48,13 @@ function InteractiveCard({ card, onContinue }) {
                   className={`ie-tab-row ${isActive ? "active" : ""}`}
                   onClick={() => setActiveIndex(idx)}
                 >
-                  <div className="ie-tab-name">{item.label}</div>
+                  <div className="ie-tab-name" dangerouslySetInnerHTML={{ __html: parseBoldText(item.label) }}></div>
                   {item.value && (
                     <div 
                       className="ie-tab-value-right" 
                       style={item.value_color ? { color: item.value_color } : {}}
+                      dangerouslySetInnerHTML={{ __html: parseBoldText(item.value) }}
                     >
-                      {item.value}
                     </div>
                   )}
                 </button>
@@ -62,10 +63,10 @@ function InteractiveCard({ card, onContinue }) {
           </div>
           
           <div className="ie-content-pane">
-            {activeItem?.content_title && <h3 className="ie-content-title">{activeItem.content_title}</h3>}
+            {activeItem?.content_title && <h3 className="ie-content-title" dangerouslySetInnerHTML={{ __html: parseBoldText(activeItem.content_title) }}></h3>}
             {/* fallback to title just in case older schema is used */}
-            {!activeItem?.content_title && activeItem?.title && <h3 className="ie-content-title">{activeItem.title}</h3>}
-            <div className="ie-content-text" dangerouslySetInnerHTML={{ __html: activeItem?.content || "" }}></div>
+            {!activeItem?.content_title && activeItem?.title && <h3 className="ie-content-title" dangerouslySetInnerHTML={{ __html: parseBoldText(activeItem.title) }}></h3>}
+            <div className="ie-content-text" dangerouslySetInnerHTML={{ __html: parseBoldText(activeItem?.content || "") }}></div>
           </div>
         </div>
       )}

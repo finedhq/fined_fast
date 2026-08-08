@@ -25,67 +25,10 @@ ChartJS.register(
   Legend
 );
 
-// Helper to replace terms in text with interactive spans
+import { renderDetailWithGlossary as renderDetailWithGlossaryCore } from "../../../../utils/textFormatters";
+
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0 || typeof detailText !== "string") {
-    if (typeof detailText === "string") {
-      return <span className="ch-detail-text" dangerouslySetInnerHTML={{ __html: detailText }} />;
-    }
-    return <span className="ch-detail-text">{detailText}</span>;
-  }
-
-  let elements = [detailText];
-
-  glossaryTerms.forEach((gTerm, termIdx) => {
-    const newElements = [];
-    const termRegex = new RegExp(`\\b(${gTerm.term})\\b`, "i");
-
-    elements.forEach((el) => {
-      if (typeof el !== "string") {
-        newElements.push(el);
-        return;
-      }
-      const parts = el.split(termRegex);
-      parts.forEach((part) => {
-        if (part.toLowerCase() === gTerm.term.toLowerCase()) {
-          const isActive = activeTermIndex === termIdx;
-          newElements.push(
-            <span key={`${termIdx}`} className="ch-glossary-wrapper">
-              <button
-                className={`ch-glossary-term ${isActive ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTermIndex(isActive ? null : termIdx);
-                }}
-              >
-                {part}
-              </button>
-              {isActive && (
-                <div className="ch-glossary-tooltip">
-                  <strong>{gTerm.term}</strong>
-                  <p>{gTerm.definition}</p>
-                  {gTerm.example && <p className="ch-example">e.g., {gTerm.example}</p>}
-                </div>
-              )}
-            </span>
-          );
-        } else if (part) {
-          newElements.push(part);
-        }
-      });
-    });
-    elements = newElements;
-  });
-
-  // At the very end, map any remaining strings to dangerouslySetInnerHTML
-  elements = elements.map((el, i) => {
-    if (typeof el === "string") {
-      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
-    }
-    return el;
-  });
-
-  return <span className="ch-detail-text">{elements}</span>;
+  return renderDetailWithGlossaryCore(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, "", "ch", "ch-detail-text");
 }
 
 // Convert a hex color string (e.g., "#00e5a0") into an rgba string for the background

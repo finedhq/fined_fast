@@ -34,6 +34,44 @@
   text-align: left;
 }
 
+/* Scenario Header */
+.sc-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f3f4f6;
+}
+
+.sc-header-avatar {
+  font-size: 2.5rem;
+}
+
+.sc-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sc-header-name {
+  font-weight: 700;
+  font-size: 1.14rem;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.sc-header-sub {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.sc-highlight-line {
+  margin-bottom: 32px;
+}
+
 /* Timeline */
 .sc-timeline {
   display: flex;

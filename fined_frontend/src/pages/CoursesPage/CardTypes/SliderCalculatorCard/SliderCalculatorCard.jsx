@@ -1,67 +1,11 @@
 import { useState, useMemo } from "react";
 import "./SliderCalculatorCard.css";
 
+import { renderDetailWithGlossary as renderDetailWithGlossaryCore } from "../../../../utils/textFormatters";
+
 // Helper to replace terms in text with interactive spans
 function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex) {
-  if (!glossaryTerms || glossaryTerms.length === 0) {
-    if (typeof detailText === "string") {
-      return <span className="slider-detail-text" dangerouslySetInnerHTML={{ __html: detailText }} />;
-    }
-    return <span className="slider-detail-text">{detailText}</span>;
-  }
-
-  let elements = [detailText];
-
-  glossaryTerms.forEach((gTerm, termIdx) => {
-    const newElements = [];
-    const termRegex = new RegExp(`\\b(${gTerm.term})\\b`, "i");
-
-    elements.forEach((el) => {
-      if (typeof el !== "string") {
-        newElements.push(el);
-        return;
-      }
-      const parts = el.split(termRegex);
-      parts.forEach((part) => {
-        if (part.toLowerCase() === gTerm.term.toLowerCase()) {
-          const isActive = activeTermIndex === termIdx;
-          newElements.push(
-            <span key={`${termIdx}`} className="slider-glossary-wrapper">
-              <button
-                className={`slider-glossary-term ${isActive ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveTermIndex(isActive ? null : termIdx);
-                }}
-              >
-                {part}
-              </button>
-              {isActive && (
-                <div className="slider-glossary-tooltip">
-                  <strong>{gTerm.term}</strong>
-                  <p>{gTerm.definition}</p>
-                  {gTerm.example && <p className="slider-example">e.g., {gTerm.example}</p>}
-                </div>
-              )}
-            </span>
-          );
-        } else if (part) {
-          newElements.push(part);
-        }
-      });
-    });
-    elements = newElements;
-  });
-
-  // At the very end, map any remaining strings to dangerouslySetInnerHTML
-  elements = elements.map((el, i) => {
-    if (typeof el === "string") {
-      return <span key={`html-${i}`} dangerouslySetInnerHTML={{ __html: el }} />;
-    }
-    return el;
-  });
-
-  return <span className="slider-detail-text">{elements}</span>;
+  return renderDetailWithGlossaryCore(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, "", "slider", "slider-detail-text");
 }
 
 function SliderCalculatorCard({ card, onContinue }) {

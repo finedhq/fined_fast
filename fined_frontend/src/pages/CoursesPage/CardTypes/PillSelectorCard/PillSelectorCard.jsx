@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import "./PillSelectorCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 function PillSelectorCard({ card, onContinue }) {
   const {
@@ -98,21 +99,21 @@ function PillSelectorCard({ card, onContinue }) {
   return (
     <div className="ps-root">
       {card_label && <div className="ps-card-label">{card_label}</div>}
-      {title && <h2 className="ps-title">{title}</h2>}
-      {body_text && <p className="ps-body">{body_text}</p>}
+      {title && <h2 className="ps-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
+      {body_text && <p className="ps-body" dangerouslySetInnerHTML={{ __html: parseBoldText(body_text) }}></p>}
 
       <div className="ps-selectors">
         {groups.map((group) => (
           <div key={group.group_id} className="ps-selector-group">
-            <div className="ps-selector-label">{group.label}</div>
+            <div className="ps-selector-label" dangerouslySetInnerHTML={{ __html: parseBoldText(group.label) }}></div>
             <div className="ps-pill-row">
               {group.options.map((opt) => (
                 <button
                   key={opt.value}
                   className={`ps-pill ${selections[group.group_id] === opt.value ? "selected" : ""}`}
                   onClick={() => handleSelect(group.group_id, opt.value)}
+                  dangerouslySetInnerHTML={{ __html: parseBoldText(opt.label) }}
                 >
-                  {opt.label}
                 </button>
               ))}
             </div>
@@ -122,15 +123,14 @@ function PillSelectorCard({ card, onContinue }) {
 
       <div className="ps-alloc-output">
         {activeProfile && (
-          <div className="ps-alloc-profile" style={{ color: activeProfile.color_hex }}>
-            {activeProfile.label}
+          <div className="ps-alloc-profile" style={{ color: activeProfile.color_hex }} dangerouslySetInnerHTML={{ __html: parseBoldText(activeProfile.label) }}>
           </div>
         )}
         
         <div className="ps-alloc-bars">
           {output_categories.map((cat) => (
             <div key={cat.id} className="ps-alloc-bar-row">
-              <span className="ps-alloc-bar-lbl">{cat.label}</span>
+              <span className="ps-alloc-bar-lbl" dangerouslySetInnerHTML={{ __html: parseBoldText(cat.label) }}></span>
               <div className="ps-alloc-bar-track">
                 <div
                   className="ps-alloc-bar-fill"
@@ -143,7 +143,7 @@ function PillSelectorCard({ card, onContinue }) {
         </div>
         
         {activeProfile && activeProfile.note && (
-          <div className="ps-alloc-note">{activeProfile.note}</div>
+          <div className="ps-alloc-note" dangerouslySetInnerHTML={{ __html: parseBoldText(activeProfile.note) }}></div>
         )}
       </div>
 

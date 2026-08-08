@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import "./CinematicCard.css";
+import { parseBoldText } from "../../../../utils/textFormatters";
 
 // card.card_data shape for this type:
 // {
@@ -52,13 +53,12 @@ function CinematicCard({ card, onContinue }) {
             className={`cc-line ${line.emphasis ? `cc-line--${line.emphasis}` : ""} ${
               i < visibleCount ? "cc-line--visible" : ""
             }`}
-          >
-            {line.text}
-          </p>
+            dangerouslySetInnerHTML={{ __html: parseBoldText(line.text) }}
+          />
         ))}
       </div>
 
-      <p className={`cc-tagline ${showTagline ? "cc-tagline--visible" : ""}`}>{tagline}</p>
+      <p className={`cc-tagline ${showTagline ? "cc-tagline--visible" : ""}`} dangerouslySetInnerHTML={{ __html: parseBoldText(tagline) }} />
 
       <button
         className={`cc-cta ${showCta ? "cc-cta--visible" : ""}`}
