@@ -205,7 +205,12 @@ const Dashboard = () => {
               <div className="dash-finscore-section">
                 <div className="dash-finscore-header">
                   <span className="dash-finscore-label">FinScore</span>
-                  <span className="dash-finscore-info">ⓘ</span>
+                  <div className="info-icon-container">
+                    <span className="dash-finscore-info" style={{ marginLeft: 0 }}>ⓘ</span>
+                    <div className="info-tooltip">
+                      FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                    </div>
+                  </div>
                 </div>
                 <div className="dash-finscore-display">
                   <div className="dash-finscore-value-group">

@@ -322,7 +322,13 @@ export default function CourseOverview() {
             <RevealOnScroll delay={100}>
               <div className="sidebar-card">
                 <div className="sidebar-card-header">
-                  FinScore <span className="info-icon">ⓘ</span>
+                  FinScore 
+                  <div className="info-icon-container">
+                    <span className="info-icon">ⓘ</span>
+                    <div className="info-tooltip">
+                      FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                    </div>
+                  </div>
                 </div>
                 <div className="finscore-value-row">
                   <span className="finscore-number">{userData?.fin_score || 0}</span>
