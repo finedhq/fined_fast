@@ -33,14 +33,13 @@
 .dash-welcome-card {
   background-color: #1e3a8a;
   border-radius: 20px;
-  padding: 40px;
+  padding: 30px;
   color: white;
   position: relative;
   flex: 2.5;
   overflow: hidden;
   display: flex;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  height: 450px;
 }
 
 .dash-welcome-content {
@@ -52,7 +51,7 @@
 .dash-greeting {
   font-size: 28px;
   font-weight: 800;
-  margin: 0 0 10px 0;
+  margin: 0 0 4px 0;
   letter-spacing: -0.5px;
 }
 
@@ -60,7 +59,7 @@
   color: #93c5fd;
   font-size: 15px;
   line-height: 1.5;
-  margin: 0 0 20px 0;
+  margin: 0 0 12px 0;
 }
 
 .dash-streak-pill {
@@ -71,15 +70,15 @@
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   backdrop-filter: blur(4px);
 }
 
 .dash-course-module {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 12px;
+  margin-bottom: 16px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -262,7 +261,7 @@
 .dash-stats-card {
   background-color: white;
   border-radius: 20px;
-  padding: 30px;
+  padding: 24px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -274,7 +273,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .dash-profile-pic {
@@ -308,8 +307,8 @@
   flex-direction: row;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 30px;
-  margin-top: 28px;
+  margin-bottom: 16px;
+  margin-top: 12px;
 }
 
 .dash-stat-item {
@@ -318,7 +317,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 8px;
+  padding: 12px 8px;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   background-color: transparent;
@@ -332,7 +331,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   border: 1.5px solid #e2e8f0;
 }
 
@@ -365,16 +364,15 @@
 }
 
 .dash-finscore-section {
-  margin-top: 10px;
   border-top: 1px solid #f1f5f9;
-  padding-top: 20px;
+  padding-top: 16px;
 }
 
 .dash-finscore-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .dash-finscore-label {
@@ -473,6 +471,12 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+}
+
+@media (min-width: 900px) {
+  .dash-challenge-card {
+    display: none;
   }
 }
 

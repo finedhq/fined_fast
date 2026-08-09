@@ -40,24 +40,22 @@
 }
 
 .hero-back-btn-outside {
-  background: #f59e0b; /* Amber 500 */
-  border: 3px solid #fef3c7; /* Amber 100 */
+  background: #f1f5f9; /* Slate 100 */
+  border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.25rem;
+  color: #0f172a; /* Slate 900 */
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .hero-back-btn-outside:hover {
-  background: #d97706; /* Amber 600 */
-  border-color: #fde68a; /* Amber 200 */
+  background: #e2e8f0; /* Slate 200 */
   transform: scale(1.05);
 }
 
@@ -149,8 +147,8 @@
 
 /* Step-by-step path segment drawing on scroll */
 .segment-mask-line {
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
+  stroke-dasharray: 5000;
+  stroke-dashoffset: 5000;
   transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: stroke-dashoffset;
 }
@@ -164,7 +162,7 @@
   height: 64px;
   width: 100%;
   z-index: 10;
-  margin-bottom: 116px;
+  margin-bottom: 186px;
 }
 
 /* Module node smooth float reveal */
@@ -316,32 +314,17 @@
 }
 
 /* Positioning the hover card & base label */
-/* MOBILE: Pop INWARDS to prevent cutting off */
+/* INWARDS: Pop towards the center to prevent cutting off */
 .pop-left .module-base-label {
-  left: calc(100% + 16px);
-  right: auto;
-  text-align: left;
-}
-
-.pop-right .module-base-label {
   right: calc(100% + 16px);
   left: auto;
   text-align: right;
 }
 
-/* DESKTOP: Pop OUTWARDS (left right alternating) */
-@media (min-width: 1024px) {
-  .pop-left .module-base-label {
-    right: calc(100% + 16px);
-    left: auto;
-    text-align: right;
-  }
-
-  .pop-right .module-base-label {
-    left: calc(100% + 16px);
-    right: auto;
-    text-align: left;
-  }
+.pop-right .module-base-label {
+  left: calc(100% + 16px);
+  right: auto;
+  text-align: left;
 }
 
 
@@ -635,11 +618,24 @@
 @media (max-width: 1023px) {
   .course-layout-container {
     padding-top: 3.5rem;
-    /* Additional padding to clear the fixed navbar */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .course-main-content {
+    display: contents;
+  }
+
+  .course-main-content > :nth-child(1) {
+    order: 1;
   }
 
   .course-sidebar {
-    order: -1;
+    order: 2;
+  }
+
+  .course-path-container {
+    order: 3;
   }
 
   .module-circle {
@@ -657,11 +653,15 @@
   }
 
   .pop-left .module-base-label {
-    left: calc(100% + 10px);
+    right: calc(100% + 10px);
+    left: auto;
+    text-align: right;
   }
 
   .pop-right .module-base-label {
-    right: calc(100% + 10px);
+    left: calc(100% + 10px);
+    right: auto;
+    text-align: left;
   }
 
   .module-base-title {
@@ -683,6 +683,14 @@
 
   .hc-content .hc-desc {
     font-size: 0.75rem;
+  }
+
+  .course-hero-banner {
+    padding: 1.5rem;
+  }
+
+  .course-hero-banner .hero-title {
+    font-size: 1.5rem;
   }
 
   .hc-icon-placeholder {

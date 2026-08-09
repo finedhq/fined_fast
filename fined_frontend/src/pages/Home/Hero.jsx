@@ -72,6 +72,33 @@ const SMALL_COURSES = [
   },
 ];
 
+const POPULAR_COURSES = [
+  {
+    id: 1,
+    title: "Investing 101: A Beginners guide",
+    lessons: 5,
+    level: "Beginner",
+    image: investingImg,
+    description: "Most people never really learned about money. Not in school, not at home. Someone just handed you a salary one day and said good luck. FinEd fixes that, but without making it feel like homework. Every lesson is short enough to finish on a lunch break. We take one money concept, explain it simply, and move on."
+  },
+  {
+    id: 2,
+    title: "Budgeting Basics: Take Control",
+    lessons: 7,
+    level: "Beginner",
+    image: budgetingBasicsImg,
+    description: "Budgeting doesn't mean eating only ramen and never having fun. It means knowing exactly where your money goes so you can spend on things you actually love guilt-free. Learn the 50/30/20 rule, how to track expenses effortlessly, and build a system that works on autopilot."
+  },
+  {
+    id: 3,
+    title: "Retirement Planning: Start Now",
+    lessons: 4,
+    level: "Intermediate",
+    image: retirementIncomePlanning1Img,
+    description: "Compound interest is the eighth wonder of the world. The earlier you start, the less you have to save. We break down PF, NPS, mutual funds, and how to structure your retirement portfolio so you don't have to work forever. Plan your freedom today."
+  },
+];
+
 function PiggyIcon() {
   return (
     <svg width="68" height="68" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -644,6 +671,76 @@ function Hero() {
         </RevealOnScroll>
 
       </div >
+
+      {/* POPULAR COURSES SECTION */}
+      <section className="popular-courses-section">
+        <RevealOnScroll>
+          <div className="pc-header">
+            <span className="pc-eyebrow">Popular Courses</span>
+            <h2 className="pc-title">Start with the right course</h2>
+            <p className="pc-subtitle" style={{ background: 'transparent' }}>Practical paths . Real skills . Lifelong effect .</p>
+          </div>
+        </RevealOnScroll>
+
+        <div className="courses-swiper-container">
+          <div className="courses-swiper-prev">❮</div>
+          <div className="courses-swiper-next">❯</div>
+          
+          <RevealOnScroll delay={100}>
+            <Swiper
+              effect={'coverflow'}
+              grabCursor={true}
+              centeredSlides={true}
+              slidesPerView={'auto'}
+              loop={true}
+              speed={500}
+              navigation={{
+                prevEl: '.courses-swiper-prev',
+                nextEl: '.courses-swiper-next',
+              }}
+              coverflowEffect={{
+                rotate: 0,
+                stretch: 0,
+                depth: 100,
+                modifier: 2,
+                slideShadows: false,
+              }}
+              autoplay={{
+                delay: 4000,
+                disableOnInteraction: false,
+              }}
+              modules={[EffectCoverflow, Pagination, Autoplay, Navigation]}
+              className="courses-swiper"
+            >
+              {[...POPULAR_COURSES, ...POPULAR_COURSES].map((course, index) => (
+                <SwiperSlide key={`${course.id}-${index}`} style={{ width: '100%', maxWidth: '850px' }}>
+                  <div className="course-swiper-card" onClick={() => navigate('/courses')}>
+                    <div className="course-swiper-img-container">
+                      <img src={course.image} alt={course.title} className="course-swiper-img" />
+                    </div>
+                    <div className="course-swiper-content">
+                      <h3 className="course-swiper-title">{course.title}</h3>
+                      <div className="course-swiper-meta">
+                        <span className="course-swiper-lessons">{course.lessons} Lessons</span>
+                        <span className="course-swiper-badge">{course.level}</span>
+                      </div>
+                      <p className="course-swiper-desc">
+                        {course.description}
+                      </p>
+                    </div>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </RevealOnScroll>
+        </div>
+
+        <RevealOnScroll delay={100}>
+          <div className="pc-view-all">
+            <button className="btn-hero-secondary-blue" onClick={() => navigate("/courses")}>Explore all courses</button>
+          </div>
+        </RevealOnScroll>
+      </section>
 
       {/* POPULAR COURSES SECTION
       <section className="popular-courses-section">

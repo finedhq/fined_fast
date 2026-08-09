@@ -110,7 +110,9 @@ export default function CourseOverview() {
               <div className="course-hero-banner">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                   <button onClick={() => navigate('/courses')} className="hero-back-btn-outside" style={{ flexShrink: 0 }}>
-                    ←
+                    <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '18px', height: '18px', transform: 'translateX(-1px)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
                   </button>
                   <h1 className="hero-title" style={{ marginBottom: 0 }}>{courseTitle}</h1>
                 </div>
@@ -128,9 +130,9 @@ export default function CourseOverview() {
             {/* Modules Path */}
             <div className="course-path-container">
               {(() => {
-                const xOffsets = isMobile ? [50, 50, 50, 50] : [35, 65, 35, 65];
+                const xOffsets = isMobile ? [25, 75, 30, 70, 20, 80] : [12, 68, 22, 78, 8, 73, 18, 83];
                 const getX = (index) => xOffsets[index % xOffsets.length];
-                const rowHeight = 180;
+                const rowHeight = 250;
                 const topPadding = 75;
                 const totalSvgHeight = course.length > 0 ? (course.length - 1) * rowHeight + 64 + topPadding : 0;
 
@@ -143,8 +145,9 @@ export default function CourseOverview() {
 
                     const localCurrY = 0;
                     const localNextY = rowHeight;
-                    const cp1Y = localCurrY + rowHeight * 0.75;
-                    const cp2Y = localNextY - rowHeight * 0.75;
+                    const curveModifier = isMobile ? 0.5 : 0.75;
+                    const cp1Y = localCurrY + rowHeight * curveModifier;
+                    const cp2Y = localNextY - rowHeight * curveModifier;
 
                     const d = `M ${currX} ${localCurrY} C ${currX} ${cp1Y}, ${nextX} ${cp2Y}, ${nextX} ${localNextY}`;
                     segments.push({ d, index: i, top: currY, height: rowHeight });
@@ -234,7 +237,7 @@ export default function CourseOverview() {
 
                       const alignmentClass = isMobile
                         ? (i % 2 === 0 ? "pop-right" : "pop-left")
-                        : (x1 < 50 ? "pop-left" : "pop-right");
+                        : (x1 < 50 ? "pop-right" : "pop-left");
 
                       const handleLaunchModule = () => {
                         if (isClickable && cardToResume) {
