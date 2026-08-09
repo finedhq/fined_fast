@@ -188,8 +188,8 @@ export default function CourseOverview() {
                               d={seg.d}
                               fill="none"
                               stroke="#c7d2fe"
-                              strokeWidth="4"
-                              strokeDasharray="10 10"
+                              strokeWidth="5"
+                              strokeDasharray="0 15"
                               strokeLinecap="round"
                               vectorEffect="non-scaling-stroke"
                               mask={`url(#course-path-mask-${i})`}

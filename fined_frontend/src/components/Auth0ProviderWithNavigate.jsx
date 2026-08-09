@@ -9,7 +9,7 @@ export const Auth0ProviderWithNavigate = ({ children }) => {
   const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
   const onRedirectCallback = (appState) => {
-    navigate(appState?.returnTo || window.location.pathname);
+    navigate(appState?.returnTo || '/dashboard');
   };
 
   if (!(domain && clientId)) {

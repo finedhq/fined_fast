@@ -149,9 +149,9 @@
 
 /* Step-by-step path segment drawing on scroll */
 .segment-mask-line {
-  stroke-dasharray: 350;
-  stroke-dashoffset: 350;
-  transition: stroke-dashoffset 0.25s ease-out;
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: stroke-dashoffset;
 }
 
@@ -298,8 +298,10 @@
 /* Hover Card */
 .module-hover-card {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%) scale(0.95);
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  transform-origin: top center;
   background: white;
   border-radius: 12px;
   padding: 1.25rem;
@@ -315,22 +317,10 @@
 
 /* Positioning the hover card & base label */
 /* MOBILE: Pop INWARDS to prevent cutting off */
-.pop-left .module-hover-card {
-  left: calc(100% + 16px);
-  right: auto;
-  transform-origin: left center;
-}
-
 .pop-left .module-base-label {
   left: calc(100% + 16px);
   right: auto;
   text-align: left;
-}
-
-.pop-right .module-hover-card {
-  right: calc(100% + 16px);
-  left: auto;
-  transform-origin: right center;
 }
 
 .pop-right .module-base-label {
@@ -341,22 +331,10 @@
 
 /* DESKTOP: Pop OUTWARDS (left right alternating) */
 @media (min-width: 1024px) {
-  .pop-left .module-hover-card {
-    right: calc(100% + 16px);
-    left: auto;
-    transform-origin: right center;
-  }
-
   .pop-left .module-base-label {
     right: calc(100% + 16px);
     left: auto;
     text-align: right;
-  }
-
-  .pop-right .module-hover-card {
-    left: calc(100% + 16px);
-    right: auto;
-    transform-origin: left center;
   }
 
   .pop-right .module-base-label {
@@ -375,7 +353,7 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(-50%) scale(1);
+  transform: translateX(-50%) scale(1);
   z-index: 50;
 }
 
@@ -678,12 +656,10 @@
     width: 125px;
   }
 
-  .pop-left .module-hover-card,
   .pop-left .module-base-label {
     left: calc(100% + 10px);
   }
 
-  .pop-right .module-hover-card,
   .pop-right .module-base-label {
     right: calc(100% + 10px);
   }
