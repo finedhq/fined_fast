@@ -17,7 +17,6 @@ function InteractiveCard({ card, onContinue }) {
 
   return (
     <div className="ie-root">
-      {card_label && <div className="ie-card-label">{card_label}</div>}
       {title && <h2 className="ie-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
       {intro_text && <p className="ie-intro" dangerouslySetInnerHTML={{ __html: parseBoldText(intro_text) }}></p>}
 

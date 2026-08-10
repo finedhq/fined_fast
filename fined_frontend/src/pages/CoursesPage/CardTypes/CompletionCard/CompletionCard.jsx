@@ -16,7 +16,6 @@ function CompletionCard({ card, onContinue }) {
 
   return (
     <div className="comp-root">
-      {card_label && <div className="comp-card-label">{card_label}</div>}
       <div className="comp-badge">{badge_icon}</div>
       <h2 className="comp-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>
       <p className="comp-sub" dangerouslySetInnerHTML={{ __html: parseBoldText(subtitle) }}></p>

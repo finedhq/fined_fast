@@ -34,7 +34,6 @@ function ScenarioCard({ card, onContinue }) {
 
   return (
     <div className="sc-root" onClick={() => setActiveTermId(null)}>
-      {card_label && <div className="sc-card-label">{card_label}</div>}
       {title && <h2 className="sc-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
       
       {scenario_header && (

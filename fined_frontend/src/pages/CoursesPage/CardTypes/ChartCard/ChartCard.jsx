@@ -129,7 +129,31 @@ function ChartCard({ card, onContinue }) {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { font: { family: "DM Sans, sans-serif", size: 11 }, color: "#6b7280" },
+        ticks: {
+          font: { family: "DM Sans, sans-serif", size: 11 },
+          color: "#6b7280",
+          callback: function (value, index) {
+            const label = actualLabels[index];
+            if (typeof label === "string" && label.length > 12) {
+              const words = label.split(" ");
+              const lines = [];
+              let currentLine = "";
+              for (const word of words) {
+                if (!currentLine) {
+                  currentLine = word;
+                } else if ((currentLine + " " + word).length > 12) {
+                  lines.push(currentLine);
+                  currentLine = word;
+                } else {
+                  currentLine += " " + word;
+                }
+              }
+              if (currentLine) lines.push(currentLine);
+              return lines;
+            }
+            return label;
+          }
+        },
       },
       y: {
         border: { display: false },
@@ -153,7 +177,6 @@ function ChartCard({ card, onContinue }) {
 
   return (
     <div className="ch-root" onClick={() => setActiveTermIndex(null)}>
-      {card_label && <div className="ch-card-label">{card_label}</div>}
       
       <h2 className="ch-title">{title}</h2>
       

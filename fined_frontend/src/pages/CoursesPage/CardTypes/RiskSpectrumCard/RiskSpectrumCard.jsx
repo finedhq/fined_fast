@@ -29,7 +29,6 @@ function RiskSpectrumCard({ card, onContinue }) {
 
   return (
     <div className="rr-root">
-      {card_label && <div className="rs-card-label">{card_label}</div>}
       {title && <h2 className="rr-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
       {body_text && <p className="rr-body" dangerouslySetInnerHTML={{ __html: parseBoldText(body_text) }}></p>}
 

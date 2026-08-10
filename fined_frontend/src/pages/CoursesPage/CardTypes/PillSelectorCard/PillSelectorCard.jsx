@@ -98,7 +98,6 @@ function PillSelectorCard({ card, onContinue }) {
 
   return (
     <div className="ps-root">
-      {card_label && <div className="ps-card-label">{card_label}</div>}
       {title && <h2 className="ps-title" dangerouslySetInnerHTML={{ __html: parseBoldText(title) }}></h2>}
       {body_text && <p className="ps-body" dangerouslySetInnerHTML={{ __html: parseBoldText(body_text) }}></p>}
 

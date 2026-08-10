@@ -45,7 +45,6 @@ function CinematicCard({ card, onContinue }) {
 
   return (
     <div className="cc-root">
-      {card_label && <div className="cc-card-label">{card_label}</div>}
       <div className="cc-lines">
         {lines.map((line, i) => (
           <p

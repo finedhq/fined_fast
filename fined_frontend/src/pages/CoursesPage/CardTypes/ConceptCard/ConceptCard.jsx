@@ -44,7 +44,6 @@ function ConceptCard({ card, onContinue }) {
 
   return (
     <div className="conc-root" onClick={() => setActiveTermIndex(null)}>
-      {card_label && <div className="conc-card-label">{card_label}</div>}
       
       {title && <h2 className="conc-title">{title}</h2>}
 

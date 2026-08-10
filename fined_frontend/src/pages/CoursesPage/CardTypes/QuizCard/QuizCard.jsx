@@ -34,7 +34,6 @@ function QuizCard({ card, onContinue }) {
 
   return (
     <div className="quiz-root">
-      {card_label && <div className="quiz-card-label">{card_label}</div>}
       <h2 className="quiz-title">{title}</h2>
       
       <div className="quiz-question" dangerouslySetInnerHTML={{ __html: parseBoldText(question) }}>

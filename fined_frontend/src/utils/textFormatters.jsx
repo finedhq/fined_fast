@@ -21,15 +21,23 @@ export function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIn
   glossaryTerms.forEach((gTerm, termIdx) => {
     const newElements = [];
     const termRegex = new RegExp(`\\b(${gTerm.term})\\b`, "i");
+    let hasMatched = false;
 
     elements.forEach((el) => {
       if (typeof el !== "string") {
         newElements.push(el);
         return;
       }
+      
+      if (hasMatched) {
+        newElements.push(el);
+        return;
+      }
+
       const parts = el.split(termRegex);
       parts.forEach((part) => {
-        if (part.toLowerCase() === gTerm.term.toLowerCase()) {
+        if (!hasMatched && part.toLowerCase() === gTerm.term.toLowerCase()) {
+          hasMatched = true;
           const termKey = (customPrefix !== "" && customPrefix !== undefined && customPrefix !== null) ? `${customPrefix}-${termIdx}` : termIdx;
           const isActive = activeTermIndex === termKey;
           newElements.push(

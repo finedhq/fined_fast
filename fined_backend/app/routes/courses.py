@@ -238,7 +238,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             "ongoing_module_id": module_id,
             "ongoing_course_id": course_id
         }).eq("email", user.email).execute())
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title").eq("course_id", course_id).order("order_index").execute())
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, order_index").eq("course_id", course_id).order("order_index").execute())
         
         all_cards = cards_res.data or []
         current_index = next((i for i, c in enumerate(all_cards) if c["card_id"] == card_id), -1)
@@ -252,6 +252,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
         modules = modules_res.data or []
         module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
         current_module_title = modules[module_index]["title"] if module_index != -1 else None
+        current_module_order = modules[module_index]["order_index"] if module_index != -1 else 0
         
         prev_module = modules[module_index - 1] if module_index > 0 else None
         next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
@@ -287,6 +288,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             "nextCardSlug": all_cards[current_index + 1].get("slug") if current_index < len(all_cards) - 1 else None,
             "module_total_cards": len(all_cards),
             "module_title": current_module_title,
+            "module_order_index": current_module_order,
             "module_progress": current_card.get("order_index", 0),
             "isFirstCardInModule": current_index == 0,
             "isLastCardInModule": current_index == len(all_cards) - 1,

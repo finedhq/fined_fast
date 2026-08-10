@@ -95,7 +95,10 @@ function CardViewer() {
       </div>
       <div className="cv-top-section">
         <div className="cv-header">
-          <span className="cv-module-name">{card?.module_title || "Module"}</span>
+          <span className="cv-module-name">
+            {card?.module_order_index ? `Module ${card.module_order_index}: ` : ""}
+            {card?.module_title || "Module"}
+          </span>
           <span className="cv-progress-fraction">
             {current}/{total}
           </span>
