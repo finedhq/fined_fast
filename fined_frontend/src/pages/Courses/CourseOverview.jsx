@@ -3,6 +3,7 @@ import instance from "../../lib/axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router-dom";
 import RevealOnScroll from "../../components/RevealOnScroll";
+import CertificateGenerator from "../../components/Certificate/CertificateGenerator";
 import "./CourseOverview.css";
 
 
@@ -46,6 +47,8 @@ export default function CourseOverview() {
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const certificateRef = useRef(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -93,6 +96,14 @@ export default function CourseOverview() {
 
   const totalModulesCount = course.length;
   const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
+
+  const handleDownloadCertificate = async () => {
+    if (certificateRef.current) {
+      setIsDownloading(true);
+      await certificateRef.current.downloadPDF();
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="course-overview-page">
@@ -321,6 +332,53 @@ export default function CourseOverview() {
 
           {/* Sidebar */}
           <div className="course-sidebar">
+            {/* Certificate Button (Only if course is completed) */}
+            {completedModulesCount > 0 && completedModulesCount === totalModulesCount && (
+              <RevealOnScroll delay={50}>
+                <div className="sidebar-card certificate-card" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: 'white', border: 'none' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '2.5rem' }}>🏆</span>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Course Completed!</h3>
+                    <p style={{ color: '#e0e7ff', fontSize: '0.875rem', marginBottom: '0.5rem' }}>You've mastered all modules in this course.</p>
+                    <button 
+                      onClick={handleDownloadCertificate}
+                      disabled={isDownloading}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        backgroundColor: 'white',
+                        color: '#4338ca',
+                        fontWeight: 'bold',
+                        borderRadius: '0.75rem',
+                        border: 'none',
+                        cursor: isDownloading ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      {isDownloading ? (
+                        <>
+                          <div style={{ width: '1.25rem', height: '1.25rem', border: '2px solid #4338ca', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '1.25rem', height: '1.25rem' }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                          </svg>
+                          Download Certificate
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </RevealOnScroll>
+            )}
+
             {/* FinScore Card */}
             <RevealOnScroll delay={100}>
               <div className="sidebar-card">
@@ -412,6 +470,12 @@ export default function CourseOverview() {
           </div>
         </div>
       )}
+
+      <CertificateGenerator 
+        ref={certificateRef} 
+        userName={user?.name || user?.nickname || "Student"} 
+        courseName={courseTitle} 
+      />
     </div>
   );
 }
