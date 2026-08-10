@@ -340,6 +340,22 @@
   z-index: 50;
 }
 
+@media (min-width: 1024px) {
+  .pop-left .module-hover-card {
+    transform: translateX(-75%) scale(0.95);
+  }
+  .pop-left:hover .module-hover-card {
+    transform: translateX(-75%) scale(1);
+  }
+
+  .pop-right .module-hover-card {
+    transform: translateX(-25%) scale(0.95);
+  }
+  .pop-right:hover .module-hover-card {
+    transform: translateX(-25%) scale(1);
+  }
+}
+
 .module-node:hover .module-base-label {
   opacity: 0;
 }
