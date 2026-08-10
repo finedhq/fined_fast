@@ -3,15 +3,15 @@ import "./InteractiveCard.css";
 import { parseBoldText } from "../../../../utils/textFormatters";
 
 function InteractiveCard({ card, onContinue }) {
-  const { 
+  const {
     card_label,
-    title = "", 
-    intro_text = "", 
-    items = [], 
-    variant = "list", 
-    button_text = "" 
+    title = "",
+    intro_text = "",
+    items = [],
+    variant = "list",
+    button_text = ""
   } = card?.card_data || {};
-  
+
   const [activeIndex, setActiveIndex] = useState(0);
   const activeItem = items[activeIndex];
 
@@ -25,7 +25,7 @@ function InteractiveCard({ card, onContinue }) {
           <div className={`ie-tabs ${variant === "grid" ? "ie-tabs-grid" : "ie-tabs-list"}`}>
             {items.map((item, idx) => {
               const isActive = activeIndex === idx;
-              
+
               if (variant === "grid") {
                 return (
                   <button
@@ -49,8 +49,8 @@ function InteractiveCard({ card, onContinue }) {
                 >
                   <div className="ie-tab-name" dangerouslySetInnerHTML={{ __html: parseBoldText(item.label) }}></div>
                   {item.value && (
-                    <div 
-                      className="ie-tab-value-right" 
+                    <div
+                      className="ie-tab-value-right"
                       style={item.value_color ? { color: item.value_color } : {}}
                       dangerouslySetInnerHTML={{ __html: parseBoldText(item.value) }}
                     >
@@ -60,7 +60,7 @@ function InteractiveCard({ card, onContinue }) {
               );
             })}
           </div>
-          
+
           <div className="ie-content-pane">
             {activeItem?.content_title && <h3 className="ie-content-title" dangerouslySetInnerHTML={{ __html: parseBoldText(activeItem.content_title) }}></h3>}
             {/* fallback to title just in case older schema is used */}

@@ -44,7 +44,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
 }
 
 /* === GRID VARIANT === */
@@ -75,7 +75,7 @@
 .ie-tab-tile:hover {
   background: #f3f4f6;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .ie-tab-tile.active {
@@ -89,7 +89,7 @@
   line-height: 1;
 }
 
-.ie-tab-tile .ie-tab-name {
+.ie-tab-name {
   font-size: 1.02rem;
   font-weight: 700;
   color: #374151;
@@ -105,46 +105,66 @@
   font-weight: 500;
 }
 
-/* === LIST VARIANT === */
+/* === LIST VARIANT (Premium) === */
 .ie-tabs-list {
   display: flex;
   flex-direction: column;
+  gap: 12px;
   border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
 }
 
 .ie-tab-row {
   background: #ffffff;
-  border: none;
-  border-bottom: 1px solid #f3f4f6;
-  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 20px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-family: inherit;
-}
-
-.ie-tab-row:last-child {
-  border-bottom: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .ie-tab-row:hover {
-  background: #f9fafb;
+  transform: translateX(4px);
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .ie-tab-row.active {
-  background: rgba(74, 58, 255, 0.05);
-  border-left: 4px solid #4A3AFF;
-  padding-left: 12px; /* compensate for border */
+  background: rgba(74, 58, 255, 0.04);
+  border-color: rgba(74, 58, 255, 0.3);
+  transform: translateX(8px);
+  box-shadow: 0 4px 16px rgba(74, 58, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+/* Glowing left bar that animates in */
+.ie-tab-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #4A3AFF;
+  transform: scaleY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.ie-tab-row.active::before {
+  transform: scaleY(1);
 }
 
 .ie-tab-row .ie-tab-name {
   font-size: 1.14rem;
   font-weight: 600;
   color: #111827;
+  transition: color 0.2s;
 }
 
 .ie-tab-row.active .ie-tab-name {
@@ -154,18 +174,23 @@
 .ie-tab-value-right {
   font-size: 1.14rem;
   font-weight: 700;
-  color: #4b5563; /* Can be overridden inline */
+  color: #4b5563;
 }
 
 /* === CONTENT PANE === */
 .ie-content-pane {
-  padding: 12px 8px;
-  animation: fadeIn 0.3s ease-in-out;
+  margin-top: 8px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  animation: contentFade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes contentFade {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .ie-content-title {
@@ -211,7 +236,8 @@
   color: #ffffff;
   border: none;
   padding: 14px 24px;
-  border-radius: 9999px; /* pill shape */
+  border-radius: 9999px;
+  /* pill shape */
   font-size: 1.26rem;
   font-weight: 600;
   cursor: pointer;
@@ -261,15 +287,18 @@
 }
 
 .metric-box.good .metric-val {
-  color: #10b981; /* emerald-500 */
+  color: #10b981;
+  /* emerald-500 */
 }
 
 .metric-box.mid .metric-val {
-  color: #f59e0b; /* amber-500 */
+  color: #f59e0b;
+  /* amber-500 */
 }
 
 .metric-box.low .metric-val {
-  color: #6b7280; /* gray-500 */
+  color: #6b7280;
+  /* gray-500 */
 }
 
 @media (max-width: 480px) {
