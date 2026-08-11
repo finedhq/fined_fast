@@ -16,6 +16,7 @@ export const EMPTY_PILL_SELECTOR_DATA = {
     }
   ],
   cta_text: "Continue",
+  allotted_finstars: 3,
 };
 
 function PillSelectorFields({ data, onChange }) {
@@ -193,6 +194,16 @@ function PillSelectorFields({ data, onChange }) {
           onChange={(e) => handleChange("cta_text", e.target.value)}
           placeholder="e.g. Continue →"
           required
+        />
+      </label>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={data.allotted_finstars ?? 3}
+          onChange={(e) => handleChange("allotted_finstars", Number(e.target.value))}
         />
       </label>
     </>

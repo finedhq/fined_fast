@@ -5,6 +5,23 @@ import { getCard, updateCard } from "../../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import "./CardViewer.css";
 
+// Lightweight FinStar toast — no external dependency needed
+function showStarToast(count) {
+  const el = document.createElement("div");
+  el.textContent = `⭐ +${count} FinStar${count !== 1 ? "s" : ""} earned!`;
+  el.style.cssText = [
+    "position:fixed", "bottom:80px", "left:50%", "transform:translateX(-50%)",
+    "background:#1a1a2e", "color:#f0c040", "font-weight:700",
+    "padding:10px 22px", "border-radius:999px", "font-size:0.95rem",
+    "box-shadow:0 4px 20px rgba(0,0,0,0.4)", "z-index:9999",
+    "transition:opacity 0.4s", "opacity:1", "pointer-events:none"
+  ].join(";");
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; }, 1800);
+  setTimeout(() => { el.remove(); }, 2300);
+}
+
+
 function CardViewer() {
   const { courseSlug, moduleSlug, cardSlug } = useParams();
   const navigate = useNavigate();
@@ -39,9 +56,17 @@ function CardViewer() {
     };
   }, [courseSlug, moduleSlug, cardSlug, email]);
 
-  const handleContinue = async () => {
+  const handleContinue = async (userAnswer = null, finStarsEarned = 0) => {
     try {
-      await updateCard(courseSlug, moduleSlug, cardSlug, { status: "completed", email });
+      await updateCard(courseSlug, moduleSlug, cardSlug, {
+        status: "completed",
+        email,
+        finStars: finStarsEarned || 0,
+        userAnswer: userAnswer || null,
+      });
+      if (finStarsEarned > 0) {
+        showStarToast(finStarsEarned);
+      }
     } catch {
       // Non-blocking — navigation should not stall on a logging failure
     }

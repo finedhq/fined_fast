@@ -6,6 +6,7 @@ export const EMPTY_RISK_SPECTRUM_DATA = {
   body_text: "",
   highlight_line: "",
   cta_text: "What's right for me?",
+  allotted_finstars: 2,
   dots: [
     { id: "1", label: "FD", position_pct: 10, color: "blue", title: "🏦 Fixed Deposits", desc: "", return_text: "7-8%", risk_text: "Very Low" },
     { id: "2", label: "Equities", position_pct: 90, color: "red", title: "📈 Equities", desc: "", return_text: "12-15%", risk_text: "High" }
@@ -197,6 +198,16 @@ function RiskSpectrumFields({ data, onChange }) {
           onChange={(e) => handleChange("cta_text", e.target.value)}
           placeholder="e.g. Continue →"
           required
+        />
+      </label>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={data.allotted_finstars ?? 2}
+          onChange={(e) => handleChange("allotted_finstars", Number(e.target.value))}
         />
       </label>
     </>

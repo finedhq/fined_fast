@@ -3,9 +3,10 @@ export const EMPTY_CONCEPT_DATA = {
   explanation: "",
   example: "",
   key_takeaway: "",
+  allotted_finstars: 2,
 };
 function ConceptFields({ data, onChange }) {
-  const { title, explanation, example, key_takeaway } = data;
+  const { title, explanation, example, key_takeaway, allotted_finstars = 2 } = data;
   return (
     <>
       <label>
@@ -45,6 +46,15 @@ function ConceptFields({ data, onChange }) {
           onChange={(e) => onChange({ ...data, key_takeaway: e.target.value })}
           placeholder="One-sentence summary..."
           style={{ marginTop: "8px" }}
+        />
+      </label>
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={allotted_finstars}
+          onChange={(e) => onChange({ ...data, allotted_finstars: Number(e.target.value) })}
         />
       </label>
     </>

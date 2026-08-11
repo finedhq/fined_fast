@@ -6,10 +6,11 @@ export const EMPTY_SCENARIO_DATA = {
   ],
   reflection_question: "",
   reflection_options: ["", ""],
+  allotted_finstars: 3,
 };
 
 function ScenarioFields({ data, onChange }) {
-  const { intro_text, stages, reflection_question, reflection_options } = data;
+  const { intro_text, stages, reflection_question, reflection_options, allotted_finstars = 3 } = data;
 
   const updateStage = (stageIdx, field, value) => {
     onChange({
@@ -209,6 +210,16 @@ function ScenarioFields({ data, onChange }) {
           + Add Option
         </button>
       </fieldset>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={allotted_finstars}
+          onChange={(e) => onChange({ ...data, allotted_finstars: Number(e.target.value) })}
+        />
+      </label>
     </>
   );
 }

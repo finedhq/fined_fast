@@ -12,6 +12,7 @@ function PillSelectorCard({ card, onContinue }) {
     base_allocation = {},
     groups = [],
     cta_text = "Continue",
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   // State to hold the selected option 'value' for each group
@@ -150,7 +151,7 @@ function PillSelectorCard({ card, onContinue }) {
         ⚠ Illustrative only — not personalised financial advice. Actual allocation should be decided with a SEBI-registered financial advisor.
       </p>
 
-      <button className="ps-btn-primary" onClick={onContinue}>
+      <button className="ps-btn-primary" onClick={() => onContinue(null, allotted_finstars)}>
         {cta_text} →
       </button>
     </div>

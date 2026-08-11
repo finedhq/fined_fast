@@ -47,7 +47,7 @@ function CompletionCard({ card, onContinue }) {
       )}
 
       <div className="comp-actions">
-        <button className="comp-btn-primary" onClick={onContinue}>
+        <button className="comp-btn-primary" onClick={() => onContinue()}>
           {cta_text}
         </button>
       </div>

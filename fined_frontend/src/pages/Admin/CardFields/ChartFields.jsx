@@ -23,10 +23,11 @@ export const EMPTY_CHART_DATA = {
     { term: "CAGR", definition: "Compound Annual Growth Rate — the smooth annual growth rate of an investment over a period.", example: "₹1 lakh growing to ₹17.4 lakh in 25 years = ~12% CAGR." }
   ],
   cta_text: "Understood — but how do I spread the risk? →",
+  allotted_finstars: 2,
 };
 
 function ChartFields({ data, onChange }) {
-  const { title, body_text_top, labels = [], datasets = [], chart_caption, stat_chips = [], body_text_bottom, glossary_terms = [], cta_text } = data;
+  const { title, body_text_top, labels = [], datasets = [], chart_caption, stat_chips = [], body_text_bottom, glossary_terms = [], cta_text, allotted_finstars = 2 } = data;
 
   const handleChange = (field, value) => onChange({ ...data, [field]: value });
 
@@ -154,6 +155,16 @@ function ChartFields({ data, onChange }) {
       <label>
         CTA Button Text
         <input type="text" value={cta_text} onChange={(e) => handleChange("cta_text", e.target.value)} required />
+      </label>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={allotted_finstars}
+          onChange={(e) => handleChange("allotted_finstars", Number(e.target.value))}
+        />
       </label>
     </>
   );

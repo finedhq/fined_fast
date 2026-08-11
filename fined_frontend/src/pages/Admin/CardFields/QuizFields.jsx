@@ -10,10 +10,11 @@ export const EMPTY_QUIZ_DATA = {
   ],
   explanation: "",
   cta_text: "Continue",
+  allotted_finstars: 10,
 };
 
 function QuizFields({ data, onChange }) {
-  const { title, question, options = [], explanation, cta_text } = data;
+  const { title, question, options = [], explanation, cta_text, allotted_finstars = 10 } = data;
 
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
@@ -136,6 +137,16 @@ function QuizFields({ data, onChange }) {
           onChange={(e) => handleChange("cta_text", e.target.value)}
           placeholder="e.g. Complete this module →"
           required
+        />
+      </label>
+
+      <label>
+        FinStars awarded (correct answer only)
+        <input
+          type="number"
+          min={0}
+          value={allotted_finstars}
+          onChange={(e) => handleChange("allotted_finstars", Number(e.target.value))}
         />
       </label>
     </>

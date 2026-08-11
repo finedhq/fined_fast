@@ -30,7 +30,8 @@ class CinematicCardData(BaseModel):
     lines: list[CinematicLine] = Field(min_length=2, max_length=5)
     tagline: str
     cta_text: str = "Continue"
-    finstars: int = Field(ge=0, default=0)
+    finstars: int = Field(ge=0, default=0)          # module-start teaser (cosmetic)
+    allotted_finstars: int = Field(ge=0, default=0)  # actual stars awarded on completion
 
 class ScenarioCardData(BaseModel):
     card_type: Literal["scenario"] = "scenario"
@@ -42,6 +43,7 @@ class ScenarioCardData(BaseModel):
     reflection_label: Optional[str] = None
     reflection_options: list[str] = Field(min_length=2, max_length=5, default_factory=list)
     callouts: list["Callout"] = Field(default_factory=list)
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class RiskSpectrumDot(BaseModel):
     id: str  # internal identifier
@@ -61,6 +63,7 @@ class RiskSpectrumCardData(BaseModel):
     dots: list[RiskSpectrumDot] = Field(min_length=2, max_length=7)
     highlight_line: Optional[str] = None
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class SliderCalculatorCardData(BaseModel):
     card_type: Literal["slider_calculator"] = "slider_calculator"
@@ -74,6 +77,7 @@ class SliderCalculatorCardData(BaseModel):
     comparison_rate: Optional[float] = None
     highlight_line: Optional[str] = None
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class OutputCategory(BaseModel):
     id: str
@@ -107,6 +111,7 @@ class PillSelectorCardData(BaseModel):
     base_allocation: dict[str, int]
     groups: list[PillGroup]
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class QuizOption(BaseModel):
     id: str
@@ -121,6 +126,7 @@ class QuizCardData(BaseModel):
     options: list[QuizOption] = Field(min_length=2, max_length=5)
     explanation: str
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class ChartDataset(BaseModel):
     label: str
@@ -153,6 +159,7 @@ class ChartCardData(BaseModel):
     value_suffix: Optional[str] = None
     glossary_terms: list[ScenarioGlossaryTerm] = Field(default_factory=list)
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class ConceptReason(BaseModel):
     icon: str
@@ -248,6 +255,7 @@ class ConceptCardData(BaseModel):
     callouts: list[Callout] = Field(default_factory=list)
     glossary_terms: list[ScenarioGlossaryTerm] = Field(default_factory=list)
     cta_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class ExplorerItem(BaseModel):
     label: str
@@ -265,6 +273,7 @@ class InteractiveCardData(BaseModel):
     variant: Literal["list", "grid"] = "list"
     items: list[ExplorerItem] = Field(min_length=2, max_length=6)
     button_text: str = "Continue"
+    allotted_finstars: int = Field(ge=0, default=0)
 
 class NextModuleTeaser(BaseModel):
     label: str = "Up next"

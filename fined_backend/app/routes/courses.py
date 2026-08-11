@@ -221,7 +221,9 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
         
-        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_slug).execute())
+        if not card_res.data:
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res.data[0]["card_id"]
@@ -278,8 +280,41 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             if next_cards:
                 next_module_first_card = {"moduleId": next_module["id"], "moduleSlug": next_module.get("slug"), "cardId": next_cards[0]["card_id"], "cardSlug": None}
                 
+        # For completion cards: compute the user's actual earned FinStars for this module
+        card_data_dict = current_card.get("card_data") or {}
+        if current_card.get("card_template") == "completion":
+            try:
+                # Fetch completed cards in this module for the user
+                completed_res = await asyncio.to_thread(lambda: supabase.from_("userCourses")
+                    .select("card_id, user_answer")
+                    .match({"email": user.email, "module_id": module_id, "progress_type": "card", "status": "completed"})
+                    .execute())
+                completed_map = {row["card_id"]: row.get("user_answer") for row in (completed_res.data or [])}
+
+                # Sum allotted_finstars from card_data for those completed cards
+                earned = 0
+                for c in all_cards:
+                    if c["card_id"] in completed_map:
+                        cd = c.get("card_data") or {}
+                        finstars = cd.get("allotted_finstars", 0)
+                        
+                        if cd.get("card_type") == "quiz":
+                            user_ans = completed_map[c["card_id"]]
+                            opts = cd.get("options", [])
+                            is_correct = any(opt.get("id") == user_ans and opt.get("is_correct") for opt in opts)
+                            if not is_correct:
+                                finstars = 0
+                                
+                        earned += finstars
+
+                # Inject real total into card_data (overrides the admin-set static value)
+                card_data_dict = {**card_data_dict, "total_finstars": earned}
+            except Exception:
+                pass  # Silently fall back to whatever is stored in card_data
+
         return {
             **current_card,
+            "card_data": card_data_dict,
             "status": user_progress.get("status", "incompleted"),
             "userAnswer": user_progress.get("user_answer"),
             "prevCardId": all_cards[current_index - 1]["card_id"] if current_index > 0 else None,
@@ -328,7 +363,9 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
         
-        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
+        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_id).execute())
+        if not card_res_id.data:
+            card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
         if not card_res_id.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res_id.data[0]["card_id"]
@@ -381,9 +418,10 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             }
             await asyncio.to_thread(lambda: supabase.from_("userCourses").insert([payload_insert]).execute())
             
-        # 3. Update stars if earned
-        current_stars = db_user.get("fin_stars") or 0
-        if body.finStars:
+        # 3. Update stars if earned (and only if first time completing)
+        was_already_completed = existing_progress and existing_progress.get("status") == "completed"
+        if body.finStars and body.status == "completed" and not was_already_completed:
+            current_stars = db_user.get("fin_stars") or 0
             current_stars += body.finStars
             await asyncio.to_thread(lambda: supabase.from_("users").update({"fin_stars": current_stars}).eq("email", user.email).execute())
             
@@ -453,17 +491,19 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             answers_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("user_answer, card_id").match({"email": user.email, "course_id": course_id, "progress_type": "card"}).execute())
             keys_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, card_data").in_("module_id", module_ids).execute())
             
-            correct_map = {
-                c["card_id"]: c["card_data"].get("correct_answer").strip().lower() 
-                for c in (keys_res.data or []) 
-                if c.get("card_data") and c["card_data"].get("correct_answer")
-            }
+            correct_map = {}
+            for c in (keys_res.data or []):
+                cd = c.get("card_data") or {}
+                if cd.get("card_type") == "quiz":
+                    correct_opt = next((opt["id"] for opt in cd.get("options", []) if opt.get("is_correct")), None)
+                    if correct_opt:
+                        correct_map[c["card_id"]] = correct_opt
             
             correct = 0
             total = 0
             for row in (answers_res.data or []):
                 card_id_ref = row["card_id"]
-                user_ans = (row.get("user_answer") or "").strip().lower()
+                user_ans = (row.get("user_answer") or "").strip()
                 if card_id_ref in correct_map:
                     total += 1
                     if user_ans == correct_map[card_id_ref]:

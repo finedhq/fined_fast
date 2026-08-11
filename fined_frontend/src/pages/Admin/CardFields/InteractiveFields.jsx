@@ -4,7 +4,8 @@ export const EMPTY_INTERACTIVE_DATA = {
   items: [
     { label: "Item 1", title: "", content: "", icon: "📌" },
     { label: "Item 2", title: "", content: "", icon: "📌" }
-  ]
+  ],
+  allotted_finstars: 2,
 };
 function InteractiveFields({ data, onChange }) {
   const { title, intro_text, items = [] } = data;
@@ -104,6 +105,16 @@ function InteractiveFields({ data, onChange }) {
           + Add Item
         </button>
       </fieldset>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={data.allotted_finstars ?? 2}
+          onChange={(e) => onChange({ ...data, allotted_finstars: Number(e.target.value) })}
+        />
+      </label>
     </>
   );
 }

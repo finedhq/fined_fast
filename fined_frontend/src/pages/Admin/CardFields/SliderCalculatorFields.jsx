@@ -10,6 +10,7 @@ export const EMPTY_SLIDER_CALCULATOR_DATA = {
   default_expected_return: 12.0,
   highlight_line: "",
   cta_text: "Continue",
+  allotted_finstars: 2,
 };
 
 function SliderCalculatorFields({ data, onChange }) {
@@ -160,6 +161,16 @@ function SliderCalculatorFields({ data, onChange }) {
           onChange={(e) => handleChange("cta_text", e.target.value)}
           placeholder="e.g. Continue →"
           required
+        />
+      </label>
+
+      <label>
+        FinStars awarded on completion
+        <input
+          type="number"
+          min={0}
+          value={data.allotted_finstars ?? 2}
+          onChange={(e) => onChange({ ...data, allotted_finstars: Number(e.target.value) })}
         />
       </label>
     </>

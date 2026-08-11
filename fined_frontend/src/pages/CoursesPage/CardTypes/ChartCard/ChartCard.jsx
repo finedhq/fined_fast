@@ -77,6 +77,7 @@ function ChartCard({ card, onContinue }) {
     highlight_line,
     glossary_terms = [],
     cta_text = "Continue",
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   const [activeTermIndex, setActiveTermIndex] = useState(null);
@@ -310,7 +311,7 @@ function ChartCard({ card, onContinue }) {
         );
       })()}
 
-      <button className="ch-btn-primary" onClick={onContinue}>
+      <button className="ch-btn-primary" onClick={() => onContinue(null, allotted_finstars)}>
         {cta_text}
       </button>
     </div>

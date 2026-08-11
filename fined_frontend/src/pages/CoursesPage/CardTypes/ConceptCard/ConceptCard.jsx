@@ -33,6 +33,7 @@ function ConceptCard({ card, onContinue }) {
     callouts = [],
     glossary_terms = [],
     cta_text = "Continue",
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   const actualBodyText1 = body_text_1 || explanation;
@@ -284,7 +285,7 @@ function ConceptCard({ card, onContinue }) {
         </div>
       )}
 
-      <button className="conc-continue-btn" onClick={onContinue}>
+      <button className="conc-continue-btn" onClick={() => onContinue(null, allotted_finstars)}>
         {cta_text}
       </button>
     </div>

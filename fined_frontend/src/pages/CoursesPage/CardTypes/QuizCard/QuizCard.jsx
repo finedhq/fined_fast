@@ -10,6 +10,7 @@ function QuizCard({ card, onContinue }) {
     options = [],
     explanation = "",
     cta_text = "Continue",
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   const [selectedOptionId, setSelectedOptionId] = useState(null);
@@ -31,6 +32,8 @@ function QuizCard({ card, onContinue }) {
     const selectedOpt = options.find((o) => o.id === selectedOptionId);
     return selectedOpt?.is_correct || false;
   };
+
+  const starsEarned = isAnsweredCorrectly() ? allotted_finstars : 0;
 
   return (
     <div className="quiz-root">
@@ -59,9 +62,11 @@ function QuizCard({ card, onContinue }) {
             {isAnsweredCorrectly() ? "✅ Correct" : "❌ Incorrect"}
           </div>
           <p dangerouslySetInnerHTML={{ __html: parseBoldText(explanation) }}></p>
-          <div className="quiz-finstars-reward">⭐ +10 FinStars earned</div>
+          {starsEarned > 0 && (
+            <div className="quiz-finstars-reward">⭐ +{starsEarned} FinStar{starsEarned !== 1 ? "s" : ""} earned</div>
+          )}
           
-          <button className="quiz-btn-primary" onClick={onContinue} style={{ marginTop: "16px" }}>
+          <button className="quiz-btn-primary" onClick={() => onContinue(selectedOptionId, starsEarned)} style={{ marginTop: "16px" }}>
             {cta_text} →
           </button>
         </div>

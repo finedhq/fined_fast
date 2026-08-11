@@ -9,7 +9,8 @@ function InteractiveCard({ card, onContinue }) {
     intro_text = "",
     items = [],
     variant = "list",
-    button_text = ""
+    button_text = "",
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -70,7 +71,7 @@ function InteractiveCard({ card, onContinue }) {
         </div>
       )}
 
-      <button className="ie-continue-btn" onClick={onContinue}>
+      <button className="ie-continue-btn" onClick={() => onContinue(null, allotted_finstars)}>
         {button_text || "Continue"}
       </button>
     </div>

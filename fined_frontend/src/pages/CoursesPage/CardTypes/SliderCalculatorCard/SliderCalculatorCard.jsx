@@ -20,6 +20,7 @@ function SliderCalculatorCard({ card, onContinue }) {
     default_investment_period = 10,
     default_expected_return = 12.0,
     comparison_rate = null,
+    allotted_finstars = 0,
   } = card?.card_data || {};
 
   const [activeTermIndex, setActiveTermIndex] = useState(null);
@@ -165,7 +166,7 @@ function SliderCalculatorCard({ card, onContinue }) {
         </div>
       )}
 
-      <button className="slider-btn-primary" onClick={onContinue}>
+      <button className="slider-btn-primary" onClick={() => onContinue(null, allotted_finstars)}>
         {cta_text} →
       </button>
     </div>

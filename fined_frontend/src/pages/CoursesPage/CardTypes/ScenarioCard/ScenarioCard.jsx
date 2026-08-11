@@ -23,7 +23,8 @@ function ScenarioCard({ card, onContinue }) {
     body_text = "",
     highlight_line = "",
     respond_label = "",
-    respond_options = []
+    respond_options = [],
+    allotted_finstars = 0,
   } = card?.card_data || {};
   
   const actualQuestion = reflection_label || reflection_question || respond_label;
@@ -117,13 +118,13 @@ function ScenarioCard({ card, onContinue }) {
           <p className="sc-reflection-q" dangerouslySetInnerHTML={{ __html: parseBoldText(actualQuestion) }}></p>
           <div className="sc-reflection-opts">
             {actualOptions.map((opt, idx) => (
-              <button key={idx} className="sc-btn-opt" onClick={onContinue} dangerouslySetInnerHTML={{ __html: parseBoldText(opt) }}>
+              <button key={idx} className="sc-btn-opt" onClick={() => onContinue(null, allotted_finstars || 0)} dangerouslySetInnerHTML={{ __html: parseBoldText(opt) }}>
               </button>
             ))}
           </div>
         </div>
       ) : (
-        <button className="sc-continue-btn" onClick={onContinue} dangerouslySetInnerHTML={{ __html: parseBoldText(cta_text) }}>
+        <button className="sc-continue-btn" onClick={() => onContinue(null, allotted_finstars || 0)} dangerouslySetInnerHTML={{ __html: parseBoldText(cta_text) }}>
         </button>
       )}
     </div>
