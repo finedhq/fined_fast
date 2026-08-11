@@ -1,10 +1,36 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { IoStarOutline, IoStar } from "react-icons/io5";
 import { RiShareForwardLine } from "react-icons/ri";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
+
+const renderTextWithLinks = (text) => {
+  if (typeof text !== "string") return text;
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    parts.push(
+      <Link key={match.index} to={match[2]} className="ar-internal-link">
+        {match[1]}
+      </Link>
+    );
+    lastIndex = regex.lastIndex;
+  }
+  
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+};
 
 const getParagraphs = (content = "") =>
   content.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
@@ -443,11 +469,11 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       {[1, 2, 3, 4, 5].map((star) => (
                         <div
                           key={star}
-                          style={{ 
-                            cursor: "pointer", 
-                            color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563", 
-                            fontSize: "22px", 
-                            display: "flex", 
+                          style={{
+                            cursor: "pointer",
+                            color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563",
+                            fontSize: "22px",
+                            display: "flex",
                             alignItems: "center",
                             transition: "color 0.2s"
                           }}
@@ -459,7 +485,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                         </div>
                       ))}
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
                         if (navigator.share) {
                           navigator.share({ title: article.title, url: window.location.href });
@@ -541,14 +567,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 if (block.level === 2) {
                   return (
                     <h2 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
-                      {block.text}
+                      {renderTextWithLinks(block.text)}
                     </h2>
                   );
                 }
                 if (block.level === 3) {
                   return (
                     <h3 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
-                      {block.text}
+                      {renderTextWithLinks(block.text)}
                     </h3>
                   );
                 }
@@ -559,7 +585,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     className="ar-p"
                     itemProp={i === 0 ? "articleBody" : undefined}
                   >
-                    {block.text}
+                    {renderTextWithLinks(block.text)}
                   </p>
                 );
               })}

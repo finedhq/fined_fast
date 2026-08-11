@@ -461,6 +461,15 @@
     position: sticky;
     top: 6rem; /* Account for navbar */
     align-self: flex-start;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .course-sidebar::-webkit-scrollbar {
+    display: none;
   }
 }
 
