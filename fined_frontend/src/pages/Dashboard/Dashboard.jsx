@@ -108,7 +108,7 @@ const Dashboard = () => {
           <RevealOnScroll delay={100}>
             <div className="dash-welcome-card">
               <div className="dash-welcome-content">
-                <h1 className="dash-greeting">Good Morning, {user?.name?.split(" ")[0] || "User"}! 👋</h1>
+                <h1 className="dash-greeting">Welcome Back, {user?.name?.split(" ")[0] || "User"}! 👋</h1>
                 <p className="dash-subtitle">Let's continue your journey towards financial freedom.</p>
 
                 <div className="dash-streak-pill">

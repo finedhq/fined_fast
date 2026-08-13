@@ -1,249 +1,471 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+/* Keep offscreen container for PDF generation */
 .cert-offscreen-container {
-  position: absolute;
+  position: fixed;
   top: -9999px;
   left: -9999px;
   opacity: 0;
   pointer-events: none;
 }
 
-.cert-container {
-  width: 1056px; /* 11 inches at 96 dpi */
-  height: 816px; /* 8.5 inches at 96 dpi */
-  background: #ffffff;
-  font-family: 'Inter', sans-serif;
-  box-sizing: border-box;
-  /* subtle border so it doesn't bleed if printed */
-  border: 1px solid #e5e7eb;
+/* =========================================================
+   CERTIFICATE
+   Original image ratio ≈ 1448 : 1086 = 4 : 3
+   ========================================================= */
+
+.certificate {
+    position: relative;
+    width: 1448px;
+    height: 1086px;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 2px;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.12);
+    color: #111827;
+    font-family: 'Montserrat', Arial, sans-serif;
+    box-sizing: border-box;
 }
 
-.cert-inner {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  background-color: #fafbfc; /* very light, slightly cool gray */
-  z-index: 1;
+.certificate * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* Background Shapes */
-.bg-shape {
-  position: absolute;
-  z-index: -1;
+/* =========================================================
+   INNER BORDER
+   ========================================================= */
+
+.certificate .inner-border {
+    position: absolute;
+    top: 1.45%;
+    left: 1.15%;
+    right: 1.15%;
+    bottom: 1.45%;
+    border: 1.5px solid #b8b2d1;
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 20;
 }
 
-/* Top Left */
-.top-left-blob {
-  top: -80px;
-  left: -80px;
-  width: 350px;
-  height: 280px;
-  background-color: #312270; /* dark purple */
-  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-  transform: rotate(-15deg);
-}
-.top-left-blob-outline {
-  top: -60px;
-  left: -60px;
-  width: 400px;
-  height: 320px;
-  border: 2px solid #F5A623; /* yellow */
-  border-radius: 45% 55% 65% 35% / 45% 45% 65% 55%;
-  transform: rotate(-10deg);
+/* =========================================================
+   TOP LEFT PURPLE DECORATION
+   ========================================================= */
+
+.certificate .top-left-purple {
+    position: absolute;
+    width: 25%;
+    height: 22%;
+    left: -2%;
+    top: -2%;
+    background: #4d258f;
+    border-bottom-right-radius: 85% 90%;
+    z-index: 1;
 }
 
-/* Top Right Blob */
-.top-right-blob {
-  top: -120px;
-  right: -120px;
-  width: 450px;
-  height: 450px;
-  background-color: #e9e5f4; /* light purple */
-  border-radius: 50% 50% 50% 50%;
+/* curved yellow line at top-left */
+.certificate .top-left-yellow-line {
+    position: absolute;
+    width: 32%;
+    height: 17%;
+    top: -1%;
+    left: -2%;
+    border-top: 2px solid #f4b51c;
+    border-radius: 50%;
+    transform: rotate(-8deg);
+    z-index: 3;
 }
 
-/* Hatching lines for top right */
-.top-right-hatching {
-  top: 50px;
-  right: 50px;
-  width: 160px;
-  height: 160px;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 12px,
-    #F5A623 12px,
-    #F5A623 14px
-  );
-  border-radius: 40% 50% 60% 40%;
-  transform: rotate(15deg);
+.certificate .top-left-yellow-line::after {
+    content: "";
+    position: absolute;
+    width: 45%;
+    height: 70%;
+    left: -9%;
+    top: 12%;
+    border-right: 2px solid #f4b51c;
+    border-radius: 50%;
 }
 
-/* Bottom Left */
-.bottom-left-blob {
-  bottom: -150px;
-  left: -150px;
-  width: 450px;
-  height: 400px;
-  background-color: #e9e5f4;
-  border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
-}
-.bottom-left-line {
-  bottom: 0px;
-  left: -20px;
-  width: 105%;
-  height: 250px;
-  border-top: 2px solid #312270;
-  border-radius: 50% 50% 0 0;
-  opacity: 0.6;
+/* =========================================================
+   TOP RIGHT LIGHT CURVE
+   ========================================================= */
+
+.certificate .top-right-circle {
+    position: absolute;
+    width: 22%;
+    height: 30%;
+    right: -5%;
+    top: -18%;
+    border: 2px solid #ded9ef;
+    border-radius: 50%;
+    z-index: 1;
 }
 
-/* Bottom Right */
-.bottom-right-blob {
-  bottom: -100px;
-  right: -80px;
-  width: 550px;
-  height: 300px;
-  background-color: #F5A623;
-  border-radius: 70% 30% 30% 70% / 70% 30% 30% 70%;
-  transform: rotate(-5deg);
-}
-.bottom-right-line {
-  bottom: 20px;
-  right: -50px;
-  width: 600px;
-  height: 350px;
-  border-top: 2px solid #312270;
-  border-radius: 60% 40% 30% 70% / 60% 40% 70% 30%;
-  transform: rotate(-15deg);
+.certificate .top-right-circle::after {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border: 1px solid #ded9ef;
+    border-radius: 50%;
 }
 
-/* Dot Patterns */
-.bg-dots {
-  position: absolute;
-  z-index: -1;
-  background-image: radial-gradient(#312270 25%, transparent 25%);
-  background-size: 24px 24px;
-  opacity: 0.4;
-}
-.top-left-dots {
-  top: 120px;
-  left: 120px;
-  width: 96px;
-  height: 96px;
-}
-.bottom-left-dots {
-  bottom: 120px;
-  left: 80px;
-  width: 120px;
-  height: 96px;
-  background-image: radial-gradient(#F5A623 25%, transparent 25%);
-}
-.bottom-right-dots {
-  bottom: 220px;
-  right: 180px;
-  width: 96px;
-  height: 72px;
+/* =========================================================
+   TOP RIGHT DIAGONAL GOLD LINES
+   ========================================================= */
+
+.certificate .gold-lines {
+    position: absolute;
+    width: 12%;
+    height: 20%;
+    top: 6%;
+    right: 2.5%;
+    z-index: 3;
+    transform: rotate(-7deg);
 }
 
-/* Main Content Overlay */
-.cert-content {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.certificate .gold-lines span {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: #f3b51b;
+    transform: rotate(-46deg);
 }
 
-/* Logo */
-.cert-logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 30px;
-}
-.cert-brand {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #312270;
-  margin-top: -5px;
-  letter-spacing: -0.5px;
-}
-.brand-highlight {
-  color: #F5A623;
+.certificate .gold-lines span:nth-child(1) { top: 0%; }
+.certificate .gold-lines span:nth-child(2) { top: 11%; }
+.certificate .gold-lines span:nth-child(3) { top: 22%; }
+.certificate .gold-lines span:nth-child(4) { top: 33%; }
+.certificate .gold-lines span:nth-child(5) { top: 44%; }
+.certificate .gold-lines span:nth-child(6) { top: 55%; }
+.certificate .gold-lines span:nth-child(7) { top: 66%; }
+.certificate .gold-lines span:nth-child(8) { top: 77%; }
+
+/* =========================================================
+   BOTTOM LEFT LAVENDER SHAPE
+   ========================================================= */
+
+.certificate .bottom-left-light {
+    position: absolute;
+    width: 23%;
+    height: 25%;
+    left: -3%;
+    bottom: -8%;
+    background: #eceaf6;
+    border-radius: 0 100% 0 0;
+    z-index: 1;
 }
 
-/* Titles */
-.cert-title-primary {
-  font-size: 3.2rem;
-  font-weight: 800;
-  color: #111827;
-  letter-spacing: 16px;
-  margin-bottom: 5px;
-  margin-left: 16px; /* offset the wide letter spacing so it's centered */
-}
-.cert-title-secondary {
-  font-size: 1.4rem;
-  font-weight: 400;
-  color: #4b5563;
-  letter-spacing: 10px;
-  margin-bottom: 25px;
-  margin-left: 10px;
-}
-.cert-separator-small {
-  width: 60px;
-  height: 2px;
-  background-color: #312270;
-  margin-bottom: 45px;
+.certificate .bottom-left-light::before {
+    content: "";
+    position: absolute;
+    width: 105%;
+    height: 110%;
+    left: 6%;
+    bottom: 8%;
+    border: 2px solid #d8d1eb;
+    border-radius: 0 100% 0 0;
 }
 
-/* Presentation */
-.cert-presented {
-  font-size: 1.3rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 15px;
-}
-.cert-name {
-  font-size: 3.5rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 0 0 30px 0;
-  padding: 0 100px 15px 100px;
-  border-bottom: 1px solid #d1d5db;
-}
-.cert-completed {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 15px;
-}
-.cert-course {
-  font-size: 2.4rem;
-  font-weight: 800;
-  color: #312270;
-  letter-spacing: 2px;
-  margin: 0 0 60px 0;
+/* =========================================================
+   BOTTOM RIGHT YELLOW SHAPE
+   ========================================================= */
+
+.certificate .bottom-right-yellow {
+    position: absolute;
+    width: 31%;
+    height: 26%;
+    right: -4%;
+    bottom: -8%;
+    background: #ffbd19;
+    border-radius: 90% 0 0 0;
+    z-index: 1;
 }
 
-/* Footer */
-.cert-footer-new {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* white curve above yellow */
+.certificate .bottom-right-curve {
+    position: absolute;
+    width: 34%;
+    height: 26%;
+    right: -3%;
+    bottom: 2%;
+    border-top: 2px solid #49268c;
+    border-radius: 70% 40% 0 0;
+    transform: rotate(-3deg);
+    z-index: 3;
 }
-.cert-date {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 5px;
+
+/* =========================================================
+   DOT GRIDS
+   ========================================================= */
+
+.certificate .dot-grid {
+    position: absolute;
+    display: grid;
+    grid-template-columns: repeat(3, 7px);
+    grid-template-rows: repeat(3, 7px);
+    gap: 13px;
+    z-index: 5;
 }
-.cert-date-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #9ca3af;
-  letter-spacing: 1px;
+
+.certificate .dot-grid span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4c2991;
+}
+
+/* top left dots */
+.certificate .dots-top-left {
+    left: 12%;
+    top: 13%;
+}
+
+/* bottom right dots */
+.certificate .dots-bottom-right {
+    right: 12%;
+    bottom: 12%;
+}
+
+/* bottom left gold dots */
+.certificate .dots-bottom-left {
+    left: 8%;
+    bottom: 8%;
+    grid-template-columns: repeat(4, 7px);
+    grid-template-rows: repeat(4, 7px);
+    gap: 13px;
+}
+
+.certificate .dots-bottom-left span {
+    background: #f3b51b;
+}
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.certificate .logo {
+    position: absolute;
+    top: 8.7%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    z-index: 10;
+    text-align: center;
+    border: none;
+    background: transparent;
+    padding: 0;
+    min-width: auto;
+    min-height: auto;
+}
+
+/* Logo icon */
+.certificate .logo-icon {
+    position: relative;
+    width: 92px;
+    height: 90px;
+    margin: 0 auto 1px auto;
+}
+
+/* graduation cap */
+.certificate .cap {
+    position: absolute;
+    width: 92px;
+    height: 33px;
+    top: 5px;
+    left: 0;
+    background: #4d258f;
+    clip-path: polygon(
+        50% 0%,
+        100% 45%,
+        51% 100%,
+        0% 45%
+    );
+}
+
+/* yellow book/screen */
+.certificate .logo-book {
+    position: absolute;
+    width: 46px;
+    height: 53px;
+    left: 28px;
+    top: 27px;
+    background: #f4b21b;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+/* purple lower page */
+.certificate .logo-book::after {
+    content: "";
+    position: absolute;
+    width: 27px;
+    height: 26px;
+    left: 0;
+    bottom: 0;
+    background: #4d258f;
+    clip-path: polygon(
+        0 100%,
+        100% 100%,
+        100% 0,
+        48% 30%
+    );
+}
+
+/* rupee symbol */
+.certificate .rupee {
+    position: absolute;
+    left: 36px;
+    top: 34px;
+    font-size: 25px;
+    color: #ffffff;
+    font-weight: 700;
+    z-index: 3;
+}
+
+/* cap tassel */
+.certificate .tassel {
+    position: absolute;
+    left: 11px;
+    top: 35px;
+    width: 2px;
+    height: 28px;
+    background: #4d258f;
+}
+
+.certificate .tassel::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: -3px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: #4d258f;
+}
+
+/* FinEd text */
+.certificate .logo-text {
+    margin-top: 0px;
+    font-size: 31px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+}
+
+.certificate .logo-text .fin {
+    color: #39207e;
+}
+
+.certificate .logo-text .ed {
+    color: #f3ae17;
+}
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.certificate .content {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    top: 27%;
+    bottom: 10%;
+    z-index: 10;
+    text-align: center;
+}
+
+/* CERTIFICATE */
+.certificate .certificate-title {
+    font-size: 75px;
+    font-weight: 600;
+    letter-spacing: 0.37em;
+    color: #101827;
+    line-height: 1;
+    margin-left: 0.37em;
+}
+
+/* OF COMPLETION */
+.certificate .subtitle {
+    margin-top: 27px;
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: 0.38em;
+    color: #101827;
+    margin-left: 0.38em;
+}
+
+/* purple short line */
+.certificate .separator {
+    width: 112px;
+    height: 3px;
+    background: #4e2990;
+    margin: 0 auto 35px auto;
+}
+
+/* this is to certify */
+.certificate .certify-text {
+    font-size: 26px;
+    font-weight: 400;
+    color: #121826;
+    margin-bottom: 31px;
+}
+
+/* NAME */
+.certificate .name {
+    font-size: 62px;
+    font-weight: 800;
+    letter-spacing: 0.045em;
+    color: #05070c;
+    line-height: 1;
+    padding-bottom: 22px;
+    border-bottom: 1.5px solid #b9b9b9;
+    width: 54%;
+    margin: 0 auto;
+}
+
+/* COURSE TEXT */
+.certificate .course-prefix {
+    margin-top: 35px;
+    font-size: 26px;
+    font-weight: 400;
+    color: #121826;
+}
+
+/* COURSE TITLE */
+.certificate .course {
+    margin-top: 20px;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #48228f;
+    margin-left: 0.12em;
+}
+
+/* =========================================================
+   DATE SECTION
+   ========================================================= */
+
+.certificate .date-section {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+}
+
+.certificate .date {
+    font-size: 22px;
+    font-weight: 500;
+    color: #111827;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+}
+
+.certificate .date-caption {
+    font-size: 20px;
+    font-weight: 400;
+    color: #7d7d7d;
+    letter-spacing: 0.02em;
 }
