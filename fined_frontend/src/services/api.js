@@ -143,6 +143,14 @@ export function addCard(payload) {
   });
 }
 
+export function getModuleBundle(courseId, moduleId, email) {
+  return request(`/courses/course/${courseId}/module/${moduleId}/bundle`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email || "" }),
+  });
+}
+
 export function getCard(courseId, moduleId, cardId, email) {
   return request(`/courses/course/${courseId}/module/${moduleId}/card/${cardId}`, {
     method: "POST",

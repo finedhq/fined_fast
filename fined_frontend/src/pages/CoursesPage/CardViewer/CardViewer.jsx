@@ -1,24 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
-import { getCard, updateCard } from "../../../services/api";
+import { getModuleBundle, updateCard } from "../../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import "./CardViewer.css";
 
-// Lightweight FinStar toast — no external dependency needed
-function showStarToast(count) {
-  const el = document.createElement("div");
-  el.textContent = `⭐ +${count} FinStar${count !== 1 ? "s" : ""} earned!`;
-  el.style.cssText = [
-    "position:fixed", "bottom:80px", "left:50%", "transform:translateX(-50%)",
-    "background:#1a1a2e", "color:#f0c040", "font-weight:700",
-    "padding:10px 22px", "border-radius:999px", "font-size:0.95rem",
-    "box-shadow:0 4px 20px rgba(0,0,0,0.4)", "z-index:9999",
-    "transition:opacity 0.4s", "opacity:1", "pointer-events:none"
-  ].join(";");
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = "0"; }, 1800);
-  setTimeout(() => { el.remove(); }, 2300);
+// Fallback FinStar defaults per card type — mirrors the backend DEFAULT_FINSTARS map
+const DEFAULT_FINSTARS = {
+  cinematic: 0,
+  concept: 2,
+  chart: 2,
+  scenario: 3,
+  risk_spectrum: 2,
+  slider_calculator: 2,
+  pill_selector: 3,
+  interactive: 2,
+  quiz: 10,
+  completion: 0,
+};
+
+function getCardFinstars(cardData, cardTemplate) {
+  const val = cardData?.allotted_finstars;
+  if (val === null || val === undefined) return DEFAULT_FINSTARS[cardTemplate] ?? 2;
+  return val;
 }
 
 
@@ -26,66 +30,203 @@ function CardViewer() {
   const { courseSlug, moduleSlug, cardSlug } = useParams();
   const navigate = useNavigate();
 
-  const [card, setCard] = useState(null);
+  // In-memory module cache (fetched once per module)
+  const [bundle, setBundle] = useState(null);
+  const [userAnswersMap, setUserAnswersMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const { user } = useAuth0();
   const email = user?.email || "";
 
-  useEffect(() => {
-    if (!email) return;
+  // Ref to track latest userAnswersMap for background sync and completion calculation
+  const answersRef = useRef(userAnswersMap);
+  answersRef.current = userAnswersMap;
 
-    let cancelled = false;
+  // 1. Fetch entire module bundle once on module entry
+  useEffect(() => {
+    if (!email || !courseSlug || !moduleSlug) return;
+
+    let isCancelled = false;
     setLoading(true);
     setError("");
 
-    getCard(courseSlug, moduleSlug, cardSlug, email)
+    getModuleBundle(courseSlug, moduleSlug, email)
       .then((data) => {
-        if (!cancelled) setCard(data);
+        if (isCancelled) return;
+        setBundle(data);
+
+        // Pre-populate user answers & completed statuses from bundle
+        const initialMap = {};
+        (data.cards || []).forEach((c) => {
+          if (c.status === "completed" || c.userAnswer) {
+            initialMap[c.card_id] = {
+              status: c.status,
+              userAnswer: c.userAnswer,
+            };
+          }
+        });
+        setUserAnswersMap(initialMap);
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message || "Failed to load card.");
+        if (!isCancelled) {
+          setError(err.message || "Failed to load module.");
+        }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!isCancelled) setLoading(false);
       });
 
     return () => {
-      cancelled = true;
+      isCancelled = true;
     };
-  }, [courseSlug, moduleSlug, cardSlug, email]);
+  }, [courseSlug, moduleSlug, email]);
 
-  const handleContinue = async (userAnswer = null, finStarsEarned = 0) => {
-    try {
-      await updateCard(courseSlug, moduleSlug, cardSlug, {
-        status: "completed",
-        email,
-        finStars: finStarsEarned || 0,
-        userAnswer: userAnswer || null,
-      });
-      if (finStarsEarned > 0) {
-        showStarToast(finStarsEarned);
+  // 2. Instant resolution of active card from memory
+  let activeCard = null;
+  if (bundle && bundle.cards && bundle.cards.length > 0) {
+    const rawCard = bundle.cards.find(
+      (c) => c.slug === cardSlug || c.card_id === cardSlug
+    ) || bundle.cards[0];
+
+    if (rawCard) {
+      const currentIdx = bundle.cards.findIndex((c) => c.card_id === rawCard.card_id);
+      const userProgress = userAnswersMap[rawCard.card_id] || {
+        status: rawCard.status || "incompleted",
+        userAnswer: rawCard.userAnswer || null,
+      };
+
+      activeCard = {
+        ...rawCard,
+        card_data: { ...(rawCard.card_data || {}) },
+        status: userProgress.status,
+        userAnswer: userProgress.userAnswer,
+        prevCardId: currentIdx > 0 ? bundle.cards[currentIdx - 1].card_id : null,
+        prevCardSlug: currentIdx > 0 ? bundle.cards[currentIdx - 1].slug : null,
+        nextCardId: currentIdx < bundle.cards.length - 1 ? bundle.cards[currentIdx + 1].card_id : null,
+        nextCardSlug: currentIdx < bundle.cards.length - 1 ? bundle.cards[currentIdx + 1].slug : null,
+        module_total_cards: bundle.module_total_cards || bundle.cards.length,
+        module_title: bundle.module_title,
+        module_order_index: bundle.module_order_index,
+        module_progress: rawCard.order_index || (currentIdx + 1),
+        isFirstCardInModule: currentIdx === 0,
+        isLastCardInModule: currentIdx === bundle.cards.length - 1,
+        prevModuleFirstCard: bundle.prevModuleFirstCard,
+        nextModuleFirstCard: bundle.nextModuleFirstCard,
+      };
+
+      // Dynamic calculation for CompletionCard
+      if (rawCard.card_template === "completion") {
+        let totalStars = 0;
+        bundle.cards.forEach((c) => {
+          const prog = userAnswersMap[c.card_id] || { status: c.status, userAnswer: c.userAnswer };
+          if (prog.status === "completed") {
+            const cd = c.card_data || {};
+            let stars = getCardFinstars(cd, c.card_template);
+            if (cd.card_type === "quiz") {
+              const userAns = prog.userAnswer;
+              const opts = cd.options || [];
+              const isCorrect = opts.some((opt) => opt.id === userAns && opt.is_correct);
+              if (!isCorrect) stars = 0;
+            }
+            totalStars += stars;
+          }
+        });
+        activeCard.card_data.total_finstars = totalStars;
       }
-    } catch {
-      // Non-blocking — navigation should not stall on a logging failure
-    }
 
-    if (card?.nextCardSlug || card?.nextCardId) {
-      navigate(`/courses/${courseSlug}/${moduleSlug}/${card.nextCardSlug || card.nextCardId}`);
-    } else if (card?.nextModuleFirstCard) {
-      const nextModSlug = card.nextModuleFirstCard.moduleSlug || card.nextModuleFirstCard.moduleId;
-      const nextCardSlug = card.nextModuleFirstCard.cardSlug || card.nextModuleFirstCard.cardId;
+      // Dynamic finstars teaser for CinematicCard — sum all non-completion cards
+      if (rawCard.card_template === "cinematic") {
+        const moduleMaxStars = bundle.cards.reduce((sum, c) => {
+          if (c.card_template === "completion") return sum;
+          return sum + getCardFinstars(c.card_data || {}, c.card_template);
+        }, 0);
+        activeCard.card_data = { ...activeCard.card_data, finstars: moduleMaxStars };
+      }
+    }
+  }
+
+  // 3. Instant Continue with Non-Blocking Background Sync
+  const handleContinue = (userAnswer = null, finStarsEarned = 0) => {
+    if (!activeCard) return;
+
+    const currentCardId = activeCard.card_id;
+    const currentCardSlug = activeCard.slug || cardSlug;
+
+    // 1. Immediately update local state
+    setUserAnswersMap((prev) => ({
+      ...prev,
+      [currentCardId]: {
+        status: "completed",
+        userAnswer: userAnswer || null,
+        finStars: finStarsEarned || 0,
+      },
+    }));
+
+
+    // 3. Navigate instantly (0ms transition)
+    if (activeCard.nextCardSlug || activeCard.nextCardId) {
+      navigate(`/courses/${courseSlug}/${moduleSlug}/${activeCard.nextCardSlug || activeCard.nextCardId}`);
+    } else if (activeCard.nextModuleFirstCard) {
+      const nextModSlug = activeCard.nextModuleFirstCard.moduleSlug || activeCard.nextModuleFirstCard.moduleId;
+      const nextCardSlug = activeCard.nextModuleFirstCard.cardSlug || activeCard.nextModuleFirstCard.cardId;
       navigate(`/courses/${courseSlug}/${nextModSlug}/${nextCardSlug}`);
     } else {
       navigate(`/courses/${courseSlug}`);
     }
+
+    // 4. Fire background save with silent auto-retry on network glitches
+    const saveToBackend = async (retries = 2) => {
+      try {
+        await updateCard(courseSlug, moduleSlug, currentCardSlug, {
+          status: "completed",
+          email,
+          finStars: finStarsEarned || 0,
+          userAnswer: userAnswer || null,
+        });
+      } catch (err) {
+        if (retries > 0) {
+          setTimeout(() => saveToBackend(retries - 1), 1500);
+        } else {
+          console.warn("Background progress save failed:", err);
+        }
+      }
+    };
+    saveToBackend();
   };
 
+  // Loading state (only shown once when opening the module)
   if (loading) {
     return (
-      <div className="cv-status">
-        <p>Loading...</p>
+      <div className="cv-page">
+        <div className="cv-top-left-nav">
+          <Link to="/" className="cv-logo" aria-label="FinEd Home">
+            <img src="/logo.ico" alt="FinEd" />
+          </Link>
+          <Link to={`/courses/${courseSlug}`} className="cv-back-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Course</span>
+          </Link>
+        </div>
+
+        <div className="cv-top-section cv-skeleton-shimmer">
+          <div className="cv-header">
+            <div className="cv-skeleton-pill" style={{ width: "120px", height: "18px" }}></div>
+            <div className="cv-skeleton-pill" style={{ width: "40px", height: "18px" }}></div>
+          </div>
+          <div className="cv-progress-track">
+            <div className="cv-progress-fill" style={{ width: "15%" }} />
+          </div>
+        </div>
+
+        <div className="cv-main-container cv-loader-container">
+          <div className="cv-spinner-orbit">
+            <div className="cv-spinner-dot"></div>
+          </div>
+          <p className="cv-loader-text">Loading module experience...</p>
+        </div>
       </div>
     );
   }
@@ -99,11 +240,18 @@ function CardViewer() {
     );
   }
 
-  const total = card?.module_total_cards || 0;
-  const current = card?.module_progress || 0;
+  if (!activeCard) {
+    return (
+      <div className="cv-status">
+        <p>Card not found.</p>
+        <Link to={`/courses/${courseSlug}`}>Back to course</Link>
+      </div>
+    );
+  }
+
+  const total = activeCard.module_total_cards || 0;
+  const current = activeCard.module_progress || 0;
   const percent = total ? (current / total) * 100 : 0;
-  // console.log("current", current)
-  // console.log("total", total)
 
   return (
     <div className="cv-page">
@@ -118,27 +266,27 @@ function CardViewer() {
           <span>Back to Course</span>
         </Link>
       </div>
+
       <div className="cv-top-section">
         <div className="cv-header">
           <span className="cv-module-name">
-            {card?.module_order_index ? `Module ${card.module_order_index}: ` : ""}
-            {card?.module_title || "Module"}
+            {activeCard.module_order_index ? `Module ${activeCard.module_order_index}: ` : ""}
+            {activeCard.module_title || "Module"}
           </span>
           <span className="cv-progress-fraction">
             {current}/{total}
           </span>
         </div>
 
-        {/* ── Progress bar ── */}
+        {/* Progress bar */}
         <div className="cv-progress-track">
           <div className="cv-progress-fill" style={{ width: `${percent}%` }} />
         </div>
       </div>
 
       <div className="cv-main-container">
-        {/* ── The card itself, rendered by the dispatcher ── */}
         <div className="cv-card-box">
-          <CardRenderer card={card} onContinue={handleContinue} />
+          <CardRenderer card={activeCard} onContinue={handleContinue} />
         </div>
       </div>
     </div>

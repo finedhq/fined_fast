@@ -143,6 +143,57 @@
 }
 
 /* ── Loading / error states ── */
+.cv-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  gap: 20px;
+}
+
+.cv-spinner-orbit {
+  width: 50px;
+  height: 50px;
+  border: 3.5px solid #e2e8f0;
+  border-top-color: #4A3AFF;
+  border-radius: 50%;
+  animation: cv-spin 0.85s linear infinite;
+}
+
+.cv-loader-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.01em;
+}
+
+.cv-skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.cv-skeleton-pill {
+  background: #e2e8f0;
+  border-radius: 6px;
+  animation: cv-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes cv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cv-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .cv-status {
   display: flex;
   flex-direction: column;
