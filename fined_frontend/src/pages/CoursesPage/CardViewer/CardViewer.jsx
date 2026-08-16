@@ -34,6 +34,7 @@ function CardViewer() {
   const [bundle, setBundle] = useState(null);
   const [userAnswersMap, setUserAnswersMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState("");
 
   const { user } = useAuth0();
@@ -146,9 +147,9 @@ function CardViewer() {
     }
   }
 
-  // 3. Instant Continue with Non-Blocking Background Sync
+  // 3. Continue: fade out → swap URL → fade in
   const handleContinue = (userAnswer = null, finStarsEarned = 0) => {
-    if (!activeCard) return;
+    if (!activeCard || transitioning) return;
 
     const currentCardId = activeCard.card_id;
     const currentCardSlug = activeCard.slug || cardSlug;
@@ -163,19 +164,25 @@ function CardViewer() {
       },
     }));
 
+    // 2. Fade out, then navigate
+    setTransitioning(true);
+    setTimeout(() => {
+      if (activeCard.nextCardSlug || activeCard.nextCardId) {
+        navigate(`/courses/${courseSlug}/${moduleSlug}/${activeCard.nextCardSlug || activeCard.nextCardId}`);
+      } else if (activeCard.nextModuleFirstCard) {
+        // Completion card: go to next module's first card
+        const nextModSlug = activeCard.nextModuleFirstCard.moduleSlug || activeCard.nextModuleFirstCard.moduleId;
+        const nextCardSlug = activeCard.nextModuleFirstCard.cardSlug || activeCard.nextModuleFirstCard.cardId;
+        navigate(`/courses/${courseSlug}/${nextModSlug}/${nextCardSlug}`);
+      } else {
+        // Last module in course → back to course page
+        navigate(`/courses/${courseSlug}`);
+      }
+      // Fade back in after URL (and thus card content) has swapped
+      setTimeout(() => setTransitioning(false), 50);
+    }, 300);
 
-    // 3. Navigate instantly (0ms transition)
-    if (activeCard.nextCardSlug || activeCard.nextCardId) {
-      navigate(`/courses/${courseSlug}/${moduleSlug}/${activeCard.nextCardSlug || activeCard.nextCardId}`);
-    } else if (activeCard.nextModuleFirstCard) {
-      const nextModSlug = activeCard.nextModuleFirstCard.moduleSlug || activeCard.nextModuleFirstCard.moduleId;
-      const nextCardSlug = activeCard.nextModuleFirstCard.cardSlug || activeCard.nextModuleFirstCard.cardId;
-      navigate(`/courses/${courseSlug}/${nextModSlug}/${nextCardSlug}`);
-    } else {
-      navigate(`/courses/${courseSlug}`);
-    }
-
-    // 4. Fire background save with silent auto-retry on network glitches
+    // 3. Fire background save with silent auto-retry on network glitches
     const saveToBackend = async (retries = 2) => {
       try {
         await updateCard(courseSlug, moduleSlug, currentCardSlug, {
@@ -285,7 +292,7 @@ function CardViewer() {
       </div>
 
       <div className="cv-main-container">
-        <div className="cv-card-box">
+        <div className={`cv-card-box${transitioning ? " cv-card-transitioning" : ""}`}>
           <CardRenderer card={activeCard} onContinue={handleContinue} />
         </div>
       </div>

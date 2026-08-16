@@ -232,3 +232,13 @@
     margin: 0 -18px;
   }
 }
+
+/* ── Card fade transition ── */
+.cv-card-box {
+  opacity: 1;
+  transition: opacity 0.18s ease;
+}
+
+.cv-card-box.cv-card-transitioning {
+  opacity: 0;
+}
