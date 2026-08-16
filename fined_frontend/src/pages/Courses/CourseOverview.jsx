@@ -5,8 +5,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import CertificateGenerator from "../../components/Certificate/CertificateGenerator";
 import "./CourseOverview.css";
-
-
+import "../Dashboard/Dashboard.css";
+import completedModuleLogo from '../../assets/completed_module_logo.png';
+import currentModuleLogo from '../../assets/current_module_logo.png';
+import lockedModuleLogo from '../../assets/locked_module_logo.png';
 // SVG Icons for statuses
 const CheckIcon = () => (
   <svg fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
@@ -31,6 +33,11 @@ const ArrowRightIcon = () => (
 const PlantIcon = () => (
   <svg fill="currentColor" viewBox="0 0 24 24">
     <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9M12 4.15L5.46 7.82 12 11.5l6.54-3.68L12 4.15Z" />
+  </svg>
+);
+const InfoIcon = () => (
+  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dash-info-icon-svg">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
@@ -96,6 +103,7 @@ export default function CourseOverview() {
 
   const totalModulesCount = course.length;
   const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
+  const level = Math.floor((userData?.fin_score || 0) / 500) + 1;
 
   const handleDownloadCertificate = async () => {
     if (certificateRef.current) {
@@ -233,14 +241,14 @@ export default function CourseOverview() {
                       const isOngoing = isClickable && !isCompleted;
 
                       let statusStr = "locked";
-                      let StatusIcon = LockIcon;
+                      let StatusImage = lockedModuleLogo;
 
                       if (isCompleted) {
                         statusStr = "completed";
-                        StatusIcon = CheckIcon;
+                        StatusImage = completedModuleLogo;
                       } else if (isOngoing) {
                         statusStr = "ongoing";
-                        StatusIcon = PlantIcon;
+                        StatusImage = currentModuleLogo;
                       }
 
                       const cardToResume = module.cards?.find(c => c.status?.toLowerCase() !== "completed") || module.cards?.[0];
@@ -280,13 +288,13 @@ export default function CourseOverview() {
                                 tabIndex={0}
                                 title={isClickable ? "Click to open module" : "Module Locked"}
                               >
-                                <StatusIcon />
+                                <img src={StatusImage} alt={`${statusStr} module`} className="module-status-logo" />
                               </div>
 
                               <div className="module-hover-card">
                                 <div className="hc-header">
                                   <div className={`hc-icon-placeholder ${statusStr}`}>
-                                    <StatusIcon />
+                                    <img src={StatusImage} alt={`${statusStr} module`} className="hc-status-logo" />
                                   </div>
                                   <button
                                     className="hc-arrow-btn"
@@ -379,54 +387,60 @@ export default function CourseOverview() {
               </RevealOnScroll>
             )}
 
-            {/* FinScore Card */}
+            {/* Dashboard Stats & FinScore */}
             <RevealOnScroll delay={100}>
-              <div className="sidebar-card">
-                <div className="sidebar-card-header">
-                  FinScore 
-                  <div className="info-icon-container">
-                    <span className="info-icon">ⓘ</span>
-                    <div className="info-tooltip">
-                      FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+              <div className="dash-stats-card">
+                <div className="dash-stats-list">
+                  <div className="dash-stat-item">
+                    <div className="dash-stat-icon-wrapper icon-streak">
+                      <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
+                    </div>
+                    <div className="dash-stat-main">
+                      <strong>{userData?.streak_count || 0}</strong> Days
+                    </div>
+                    <div className="dash-stat-label">STREAK</div>
+                  </div>
+
+                  <div className="dash-stat-item">
+                    <div className="dash-stat-icon-wrapper icon-finstars">
+                      <img src="/dash-star.png" alt="FinStars" className="dash-stat-img" />
+                    </div>
+                    <div className="dash-stat-main">
+                      <strong>{userData?.fin_stars || 0}</strong>
+                    </div>
+                    <div className="dash-stat-label">FINSTARS</div>
+                  </div>
+
+                  <div className="dash-stat-item">
+                    <div className="dash-stat-icon-wrapper icon-modules">
+                      <img src="/dash-rank.png" alt="Rank" className="dash-stat-img" />
+                    </div>
+                    <div className="dash-stat-main">
+                      <strong>Level {level}</strong>
+                    </div>
+                    <div className="dash-stat-label">RANK</div>
+                  </div>
+                </div>
+
+                <div className="dash-finscore-section">
+                  <div className="dash-finscore-header">
+                    <span className="dash-finscore-label">FinScore</span>
+                    <div className="info-icon-container">
+                      <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
+                        <InfoIcon />
+                      </span>
+                      <div className="info-tooltip">
+                        FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="finscore-value-row">
-                  <span className="finscore-number">{userData?.fin_score || 0}</span>
-                  <span className="finscore-trend">▲ 24</span>
-                </div>
-                <div className="finscore-chart-mock">
-                  <div className="bar-mock"></div>
-                  <div className="bar-mock"></div>
-                  <div className="bar-mock"></div>
-                  <div className="bar-mock"></div>
-                  <div className="bar-mock"></div>
-                  <div className="bar-mock"></div>
-                </div>
-                <p className="finscore-msg">
-                  Great progress! Keep learning consistently.
-                </p>
-              </div>
-            </RevealOnScroll>
-
-            {/* Stats Box (Points, Rank, Streak) */}
-            <RevealOnScroll delay={200}>
-              <div className="sidebar-card">
-                <div className="stats-box-container">
-                  <div className="stat-column">
-                    <span className="stat-icon-top" style={{ color: '#fbbf24' }}>⭐</span>
-                    <span className="stat-value-large">{userData?.fin_stars || 0}</span>
-                    <span className="stat-label-small">POINTS</span>
-                  </div>
-                  <div className="stat-column">
-                    <span className="stat-icon-top" style={{ color: '#818cf8' }}>🎖️</span>
-                    <span className="stat-value-large">Top 10%</span>
-                    <span className="stat-label-small">YOUR RANK</span>
-                  </div>
-                  <div className="stat-column">
-                    <span className="stat-icon-top" style={{ color: '#ef4444' }}>🔥</span>
-                    <span className="stat-value-large">{userData?.streak_count || 0} Days</span>
-                    <span className="stat-label-small">STREAK</span>
+                  <div className="dash-finscore-display">
+                    <div className="dash-finscore-value-group">
+                      <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
+                    </div>
+                    <div className="dash-finscore-chart-img-wrapper">
+                      <img src="/dash-speedometer.png" alt="FinScore Speedometer" className="dash-speedometer-img" />
+                    </div>
                   </div>
                 </div>
               </div>

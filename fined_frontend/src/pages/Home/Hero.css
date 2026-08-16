@@ -630,7 +630,7 @@ body {
 
 .courses-swiper-container {
   position: relative;
-  max-width: 1150px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 50px;
 }
@@ -666,7 +666,7 @@ body {
   box-shadow: none;
   border: 1px solid #E5E7EB;
   margin: 20px auto;
-  align-items: stretch;
+  align-items: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   min-height: 415px;
 }
@@ -680,12 +680,13 @@ body {
   flex: 1;
   border-radius: 12px;
   overflow: hidden;
+  aspect-ratio: 4 / 3;
 }
 
 .course-swiper-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.3s ease;
 }
 
@@ -701,9 +702,9 @@ body {
 }
 
 .course-swiper-title {
-  font-size: 26px;
+  font-size: 36px;
   font-weight: 800;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
   color: #111827;
   font-family: 'Nunito', sans-serif;
   line-height: 1.2;
@@ -711,13 +712,13 @@ body {
 
 .course-swiper-meta {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .course-swiper-lessons {
-  font-size: 15px;
+  font-size: 19px;
   color: #6B7280;
   font-weight: 600;
 }
@@ -725,14 +726,14 @@ body {
 .course-swiper-badge {
   background-color: #D1FAE5;
   color: #065F46;
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .course-swiper-desc {
-  font-size: 15px;
+  font-size: 18px;
   color: #4B5563;
   line-height: 1.6;
   margin: 0;
@@ -1650,7 +1651,7 @@ body {
   min-height: 700px;
   background-size: 100% auto;
   /* change to auto height */
-  background-position: center 98%;
+  background-position: center 75%;
   background-repeat: no-repeat;
   display: flex;
   align-items: flex-start;
@@ -1738,7 +1739,9 @@ body {
 }
 
 .journey-line-wrapper {
-  display: none;
+  width: 100%;
+  padding: 0 56px;
+  margin-top: 0px;
 }
 
 /* ─── CONNECTING PATH LINES ─── */
@@ -1901,6 +1904,7 @@ body {
 
   .footer-cta-section {
     min-height: 650px !important;
+    
     background-image: url('../../assets/mobileview-footer-bg-img.png') !important;
     background-size: 100% 100% !important;
     background-position: center top !important;

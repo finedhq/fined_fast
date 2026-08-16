@@ -4,7 +4,14 @@ import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
 import RevealOnScroll from '../../components/RevealOnScroll';
+import dashboardWateringGuy from '../../assets/dashboard_watering_guy.png';
 import './Dashboard.css';
+
+const InfoIcon = () => (
+  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dash-info-icon-svg">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -148,13 +155,7 @@ const Dashboard = () => {
               </div>
 
               <div className="dash-fox-illustration">
-                <div className="dash-speech-bubble">
-                  Great job<br />staying consistent!<br />Keep it up! 🎉
-                </div>
-                <img src="/fox-placeholder.png" alt="Fox Mascot" className="dash-fox-img"
-                  onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-                />
-                <div className="dash-fox-fallback" style={{ display: 'none' }}>🦊</div>
+                <img src={dashboardWateringGuy} alt="Dashboard Icon" className="dash-fox-img" />
               </div>
             </div>
           </RevealOnScroll>
@@ -173,32 +174,32 @@ const Dashboard = () => {
               <div className="dash-stats-list">
                 <div className="dash-stat-item">
                   <div className="dash-stat-icon-wrapper icon-streak">
-                    <span className="dash-stat-icon">🔥</span>
+                    <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
                   </div>
                   <div className="dash-stat-main">
-                    <strong style={{ fontSize: "19px" }}>{userData?.streak_count || 0}</strong> Days
+                    <strong>{userData?.streak_count || 0}</strong> Days
                   </div>
                   <div className="dash-stat-label">STREAK</div>
                 </div>
 
                 <div className="dash-stat-item">
                   <div className="dash-stat-icon-wrapper icon-finstars">
-                    <span className="dash-stat-icon">⭐</span>
+                    <img src="/dash-star.png" alt="FinStars" className="dash-stat-img" />
                   </div>
                   <div className="dash-stat-main">
-                    <strong style={{ fontSize: "19px" }}>{userData?.fin_stars || 0}</strong>
+                    <strong>{userData?.fin_stars || 0}</strong>
                   </div>
                   <div className="dash-stat-label">FINSTARS</div>
                 </div>
 
                 <div className="dash-stat-item">
                   <div className="dash-stat-icon-wrapper icon-modules">
-                    <span className="dash-stat-icon">✅</span>
+                    <img src="/dash-rank.png" alt="Rank" className="dash-stat-img" />
                   </div>
                   <div className="dash-stat-main">
-                    <strong style={{ fontSize: "19px" }}>2</strong> Done
+                    <strong>Level {level}</strong>
                   </div>
-                  <div className="dash-stat-label">MODULES</div>
+                  <div className="dash-stat-label">RANK</div>
                 </div>
               </div>
 
@@ -206,7 +207,9 @@ const Dashboard = () => {
                 <div className="dash-finscore-header">
                   <span className="dash-finscore-label">FinScore</span>
                   <div className="info-icon-container">
-                    <span className="dash-finscore-info" style={{ marginLeft: 0 }}>ⓘ</span>
+                    <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
+                      <InfoIcon />
+                    </span>
                     <div className="info-tooltip">
                       FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
                     </div>
@@ -215,13 +218,9 @@ const Dashboard = () => {
                 <div className="dash-finscore-display">
                   <div className="dash-finscore-value-group">
                     <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
-                    <span className="dash-finscore-trend">▲ 24</span>
                   </div>
-                  <div className="dash-finscore-chart">
-                    <div className="dash-bar dash-bar-1"></div>
-                    <div className="dash-bar dash-bar-2"></div>
-                    <div className="dash-bar dash-bar-3"></div>
-                    <div className="dash-chart-flag">🚩</div>
+                  <div className="dash-finscore-chart-img-wrapper">
+                    <img src="/dash-speedometer.png" alt="FinScore Speedometer" className="dash-speedometer-img" />
                   </div>
                 </div>
               </div>

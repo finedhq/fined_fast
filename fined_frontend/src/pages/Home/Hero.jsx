@@ -157,23 +157,13 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
   return (
     <div ref={ref} className={className} style={style}>
       <div className="testimonials-carousel-wrapper desktop-testimonials">
-        <button className="carousel-arrow carousel-arrow-left" ref={desktopPrevRef} aria-label="Previous testimonial">‹</button>
-
         <div className="testimonials-track-wrapper">
           <Swiper
-            modules={[Pagination, Autoplay, Navigation]}
+            modules={[Pagination, Autoplay]}
             spaceBetween={20}
             slidesPerView={4}
             loop={true}
             autoplay={{ delay: 4000, disableOnInteraction: false }}
-            navigation={{
-              prevEl: desktopPrevRef.current,
-              nextEl: desktopNextRef.current,
-            }}
-            onBeforeInit={(swiper) => {
-              swiper.params.navigation.prevEl = desktopPrevRef.current;
-              swiper.params.navigation.nextEl = desktopNextRef.current;
-            }}
             breakpoints={{
               0: { slidesPerView: 1 },
               900: { slidesPerView: 4 },
@@ -189,9 +179,27 @@ const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
               </SwiperSlide>
             ))}
           </Swiper>
+          
+          <div className="journey-line-wrapper" style={{ display: 'block', marginTop: '20px' }}>
+            <svg className="journey-svg" viewBox="0 0 1000 150" preserveAspectRatio="none" style={{ width: '100%', height: '120px', overflow: 'visible' }}>
+              <path 
+                d="M 125,75 Q 250,-25 375,75 Q 500,175 625,75 Q 750,-25 875,75" 
+                fill="none" 
+                stroke="#4A3AFF" 
+                strokeWidth="2.5" 
+                strokeDasharray="10 8" 
+              />
+              <line x1="125" y1="-40" x2="125" y2="68" stroke="#c7d2fe" strokeWidth="2" />
+              <line x1="375" y1="-40" x2="375" y2="68" stroke="#c7d2fe" strokeWidth="2" />
+              <line x1="625" y1="-40" x2="625" y2="68" stroke="#c7d2fe" strokeWidth="2" />
+              <line x1="875" y1="-40" x2="875" y2="68" stroke="#c7d2fe" strokeWidth="2" />
+              <circle cx="125" cy="75" r="7" fill="white" stroke="#4A3AFF" strokeWidth="3.5" />
+              <circle cx="375" cy="75" r="7" fill="white" stroke="#4A3AFF" strokeWidth="3.5" />
+              <circle cx="625" cy="75" r="7" fill="white" stroke="#4A3AFF" strokeWidth="3.5" />
+              <circle cx="875" cy="75" r="7" fill="white" stroke="#4A3AFF" strokeWidth="3.5" />
+            </svg>
+          </div>
         </div>
-
-        <button className="carousel-arrow carousel-arrow-right" ref={desktopNextRef} aria-label="Next testimonial">›</button>
       </div>
 
       <div className="mobile-testimonials">
@@ -700,9 +708,9 @@ function Hero() {
               }}
               coverflowEffect={{
                 rotate: 0,
-                stretch: 0,
-                depth: 100,
-                modifier: 2,
+                stretch: 120,
+                depth: 180,
+                modifier: 1.5,
                 slideShadows: false,
               }}
               autoplay={{
@@ -713,7 +721,7 @@ function Hero() {
               className="courses-swiper"
             >
               {[...POPULAR_COURSES, ...POPULAR_COURSES].map((course, index) => (
-                <SwiperSlide key={`${course.id}-${index}`} style={{ width: '100%', maxWidth: '850px' }}>
+                <SwiperSlide key={`${course.id}-${index}`} style={{ width: '100%', maxWidth: '950px' }}>
                   <div className="course-swiper-card" onClick={() => navigate('/courses')}>
                     <div className="course-swiper-img-container">
                       <img src={course.image} alt={course.title} className="course-swiper-img" />
