@@ -363,7 +363,7 @@
 }
 
 .dash-stat-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: #94a3b8;
   letter-spacing: 0.5px;
@@ -384,7 +384,7 @@
 }
 
 .dash-finscore-label {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: #1e293b;
 }
@@ -398,8 +398,8 @@
 }
 
 .dash-info-icon-svg {
-  width: 18px;
-  height: 18px;
+  width: 23px;
+  height: 23px;
 }
 
 .dash-finscore-display {
@@ -416,7 +416,7 @@
 }
 
 .dash-finscore-value {
-  font-size: 50px;
+  font-size: 60px;
   font-weight: 900;
   color: #1e3a8a;
   line-height: 1;
@@ -431,7 +431,7 @@
 .dash-finscore-chart-img-wrapper {
   display: flex;
   align-items: flex-end;
-  height: 115px;
+  height: 80px;
   margin-right: 32px;
 }
 
