@@ -131,7 +131,7 @@ export default function Courses() {
                 ) : targetCourse ? (
                   <RevealOnScroll>
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4 sm:p-5 w-full max-w-4xl flex flex-col sm:flex-row gap-5 sm:gap-8 items-center">
-                      <div className="w-full sm:w-2/5 aspect-video rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                      <div className="w-full sm:w-2/5 aspect-[4/3] rounded-xl overflow-hidden shrink-0 bg-gray-100">
                         <SmartImage
                           src={targetCourse.thumbnail_url}
                           alt={targetCourse.title}

@@ -184,7 +184,7 @@ const Dashboard = () => {
 
                 <div className="dash-stat-item">
                   <div className="dash-stat-icon-wrapper icon-finstars">
-                    <img src="/dash-star.png" alt="FinStars" className="dash-stat-img" />
+                    <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
                   </div>
                   <div className="dash-stat-main">
                     <strong>{userData?.fin_stars || 0}</strong>
@@ -220,7 +220,7 @@ const Dashboard = () => {
                     <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
                   </div>
                   <div className="dash-finscore-chart-img-wrapper">
-                    <img src="/dash-speedometer.png" alt="FinScore Speedometer" className="dash-speedometer-img" />
+                    <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
                   </div>
                 </div>
               </div>
