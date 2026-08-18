@@ -167,6 +167,22 @@ export function updateCard(courseId, moduleId, cardId, body) {
   });
 }
 
+export function getBundleByCardSlug(cardSlug, email) {
+  return request(`/courses/card/${cardSlug}/bundle`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email || "" }),
+  });
+}
+
+export function updateCardBySlug(cardSlug, body) {
+  return request(`/courses/card/${cardSlug}/updateCard`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 export function fetchAuthors() {
   return request("/authors/");
 }

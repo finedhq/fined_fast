@@ -221,6 +221,93 @@ def get_card_finstars(card_data: dict, card_template: str) -> int:
     return int(val)
 
 
+async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str):
+    # 1. Parallel lookups: cards, user progress, course modules, ongoing state
+    cards_res, progress_res, modules_res, _ = await asyncio.gather(
+        asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute()),
+        asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status, user_answer").match({
+            "email": user_email,
+            "module_id": module_id,
+            "progress_type": "card"
+        }).execute()),
+        asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("course_id", course_id).order("order_index").execute()),
+        asyncio.to_thread(lambda: supabase.from_("users").update({
+            "ongoing_module_id": module_id,
+            "ongoing_course_id": course_id
+        }).eq("email", user_email).execute())
+    )
+
+    all_cards = cards_res.data or []
+    progress_map = {row["card_id"]: row for row in (progress_res.data or [])}
+
+    # 2. Adjacent modules navigation lookup
+    modules = modules_res.data or []
+    module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
+    prev_module = modules[module_index - 1] if module_index > 0 else None
+    next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
+
+    prev_module_first_card = None
+    next_module_first_card = None
+
+    nav_queries = []
+    if prev_module:
+        nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
+    if next_module:
+        nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
+
+    if nav_queries:
+        nav_results = await asyncio.gather(*nav_queries)
+        nav_idx = 0
+        if prev_module:
+            prev_cards = nav_results[nav_idx].data
+            if prev_cards:
+                prev_module_first_card = {
+                    "moduleId": prev_module["id"],
+                    "moduleSlug": prev_module.get("slug"),
+                    "cardId": prev_cards[0]["card_id"],
+                    "cardSlug": prev_cards[0].get("slug")
+                }
+            nav_idx += 1
+        if next_module:
+            next_cards = nav_results[nav_idx].data
+            if next_cards:
+                next_module_first_card = {
+                    "moduleId": next_module["id"],
+                    "moduleSlug": next_module.get("slug"),
+                    "cardId": next_cards[0]["card_id"],
+                    "cardSlug": next_cards[0].get("slug")
+                }
+
+    # Package cards with user progress attached
+    cards_packaged = []
+    for idx, c in enumerate(all_cards):
+        c_prog = progress_map.get(c["card_id"], {})
+        cards_packaged.append({
+            **c,
+            "status": c_prog.get("status", "incompleted"),
+            "userAnswer": c_prog.get("user_answer"),
+            "prevCardId": all_cards[idx - 1]["card_id"] if idx > 0 else None,
+            "prevCardSlug": all_cards[idx - 1].get("slug") if idx > 0 else None,
+            "nextCardId": all_cards[idx + 1]["card_id"] if idx < len(all_cards) - 1 else None,
+            "nextCardSlug": all_cards[idx + 1].get("slug") if idx < len(all_cards) - 1 else None,
+            "isFirstCardInModule": idx == 0,
+            "isLastCardInModule": idx == len(all_cards) - 1,
+        })
+
+    return {
+        "course_id": course_id,
+        "course_title": course_title,
+        "course_slug": course_slug,
+        "module_id": module_id,
+        "module_title": module_title,
+        "module_order_index": module_order,
+        "module_total_cards": len(all_cards),
+        "cards": cards_packaged,
+        "prevModuleFirstCard": prev_module_first_card,
+        "nextModuleFirstCard": next_module_first_card
+    }
+
+
 @router.post("/course/{course_slug}/module/{module_slug}/bundle")
 async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardRequest, user: AuthUser = Depends(get_current_user)):
     """
@@ -236,6 +323,7 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
         course_title = course_res.data[0].get("title")
+        c_slug_real = course_res.data[0].get("slug")
 
         # Resolve module_slug
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("slug", module_slug).execute())
@@ -247,95 +335,52 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
         module_title = module_res.data[0].get("title")
         module_order = module_res.data[0].get("order_index", 0)
 
-        # 1. Parallel lookups: cards, user progress, course modules, ongoing state
-        cards_res, progress_res, modules_res, _ = await asyncio.gather(
-            asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute()),
-            asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status, user_answer").match({
-                "email": user.email,
-                "module_id": module_id,
-                "progress_type": "card"
-            }).execute()),
-            asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("course_id", course_id).order("order_index").execute()),
-            asyncio.to_thread(lambda: supabase.from_("users").update({
-                "ongoing_module_id": module_id,
-                "ongoing_course_id": course_id
-            }).eq("email", user.email).execute())
-        )
-
-        all_cards = cards_res.data or []
-        progress_map = {row["card_id"]: row for row in (progress_res.data or [])}
-
-        # 2. Adjacent modules navigation lookup
-        modules = modules_res.data or []
-        module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
-        prev_module = modules[module_index - 1] if module_index > 0 else None
-        next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
-
-        prev_module_first_card = None
-        next_module_first_card = None
-
-        nav_queries = []
-        if prev_module:
-            nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
-        if next_module:
-            nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
-
-        if nav_queries:
-            nav_results = await asyncio.gather(*nav_queries)
-            nav_idx = 0
-            if prev_module:
-                prev_cards = nav_results[nav_idx].data
-                if prev_cards:
-                    prev_module_first_card = {
-                        "moduleId": prev_module["id"],
-                        "moduleSlug": prev_module.get("slug"),
-                        "cardId": prev_cards[0]["card_id"],
-                        "cardSlug": prev_cards[0].get("slug")
-                    }
-                nav_idx += 1
-            if next_module:
-                next_cards = nav_results[nav_idx].data
-                if next_cards:
-                    next_module_first_card = {
-                        "moduleId": next_module["id"],
-                        "moduleSlug": next_module.get("slug"),
-                        "cardId": next_cards[0]["card_id"],
-                        "cardSlug": next_cards[0].get("slug")
-                    }
-
-        # Package cards with user progress attached
-        cards_packaged = []
-        for idx, c in enumerate(all_cards):
-            c_prog = progress_map.get(c["card_id"], {})
-            cards_packaged.append({
-                **c,
-                "status": c_prog.get("status", "incompleted"),
-                "userAnswer": c_prog.get("user_answer"),
-                "prevCardId": all_cards[idx - 1]["card_id"] if idx > 0 else None,
-                "prevCardSlug": all_cards[idx - 1].get("slug") if idx > 0 else None,
-                "nextCardId": all_cards[idx + 1]["card_id"] if idx < len(all_cards) - 1 else None,
-                "nextCardSlug": all_cards[idx + 1].get("slug") if idx < len(all_cards) - 1 else None,
-                "isFirstCardInModule": idx == 0,
-                "isLastCardInModule": idx == len(all_cards) - 1,
-            })
-
-        return {
-            "course_id": course_id,
-            "course_title": course_title,
-            "module_id": module_id,
-            "module_title": module_title,
-            "module_order_index": module_order,
-            "module_total_cards": len(all_cards),
-            "cards": cards_packaged,
-            "prevModuleFirstCard": prev_module_first_card,
-            "nextModuleFirstCard": next_module_first_card
-        }
+        return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email)
     except HTTPException as he:
         raise he
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch module bundle: {str(e)}"
+        )
+
+
+@router.post("/card/{card_slug}/bundle")
+async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: AuthUser = Depends(get_current_user)):
+    """
+    Fetch module bundle directly via a unique card slug.
+    """
+    try:
+        # Resolve card to get module_id
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("slug", card_slug).execute())
+        if not card_res.data:
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("card_id", card_slug).execute())
+        if not card_res.data:
+            raise HTTPException(status_code=404, detail="Card not found")
+        m_id = card_res.data[0]["module_id"]
+
+        # Resolve module to get course_id
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("id", m_id).execute())
+        if not module_res.data:
+            raise HTTPException(status_code=404, detail="Module not found")
+        m_title = module_res.data[0].get("title")
+        m_order = module_res.data[0].get("order_index", 0)
+        c_id = module_res.data[0]["course_id"]
+
+        # Resolve course to get details
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("id", c_id).execute())
+        if not course_res.data:
+            raise HTTPException(status_code=404, detail="Course not found")
+        c_title = course_res.data[0].get("title")
+        c_slug_real = course_res.data[0].get("slug")
+
+        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email)
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch module bundle by card: {str(e)}"
         )
 
 
@@ -702,6 +747,38 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update progress: {str(e)}"
+        )
+
+
+@router.post("/card/{card_slug}/updateCard")
+async def update_card_by_slug(card_slug: str, body: UpdateCardRequest, user: AuthUser = Depends(get_current_user)):
+    """
+    Updates the completion status of a card using only its slug.
+    Delegates to the main update_a_card function.
+    """
+    try:
+        # Resolve card to get card_id and module_id
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("slug", card_slug).execute())
+        if not card_res.data:
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("card_id", card_slug).execute())
+        if not card_res.data:
+            raise HTTPException(status_code=404, detail="Card not found")
+        c_id = card_res.data[0]["card_id"]
+        m_id = card_res.data[0]["module_id"]
+
+        # Resolve module to get course_id
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("course_id").eq("id", m_id).execute())
+        if not module_res.data:
+            raise HTTPException(status_code=404, detail="Module not found")
+        course_id = module_res.data[0]["course_id"]
+
+        return await update_a_card(course_id, m_id, c_id, body, user)
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update card by slug: {str(e)}"
         )
 
 class AddCardRequest(BaseModel):

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
-import { getModuleBundle, updateCard } from "../../../services/api";
+import { getBundleByCardSlug, updateCardBySlug } from "../../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import "./CardViewer.css";
 
@@ -27,11 +27,13 @@ function getCardFinstars(cardData, cardTemplate) {
 
 
 function CardViewer() {
-  const { courseSlug, moduleSlug, cardSlug } = useParams();
+  const { cardSlug } = useParams();
   const navigate = useNavigate();
 
   // In-memory module cache (fetched once per module)
   const [bundle, setBundle] = useState(null);
+  const bundleRef = useRef(null);
+  bundleRef.current = bundle;
   const [userAnswersMap, setUserAnswersMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
@@ -46,13 +48,19 @@ function CardViewer() {
 
   // 1. Fetch entire module bundle once on module entry
   useEffect(() => {
-    if (!email || !courseSlug || !moduleSlug) return;
+    if (!email || !cardSlug) return;
+
+    // Check if we already have this card in our current bundle
+    const currentBundle = bundleRef.current;
+    if (currentBundle && currentBundle.cards && currentBundle.cards.some(c => c.slug === cardSlug || c.card_id === cardSlug)) {
+      return; // Already have it, don't refetch!
+    }
 
     let isCancelled = false;
     setLoading(true);
     setError("");
 
-    getModuleBundle(courseSlug, moduleSlug, email)
+    getBundleByCardSlug(cardSlug, email)
       .then((data) => {
         if (isCancelled) return;
         setBundle(data);
@@ -81,7 +89,7 @@ function CardViewer() {
     return () => {
       isCancelled = true;
     };
-  }, [courseSlug, moduleSlug, email]);
+  }, [cardSlug, email]);
 
   // 2. Instant resolution of active card from memory
   let activeCard = null;
@@ -168,15 +176,14 @@ function CardViewer() {
     setTransitioning(true);
     setTimeout(() => {
       if (activeCard.nextCardSlug || activeCard.nextCardId) {
-        navigate(`/courses/${courseSlug}/${moduleSlug}/${activeCard.nextCardSlug || activeCard.nextCardId}`);
+        navigate(`/cards/${activeCard.nextCardSlug || activeCard.nextCardId}`);
       } else if (activeCard.nextModuleFirstCard) {
         // Completion card: go to next module's first card
-        const nextModSlug = activeCard.nextModuleFirstCard.moduleSlug || activeCard.nextModuleFirstCard.moduleId;
         const nextCardSlug = activeCard.nextModuleFirstCard.cardSlug || activeCard.nextModuleFirstCard.cardId;
-        navigate(`/courses/${courseSlug}/${nextModSlug}/${nextCardSlug}`);
+        navigate(`/cards/${nextCardSlug}`);
       } else {
         // Last module in course → back to course page
-        navigate(`/courses/${courseSlug}`);
+        navigate(bundle?.course_slug ? `/courses/${bundle.course_slug}` : `/courses`);
       }
       // Fade back in after URL (and thus card content) has swapped
       setTimeout(() => setTransitioning(false), 50);
@@ -185,7 +192,7 @@ function CardViewer() {
     // 3. Fire background save with silent auto-retry on network glitches
     const saveToBackend = async (retries = 2) => {
       try {
-        await updateCard(courseSlug, moduleSlug, currentCardSlug, {
+        await updateCardBySlug(currentCardSlug, {
           status: "completed",
           email,
           finStars: finStarsEarned || 0,
@@ -203,6 +210,8 @@ function CardViewer() {
   };
 
   // Loading state (only shown once when opening the module)
+  const backToCourseLink = bundle?.course_slug ? `/courses/${bundle.course_slug}` : "/courses";
+
   if (loading) {
     return (
       <div className="cv-page">
@@ -210,12 +219,14 @@ function CardViewer() {
           <Link to="/" className="cv-logo" aria-label="FinEd Home">
             <img src="/logo.ico" alt="FinEd" />
           </Link>
-          <Link to={`/courses/${courseSlug}`} className="cv-back-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            <span>Back to Course</span>
-          </Link>
+          {bundle?.course_slug && (
+            <Link to={backToCourseLink} className="cv-back-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span>Back to Course</span>
+            </Link>
+          )}
         </div>
 
         <div className="cv-top-section cv-skeleton-shimmer">
@@ -242,7 +253,7 @@ function CardViewer() {
     return (
       <div className="cv-status">
         <p>{error}</p>
-        <Link to={`/courses/${courseSlug}`}>Back to course</Link>
+        <Link to={backToCourseLink}>Back to course</Link>
       </div>
     );
   }
@@ -251,7 +262,7 @@ function CardViewer() {
     return (
       <div className="cv-status">
         <p>Card not found.</p>
-        <Link to={`/courses/${courseSlug}`}>Back to course</Link>
+        <Link to={backToCourseLink}>Back to course</Link>
       </div>
     );
   }
@@ -266,7 +277,7 @@ function CardViewer() {
         <Link to="/" className="cv-logo" aria-label="FinEd Home">
           <img src="/logo.ico" alt="FinEd" />
         </Link>
-        <Link to={`/courses/${courseSlug}`} className="cv-back-btn" title="Back to Course Overview">
+        <Link to={backToCourseLink} className="cv-back-btn" title="Back to Course Overview">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>

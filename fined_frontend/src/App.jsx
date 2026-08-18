@@ -51,7 +51,7 @@ function App() {
           <ApiTokenProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/courses/:courseSlug/:moduleSlug/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Hero />} />
                   <Route path="articles" element={<ArticlesPage />} />

@@ -261,7 +261,7 @@ export default function CourseOverview() {
                       const handleLaunchModule = () => {
                         if (isClickable && cardToResume) {
                           sessionStorage.removeItem('quiz_score');
-                          navigate(`/courses/${courseSlug}/${module.moduleSlug || module.moduleId}/${cardToResume.cardSlug || cardToResume.card_id}`);
+                          navigate(`/cards/${cardToResume.cardSlug || cardToResume.card_id}`);
                         } else if (!cardToResume) {
                           setWarning("This module has no cards yet!");
                         } else {
