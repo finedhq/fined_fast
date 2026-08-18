@@ -21,6 +21,7 @@ google-auth-oauthlib = "^1.2.0"
 aiosmtplib = "^3.0.0"
 slowapi = "^0.1.9"
 uuid = "^1.30"
+sentry-sdk = {extras = ["fastapi"], version = "^2.0.0"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.0"

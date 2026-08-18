@@ -22,6 +22,7 @@ class Settings(BaseSettings):
 
     FRONTEND_URL: str = "https://fined-web.vercel.app"
     ENVIRONMENT: str = "development"
+    SENTRY_DSN: str | None = None
 
 
     model_config = SettingsConfigDict(

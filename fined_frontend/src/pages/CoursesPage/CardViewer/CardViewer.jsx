@@ -180,7 +180,7 @@ function CardViewer() {
       }
       // Fade back in after URL (and thus card content) has swapped
       setTimeout(() => setTransitioning(false), 50);
-    }, 300);
+    }, 200);
 
     // 3. Fire background save with silent auto-retry on network glitches
     const saveToBackend = async (retries = 2) => {

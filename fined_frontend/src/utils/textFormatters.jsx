@@ -2,7 +2,10 @@ export function parseBoldText(text) {
   if (text === undefined || text === null) return "";
   if (typeof text !== "string") return text;
   // Replace **text** with <strong>text</strong>
-  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Replace *text* with <em>text</em>
+  parsed = parsed.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  return parsed;
 }
 
 export function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, customPrefix = "", classPrefix = "", spanClass = "") {

@@ -321,12 +321,17 @@
 }
 
 /* 7. Table */
+.conc-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
+}
 .conc-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 1.02rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
   overflow: hidden;
 }
 .conc-table th {

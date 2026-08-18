@@ -216,24 +216,26 @@ function ConceptCard({ card, onContinue }) {
 
       {/* 7. Table */}
       {table && table.rows && (
-        <table className="conc-table">
-          {table.headers && table.headers.length > 0 && (
-            <thead>
-              <tr>
-                {table.headers.map((h, i) => <th key={i}>{h}</th>)}
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {table.rows.map((row, i) => (
-              <tr key={i}>
-                {row.map((cell, j) => (
-                  <td key={j} dangerouslySetInnerHTML={{ __html: cell }}></td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="conc-table-wrapper">
+          <table className="conc-table">
+            {table.headers && table.headers.length > 0 && (
+              <thead>
+                <tr>
+                  {table.headers.map((h, i) => <th key={i}>{h}</th>)}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {table.rows.map((row, i) => (
+                <tr key={i}>
+                  {row.map((cell, j) => (
+                    <td key={j} dangerouslySetInnerHTML={{ __html: cell }}></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* 8. Simple List */}
