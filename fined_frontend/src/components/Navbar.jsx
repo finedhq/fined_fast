@@ -73,10 +73,11 @@ export default function Navbar() {
         <div className="nav-menu-wrapper">
           <ul className="nav-links">
             <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
-            <li>
+            <li className="nav-item-with-badge">
               <NavLink to="/courses" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}>
                 <span className="cube-wrapper" data-text="Courses">Courses</span>
               </NavLink>
+              <span className="nav-badge live-badge">New!</span>
             </li>
             <li><NavLink to="/articles" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Articles">Articles</span></NavLink></li>
             <li><NavLink to="/contact" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Contact Us">Contact Us</span></NavLink></li>
@@ -123,9 +124,10 @@ export default function Navbar() {
         </div>
         <ul className="mobile-nav-links">
           <li><NavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</NavLink></li>
-          <li>
+          <li className="mobile-nav-item-with-badge">
             <NavLink to="/courses" onClick={() => setIsMobileMenuOpen(false)}>
               Courses
+              <span className="nav-badge live-badge mobile-badge">New!</span>
             </NavLink>
           </li>
           <li><NavLink to="/articles" onClick={() => setIsMobileMenuOpen(false)}>Articles</NavLink></li>

@@ -244,4 +244,46 @@ nav {
     color: var(--brand-dark);
     text-decoration: none;
   }
+}/* Badge Styles for Nav Items */
+.nav-item-with-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-badge.live-badge {
+  position: absolute;
+  top: 100%;
+  margin-top: 4px;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+  animation: pulse-live-badge 2s infinite;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.mobile-nav-item-with-badge a {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-badge {
+  position: static;
+  margin-top: 0;
+  animation: none; /* optional: disable pulse on mobile */
+}
+
+@keyframes pulse-live-badge {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
