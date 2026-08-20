@@ -110,7 +110,7 @@ export default function CourseOverview() {
       // Fetch both course data and user stats concurrently
       const [courseRes, userRes] = await Promise.all([
         instance.post(`/courses/course/${courseSlug}`, { email }),
-        instance.post("/home/getdata", { email: email, userId: user?.sub })
+        instance.post("/home/getdata", { email: email, userId: user?.sub || 'guest_sub' })
       ]);
 
       setCourseTitle(courseRes.data.title);
