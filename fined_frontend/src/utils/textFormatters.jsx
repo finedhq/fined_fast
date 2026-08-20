@@ -8,6 +8,43 @@ export function parseBoldText(text) {
   return parsed;
 }
 
+/**
+ * Checks if an article has both editor_summary and metadata configured.
+ * Only articles meeting both criteria are eligible for the "AI Lens" / "AI Lens Ready" tag.
+ */
+export function hasAiLens(article) {
+  if (!article) return false;
+
+  // 1. Check editor_summary
+  const summary = article.editor_summary;
+  const hasSummary = Boolean(
+    summary &&
+    typeof summary === "string" &&
+    summary.trim().length > 0
+  );
+
+  if (!hasSummary) return false;
+
+  // 2. Check metadata
+  const meta = article.metadata;
+  if (!meta) return false;
+
+  if (typeof meta === "object") {
+    return Object.keys(meta).length > 0;
+  }
+
+  if (typeof meta === "string" && meta.trim().length > 0) {
+    try {
+      const parsed = JSON.parse(meta);
+      return Boolean(parsed && typeof parsed === "object" && Object.keys(parsed).length > 0);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 export function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, setActiveTermIndex, customPrefix = "", classPrefix = "", spanClass = "") {
   let formattedText = parseBoldText(detailText);
   const prefix = classPrefix ? classPrefix + "-" : "";

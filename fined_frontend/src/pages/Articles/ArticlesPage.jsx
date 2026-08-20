@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { fetchArticles } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
+import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
+import { IoSparkles } from "react-icons/io5";
+import { hasAiLens } from "../../utils/textFormatters";
 
 const ARTICLES_PER_PAGE = 30;
 
@@ -58,8 +61,21 @@ function ArticlesPage() {
     setError("");
     try {
       const limit = nextOffset === 0 ? 37 : ARTICLES_PER_PAGE;
-      const data = await fetchArticles({ limit, offset: nextOffset });
-      const incoming = Array.isArray(data) ? data : data.articles || [];
+      let incoming = [];
+      try {
+        const data = await fetchArticles({ limit, offset: nextOffset });
+        incoming = Array.isArray(data) ? data : data.articles || [];
+      } catch (err) {
+        console.warn("Could not fetch articles from server, using local fallback", err);
+      }
+
+      // Ensure ETF demo article is available as fallback or appended
+      if (!append && incoming.length === 0) {
+        incoming = [ETF_DEMO_ARTICLE];
+      } else if (!append && !incoming.some((a) => (a.slug || "").includes("etf") || (a.title || "").toLowerCase().includes("etf"))) {
+        incoming = [...incoming, ETF_DEMO_ARTICLE];
+      }
+
       setArticles((prev) => (append ? [...prev, ...incoming] : incoming));
       setOffset(nextOffset + incoming.length);
       setHasMore(incoming.length === limit);
@@ -124,7 +140,8 @@ function ArticlesPage() {
 
   const openArticle = (article) => {
     if (!article) return;
-    navigate(`/articles/${generateSlug(article.title)}`);
+    const targetSlug = article.slug || generateSlug(article.title);
+    navigate(`/articles/${targetSlug}`);
   };
 
   const scrollUp = () => {
@@ -140,6 +157,8 @@ function ArticlesPage() {
     ? articles
     : articles.filter(article => article.tag === activeCategory);
 
+  const latestArticle = articles[0] || ETF_DEMO_ARTICLE;
+
   return (
     <div className="ap-root">
 
@@ -148,6 +167,63 @@ function ArticlesPage() {
         <div className="ap-hero-strip">
           <h1 className="ap-headline">Articles</h1>
           <p className="ap-sub">Fresh financial explainers, backed by real research.</p>
+        </div>
+      </RevealOnScroll>
+
+      {/* PERSONAL LENS SPOTLIGHT BANNER */}
+      <RevealOnScroll>
+        <div
+          style={{
+            background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+            borderRadius: "20px",
+            padding: "24px 28px",
+            margin: "0 auto 36px auto",
+            maxWidth: "1280px",
+            color: "#ffffff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "20px",
+            flexWrap: "wrap",
+            boxShadow: "0 10px 30px -5px rgba(79, 70, 229, 0.3)",
+            position: "relative",
+            overflow: "hidden"
+          }}
+        >
+          <div style={{ maxWidth: "720px", zIndex: 2 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
+              <IoSparkles size={12} />
+              <span>Personal Lens AI</span>
+            </div>
+            <h2 style={{ fontSize: "22px", fontWeight: "800", margin: "0 0 6px 0", color: "#ffffff" }}>
+              FinEd Personal Lens - Your AI Pre-Reading Coach
+            </h2>
+            <p style={{ fontSize: "14px", opacity: "0.9", margin: "0", lineHeight: "1.5" }}>
+              Answer 4 quick questions (~20s) inside any article to get personalized analogies, priority sections, and plain-English takeaways tailored to your exact experience level.
+            </p>
+          </div>
+          <button
+            onClick={() => openArticle(latestArticle)}
+            style={{
+              background: "#ffffff",
+              color: "#4f46e5",
+              border: "none",
+              borderRadius: "12px",
+              padding: "12px 22px",
+              fontSize: "14px",
+              fontWeight: "700",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+              zIndex: 2,
+              transition: "transform 0.2s"
+            }}
+          >
+            <span>Try on Latest Article</span>
+            <span>→</span>
+          </button>
         </div>
       </RevealOnScroll>
 
@@ -194,16 +270,23 @@ function ArticlesPage() {
 
                   </div>
                   <div className="ap-featured-body">
-                    <span
-                      className="ap-grid-category"
-                      style={{ marginBottom: '8px', cursor: 'pointer' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (articles[0]?.tag) navigate(`/tags/${generateSlug(articles[0].tag)}`);
-                      }}
-                    >
-                      {articles[0]?.tag?.toUpperCase()}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span
+                        className="ap-grid-category"
+                        style={{ margin: 0, cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (articles[0]?.tag) navigate(`/tags/${generateSlug(articles[0].tag)}`);
+                        }}
+                      >
+                        {articles[0]?.tag?.toUpperCase()}
+                      </span>
+                      {hasAiLens(articles[0]) && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#eef2ff', color: '#4f46e5', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>
+                          <IoSparkles size={10} /> AI Lens Ready
+                        </span>
+                      )}
+                    </div>
                     <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
                     <p className="ap-featured-excerpt">
                       {articles[0]?.description || ""}
@@ -285,16 +368,23 @@ function ArticlesPage() {
                         <div className="ap-row-body">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <p className="ap-row-date" style={{ margin: 0, fontSize: '12px' }}>{formatDate(article.published_at || article.created_at)}</p>
-                            <span
-                              className="ap-grid-category"
-                              style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                              }}
-                            >
-                              {article.tag?.toUpperCase()}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span
+                                className="ap-grid-category"
+                                style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
+                                }}
+                              >
+                                {article.tag?.toUpperCase()}
+                              </span>
+                              {hasAiLens(article) && (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
+                                  <IoSparkles size={9} /> Lens
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <h3 className="ap-row-title" style={{ fontSize: '18px', WebkitLineClamp: 2, margin: '4px 0' }}>{article.title}</h3>
                           {article.description && (
@@ -364,17 +454,24 @@ function ArticlesPage() {
                     {/* Text Section */}
                     <div className="ap-grid-card-content">
 
-                      {/* Category */}
-                      <span
-                        className="ap-grid-category"
-                        style={{ cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                        }}
-                      >
-                        {article.tag?.toUpperCase()}
-                      </span>
+                      {/* Category & Lens Tag */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <span
+                          className="ap-grid-category"
+                          style={{ margin: 0, cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
+                          }}
+                        >
+                          {article.tag?.toUpperCase()}
+                        </span>
+                        {hasAiLens(article) && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
+                            <IoSparkles size={9} /> AI Lens
+                          </span>
+                        )}
+                      </div>
 
                       {/* Title */}
                       <h3 className="ap-grid-title">{article.title}</h3>

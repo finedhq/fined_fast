@@ -4,6 +4,8 @@ import ArticleReader from "../../components/ArticleReader";
 import { fetchAuthorDetails } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
+import { IoSparkles } from "react-icons/io5";
+import { hasAiLens } from "../../utils/textFormatters";
 
 const generateSlug = (title) => {
   if (!title) return "";
@@ -172,16 +174,23 @@ function AuthorPage() {
                     )}
                   </div>
                   <div className="ap-grid-card-content">
-                    <span
-                      className="ap-grid-category"
-                      style={{ cursor: 'pointer' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                      }}
-                    >
-                      {article.tag?.toUpperCase()}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                      <span
+                        className="ap-grid-category"
+                        style={{ margin: 0, cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
+                        }}
+                      >
+                        {article.tag?.toUpperCase()}
+                      </span>
+                      {hasAiLens(article) && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
+                          <IoSparkles size={9} /> AI Lens
+                        </span>
+                      )}
+                    </div>
                     <h3 className="ap-grid-title">{article.title}</h3>
                     <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
                       {article.description || ""}

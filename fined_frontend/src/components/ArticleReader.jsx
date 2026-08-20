@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IoStarOutline, IoStar } from "react-icons/io5";
+import { IoStarOutline, IoStar, IoSparkles } from "react-icons/io5";
 import { RiShareForwardLine } from "react-icons/ri";
+import { FiX } from "react-icons/fi";
+import PersonalLensSidebar from "./PersonalLens/PersonalLensSidebar";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -24,7 +26,7 @@ const renderTextWithLinks = (text) => {
     );
     lastIndex = regex.lastIndex;
   }
-  
+
   if (lastIndex < text.length) {
     parts.push(text.substring(lastIndex));
   }
@@ -108,6 +110,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const tocListRef = useRef(null);
   const tocNavRef = useRef(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
+  const [isMobileLensOpen, setIsMobileLensOpen] = useState(false);
 
   // Close mobile TOC when clicking outside
   useEffect(() => {
@@ -164,7 +167,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   );
 
   const tocItems = useMemo(() => {
-    const headings = blocks.filter((b) => b.isHeading);
+    const headings = blocks.filter((b) => b.isHeading && b.level !== 3);
     if (headings.length > 0) {
       return headings.map((b) => ({ id: b.id, label: trimLabel(b.text), level: b.level }));
     }
@@ -593,7 +596,71 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
             {footer}
           </article>
+
+          {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}
+          <aside className="ar-lens-aside">
+            <div style={{ position: "sticky", top: "60px" }}>
+              <PersonalLensSidebar
+                article={article}
+                articleId={article?.slug || article?.id || "etf-101-guide"}
+              />
+            </div>
+          </aside>
         </div>
+
+        {/* Floating Trigger for Mobile & Tablet */}
+        <button
+          type="button"
+          className="pl-mobile-trigger"
+          onClick={() => setIsMobileLensOpen(true)}
+          aria-label="Open Personal Lens"
+        >
+          <IoSparkles />
+          <span>Personal Lens</span>
+        </button>
+
+        {/* Mobile & Tablet Drawer Modal */}
+        {isMobileLensOpen && (
+          <div
+            className="pl-drawer-backdrop"
+            onClick={() => setIsMobileLensOpen(false)}
+          >
+            <div
+              className="pl-drawer-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 16px 0" }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileLensOpen(false)}
+                  style={{
+                    background: "#f1f5f9",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "#475569"
+                  }}
+                  aria-label="Close Personal Lens"
+                >
+                  <FiX size={18} />
+                </button>
+              </div>
+              <div style={{ padding: "0 16px 24px 16px" }}>
+                <PersonalLensSidebar
+                  article={article}
+                  articleId={article?.slug || article?.id || "etf-101-guide"}
+                  isMobileDrawer={true}
+                  onCloseDrawer={() => setIsMobileLensOpen(false)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoadingMore && (
           <div className="ar-loading-overlay">

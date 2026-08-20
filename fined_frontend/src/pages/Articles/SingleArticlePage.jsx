@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticleBySlug, fetchAdjacentArticles } from "../../services/api";
+import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
 
 function SingleArticlePage() {
   const { slug } = useParams();
@@ -22,6 +23,12 @@ function SingleArticlePage() {
 
   useEffect(() => {
     async function loadArticle() {
+      if (slug === "understanding-etfs-exchange-traded-funds" || slug === "etf-101-guide") {
+        setArticle(ETF_DEMO_ARTICLE);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const data = await fetchArticleBySlug(slug);
@@ -33,8 +40,14 @@ function SingleArticlePage() {
           setAdjacent(adjData);
         }).catch(console.error);
       } catch (err) {
-        setError("Article not found.");
-        navigate("/articles", { replace: true });
+        // If article not found in DB, check if it's the demo article before redirecting
+        if (slug.includes("etf")) {
+          setArticle(ETF_DEMO_ARTICLE);
+          setLoading(false);
+        } else {
+          setError("Article not found.");
+          navigate("/articles", { replace: true });
+        }
       }
     }
     if (slug) {

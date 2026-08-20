@@ -199,4 +199,21 @@ export function joinWaitlist(email) {
   });
 }
 
+export function fetchPersonalLens(articleId, answers) {
+  return request("/personal-lens", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      article_id: articleId,
+      answers: answers
+    }),
+  });
+}
+
+export function fetchArticleQuestions(articleId) {
+  return request(`/personal-lens/questions/${articleId}`, {
+    method: "GET",
+  });
+}
+
 export { API_BASE_URL };

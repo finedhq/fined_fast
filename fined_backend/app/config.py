@@ -20,6 +20,9 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = "redis://localhost:6379"
 
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-flash-lite-latest"
+
     FRONTEND_URL: str = "https://fined-web.vercel.app"
     ENVIRONMENT: str = "development"
     SENTRY_DSN: str | None = None

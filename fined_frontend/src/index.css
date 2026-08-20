@@ -913,13 +913,29 @@ button {
 
 
 .ar-grid {
-  width: min(1490px, 100%);
+  width: min(1560px, 100%);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 285px minmax(0, 940px);
+  grid-template-columns: 260px minmax(0, 840px) 340px;
   justify-content: center;
-  gap: 88px;
+  gap: 36px;
   align-items: start;
+}
+
+.ar-lens-aside {
+  display: block;
+  width: 100%;
+  max-width: 350px;
+}
+
+@media (max-width: 1279px) {
+  .ar-grid {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 48px;
+  }
+  .ar-lens-aside {
+    display: none;
+  }
 }
 
 .ar-toc-aside {

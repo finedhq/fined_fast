@@ -12,11 +12,13 @@ from app.routes.cards import router as cards_router
 from app.routes.auth import router as auth_router
 
 from app.routes.authors import router as authors_router
+from app.routes.personal_lens import router as personal_lens_router
 
 api_router = APIRouter()
 
 api_router.include_router(home_router)
 api_router.include_router(articles_router)
+api_router.include_router(personal_lens_router)
 api_router.include_router(courses_router)
 api_router.include_router(authors_router)
 api_router.include_router(admin_router)

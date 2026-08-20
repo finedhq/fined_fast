@@ -52,6 +52,8 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
+                <Route path="/lens" element={<Navigate to="/articles" replace />} />
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Hero />} />
                   <Route path="articles" element={<ArticlesPage />} />
