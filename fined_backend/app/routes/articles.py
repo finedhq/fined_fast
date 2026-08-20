@@ -226,11 +226,12 @@ async def add_article(
     content: str = Form(...),
     description: Optional[str] = Form(None),
     tag: str = Form(...),
+    slug: Optional[str] = Form(None),
     author_id: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin adds an article with optional image upload to Supabase Storage"""
+    """Admin adds an article with optional custom slug and optional image upload to Supabase Storage"""
     try:
         image_url = ""
         if image:
@@ -242,7 +243,15 @@ async def add_article(
                 folder="articles",
                 title=title
             )
-        return article_service.add(title=title, content=content, description=description or "", image_url=image_url, tag=tag, author_id=author_id)
+        return article_service.add(
+            title=title,
+            content=content,
+            description=description or "",
+            image_url=image_url,
+            tag=tag,
+            slug=slug,
+            author_id=author_id
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -80,8 +80,8 @@ function AuthorPage() {
 
   useEffect(() => {
     if (articleSlug && articles.length > 0) {
-      const article = articles.find(a => generateSlug(a.title) === articleSlug);
-      if (article && (!selectedArticle || generateSlug(selectedArticle.title) !== articleSlug)) {
+      const article = articles.find(a => (a.slug || generateSlug(a.title)) === articleSlug);
+      if (article && (!selectedArticle || (selectedArticle.slug || generateSlug(selectedArticle.title)) !== articleSlug)) {
         setSelectedArticle(article);
       }
     } else if (!articleSlug && selectedArticle) {
@@ -91,7 +91,8 @@ function AuthorPage() {
 
   const openArticle = (article) => {
     if (!article) return;
-    navigate(`/authors/${slug}/${generateSlug(article.title)}`);
+    const targetSlug = article.slug || generateSlug(article.title);
+    navigate(`/authors/${slug}/${targetSlug}`);
     setSelectedArticle(article);
   };
 

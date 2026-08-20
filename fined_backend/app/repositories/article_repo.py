@@ -34,6 +34,13 @@ class ArticleRepository:
     def delete(self, article_id: str):
         supabase.from_("articles").delete().eq("id", article_id).execute()
 
+    def update_slug(self, article_id: str, slug: str):
+        """Update or backfill slug for an article."""
+        try:
+            supabase.from_("articles").update({"slug": slug}).eq("id", article_id).execute()
+        except Exception:
+            pass
+
     def update_avg_rating(self, article_id: str, avg: float):
         supabase.from_("articles").update({"rating": round(avg, 2)})\
             .eq("id", article_id).execute()
@@ -80,7 +87,7 @@ class ArticleRepository:
         ).execute()
 
     def get_all_for_sitemap(self) -> list:
-        res = supabase.from_("articles").select("id, title, created_at, published_at")\
+        res = supabase.from_("articles").select("id, title, slug, created_at, published_at")\
             .order("created_at", desc=True).execute()
         return res.data or []
 

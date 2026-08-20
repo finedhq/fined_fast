@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowRight, FiBookOpen } from "react-icons/fi";
+import { FiArrowRight, FiZap, FiLayers, FiCheckCircle, FiCpu } from "react-icons/fi";
 import { IoSparkles } from "react-icons/io5";
 import LensQuestionnaire from "./LensQuestionnaire";
 import GeneratingLens from "./GeneratingLens";
@@ -178,52 +178,58 @@ export default function PersonalLensSidebar({
   if (!isEnabled) {
     return (
       <div className="pl-container">
-        {/* Header Banner */}
-        <div className="pl-header" style={{ background: "linear-gradient(135deg, #64748b 0%, #475569 100%)" }}>
-          <div className="pl-header-content">
-            <div className="pl-header-title-wrap">
-              <span className="pl-sparkle-icon" style={{ animation: "none", opacity: 0.7 }}>✨</span>
+        <div className="pl-inner-card">
+          {/* Integrated Minimal Top Bar */}
+          <div className="pl-top-bar">
+            <div className="pl-top-branding">
+              <div className="pl-neon-indicator">
+                <span className="pl-neon-dot" style={{ background: "#94a3b8", boxShadow: "none" }} />
+              </div>
               <div>
-                <h2 className="pl-header-title">FinEd Personal Lens</h2>
-                <p className="pl-header-subtitle">AI Pre-Reading Coach</p>
+                <div className="pl-brand-title">
+                  <span>Personal Lens</span>
+                  <span className="pl-brand-ai-tag" style={{ color: "#64748b", borderColor: "#cbd5e1", background: "#f1f5f9" }}>AI</span>
+                </div>
+                <p className="pl-brand-subtitle">Pre-Reading Companion</p>
               </div>
             </div>
-            <span className="pl-badge-pill" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.2)" }}>
+            <span className="pl-status-pill disabled">
               Not Enabled
             </span>
           </div>
-        </div>
 
-        {/* Disabled State Body */}
-        <div className="pl-intro-body" style={{ padding: "28px 20px" }}>
-          <div className="pl-intro-icon" style={{ background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)", color: "#64748b", boxShadow: "none" }}>
-            <IoSparkles size={22} />
+          {/* Disabled State Body */}
+          <div className="pl-intro-body">
+            <div className="pl-focus-lens-visual">
+              <div className="pl-focus-lens-center" style={{ background: "#f8fafc", borderColor: "#e2e8f0", color: "#94a3b8", boxShadow: "none" }}>
+                <IoSparkles size={18} />
+              </div>
+            </div>
+            <h3 className="pl-intro-heading">
+              Personal Lens Not Enabled
+            </h3>
+            <p className="pl-intro-desc">
+              Personal Lens generates customized analogies, priority sections, and tailored takeaways for your background.
+            </p>
+            <p className="pl-intro-desc" style={{ fontSize: "12.5px", color: "#94a3b8", marginBottom: "20px" }}>
+              This feature is currently available on selected articles and will roll out everywhere soon.
+            </p>
+
+            <button
+              type="button"
+              className="pl-start-btn"
+              onClick={handleGoToLatest}
+              style={{
+                background: "#f8fafc",
+                color: "#4f46e5",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.02)"
+              }}
+            >
+              <span>Try on the latest article</span>
+              <FiArrowRight className="pl-start-btn-icon" />
+            </button>
           </div>
-          <h3 className="pl-intro-heading" style={{ color: "#1e293b", fontSize: "16px", marginBottom: "8px" }}>
-            AI Lens Not Enabled
-          </h3>
-          <p className="pl-intro-desc" style={{ fontSize: "13px", lineHeight: "1.6", color: "#64748b", marginBottom: "14px" }}>
-            Personal Lens is our AI-powered pre-reading coach that generates personalized analogies, key concepts, and custom takeaways based on your background.
-          </p>
-          <p className="pl-intro-desc" style={{ fontSize: "12px", lineHeight: "1.5", color: "#94a3b8", marginBottom: "20px" }}>
-            This feature is not yet enabled for this article. We are working on it and will soon roll it out across more articles!
-          </p>
-
-          <button
-            type="button"
-            className="pl-start-btn"
-            onClick={handleGoToLatest}
-            style={{
-              background: "#f8fafc",
-              color: "#4f46e5",
-              border: "1px solid #e2e8f0",
-              fontWeight: "600",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.03)"
-            }}
-          >
-            <span>Try on the latest article</span>
-            <FiArrowRight />
-          </button>
         </div>
       </div>
     );
@@ -231,70 +237,89 @@ export default function PersonalLensSidebar({
 
   return (
     <div className="pl-container">
-      {/* Header Banner */}
-      <div className="pl-header">
-        <div className="pl-header-content">
-          <div className="pl-header-title-wrap">
-            <span className="pl-sparkle-icon">✨</span>
+      <div className="pl-inner-card">
+        {/* Integrated Minimal Top Bar */}
+        <div className="pl-top-bar">
+          <div className="pl-top-branding">
+            <div className="pl-neon-indicator">
+              <span className="pl-neon-ping" />
+              <span className="pl-neon-dot" />
+            </div>
             <div>
-              <h2 className="pl-header-title">FinEd Personal Lens</h2>
-              <p className="pl-header-subtitle">Your AI Pre-Reading Coach</p>
+              <div className="pl-brand-title">
+                <span>Personal Lens</span>
+                <span className="pl-brand-ai-tag">AI</span>
+              </div>
+              <p className="pl-brand-subtitle">Pre-Reading Companion</p>
             </div>
           </div>
-          <span className="pl-badge-pill">
-            {viewState === "result" ? "Personalized" : "AI Coach"}
+          <span className="pl-status-pill">
+            {viewState === "result" ? "Personalized" : "Ready"}
           </span>
         </div>
+
+        {/* State 1: Intro Card */}
+        {viewState === "intro" && (
+          <div className="pl-intro-body">
+            <div className="pl-focus-lens-visual">
+              <div className="pl-focus-lens-ring" />
+              <div className="pl-focus-lens-ring-2" />
+              <div className="pl-focus-lens-center">
+                <IoSparkles size={18} />
+              </div>
+            </div>
+            <h3 className="pl-intro-heading">Make this article about you</h3>
+            <p className="pl-intro-desc">
+              Answer 4 quick questions (~20s) to get custom analogies, priority sections, and takeaways tailored to your background.
+            </p>
+
+            <div className="pl-feature-pills">
+              <span className="pl-feature-pill">
+                <FiCheckCircle size={11} />
+                <span>Zero Jargon</span>
+              </span>
+              <span className="pl-feature-pill">
+                <FiZap size={11} />
+                <span>Key Analogies</span>
+              </span>
+              <span className="pl-feature-pill">
+                <FiLayers size={11} />
+                <span>Focus Sections</span>
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="pl-start-btn"
+              onClick={handleStart}
+            >
+              <span>Personalize Article</span>
+              <FiArrowRight className="pl-start-btn-icon" />
+            </button>
+          </div>
+        )}
+
+        {/* State 2: 4-Step Questionnaire */}
+        {viewState === "questionnaire" && (
+          <LensQuestionnaire
+            questions={questions}
+            currentIndex={stepIndex}
+            answers={answers}
+            onSelectOption={handleSelectOption}
+            onPrevStep={handlePrevStep}
+          />
+        )}
+
+        {/* State 3: Generating */}
+        {viewState === "generating" && (
+          <GeneratingLens answers={answers} />
+        )}
+
+        {/* State 4: Tailored Result Takeaways */}
+        {viewState === "result" && (
+          <LensResultCard lens={lensData} onReset={handleReset} />
+        )}
       </div>
-
-      {/* State 1: Intro Card */}
-      {viewState === "intro" && (
-        <div className="pl-intro-body">
-          <div className="pl-intro-icon">
-            <FiBookOpen />
-          </div>
-          <h3 className="pl-intro-heading">Make this article about you</h3>
-          <p className="pl-intro-desc">
-            Answer 4 quick questions (~20s) to get custom analogies, priority sections, and takeaways tailored to your background.
-          </p>
-
-          <div className="pl-feature-tags">
-            <span className="pl-feature-tag">🎯 Zero Jargon</span>
-            <span className="pl-feature-tag">⚡ Key Analogies</span>
-            <span className="pl-feature-tag">💡 Focus Sections</span>
-          </div>
-
-          <button
-            type="button"
-            className="pl-start-btn"
-            onClick={handleStart}
-          >
-            <span>Personalize Article</span>
-            <FiArrowRight />
-          </button>
-        </div>
-      )}
-
-      {/* State 2: 4-Step Questionnaire */}
-      {viewState === "questionnaire" && (
-        <LensQuestionnaire
-          questions={questions}
-          currentIndex={stepIndex}
-          answers={answers}
-          onSelectOption={handleSelectOption}
-          onPrevStep={handlePrevStep}
-        />
-      )}
-
-      {/* State 3: Generating (4-Phase Animation) */}
-      {viewState === "generating" && (
-        <GeneratingLens answers={answers} />
-      )}
-
-      {/* State 4: Tailored Result Takeaways */}
-      {viewState === "result" && (
-        <LensResultCard lens={lensData} onReset={handleReset} />
-      )}
     </div>
   );
 }

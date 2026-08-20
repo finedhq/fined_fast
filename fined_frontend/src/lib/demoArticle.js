@@ -71,10 +71,10 @@ export const DEMO_QUESTIONS = [
     question: "How familiar are you with ETFs (Exchange Traded Funds)?",
     display_order: 1,
     options: [
-      { id: "never", label: "Never heard of them", tag: "New to ETFs", icon: "🌱" },
-      { id: "basic", label: "Heard the name, concept is fuzzy", tag: "Curious beginner", icon: "🔍" },
-      { id: "some_exp", label: "Understand basics, want deeper insights", tag: "Intermediate", icon: "📈" },
-      { id: "active", label: "Active investor looking for nuances", tag: "Experienced", icon: "⚡" }
+      { id: "never", label: "Never heard of them", tag: "New to ETFs" },
+      { id: "basic", label: "Heard the name, concept is fuzzy", tag: "Curious beginner" },
+      { id: "some_exp", label: "Understand basics, want deeper insights", tag: "Intermediate" },
+      { id: "active", label: "Active investor looking for nuances", tag: "Experienced" }
     ]
   },
   {
@@ -82,10 +82,10 @@ export const DEMO_QUESTIONS = [
     question: "What is your main goal for reading this article?",
     display_order: 2,
     options: [
-      { id: "beginner_guide", label: "Just exploring how investing works", tag: "Curious mind", icon: "💡" },
-      { id: "compare_mf", label: "Comparing ETFs vs Mutual Funds", tag: "Comparison seeker", icon: "⚖️" },
-      { id: "build_portfolio", label: "Ready to build a diversified portfolio", tag: "Action oriented", icon: "🎯" },
-      { id: "cost_efficiency", label: "Understanding fees & expense ratios", tag: "Cost conscious", icon: "💰" }
+      { id: "beginner_guide", label: "Just exploring how investing works", tag: "Curious mind" },
+      { id: "compare_mf", label: "Comparing ETFs vs Mutual Funds", tag: "Comparison seeker" },
+      { id: "build_portfolio", label: "Ready to build a diversified portfolio", tag: "Action oriented" },
+      { id: "cost_efficiency", label: "Understanding fees & expense ratios", tag: "Cost conscious" }
     ]
   },
   {
@@ -93,10 +93,10 @@ export const DEMO_QUESTIONS = [
     question: "What is your current investing status?",
     display_order: 3,
     options: [
-      { id: "none", label: "Haven't started investing yet", tag: "Starting fresh", icon: "🚀" },
-      { id: "sip_mf", label: "Investing via SIPs in Mutual Funds", tag: "SIP investor", icon: "📅" },
-      { id: "direct_stocks", label: "Buying individual company stocks", tag: "Direct equities", icon: "🏢" },
-      { id: "crypto_alt", label: "FDs, Gold, or other assets", tag: "Alternative assets", icon: "🛡️" }
+      { id: "none", label: "Haven't started investing yet", tag: "Starting fresh" },
+      { id: "sip_mf", label: "Investing via SIPs in Mutual Funds", tag: "SIP investor" },
+      { id: "direct_stocks", label: "Buying individual company stocks", tag: "Direct equities" },
+      { id: "crypto_alt", label: "FDs, Gold, or other assets", tag: "Alternative assets" }
     ]
   },
   {
@@ -104,10 +104,10 @@ export const DEMO_QUESTIONS = [
     question: "What is the single biggest question or confusion you have?",
     display_order: 4,
     options: [
-      { id: "how_it_works", label: "How does an ETF actually work?", tag: "Core mechanics", icon: "⚙️" },
-      { id: "risk_safety", label: "Is it safe and what are the risks?", tag: "Risk focus", icon: "🛡️" },
-      { id: "tax_liquidity", label: "Taxes, charges, and withdrawing money", tag: "Tax & liquidity", icon: "📊" },
-      { id: "which_to_buy", label: "How to evaluate or pick an ETF", tag: "Selection strategy", icon: "🧭" }
+      { id: "how_it_works", label: "How does an ETF actually work?", tag: "Core mechanics" },
+      { id: "risk_safety", label: "Is it safe and what are the risks?", tag: "Risk focus" },
+      { id: "tax_liquidity", label: "Taxes, charges, and withdrawing money", tag: "Tax & liquidity" },
+      { id: "which_to_buy", label: "How to evaluate or pick an ETF", tag: "Selection strategy" }
     ]
   }
 ];

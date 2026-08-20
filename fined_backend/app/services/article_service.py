@@ -14,8 +14,28 @@ class ArticleService:
         return article_repo.get_all(limit=limit, offset=offset, tag=tag)
 
     def get_by_slug(self, slug: str) -> dict | None:
-        """Fetch a specific article directly by its slug."""
-        return article_repo.get_by_slug(slug)
+        """Fetch a specific article directly by its slug with fallback for legacy articles."""
+        if not slug:
+            return None
+
+        # 1. Primary lookup by slug column in DB
+        article = article_repo.get_by_slug(slug)
+        if article:
+            return article
+
+        # 2. Fallback lookup for legacy articles where slug was NULL or empty
+        all_articles = article_repo.get_all(limit=100, offset=0)
+        for a in all_articles:
+            gen_slug = self._generate_slug(a.get("title", ""))
+            if gen_slug == slug:
+                # 3. Auto-heal: backfill the missing slug in Supabase
+                article_id = a.get("id")
+                if article_id and not a.get("slug"):
+                    article_repo.update_slug(article_id, gen_slug)
+                    a["slug"] = gen_slug
+                return a
+
+        return None
 
     def get_adjacent(self, slug: str) -> dict:
         """Get previous and next articles based on current slug"""
@@ -24,10 +44,13 @@ class ArticleService:
             return {"previous": None, "next": None}
         return article_repo.get_adjacent(article["created_at"])
 
-    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", author_id: str = None) -> dict:
-        """Admin adds article — equivalent to addArticle"""
-        slug = self._generate_slug(title)
-        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=slug, author_id=author_id)
+    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = None, author_id: str = None) -> dict:
+        """Admin adds article — using custom slug if provided, else auto-generated from title"""
+        if slug and slug.strip():
+            final_slug = self._sanitize_slug(slug.strip())
+        else:
+            final_slug = self._generate_slug(title)
+        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=final_slug, author_id=author_id)
         
     def get_all_authors(self) -> list:
         return article_repo.get_all_authors()
@@ -129,11 +152,15 @@ class ArticleService:
         """Save waitlist email subscription"""
         article_repo.save_waitlist_email(email)
 
+    def _sanitize_slug(self, text: str) -> str:
+        s = text.lower().strip()
+        s = re.sub(r'[^a-z0-9]+', '-', s)
+        s = re.sub(r'^-+|-+$', '', s)
+        return s
+
     def _generate_slug(self, title: str) -> str:
         # Must exactly match generateSlug() in ArticlesPage.jsx
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower())
-        slug = re.sub(r'^-+|-+$', '', slug)
-        return slug
+        return self._sanitize_slug(title)
 
     def build_sitemap_xml(self) -> str:
         articles = article_repo.get_all_for_sitemap()
@@ -148,7 +175,7 @@ class ArticleService:
             entries.append(f"<url><loc>{loc}</loc><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>")
 
         for a in articles:
-            slug = self._generate_slug(a["title"])
+            slug = a.get("slug") or self._generate_slug(a.get("title", ""))
             loc = escape(f"https://myfined.com/articles/{slug}")
             lastmod_raw = a.get("published_at") or a.get("created_at")
             lastmod = lastmod_raw[:10] if lastmod_raw else ""

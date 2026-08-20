@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiChevronLeft, FiCheck } from "react-icons/fi";
+import { FiChevronLeft, FiArrowRight } from "react-icons/fi";
 
 export default function LensQuestionnaire({
   questions = [],
@@ -25,7 +25,7 @@ export default function LensQuestionnaire({
     const optKey = typeof opt === "string" ? `opt_${idx}` : (opt.id || `opt_${idx}`);
     
     setAnimatingKey(optKey);
-    // Subtle 180ms delay so user sees selection visually before advancing
+    // Tactile delay so user perceives the futuristic selection state before advancing
     setTimeout(() => {
       onSelectOption(qIdentifier, optKey, label, currentQuestion.question);
       setAnimatingKey(null);
@@ -33,7 +33,7 @@ export default function LensQuestionnaire({
   };
 
   return (
-    <div className="pl-quest-body">
+    <div className="pl-quest-body" key={currentIndex}>
       {/* Progress Header */}
       <div className="pl-progress-wrap">
         <div className="pl-progress-meta">
@@ -47,9 +47,8 @@ export default function LensQuestionnaire({
               onClick={onPrevStep}
               title="Previous question"
             >
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
-                <FiChevronLeft /> Back
-              </span>
+              <FiChevronLeft size={13} />
+              <span>Back</span>
             </button>
           )}
         </div>
@@ -64,7 +63,7 @@ export default function LensQuestionnaire({
       {/* Question Title */}
       <h3 className="pl-quest-title">{currentQuestion.question}</h3>
 
-      {/* Options List */}
+      {/* Options List - Clean & Sleek (No Tickboxes) */}
       <div className="pl-options-list">
         {(currentQuestion.options || []).map((opt, idx) => {
           const label = typeof opt === "string" ? opt : (opt.label || opt.text || String(opt));
@@ -78,16 +77,11 @@ export default function LensQuestionnaire({
             <button
               key={optKey}
               type="button"
-              className={`pl-option-btn ${isSelected ? "selected" : ""}`}
+              className={`pl-option-item ${isSelected ? "selected" : ""}`}
               onClick={() => handleOptionClick(opt, idx)}
             >
-              {typeof opt === "object" && opt.icon && (
-                <span className="pl-option-icon">{opt.icon}</span>
-              )}
-              <span className="pl-option-label">{label}</span>
-              <div className="pl-option-check">
-                {isSelected && <FiCheck />}
-              </div>
+              <span className="pl-option-item-text">{label}</span>
+              <FiArrowRight className="pl-option-arrow" />
             </button>
           );
         })}

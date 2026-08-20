@@ -990,7 +990,7 @@ function Hero() {
                   <SwiperSlide key={index}>
                     <div
                       className="article-swiper-card"
-                      onClick={() => !isPlaceholder ? navigate(`/articles/${generateSlug(articleData.title)}`) : null}
+                      onClick={() => !isPlaceholder ? navigate(`/articles/${articleData.slug || generateSlug(articleData.title)}`) : null}
                     >
                       <img
                         src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg}

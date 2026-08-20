@@ -116,7 +116,8 @@ function TagArticlesPage() {
 
   const openArticle = (article) => {
     if (!article) return;
-    navigate(`/tags/${tag}/${generateSlug(article.title)}`);
+    const targetSlug = article.slug || generateSlug(article.title);
+    navigate(`/tags/${tag}/${targetSlug}`);
     setSelectedArticle(article);
   };
 
@@ -127,8 +128,8 @@ function TagArticlesPage() {
 
   useEffect(() => {
     if (slug && articles.length > 0) {
-      const article = articles.find(a => generateSlug(a.title) === slug);
-      if (article && (!selectedArticle || generateSlug(selectedArticle.title) !== slug)) {
+      const article = articles.find(a => (a.slug || generateSlug(a.title)) === slug);
+      if (article && (!selectedArticle || (selectedArticle.slug || generateSlug(selectedArticle.title)) !== slug)) {
         setSelectedArticle(article);
       }
     } else if (!slug && selectedArticle) {

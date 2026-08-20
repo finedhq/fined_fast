@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", content: "", description: "", tag: "Deep Dives", author_id: "" });
+  const [form, setForm] = useState({ title: "", slug: "", content: "", description: "", tag: "Deep Dives", author_id: "" });
   const [authors, setAuthors] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
@@ -29,6 +29,7 @@ function AdminArticleForm() {
 
     const formData = new FormData();
     formData.append("title", form.title);
+    if (form.slug) formData.append("slug", form.slug);
     formData.append("content", form.content);
     formData.append("description", form.description);
     formData.append("tag", form.tag);
@@ -37,7 +38,7 @@ function AdminArticleForm() {
 
     try {
       await postArticle(formData);
-      setForm({ title: "", content: "", description: "", tag: "Deep Dives", author_id: form.author_id });
+      setForm({ title: "", slug: "", content: "", description: "", tag: "Deep Dives", author_id: form.author_id });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");
@@ -66,6 +67,19 @@ function AdminArticleForm() {
               placeholder="e.g., Basics of Cryptocurrency"
               required
             />
+          </label>
+
+          <label>
+            Custom URL Slug (Optional)
+            <input
+              name="slug"
+              value={form.slug}
+              onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }))}
+              placeholder={form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : "e.g., cryptocurrency-basics-guide"}
+            />
+            <span style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", display: "block" }}>
+              Live URL: <code>/articles/{form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : "custom-slug")}</code>
+            </span>
           </label>
 
           <label>
