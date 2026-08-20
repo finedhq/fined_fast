@@ -55,6 +55,7 @@ export default function CourseOverview() {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const certificateRef = useRef(null);
+  const [heroHeight, setHeroHeight] = useState('auto');
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
@@ -62,6 +63,36 @@ export default function CourseOverview() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const updateHeight = () => {
+      const bannerEl = document.getElementById('course-hero-banner-id');
+      if (bannerEl && window.innerWidth >= 1024) {
+        setHeroHeight(`${bannerEl.offsetHeight}px`);
+      } else {
+        setHeroHeight('auto');
+      }
+    };
+
+    // Initial checks to catch any delayed layout shifts
+    updateHeight();
+    setTimeout(updateHeight, 100);
+    setTimeout(updateHeight, 500);
+
+    const bannerEl = document.getElementById('course-hero-banner-id');
+    if (!bannerEl) return;
+    
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(bannerEl);
+    
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;
@@ -126,7 +157,7 @@ export default function CourseOverview() {
           <div className="course-main-content">
             {/* Hero Banner */}
             <RevealOnScroll>
-              <div className="course-hero-banner">
+              <div id="course-hero-banner-id" className="course-hero-banner">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                   <button onClick={() => navigate('/courses')} className="hero-back-btn-outside" style={{ flexShrink: 0 }}>
                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '18px', height: '18px', transform: 'translateX(-1px)' }}>
@@ -389,7 +420,14 @@ export default function CourseOverview() {
 
             {/* Dashboard Stats & FinScore */}
             <RevealOnScroll delay={100}>
-              <div className="dash-stats-card">
+              <div 
+                className="dash-stats-card" 
+                style={{ 
+                  height: heroHeight,
+                  minHeight: heroHeight,
+                  justifyContent: heroHeight !== 'auto' ? 'space-between' : 'flex-start'
+                }}
+              >
                 <div className="dash-stats-list">
                   <div className="dash-stat-item">
                     <div className="dash-stat-icon-wrapper icon-streak">

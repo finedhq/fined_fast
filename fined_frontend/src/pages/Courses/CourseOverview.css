@@ -432,6 +432,23 @@
   cursor: not-allowed;
 }
 
+@media (min-width: 1024px) {
+  .hc-icon-placeholder {
+    display: none;
+  }
+
+  .hc-header {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .hc-content {
+    padding-right: 2rem;
+  }
+}
+
 .hc-content .hc-module-num {
   font-size: 0.75rem;
   color: #64748b;
