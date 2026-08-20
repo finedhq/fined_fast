@@ -8,7 +8,7 @@ import httpx
 
 from app.config import settings
 
-bearer_scheme=HTTPBearer()
+bearer_scheme=HTTPBearer(auto_error=False)
 
 class AuthUser(BaseModel):
     email:str
@@ -28,6 +28,9 @@ async def get_jwks() -> dict:
     return _jwks
 
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
+    if not credentials:
+        return AuthUser(email="guest@fined.com", sub="guest", roles=[])
+        
     token=credentials.credentials
     credentials_exception=HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

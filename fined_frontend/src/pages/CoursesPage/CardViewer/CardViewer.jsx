@@ -39,8 +39,8 @@ function CardViewer() {
   const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState("");
 
-  const { user } = useAuth0();
-  const email = user?.email || "";
+  const { user, isAuthenticated } = useAuth0();
+  const email = (isAuthenticated && user) ? (user.email || "guest@fined.com") : "guest@fined.com";
 
   // Ref to track latest userAnswersMap for background sync and completion calculation
   const answersRef = useRef(userAnswersMap);

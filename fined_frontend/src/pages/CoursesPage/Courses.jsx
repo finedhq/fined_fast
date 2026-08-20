@@ -29,8 +29,12 @@ export default function Courses() {
   const carouselRef = useRef(null);
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated || !user) return;
-    setEmail(user.email || "");
+    if (isLoading) return;
+    if (isAuthenticated && user) {
+      setEmail(user.email || "guest@fined.com");
+    } else {
+      setEmail("guest@fined.com");
+    }
   }, [isLoading, isAuthenticated, user]);
 
   async function fetchCourses() {
@@ -270,11 +274,7 @@ function CourseCard({ course, isAuthenticated, navigate }) {
   return (
     <div
       onClick={() => {
-        if (isAuthenticated) {
-          navigate(`/courses/${course.slug || course.id}`);
-        } else {
-          toast.error("Please sign in to view this course");
-        }
+        navigate(`/courses/${course.slug || course.id}`);
       }}
       className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full h-full cursor-pointer flex flex-col overflow-hidden group"
     >

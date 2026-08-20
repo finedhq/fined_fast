@@ -95,8 +95,12 @@ export default function CourseOverview() {
   }, [loading]);
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated || !user) return;
-    setEmail(user.email || '');
+    if (isLoading) return;
+    if (isAuthenticated && user) {
+      setEmail(user.email || 'guest@fined.com');
+    } else {
+      setEmail('guest@fined.com');
+    }
   }, [isLoading, isAuthenticated, user]);
 
   async function fetchData() {

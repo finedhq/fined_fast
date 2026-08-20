@@ -51,7 +51,7 @@ function App() {
           <ApiTokenProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                <Route path="/cards/:cardSlug" element={<CardViewer />} />
                 <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
                 <Route path="/lens" element={<Navigate to="/articles" replace />} />
                 <Route path="/" element={<MainLayout />}>
@@ -60,7 +60,7 @@ function App() {
                   <Route path="articles/:slug" element={<SingleArticlePage />} />
                   <Route path="tags/:tag" element={<TagArticlesPage />} />
                   <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
-                  <Route path="courses" element={<AuthenticationGuard component={Courses} />} />
+                  <Route path="courses" element={<Courses />} />
                   <Route path="contact" element={<ContactPage />} />
                   <Route path="feedback" element={<FeedbackPage />} />
 
@@ -78,7 +78,7 @@ function App() {
                   <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
                   <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
                   <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
-                  <Route path="courses/:courseSlug" element={<AuthenticationGuard component={CourseOverview} />} />
+                  <Route path="courses/:courseSlug" element={<CourseOverview />} />
                   <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />
                   <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
                   <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
