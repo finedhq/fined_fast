@@ -5,6 +5,17 @@
       "destination": "https://api.myfined.com/sitemap.xml"
     },
     {
+      "source": "/articles/:slug*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/articles/:slug*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -105,6 +105,8 @@ if os.path.exists(FRONTEND_DIST_DIR):
     if os.path.exists(assets_dir):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
+import html
+
 @app.get("/{fallback_path:path}", include_in_schema=False)
 async def spa_fallback(fallback_path: str):
     # Do not intercept API or docs routes
@@ -120,12 +122,55 @@ async def spa_fallback(fallback_path: str):
     file_path = os.path.join(FRONTEND_DIST_DIR, fallback_path)
     if fallback_path and os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(file_path)
+
+    # Locate index.html (dist or root for local dev)
+    index_path = os.path.join(FRONTEND_DIST_DIR, "index.html")
+    if not os.path.exists(index_path):
+        dev_index = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "fined_frontend", "index.html"))
+        if os.path.exists(dev_index):
+            index_path = dev_index
+
+    # Check if request is for a single article (for social crawler preview generation)
+    if fallback_path.startswith("articles/") and os.path.exists(index_path):
+        slug = fallback_path.split("articles/")[1].strip("/").split("?")[0]
+        if slug:
+            try:
+                article = article_service.get_by_slug(slug)
+                if article:
+                    with open(index_path, "r", encoding="utf-8") as f:
+                        html_content = f.read()
+
+                    title = html.escape(article.get("title") or "FinEd Article")
+                    raw_desc = article.get("description") or (article.get("content", "").split("\n")[0] if article.get("content") else "A clear, practical finance explainer from FinEd.")
+                    description = html.escape(raw_desc[:250])
+                    image_url = html.escape(article.get("image_url") or "https://www.myfined.com/assets/images/fined_card_banner.png")
+                    article_url = f"{settings.FRONTEND_URL}/articles/{slug}"
+
+                    og_tags = f"""
+  <title>{title} | FinEd</title>
+  <meta name="description" content="{description}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="FinEd" />
+  <meta property="og:title" content="{title}" />
+  <meta property="og:description" content="{description}" />
+  <meta property="og:image" content="{image_url}" />
+  <meta property="og:url" content="{article_url}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{title}" />
+  <meta name="twitter:description" content="{description}" />
+  <meta name="twitter:image" content="{image_url}" />
+"""
+                    if "</head>" in html_content:
+                        html_content = html_content.replace("</head>", f"{og_tags}\n</head>", 1)
+                    return Response(content=html_content, media_type="text/html")
+            except Exception:
+                pass  # Fall back to standard index.html on any error
         
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
-    index_path = os.path.join(FRONTEND_DIST_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
         
     # Fallback redirect to Frontend URL if dist is not built or available
     return RedirectResponse(url=f"{settings.FRONTEND_URL}/{fallback_path}")
+
 

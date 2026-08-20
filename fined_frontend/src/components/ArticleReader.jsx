@@ -4,6 +4,7 @@ import { IoStarOutline, IoStar, IoSparkles } from "react-icons/io5";
 import { RiShareForwardLine } from "react-icons/ri";
 import { FiX } from "react-icons/fi";
 import PersonalLensSidebar from "./PersonalLens/PersonalLensSidebar";
+import ShareModal from "./ShareModal";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -104,6 +105,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [readingProgress, setReadingProgress] = useState(0);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
@@ -127,7 +129,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isMobileTocOpen]);
-  const [isScrollingUp, setIsScrollingUp] = useState(false);
+  const [isScrollingUp, setIsScrollingUp] = useState(true);
 
 
   const blocks = useMemo(
@@ -230,22 +232,41 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     const metaDesc = ensure('meta[name="description"]', { name: "description" });
     const ogTitle = ensure('meta[property="og:title"]', { property: "og:title" });
     const ogDesc = ensure('meta[property="og:description"]', { property: "og:description" });
+    const ogImage = ensure('meta[property="og:image"]', { property: "og:image" });
+    const ogUrl = ensure('meta[property="og:url"]', { property: "og:url" });
+    const ogType = ensure('meta[property="og:type"]', { property: "og:type" });
+    const twitterCard = ensure('meta[name="twitter:card"]', { name: "twitter:card" });
+    const twitterTitle = ensure('meta[name="twitter:title"]', { name: "twitter:title" });
+    const twitterDesc = ensure('meta[name="twitter:description"]', { name: "twitter:description" });
+    const twitterImage = ensure('meta[name="twitter:image"]', { name: "twitter:image" });
+
     const prevDesc = metaDesc.getAttribute("content");
     const prevOgT = ogTitle.getAttribute("content");
     const prevOgD = ogDesc.getAttribute("content");
+    const prevOgI = ogImage.getAttribute("content");
+    const prevTwitterI = twitterImage.getAttribute("content");
 
     document.title = `${article.title} | FinEd Articles`;
     metaDesc.setAttribute("content", description);
     ogTitle.setAttribute("content", article.title);
     ogDesc.setAttribute("content", description);
+    if (article.image_url) ogImage.setAttribute("content", article.image_url);
+    ogUrl.setAttribute("content", window.location.href);
+    ogType.setAttribute("content", "article");
+    twitterCard.setAttribute("content", "summary_large_image");
+    twitterTitle.setAttribute("content", article.title);
+    twitterDesc.setAttribute("content", description);
+    if (article.image_url) twitterImage.setAttribute("content", article.image_url);
 
     return () => {
       document.title = prevTitle;
       if (prevDesc) metaDesc.setAttribute("content", prevDesc);
       if (prevOgT) ogTitle.setAttribute("content", prevOgT);
       if (prevOgD) ogDesc.setAttribute("content", prevOgD);
+      if (prevOgI) ogImage.setAttribute("content", prevOgI);
+      if (prevTwitterI) twitterImage.setAttribute("content", prevTwitterI);
     };
-  }, [article?.title, description]);
+  }, [article?.title, article?.image_url, description]);
 
   /* escape key */
   useEffect(() => {
@@ -448,22 +469,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   {/* Spacer to prevent bottom items from being cut off during scroll */}
                   <div style={{ height: "20px", flexShrink: 0, width: "100%" }} />
                 </ul>
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "8px 16px",
-                  marginTop: "16px",
-                  marginBottom: "8px",
-                  marginLeft: "1.25rem",
-                  width: "fit-content",
-                  backgroundColor: "#fff",
-                  borderRadius: "16px",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
-                  flexShrink: 0
-                }}>
+                <div className="ar-toc-rate-share">
                   <span style={{ fontSize: "16px", fontWeight: "600", color: "#4B5563" }}>
                     Rate & Share this article
                   </span>
@@ -474,7 +480,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                           key={star}
                           style={{
                             cursor: "pointer",
-                            color: star <= (hoverRating || rating) ? "#F5A623" : "#4B5563",
+                            color: star <= (hoverRating || rating) ? "#F59E0B" : "#FCD34D",
                             fontSize: "22px",
                             display: "flex",
                             alignItems: "center",
@@ -489,14 +495,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       ))}
                     </div>
                     <button
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({ title: article.title, url: window.location.href });
-                        } else {
-                          navigator.clipboard.writeText(window.location.href);
-                          alert("Link copied to clipboard!");
-                        }
-                      }}
+                      onClick={() => setIsShareModalOpen(true)}
                       style={{
                         background: "none",
                         border: "none",
@@ -508,7 +507,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                         justifyContent: "center",
                         padding: "4px"
                       }}
-                      title="Share"
+                      title="Share Article with Preview"
+                      aria-label="Share article"
                     >
                       <RiShareForwardLine />
                     </button>
@@ -594,6 +594,60 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               })}
             </div>
 
+            {/* RATE & SHARE CARD AT END OF ARTICLE */}
+            <div className="ar-end-card">
+              <div className="ar-end-card-header">
+                <div className="ar-end-card-icon">
+                  <IoSparkles />
+                </div>
+                <div>
+                  <h3 className="ar-end-card-title">
+                    {rating > 0 ? "Thanks for your feedback!" : "Enjoyed this article?"}
+                  </h3>
+                  <p className="ar-end-card-subtitle">
+                    {rating > 0 
+                      ? `You rated this explainer ${rating} out of 5 stars.`
+                      : "Rate this explainer and share it with friends."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="ar-end-card-actions">
+                <div className="ar-end-stars-wrap">
+                  <span className="ar-end-stars-label">Your Rating:</span>
+                  <div className="ar-end-stars">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        className="ar-star-btn"
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                        aria-label={`Rate ${star} stars`}
+                      >
+                        {star <= (hoverRating || rating) ? (
+                          <IoStar className="ar-star-filled" />
+                        ) : (
+                          <IoStarOutline className="ar-star-empty" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="ar-end-share-btn"
+                  onClick={() => setIsShareModalOpen(true)}
+                  aria-label="Share this article"
+                >
+                  <RiShareForwardLine size={18} />
+                  <span>Share Article</span>
+                </button>
+              </div>
+            </div>
+
             {footer}
           </article>
 
@@ -608,7 +662,18 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           </aside>
         </div>
 
-        {/* Floating Trigger for Mobile & Tablet */}
+        {/* Floating Share Trigger for Mobile & Tablet (Left Side) */}
+        <button
+          type="button"
+          className={`ar-mobile-share-trigger ${isScrollingUp ? "scroll-up" : "scroll-down"}`}
+          onClick={() => setIsShareModalOpen(true)}
+          aria-label="Share Article"
+        >
+          <RiShareForwardLine size={18} style={{ color: "#4A3AFF" }} />
+          <span>Share</span>
+        </button>
+
+        {/* Floating Trigger for Mobile & Tablet (Right Side - Personal Lens) */}
         <button
           type="button"
           className="pl-mobile-trigger"
@@ -668,6 +733,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           </div>
         )}
       </div>
+
+      {/* Share Modal Dialog */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        article={article}
+        description={description}
+      />
     </div>
   );
 }

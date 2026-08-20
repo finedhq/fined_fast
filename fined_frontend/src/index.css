@@ -1183,7 +1183,7 @@ button {
 }
 
 .ar-article>.ap-reader-footer {
-  order: 4;
+  order: 5;
 }
 
 .admin-page,
@@ -2382,3 +2382,218 @@ button {
   text-decoration: underline;
   opacity: 0.9;
 }
+
+/* --- TOC RATE & SHARE BOX --- */
+.ar-toc-rate-share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  margin-left: 1.25rem;
+  width: fit-content;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .ar-toc-rate-share {
+    display: none !important;
+  }
+}
+
+/* --- FLOATING MOBILE SHARE PILL (LEFT SIDE) --- */
+.ar-mobile-share-trigger {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+.ar-mobile-share-trigger:active {
+  transform: scale(0.96);
+}
+
+.ar-mobile-share-trigger.scroll-down {
+  transform: translateY(160%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ar-mobile-share-trigger.scroll-up {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 1100px) {
+  .ar-mobile-share-trigger {
+    display: flex;
+  }
+}
+
+/* --- END OF ARTICLE RATE & SHARE CARD --- */
+.ar-end-card {
+  order: 4;
+  width: min(890px, 100%);
+  box-sizing: border-box;
+  margin: 44px 0 28px 0;
+  padding: 24px 28px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ar-end-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ar-end-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #4a3aff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ar-end-card-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ar-end-card-subtitle {
+  margin: 3px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ar-end-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ar-end-stars-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ar-end-stars-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.ar-end-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ar-star-btn {
+  background: none;
+  border: none;
+  padding: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #f59e0b;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.ar-star-btn:hover {
+  transform: scale(1.2);
+}
+
+.ar-star-filled {
+  color: #f59e0b;
+  filter: drop-shadow(0 1px 3px rgba(245, 158, 11, 0.35));
+}
+
+.ar-star-empty {
+  color: #fcd34d;
+  opacity: 0.85;
+}
+
+.ar-end-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #4a3aff;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(74, 58, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+.ar-end-share-btn:hover {
+  background: #3b2bee;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(74, 58, 255, 0.35);
+}
+
+.ar-end-share-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .ar-end-card {
+    padding: 20px;
+    margin: 32px 0 20px 0;
+  }
+  .ar-end-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .ar-end-stars-wrap {
+    justify-content: space-between;
+  }
+  .ar-end-share-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}

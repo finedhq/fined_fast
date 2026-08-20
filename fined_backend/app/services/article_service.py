@@ -7,20 +7,45 @@ from app.services.score_service import score_service
 import re
 from xml.sax.saxutils import escape
 
+import time
+
 class ArticleService:
+    def __init__(self):
+        self._slug_cache = {}
+        self._slug_cache_ttl = 600  # 10 minutes
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
         """Fetch all articles — equivalent to getAllArticles"""
         return article_repo.get_all(limit=limit, offset=offset, tag=tag)
 
     def get_by_slug(self, slug: str) -> dict | None:
-        """Fetch a specific article directly by its slug with fallback for legacy articles."""
+        """Fetch a specific article directly by its slug with in-memory caching and fallback for legacy articles."""
         if not slug:
             return None
+
+        now = time.time()
+        if slug in self._slug_cache:
+            entry, timestamp = self._slug_cache[slug]
+            if now - timestamp < self._slug_cache_ttl:
+                return entry
+
+        # Special handling for flagship demo article
+        if slug in ("understanding-etfs-exchange-traded-funds", "etf-101-guide"):
+            demo = {
+                "id": "etf-101-guide",
+                "slug": "understanding-etfs-exchange-traded-funds",
+                "title": "The No-Nonsense Guide to Exchange Traded Funds (ETFs)",
+                "description": "A plain English breakdown of ETFs: how they bundle assets, trade in real time on stock exchanges, and offer low expense ratios.",
+                "image_url": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",
+                "tag": "Investing"
+            }
+            self._slug_cache[slug] = (demo, now)
+            return demo
 
         # 1. Primary lookup by slug column in DB
         article = article_repo.get_by_slug(slug)
         if article:
+            self._slug_cache[slug] = (article, now)
             return article
 
         # 2. Fallback lookup for legacy articles where slug was NULL or empty
@@ -33,6 +58,7 @@ class ArticleService:
                 if article_id and not a.get("slug"):
                     article_repo.update_slug(article_id, gen_slug)
                     a["slug"] = gen_slug
+                self._slug_cache[slug] = (a, now)
                 return a
 
         return None
