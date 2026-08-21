@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Lenis from 'lenis';
 import RevealOnScroll from '../../components/RevealOnScroll';
 import "./AboutPage.css";
@@ -14,6 +15,8 @@ import imgLeaderboards from '../../assets/leaderboards-abtus.png';
 import imgInstitutional from '../../assets/institutional-partnerships.png';
 
 export default function AboutPage() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time) {
@@ -88,7 +91,7 @@ export default function AboutPage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mission-plus">
                   <path d="M12 4V20M4 12H20" stroke="#FFB600" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <p>Most of us finished school without ever learning how credit scores work, how to invest in a mutual fund, or how to budget our monthly expenses.</p>
+                <p>Break down complex financial topics into simple, engaging, and bite-sized lessons that fit into your busy life.</p>
               </div>
             </RevealOnScroll>
             
@@ -97,7 +100,7 @@ export default function AboutPage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mission-plus">
                   <path d="M12 4V20M4 12H20" stroke="#FFB600" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <p>Most of us finished school without ever learning how credit scores work, how to invest in a mutual fund, or how to budget our monthly expenses.</p>
+                <p>Equip you with the practical skills and confidence needed to navigate real-world financial decisions effectively.</p>
               </div>
             </RevealOnScroll>
 
@@ -106,7 +109,7 @@ export default function AboutPage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mission-plus">
                   <path d="M12 4V20M4 12H20" stroke="#FFB600" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <p>Most of us finished school without ever learning how credit scores work, how to invest in a mutual fund, or how to budget our monthly expenses.</p>
+                <p>Bridge the gap left by traditional education to help you build a foundation for lifelong financial independence.</p>
               </div>
             </RevealOnScroll>
           </div>
@@ -200,7 +203,7 @@ export default function AboutPage() {
                 <h2>For Institutional Partnerships</h2>
                 <p>We built FinEd to fix this gap. Our goal is to make finance intuitive. We don't publish long, dry textbooks. Instead, we use interactive flashcards, calculators, and simple dashboards so you can learn by doing.</p>
                 <p>We built FinEd to fix this gap. Our goal is to make finance intuitive.</p>
-                <button className="btn-partner-with-us">Partner with us</button>
+                <button className="btn-partner-with-us" onClick={() => navigate('/contact')}>Partner with us</button>
               </div>
             </RevealOnScroll>
           </div>
