@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any, List
 
 from app.integrations.storage import upload_to_supabase
 from app.integrations.supabase_client import supabase
-from app.dependencies import get_current_user, require_admin, AuthUser
+from app.dependencies import get_current_user, get_optional_current_user, require_admin, AuthUser
 from app.models.card_data import validate_card_data
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -106,7 +106,7 @@ async def delete_course(id: str, user: AuthUser = Depends(require_admin)):
 
 
 @router.post("/getongoingcourse")
-async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Depends(get_current_user)):
+async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Depends(get_optional_current_user)):
     """Fetch user's current in-progress course"""
     try:
         # Get user's ongoing course ID
@@ -127,29 +127,30 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
 
 
 @router.post("/course/{course_slug}")
-async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser = Depends(get_current_user)):
+async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser = Depends(get_optional_current_user)):
     """
     Fetch course overview with modules and card completion progress.
     Optimized: consolidated card lookups and executed in parallel.
     """
     try:
         # Sequential database requests (Thread-safe)
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title").eq("slug", course_slug).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description").eq("slug", course_slug).execute())
         if not course_res.data:
-            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title").eq("id", course_slug).execute())
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description").eq("id", course_slug).execute())
         
         if not course_res.data:
-            return {"title": "", "data": []}
+            return {"title": "", "description": "", "data": []}
             
         course_id = course_res.data[0]["id"]
         course_title = course_res.data[0]["title"]
+        course_description = course_res.data[0].get("description", "")
             
         modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug").eq("course_id", course_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
         modules = modules_res.data or []
         if not modules:
-            return {"title": course_title, "data": []}
+            return {"title": course_title, "description": course_description, "data": []}
             
         # Optimization: Fetch only cards belonging to the modules in this course (Latency Win 1)
         module_ids = [m["id"] for m in modules]
@@ -191,7 +192,7 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
                 "cards": module_cards
             })
             
-        return {"title": course_title, "data": formatted_data}
+        return {"title": course_title, "description": course_description, "data": formatted_data}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

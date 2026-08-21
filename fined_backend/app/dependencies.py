@@ -29,8 +29,11 @@ async def get_jwks() -> dict:
 
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     if not credentials:
-        return AuthUser(email="guest@fined.com", sub="guest", roles=[])
-        
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     token=credentials.credentials
     credentials_exception=HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -69,6 +72,14 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
     
     except JWTError:
         raise credentials_exception
+
+async def get_optional_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
+    if not credentials:
+        return AuthUser(email="guest@fined.com", sub="guest", roles=[])
+    try:
+        return await get_current_user(credentials)
+    except HTTPException:
+        return AuthUser(email="guest@fined.com", sub="guest", roles=[])
 
 
 

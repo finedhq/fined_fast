@@ -51,7 +51,7 @@ function App() {
           <ApiTokenProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/cards/:cardSlug" element={<CardViewer />} />
+                <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                 <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
                 <Route path="/lens" element={<Navigate to="/articles" replace />} />
                 <Route path="/" element={<MainLayout />}>
