@@ -189,6 +189,7 @@ function ArticlesPage() {
             position: "relative",
             overflow: "hidden"
           }}
+          className="ap-spotlight-banner"
         >
           <div style={{ maxWidth: "720px", zIndex: 2 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>

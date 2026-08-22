@@ -317,7 +317,7 @@ export default function PersonalLensSidebar({
 
         {/* State 4: Tailored Result Takeaways */}
         {viewState === "result" && (
-          <LensResultCard lens={lensData} onReset={handleReset} />
+          <LensResultCard lens={lensData} onReset={handleReset} onClose={onCloseDrawer} />
         )}
       </div>
     </div>

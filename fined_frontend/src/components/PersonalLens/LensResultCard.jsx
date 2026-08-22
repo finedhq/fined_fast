@@ -9,7 +9,7 @@ import {
   FiZap,
 } from "react-icons/fi";
 
-export default function LensResultCard({ lens, onReset }) {
+export default function LensResultCard({ lens, onReset, onClose }) {
   if (!lens) return null;
 
   const scrollToHeading = (sectionName) => {
@@ -27,6 +27,9 @@ export default function LensResultCard({ lens, onReset }) {
 
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (onClose) {
+      onClose();
     }
   };
 

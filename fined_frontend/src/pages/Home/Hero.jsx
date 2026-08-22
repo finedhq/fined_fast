@@ -23,6 +23,7 @@ import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
 import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
 import satvikImg from "../../assets/satvik-img.png"
 import { fetchArticles, joinWaitlist } from "../../services/api";
+import instance from "../../lib/axios";
 import newLandingpagebgm from "../../assets/newlandingpagebg.png";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
@@ -308,6 +309,22 @@ function Hero() {
   const [pathOffsets, setPathOffsets] = useState([]);
   const [pathProgresses, setPathProgresses] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [heroCourse, setHeroCourse] = useState(null);
+
+  useEffect(() => {
+    async function getHeroCourse() {
+      try {
+        const res = await instance.get("/courses/getall");
+        if (res.data && res.data.length > 0) {
+          const stockCourse = res.data.find(c => c.title.toLowerCase().includes("stock market"));
+          setHeroCourse(stockCourse || res.data[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch courses", err);
+      }
+    }
+    getHeroCourse();
+  }, []);
 
   // Waitlist state
   const [waitlistEmail, setWaitlistEmail] = useState("");
@@ -720,23 +737,52 @@ function Hero() {
               modules={[EffectCoverflow, Pagination, Autoplay, Navigation]}
               className="courses-swiper"
             >
-              {[...POPULAR_COURSES, ...POPULAR_COURSES].map((course, index) => (
-                <SwiperSlide key={`${course.id}-${index}`} style={{ width: '100%', maxWidth: '950px' }}>
-                  <div className="course-swiper-card" onClick={() => navigate('/courses')}>
-                    <div className="course-swiper-img-container">
-                      <img src={course.image} alt={course.title} className="course-swiper-img" />
-                    </div>
-                    <div className="course-swiper-content">
-                      <h3 className="course-swiper-title">{course.title}</h3>
-                      <div className="course-swiper-meta">
-                        <span className="course-swiper-lessons">{course.lessons} Lessons</span>
-                        <span className="course-swiper-badge">{course.level}</span>
+              {[
+                { type: 'course' },
+                { type: 'coming_soon' },
+                { type: 'course' },
+                { type: 'coming_soon' }
+              ].map((slide, index) => (
+                <SwiperSlide key={`slide-${index}`} style={{ width: '100%', maxWidth: '950px' }}>
+                  {slide.type === 'course' ? (
+                    <div className="course-swiper-card" onClick={() => navigate('/courses')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="w-full flex flex-col md:flex-row items-start gap-4 md:gap-6">
+                        <div className="course-swiper-img-container shrink-0 w-full md:w-[45%]" style={{ flex: 'none', aspectRatio: '4/3' }}>
+                          <img src={heroCourse?.thumbnail_url || featuredImg} alt={heroCourse?.title || "Basics of Stock Market"} className="course-swiper-img" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+                        </div>
+                        <div className="course-swiper-content w-full md:flex-1" style={{ textAlign: 'left' }}>
+                        <h3 className="course-swiper-title" style={{ fontFamily: 'Nunito, sans-serif', fontSize: '28px', color: '#111827', margin: '0 0 8px 0', fontWeight: 'bold' }}>
+                          {heroCourse?.title || "Basics of Stock Market"}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium" style={{ color: '#6B7280', fontSize: '15px', marginBottom: '16px' }}>
+                          <span>{heroCourse?.modules_count || 12} Modules</span>
+                          <span>&bull;</span>
+                          <span>{heroCourse?.duration || 15} mins</span>
+                        </div>
+                        <p className="course-swiper-desc" style={{ fontSize: '16px', color: '#4B5563', margin: '0 0 24px 0' }}>
+                          {heroCourse?.description || "This course will provide you everything you need to start investing in India."}
+                        </p>
+                        <button
+                          className="self-start transition-colors active:scale-95"
+                          style={{ backgroundColor: '#F5A623', color: 'white', padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+                        >
+                          Continue Course
+                        </button>
                       </div>
-                      <p className="course-swiper-desc">
-                        {course.description}
-                      </p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="course-swiper-card" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '415px', flexDirection: 'column' }}>
+                      <div style={{ padding: '20px' }}>
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 20px auto' }}>
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <h3 className="course-swiper-title" style={{ fontSize: '28px', color: '#6B7280', margin: 0, fontWeight: 'bold' }}>More courses coming soon...</h3>
+                        <p style={{ color: '#9CA3AF', fontSize: '16px', margin: '10px 0 0 0' }}>Stay tuned for new financial lessons</p>
+                      </div>
+                    </div>
+                  )}
                 </SwiperSlide>
               ))}
             </Swiper>

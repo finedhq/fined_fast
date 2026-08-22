@@ -176,7 +176,7 @@ export default function CourseOverview() {
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <h1 className="hero-title" style={{ marginBottom: courseDescription ? '0.5rem' : 0 }}>{courseTitle}</h1>
                     {courseDescription && (
-                      <p style={{ color: '#e0e7ff', fontSize: '1rem', maxWidth: '40rem', marginBottom: email === 'guest@fined.com' ? '1rem' : 0 }}>
+                      <p className="hero-desc" style={{ color: '#e0e7ff', fontSize: '1rem', maxWidth: '40rem', marginBottom: email === 'guest@fined.com' ? '1rem' : 0 }}>
                         {courseDescription}
                       </p>
                     )}

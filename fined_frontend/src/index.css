@@ -916,7 +916,7 @@ button {
   width: min(1560px, 100%);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 260px minmax(0, 840px) 340px;
+  grid-template-columns: 260px minmax(0, 880px);
   justify-content: center;
   gap: 36px;
   align-items: start;
@@ -947,11 +947,12 @@ button {
   align-items: flex-start;
   padding-top: 12px;
   padding-bottom: 24px;
+  transform: translateX(-10px);
 }
 
 @media (min-width: 1400px) {
   .ar-toc-aside {
-    transform: translateX(-52px);
+    transform: translateX(-62px);
   }
 }
 
@@ -2595,5 +2596,12 @@ button {
   .ar-end-share-btn {
     justify-content: center;
     width: 100%;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ap-spotlight-banner {
+    width: min(1180px, calc(100% - 32px)) !important;
+    padding: 24px 20px !important;
   }
 }

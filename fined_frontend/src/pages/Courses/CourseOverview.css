@@ -795,10 +795,18 @@
 
   .course-hero-banner {
     padding: 1.5rem;
+    aspect-ratio: auto;
+    justify-content: center;
   }
 
   .course-hero-banner .hero-title {
     font-size: 1.5rem;
+    max-width: 60%;
+  }
+
+  .course-hero-banner .hero-desc {
+    font-size: 0.9rem !important;
+    max-width: 60% !important;
   }
 
   .hc-icon-placeholder {

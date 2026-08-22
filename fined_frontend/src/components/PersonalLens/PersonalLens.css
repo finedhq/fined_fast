@@ -529,6 +529,7 @@
   line-height: 1.55;
   color: #334155;
   margin: 0;
+  font-weight: 500;
 }
 
 .pl-why-matters-box {
@@ -540,7 +541,7 @@
 
 .pl-why-matters-box .pl-result-text {
   color: #1e1b4b;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .pl-focus-chips {
@@ -584,7 +585,7 @@
 
 .pl-takeaway-box .pl-result-text {
   color: #4c1d95;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
 }
 
@@ -601,6 +602,7 @@
 
 .pl-action-box .pl-result-text {
   color: #14532d;
+  font-weight: 600;
   font-size: 12.5px;
 }
 
@@ -643,7 +645,7 @@
   font-weight: 600;
   border: none;
   cursor: pointer;
-  display: none;
+  display: flex;
   align-items: center;
   gap: 8px;
   transition: transform 0.2s;
@@ -667,12 +669,19 @@
 .pl-drawer-modal {
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
   border-radius: 24px 24px 0 0;
   background: #ffffff;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
   animation: pl-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.pl-drawer-modal::-webkit-scrollbar {
+  display: none;
 }
 
 /* --- Keyframe Animations --- */
@@ -712,9 +721,3 @@
   to { transform: translateY(0); }
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1100px) {
-  .pl-mobile-trigger {
-    display: flex;
-  }
-}
