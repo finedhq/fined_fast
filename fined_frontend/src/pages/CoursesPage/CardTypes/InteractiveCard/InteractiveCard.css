@@ -223,6 +223,42 @@
   position: relative;
 }
 
+.ie-intro .jargon:hover::after,
+.ie-content-text .jargon:hover::after {
+  content: attr(data-def);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  width: max-content;
+  max-width: 250px;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.ie-intro .jargon:hover::before,
+.ie-content-text .jargon:hover::before {
+  content: "";
+  position: absolute;
+  bottom: calc(120% - 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1a1a1a transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
 .ie-intro .cite,
 .ie-content-text .cite {
   color: #6b7280;

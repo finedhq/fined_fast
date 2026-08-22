@@ -154,7 +154,7 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
             
         # Optimization: Fetch only cards belonging to the modules in this course (Latency Win 1)
         module_ids = [m["id"] for m in modules]
-        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, card_template, order_index").in_("module_id", module_ids).execute())
+        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id, title, card_template, order_index, slug").in_("module_id", module_ids).execute())
         cards = cards_res.data or []
         
         # Build user progress map

@@ -50,30 +50,30 @@ export default function AboutPage() {
         <div className="stats-container">
           <RevealOnScroll delay={100}>
             <div className="stat-item">
-              <img src={img50kLearner} alt="50K+ Active learners icon" className="stat-icon" />
-              <h3>50K+</h3>
-              <p>Active learners</p>
+              <img src={img50kLearner} alt="100% Free Access icon" className="stat-icon" />
+              <h3>100%</h3>
+              <p>Free Access</p>
             </div>
           </RevealOnScroll>
           <RevealOnScroll delay={200}>
             <div className="stat-item">
-              <img src={img150Lessons} alt="150+ Lesson icon" className="stat-icon" />
-              <h3>150+</h3>
-              <p>Lesson</p>
+              <img src={img150Lessons} alt="12+ Core Modules icon" className="stat-icon" />
+              <h3>12+</h3>
+              <p>Core Modules</p>
             </div>
           </RevealOnScroll>
           <RevealOnScroll delay={300}>
             <div className="stat-item">
-              <img src={imgStar} alt="4.5/5 Learner Rating icon" className="stat-icon star-icon" />
-              <h3>4.5/5</h3>
-              <p>Learner Rating</p>
+              <img src={imgStar} alt="Zero Financial Jargon icon" className="stat-icon star-icon" />
+              <h3>Zero</h3>
+              <p>Financial Jargon</p>
             </div>
           </RevealOnScroll>
           <RevealOnScroll delay={400}>
             <div className="stat-item">
-              <img src={imgInstitute} alt="100+ Partner Institutions icon" className="stat-icon" />
-              <h3>100+</h3>
-              <p>Partner Institutions</p>
+              <img src={imgInstitute} alt="Expert Built Curriculum icon" className="stat-icon" />
+              <h3>Expert</h3>
+              <p>Built Curriculum</p>
             </div>
           </RevealOnScroll>
         </div>
