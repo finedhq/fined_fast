@@ -101,9 +101,10 @@ const Dashboard = () => {
   };
   const levelTitle = getLevelTitle(level);
 
+  const currentLesson = ongoingCourse?.current_lesson || 1;
   const progressPercent = ongoingCourse?.modules_count
-    ? Math.floor((1 / ongoingCourse.modules_count) * 100)
-    : 57; // Dummy if not enough data
+    ? Math.floor((currentLesson / ongoingCourse.modules_count) * 100)
+    : 0;
 
   return (
     <div className="dashboard-wrapper">
@@ -129,14 +130,18 @@ const Dashboard = () => {
                     </div>
                     <div className="dash-course-details">
                       <span className="dash-course-label">Continue Learning</span>
-                      <h3 className="dash-course-title">{ongoingCourse?.title || "Budgeting 101"}</h3>
-                      <span className="dash-course-lesson">Lesson 4 of {ongoingCourse?.modules_count || 7}</span>
-                      <div className="dash-progress-container">
-                        <div className="dash-progress-bar">
-                          <div className="dash-progress-fill" style={{ width: `${progressPercent}%` }}></div>
-                        </div>
-                        <span className="dash-progress-text">{progressPercent}%</span>
-                      </div>
+                      <h3 className="dash-course-title">{ongoingCourse?.title || "No course started yet"}</h3>
+                      {ongoingCourse?.modules_count && (
+                        <>
+                          <span className="dash-course-lesson">Lesson {currentLesson} of {ongoingCourse.modules_count}</span>
+                          <div className="dash-progress-container">
+                            <div className="dash-progress-bar">
+                              <div className="dash-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+                            </div>
+                            <span className="dash-progress-text">{progressPercent}%</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

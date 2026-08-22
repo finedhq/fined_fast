@@ -86,12 +86,12 @@ export default function Navbar() {
           <div className="nav-right">
             {isAuthenticated ? (
               <>
-                <button className="btn-signin" onClick={() => navigate("/dashboard")}>
-                  Dashboard
+                <button className="btn-signin cube-link" onClick={() => navigate("/dashboard")}>
+                  <span className="cube-wrapper" data-text="Dashboard">Dashboard</span>
                 </button>
                 {isAdminUser(user) && (
-                  <button className="btn-signin" onClick={() => navigate("/admin")}>
-                    Admin
+                  <button className="btn-signin cube-link" onClick={() => navigate("/admin")}>
+                    <span className="cube-wrapper" data-text="Admin">Admin</span>
                   </button>
                 )}
                 <button className="btn-nav-register" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
@@ -100,11 +100,11 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <button className="btn-signin" onClick={() => loginWithRedirect()}>
-                  Log in
+                <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
+                  <span className="cube-wrapper" data-text="Log In">Log In</span>
                 </button>
                 <button className="btn-nav-register" onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}>
-                  Sign up
+                  Sign Up
                 </button>
               </>
             )}
@@ -141,10 +141,12 @@ export default function Navbar() {
               <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); logout({ logoutParams: { returnTo: window.location.origin } }); }}>Logout</a></li>
             </>
           ) : (
-            <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect(); }}>Log in</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect({ authorizationParams: { screen_hint: "signup" } }); }}>Sign up</a></li>
-            </>
+              <li className="mobile-nav-auth-wrapper">
+                <div className="mobile-nav-auth-footer">
+                  <button className="mobile-btn-primary" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect({ authorizationParams: { screen_hint: "signup" } }); }}>Sign Up</button>
+                  <button className="mobile-btn-outline" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect(); }}>Log In</button>
+                </div>
+              </li>
           )}
         </ul>
       </div>

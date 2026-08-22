@@ -167,7 +167,7 @@ export default function CourseOverview() {
             {/* Hero Banner */}
             <RevealOnScroll>
               <div id="course-hero-banner-id" className="course-hero-banner">
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="course-hero-header">
                   <button onClick={() => navigate('/courses')} className="hero-back-btn-outside mt-2" style={{ flexShrink: 0 }}>
                     <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '18px', height: '18px', transform: 'translateX(-1px)' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />

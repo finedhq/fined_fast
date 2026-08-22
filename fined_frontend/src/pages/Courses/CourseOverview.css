@@ -73,6 +73,13 @@
   font-weight: 500;
 }
 
+.course-hero-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .course-hero-banner .hero-title {
   font-size: 2rem;
   font-weight: 700;
@@ -797,16 +804,42 @@
     padding: 1.5rem;
     aspect-ratio: auto;
     justify-content: center;
+    background-position: left center;
+  }
+
+  .course-hero-header {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .course-hero-banner .hero-title {
-    font-size: 1.5rem;
-    max-width: 60%;
+    font-size: 1.75rem;
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
   }
 
   .course-hero-banner .hero-desc {
-    font-size: 0.9rem !important;
-    max-width: 60% !important;
+    font-size: 0.95rem !important;
+    max-width: 100% !important;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-progress-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-progress-bar-container {
+    max-width: 100%;
+    width: 100%;
+    flex: none;
+    height: 8px;
   }
 
   .hc-icon-placeholder {

@@ -766,13 +766,13 @@ function Hero() {
                           className="self-start transition-colors active:scale-95"
                           style={{ backgroundColor: '#F5A623', color: 'white', padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '16px' }}
                         >
-                          Continue Course
+                          View Course
                         </button>
                       </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="course-swiper-card" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '415px', flexDirection: 'column' }}>
+                    <div className="course-swiper-card" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '415px', flexDirection: 'column', backgroundColor: '#f0f4ff', border: '1px dashed #c7d2fe' }}>
                       <div style={{ padding: '20px' }}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 20px auto' }}>
                           <circle cx="12" cy="12" r="10"></circle>

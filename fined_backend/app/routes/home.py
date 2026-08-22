@@ -67,16 +67,28 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
 
         ongoing_course_id = stats.get("ongoing_course_id")
 
+        user_row = await asyncio.to_thread(user_repo.get_by_email, body.email)
+
         # 2. Define a small helper for the ongoing course fetch
         async def fetch_ongoing_course():
             if not ongoing_course_id:
                 return None
-            return await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
+            course = await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
+            if not course:
+                return None
+            
+            lesson_number = 1
+            if user_row and user_row.get("ongoing_module_id"):
+                mod = await asyncio.to_thread(course_repo.get_module_by_id, user_row.get("ongoing_module_id"))
+                if mod:
+                    lesson_number = mod.get("order_index", 1)
+            
+            course["current_lesson"] = lesson_number
+            return course
 
         # 3. Run all independent DB queries sequentially (Thread-safe)
         articles = await asyncio.to_thread(article_repo.get_all, 1)
         courses = await asyncio.to_thread(course_repo.get_all)
-        user_row = await asyncio.to_thread(user_repo.get_by_email, body.email)
         ongoing_course_data = await fetch_ongoing_course()
         log_data = await asyncio.to_thread(user_repo.get_score_logs, body.email)
         
