@@ -6,6 +6,17 @@ import Lenis from 'lenis';
 import RevealOnScroll from '../../components/RevealOnScroll';
 import dashboardWateringGuy from '../../assets/dashboard_watering_guy.png';
 import './Dashboard.css';
+import { getCourses, fetchArticles } from '../../services/api';
+import SmartImage from '../../uiComponents/SmartImage';
+
+import { IoSparkles } from "react-icons/io5";
+import { hasAiLens } from "../../utils/textFormatters";
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+};
 
 const InfoIcon = () => (
   <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dash-info-icon-svg">
@@ -22,6 +33,9 @@ const Dashboard = () => {
   const [ongoingCourse, setOngoingCourse] = useState({});
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState("");
+  
+  const [recommendedCourses, setRecommendedCourses] = useState([]);
+  const [recommendedArticles, setRecommendedArticles] = useState([]);
 
   useEffect(() => {
     const lenis = new Lenis();
@@ -56,6 +70,29 @@ const Dashboard = () => {
         setUserData(res.data.userData);
         setOngoingCourse(res.data.ongoingCourseData || {});
       }
+      
+      // Fetch recommendations concurrently
+      try {
+        const [coursesRes, articlesRes] = await Promise.all([
+          getCourses(),
+          fetchArticles({ limit: 5, offset: 0 })
+        ]);
+        
+        const allCourses = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
+        const sortedCourses = allCourses
+          .sort((a, b) => new Date(b.created_at || b.published_at || 0) - new Date(a.created_at || a.published_at || 0))
+          .slice(0, 3); // For now, the user requested only 1 course to be shown, but this will handle up to 3 naturally as requested (latest 3 courses and 3 articles)
+        setRecommendedCourses(sortedCourses.slice(0, 1)); // Enforce showing only 1 course as per user prompt "for now put only 1 course we have"
+
+        const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
+        const sortedArticles = allArticles
+          .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0))
+          .slice(0, 3);
+        setRecommendedArticles(sortedArticles);
+      } catch (recError) {
+        console.error("Failed to fetch recommendations:", recError);
+      }
+
     } catch (error) {
       setError("Failed to fetch your data.");
     } finally {
@@ -269,6 +306,118 @@ const Dashboard = () => {
           </div>
         </RevealOnScroll>
 
+      </div>
+      
+      {/* RECOMMENDATIONS SECTION */}
+      <div className="dashboard-container" style={{ marginTop: '20px' }}>
+        <RevealOnScroll delay={300}>
+          <div className="dash-recommendations-section">
+            <h2 className="dash-rec-header" style={{ marginBottom: '16px' }}>Recommended Course</h2>
+            <div className="ap-articles-grid">
+              {recommendedCourses.map(course => (
+                <div 
+                  key={course.id} 
+                  className="ap-grid-card"
+                  onClick={() => navigate(`/courses/${course.slug || course.id}`)}
+                >
+                  <div className="ap-grid-card-img-wrap">
+                    <img
+                      src={course.thumbnail_url} 
+                      alt={course.title} 
+                      className="ap-grid-card-img"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="ap-grid-card-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                      <span className="ap-grid-category" style={{ margin: 0 }}>
+                        {`${course.modules_count || 0} MODULES`}
+                      </span>
+                    </div>
+                    <h3 className="ap-grid-title">{course.title}</h3>
+                    <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
+                      {course.description || ""}
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                      <span>{formatDate(course.created_at || course.published_at)}</span>
+                      <span style={{ color: '#0ea5e9' }}>
+                        By <span style={{ textDecoration: 'underline' }}>FinEd</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {recommendedCourses.length === 0 && (
+                <p style={{ color: '#64748b' }}>No courses available right now.</p>
+              )}
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll delay={400}>
+          <div className="dash-recommendations-section" style={{ marginTop: '32px', marginBottom: '32px' }}>
+            <h2 className="dash-rec-header" style={{ marginBottom: '16px' }}>Recommended Articles</h2>
+            <div className="ap-articles-grid">
+              {recommendedArticles.map(article => (
+                <div 
+                  key={article.id} 
+                  className="ap-grid-card"
+                  onClick={() => navigate(`/articles/${article.slug || article.id}`)}
+                >
+                  <div className="ap-grid-card-img-wrap">
+                    {article.image_url ? (
+                      <img
+                        src={article.image_url} 
+                        alt={article.title} 
+                        className="ap-grid-card-img"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="ap-grid-card-img-placeholder" />
+                    )}
+                  </div>
+                  <div className="ap-grid-card-content">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                      <span className="ap-grid-category" style={{ margin: 0 }}>
+                        {article.tag?.toUpperCase() || "FINANCE"}
+                      </span>
+                      {hasAiLens(article) && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
+                          <IoSparkles size={9} /> AI Lens
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="ap-grid-title">{article.title}</h3>
+                    <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
+                      {article.description || ""}
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                      <span>{formatDate(article.published_at || article.created_at)}</span>
+                      {article.authors ? (
+                        <span
+                          style={{ cursor: 'pointer', color: '#0ea5e9' }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
+                        >
+                          By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
+                        </span>
+                      ) : (
+                        <span
+                          style={{ cursor: 'pointer', color: '#0ea5e9' }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                        >
+                          By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {recommendedArticles.length === 0 && (
+                <p style={{ color: '#64748b' }}>No articles available right now.</p>
+              )}
+            </div>
+          </div>
+        </RevealOnScroll>
       </div>
     </div>
   );
