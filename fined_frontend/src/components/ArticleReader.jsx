@@ -651,6 +651,15 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
             {footer}
           </article>
 
+          {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}
+          <aside className="ar-lens-aside">
+            <div style={{ position: "sticky", top: "60px" }}>
+              <PersonalLensSidebar
+                article={article}
+                articleId={article?.slug || article?.id || "etf-101-guide"}
+              />
+            </div>
+          </aside>
         </div>
 
         {/* Floating Share Trigger for Mobile & Tablet (Left Side) */}

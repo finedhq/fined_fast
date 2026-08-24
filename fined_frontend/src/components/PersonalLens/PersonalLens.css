@@ -52,6 +52,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  font-size: 21px;
+  line-height: 1.6;
 }
 
 /* --- Integrated Minimal Top Bar (No solid blue div) --- */
@@ -649,6 +651,12 @@
   align-items: center;
   gap: 8px;
   transition: transform 0.2s;
+}
+
+@media (min-width: 1280px) {
+  .pl-mobile-trigger {
+    display: none !important;
+  }
 }
 
 .pl-mobile-trigger:active {
