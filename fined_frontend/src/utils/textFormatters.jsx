@@ -5,6 +5,8 @@ export function parseBoldText(text) {
   let parsed = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   // Replace *text* with <em>text</em>
   parsed = parsed.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  // Replace \n with <br/>
+  parsed = parsed.replace(/\n/g, '<br/>');
   return parsed;
 }
 

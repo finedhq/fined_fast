@@ -134,9 +134,9 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
     """
     try:
         # Sequential database requests (Thread-safe)
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description").eq("slug", course_slug).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("slug", course_slug).execute())
         if not course_res.data:
-            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description").eq("id", course_slug).execute())
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("id", course_slug).execute())
         
         if not course_res.data:
             return {"title": "", "description": "", "data": []}
@@ -144,8 +144,9 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
         course_id = course_res.data[0]["id"]
         course_title = course_res.data[0]["title"]
         course_description = course_res.data[0].get("description", "")
+        thumbnail_url = course_res.data[0].get("thumbnail_url", "")
             
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug").eq("course_id", course_id).order("order_index").execute())
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, description").eq("course_id", course_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
         modules = modules_res.data or []
@@ -189,10 +190,11 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
                 "moduleTitle": module["title"],
                 "moduleId": mod_id,
                 "moduleSlug": module.get("slug"),
+                "moduleDescription": module.get("description"),
                 "cards": module_cards
             })
             
-        return {"title": course_title, "description": course_description, "data": formatted_data}
+        return {"title": course_title, "description": course_description, "thumbnail_url": thumbnail_url, "data": formatted_data}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

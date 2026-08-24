@@ -62,7 +62,7 @@ export default function Navbar() {
   return (
     <>
       <nav className={`site-nav${hidden ? " site-nav--hidden" : ""}`}>
-        <div className="logo" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
+        <div className="logo" onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")} style={{ cursor: 'pointer' }}>
           <img src="/logo.ico" alt="FinEd" className="logo-icon-1" />
         </div>
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
         <div className="nav-menu-wrapper">
           <ul className="nav-links">
-            <li><NavLink to="/" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
+            <li><NavLink to={isAuthenticated ? "/dashboard" : "/"} className={({ isActive }) => `cube-link ${isActive && !isAuthenticated ? "active" : ""}`}><span className="cube-wrapper" data-text="Home">Home</span></NavLink></li>
             <li className="nav-item-with-badge">
               <NavLink to="/courses" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}>
                 <span className="cube-wrapper" data-text="Courses">Courses</span>
@@ -86,9 +86,6 @@ export default function Navbar() {
           <div className="nav-right">
             {isAuthenticated ? (
               <>
-                <button className="btn-signin cube-link" onClick={() => navigate("/dashboard")}>
-                  <span className="cube-wrapper" data-text="Dashboard">Dashboard</span>
-                </button>
                 {isAdminUser(user) && (
                   <button className="btn-signin cube-link" onClick={() => navigate("/admin")}>
                     <span className="cube-wrapper" data-text="Admin">Admin</span>
@@ -115,7 +112,7 @@ export default function Navbar() {
       {/* Dedicated Mobile Menu Overlay */}
       <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
         <div className="mobile-menu-header">
-          <div className="logo" onClick={() => { setIsMobileMenuOpen(false); navigate("/"); }} style={{ cursor: 'pointer' }}>
+          <div className="logo" onClick={() => { setIsMobileMenuOpen(false); navigate(isAuthenticated ? "/dashboard" : "/"); }} style={{ cursor: 'pointer' }}>
             <img src="/logo.ico" alt="FinEd" className="logo-icon-1" />
           </div>
           <div className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>
@@ -123,7 +120,7 @@ export default function Navbar() {
           </div>
         </div>
         <ul className="mobile-nav-links">
-          <li><NavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</NavLink></li>
+          <li><NavLink to={isAuthenticated ? "/dashboard" : "/"} onClick={() => setIsMobileMenuOpen(false)}>Home</NavLink></li>
           <li className="mobile-nav-item-with-badge">
             <NavLink to="/courses" onClick={() => setIsMobileMenuOpen(false)}>
               Courses

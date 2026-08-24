@@ -290,6 +290,14 @@ const TickItem = ({ children, delay = 0 }) => (
 
 function Hero() {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth0();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time) {

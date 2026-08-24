@@ -49,6 +49,7 @@ export default function CourseOverview() {
   const [email, setEmail] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [course, setCourse] = useState([]);
   const [userData, setUserData] = useState({});
   const [showLockedAlert, setShowLockedAlert] = useState(false);
@@ -119,6 +120,7 @@ export default function CourseOverview() {
 
       setCourseTitle(courseRes.data.title);
       setCourseDescription(courseRes.data.description || "");
+      setThumbnailUrl(courseRes.data.thumbnail_url || "");
       setCourse(courseRes.data.data || []);
 
       if (results.length > 1 && results[1].data?.userData) {
@@ -164,31 +166,46 @@ export default function CourseOverview() {
         <div className="course-layout-container">
 
           <div className="course-main-content">
-            {/* Hero Banner */}
+            {/* Hero Section */}
             <RevealOnScroll>
-              <div id="course-hero-banner-id" className="course-hero-banner">
-                <div className="course-hero-header">
-                  <button onClick={() => navigate('/courses')} className="hero-back-btn-outside mt-2" style={{ flexShrink: 0 }}>
-                    <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '18px', height: '18px', transform: 'translateX(-1px)' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                    </svg>
-                  </button>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <h1 className="hero-title" style={{ marginBottom: courseDescription ? '0.5rem' : 0 }}>{courseTitle}</h1>
+              <div id="course-hero-banner-id" className="course-hero-clean">
+                <button onClick={() => navigate('/courses')} className="hero-back-btn-clean mt-2">
+                  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '20px', height: '20px', transform: 'translateX(-1px)' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                  </svg>
+                  Back to Courses
+                </button>
+                
+                <div className="hero-content-wrapper">
+                  {thumbnailUrl && (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div className="hero-thumbnail-container">
+                        <img src={thumbnailUrl} alt={courseTitle} className="hero-thumbnail-img" />
+                      </div>
+                      <div className="hero-meta-clean" style={{ marginTop: '16px' }}>
+                        <span className="bestseller-badge">Bestseller</span>
+                        <span className="hero-author">Created by <span className="author-name">FinEd</span></span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="hero-text-content">
+                    <h1 className="hero-title-clean">{courseTitle}</h1>
                     {courseDescription && (
-                      <p className="hero-desc" style={{ color: '#e0e7ff', fontSize: '1rem', maxWidth: '40rem', marginBottom: email === 'guest@fined.com' ? '1rem' : 0 }}>
+                      <p className="hero-desc-clean">
                         {courseDescription}
                       </p>
                     )}
+
                     {email === 'guest@fined.com' && (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(67, 56, 202, 0.4)', color: '#e0e7ff', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontSize: '0.875rem', fontWeight: 600, border: '1px solid rgba(99, 102, 241, 0.3)', width: 'fit-content' }}>
+                      <div className="hero-signin-alert">
                         <span>🔒</span> Sign in is necessary to access the content of the course
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="hero-progress-section" style={{ marginTop: '1.5rem' }}>
+                <div className="hero-progress-section-clean" style={{ width: '100%' }}>
                   <span className="hero-progress-label">Module Progress</span>
                   <div className="hero-progress-bar-container">
                     <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
@@ -372,16 +389,7 @@ export default function CourseOverview() {
                                     {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
                                   </div>
                                   <p className="hc-desc">
-                                    {isGuest ? (
-                                      "Sign in or create an account to start learning and track your progress!"
-                                    ) : (
-                                      <>
-                                        {module.cards.filter(c => c.status?.toLowerCase() === 'completed').length} / {module.cards.length} Cards Completed.
-                                        {isCompleted ? " You've successfully finished this module." :
-                                          isOngoing ? " Continue learning to finish this module." :
-                                            " Complete previous modules to unlock."}
-                                      </>
-                                    )}
+                                    {module.moduleDescription || "Explore the contents of this module to advance your knowledge."}
                                   </p>
                                 </div>
                               </div>
@@ -406,6 +414,69 @@ export default function CourseOverview() {
 
           {/* Sidebar */}
           <div className="course-sidebar">
+            {/* Dashboard Stats & FinScore */}
+            {email !== 'guest@fined.com' && (
+              <div style={{ position: 'relative', zIndex: 10 }}>
+                <RevealOnScroll delay={100}>
+                  <div className="dash-stats-card">
+                  <div className="dash-stats-list">
+                    <div className="dash-stat-item">
+                      <div className="dash-stat-icon-wrapper icon-streak">
+                        <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
+                      </div>
+                      <div className="dash-stat-main">
+                        <strong>{userData?.streak_count || 0}</strong> Days
+                      </div>
+                      <div className="dash-stat-label">STREAK</div>
+                    </div>
+
+                    <div className="dash-stat-item">
+                      <div className="dash-stat-icon-wrapper icon-finstars">
+                        <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
+                      </div>
+                      <div className="dash-stat-main">
+                        <strong>{userData?.fin_stars || 0}</strong>
+                      </div>
+                      <div className="dash-stat-label">FINSTARS</div>
+                    </div>
+
+                    <div className="dash-stat-item">
+                      <div className="dash-stat-icon-wrapper icon-modules">
+                        <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
+                      </div>
+                      <div className="dash-stat-main">
+                        <strong>#{userData?.rank || '-'}</strong>
+                      </div>
+                      <div className="dash-stat-label">RANK</div>
+                    </div>
+                  </div>
+
+                  <div className="dash-finscore-section">
+                    <div className="dash-finscore-header">
+                      <span className="dash-finscore-label">FinScore</span>
+                      <div className="info-icon-container">
+                        <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
+                          <InfoIcon />
+                        </span>
+                        <div className="info-tooltip">
+                          FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                        </div>
+                      </div>
+                    </div>
+                    <div className="dash-finscore-display">
+                      <div className="dash-finscore-value-group">
+                        <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
+                      </div>
+                      <div className="dash-finscore-chart-img-wrapper">
+                        <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </RevealOnScroll>
+              </div>
+            )}
+
             {/* Certificate Card */}
             <RevealOnScroll delay={50}>
               {(completedModulesCount > 0 && completedModulesCount === totalModulesCount && email !== 'guest@fined.com') ? (
@@ -460,74 +531,6 @@ export default function CourseOverview() {
                 </div>
               )}
             </RevealOnScroll>
-
-            {/* Dashboard Stats & FinScore */}
-            {email !== 'guest@fined.com' && (
-              <RevealOnScroll delay={100}>
-                <div 
-                  className="dash-stats-card" 
-                  style={{ 
-                    height: heroHeight,
-                    minHeight: heroHeight,
-                    justifyContent: heroHeight !== 'auto' ? 'space-between' : 'flex-start'
-                  }}
-                >
-                  <div className="dash-stats-list">
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-streak">
-                        <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
-                      </div>
-                      <div className="dash-stat-main">
-                        <strong>{userData?.streak_count || 0}</strong> Days
-                      </div>
-                      <div className="dash-stat-label">STREAK</div>
-                    </div>
-
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-finstars">
-                        <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
-                      </div>
-                      <div className="dash-stat-main">
-                        <strong>{userData?.fin_stars || 0}</strong>
-                      </div>
-                      <div className="dash-stat-label">FINSTARS</div>
-                    </div>
-
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-modules">
-                        <img src="/dash-rank.png" alt="Rank" className="dash-stat-img" />
-                      </div>
-                      <div className="dash-stat-main">
-                        <strong>Level {level}</strong>
-                      </div>
-                      <div className="dash-stat-label">RANK</div>
-                    </div>
-                  </div>
-
-                  <div className="dash-finscore-section">
-                    <div className="dash-finscore-header">
-                      <span className="dash-finscore-label">FinScore</span>
-                      <div className="info-icon-container">
-                        <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
-                          <InfoIcon />
-                        </span>
-                        <div className="info-tooltip">
-                          FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
-                        </div>
-                      </div>
-                    </div>
-                    <div className="dash-finscore-display">
-                      <div className="dash-finscore-value-group">
-                        <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
-                      </div>
-                      <div className="dash-finscore-chart-img-wrapper">
-                        <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
-            )}
           </div>
         </div>
       )}

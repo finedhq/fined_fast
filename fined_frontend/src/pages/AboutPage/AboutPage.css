@@ -350,6 +350,14 @@
   flex-shrink: 0;
 }
 
+.founder-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
 .founder-info {
   display: flex;
   flex-direction: column;
@@ -387,6 +395,31 @@
   height: 32px;
   background-color: #D9D9D9;
   border-radius: 6px;
+}
+
+.view-profile-btn {
+  background-color: transparent;
+  color: #1A37AD;
+  border: 1px solid #1A37AD;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-profile-btn:hover {
+  background-color: #1A37AD;
+  color: white;
+}
+
+.social-link {
+  transition: transform 0.2s;
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
 }
 
 @media (max-width: 1024px) {

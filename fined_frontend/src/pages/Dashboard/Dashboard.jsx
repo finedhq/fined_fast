@@ -37,6 +37,8 @@ const Dashboard = () => {
   const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [recommendedArticles, setRecommendedArticles] = useState([]);
 
+  const articlesScrollRef = React.useRef(null);
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time) {
@@ -75,7 +77,7 @@ const Dashboard = () => {
       try {
         const [coursesRes, articlesRes] = await Promise.all([
           getCourses(),
-          fetchArticles({ limit: 5, offset: 0 })
+          fetchArticles({ limit: 10, offset: 0 })
         ]);
         
         const allCourses = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
@@ -86,8 +88,7 @@ const Dashboard = () => {
 
         const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
         const sortedArticles = allArticles
-          .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0))
-          .slice(0, 3);
+          .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
         setRecommendedArticles(sortedArticles);
       } catch (recError) {
         console.error("Failed to fetch recommendations:", recError);
@@ -143,6 +144,13 @@ const Dashboard = () => {
     ? Math.floor((currentLesson / ongoingCourse.modules_count) * 100)
     : 0;
 
+  const scrollArticles = (direction) => {
+    if (articlesScrollRef.current) {
+      const scrollAmount = 370; // card width + gap
+      articlesScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
@@ -190,9 +198,6 @@ const Dashboard = () => {
                   >
                     Continue Learning →
                   </button>
-                  <button className="dash-btn-icon">
-                    ▷
-                  </button>
                 </div>
               </div>
 
@@ -215,16 +220,18 @@ const Dashboard = () => {
 
               <div className="dash-stats-list">
                 <div className="dash-stat-item">
+                  <div className="dash-stat-tooltip-mobile">Streak</div>
                   <div className="dash-stat-icon-wrapper icon-streak">
                     <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
                   </div>
                   <div className="dash-stat-main">
-                    <strong>{userData?.streak_count || 0}</strong> Days
+                    <strong>{userData?.streak_count || 0}</strong>{" "}<span className="dash-stat-text-hide-mobile">Days</span>
                   </div>
                   <div className="dash-stat-label">STREAK</div>
                 </div>
 
                 <div className="dash-stat-item">
+                  <div className="dash-stat-tooltip-mobile">FinStars</div>
                   <div className="dash-stat-icon-wrapper icon-finstars">
                     <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
                   </div>
@@ -235,11 +242,12 @@ const Dashboard = () => {
                 </div>
 
                 <div className="dash-stat-item">
+                  <div className="dash-stat-tooltip-mobile">Rank</div>
                   <div className="dash-stat-icon-wrapper icon-modules">
-                    <img src="/dash-rank.png" alt="Rank" className="dash-stat-img" />
+                    <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
                   </div>
                   <div className="dash-stat-main">
-                    <strong>Level {level}</strong>
+                    <strong>#{userData?.rank || '-'}</strong>
                   </div>
                   <div className="dash-stat-label">RANK</div>
                 </div>
@@ -356,8 +364,20 @@ const Dashboard = () => {
 
         <RevealOnScroll delay={400}>
           <div className="dash-recommendations-section" style={{ marginTop: '32px', marginBottom: '32px' }}>
-            <h2 className="dash-rec-header" style={{ marginBottom: '16px' }}>Recommended Articles</h2>
-            <div className="ap-articles-grid">
+            <div className="dash-rec-header-container">
+              <h2 className="dash-rec-header">Recommended Articles</h2>
+              <div className="dash-rec-actions">
+                <span 
+                  onClick={() => navigate('/articles')} 
+                  className="dash-view-all-link"
+                >
+                  View all <span className="dash-view-all-arrow">→</span>
+                </span>
+              </div>
+            </div>
+            <div className="dash-carousel-wrapper">
+              <button onClick={() => scrollArticles('left')} className="dash-scroll-btn dash-scroll-btn-left">‹</button>
+              <div className="dash-carousel-container" ref={articlesScrollRef}>
               {recommendedArticles.map(article => (
                 <div 
                   key={article.id} 
@@ -415,6 +435,8 @@ const Dashboard = () => {
               {recommendedArticles.length === 0 && (
                 <p style={{ color: '#64748b' }}>No articles available right now.</p>
               )}
+              </div>
+              <button onClick={() => scrollArticles('right')} className="dash-scroll-btn dash-scroll-btn-right">›</button>
             </div>
           </div>
         </RevealOnScroll>

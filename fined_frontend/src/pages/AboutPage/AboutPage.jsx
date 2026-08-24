@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lenis from 'lenis';
 import RevealOnScroll from '../../components/RevealOnScroll';
@@ -13,11 +13,16 @@ import imgInteractive from '../../assets/interactivelearning-abt-us.png';
 import imgRewards from '../../assets/realrewards-abtus.png';
 import imgLeaderboards from '../../assets/leaderboards-abtus.png';
 import imgInstitutional from '../../assets/institutional-partnerships.png';
+import { FaLinkedin } from "react-icons/fa";
+import { fetchAuthors } from '../../services/api';
 
 export default function AboutPage() {
   const navigate = useNavigate();
+  const [authors, setAuthors] = useState([]);
 
   useEffect(() => {
+    fetchAuthors().then(data => setAuthors(data || [])).catch(console.error);
+
     const lenis = new Lenis();
     function raf(time) {
       lenis.raf(time);
@@ -136,8 +141,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      
-
       {/* Founders Section */}
       <section className="about-founders-section">
         <div className="founders-container">
@@ -154,15 +157,26 @@ export default function AboutPage() {
             {/* Founder 1 */}
             <RevealOnScroll delay={200}>
               <div className="founder-card">
-                <div className="founder-image-placeholder"></div>
+                {authors.find(a => a.name === "Shravan Mutha")?.image_url ? (
+                  <img src={authors.find(a => a.name === "Shravan Mutha").image_url} alt="Shravan Mutha" className="founder-image" />
+                ) : (
+                  <div className="founder-image-placeholder"></div>
+                )}
                 <div className="founder-info">
                   <h3>Shravan Mutha</h3>
                   <p>Shravan is passionate about making financial education simple and accessible. He leads the product, technology, and content at FinEd, working on everything from building the platform to creating easy-to-understand courses and articles. His goal is to help young people develop the financial knowledge needed to make better money decisions throughout their lives.</p>
-                  <div className="founder-socials">
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
+                  <div className="founder-socials" style={{ alignItems: 'center' }}>
+                    {authors.find(a => a.name === "Shravan Mutha")?.linkedin_url && (
+                      <a href={authors.find(a => a.name === "Shravan Mutha").linkedin_url} target="_blank" rel="noopener noreferrer" className="social-link" style={{ display: 'flex', alignItems: 'center', marginRight: '8px' }}>
+                        <FaLinkedin size={26} color="#0A66C2" />
+                      </a>
+                    )}
+                    <button 
+                      className="view-profile-btn" 
+                      onClick={() => navigate(`/authors/${authors.find(a => a.name === "Shravan Mutha")?.slug || 'shravan-mutha'}`)}
+                    >
+                      Full Profile →
+                    </button>
                   </div>
                 </div>
               </div>
@@ -171,15 +185,26 @@ export default function AboutPage() {
             {/* Founder 2 */}
             <RevealOnScroll delay={300}>
               <div className="founder-card">
-                <div className="founder-image-placeholder"></div>
+                {authors.find(a => a.name === "Anish Pujari")?.image_url ? (
+                  <img src={authors.find(a => a.name === "Anish Pujari").image_url} alt="Anish Pujari" className="founder-image" />
+                ) : (
+                  <div className="founder-image-placeholder"></div>
+                )}
                 <div className="founder-info">
                   <h3>Anish Pujari</h3>
                   <p>Anish leads the design, branding, and marketing. He focuses on creating an engaging user experience while growing FinEd's reach through creative campaigns and storytelling. His goal is to make learning about finance feel approachable, enjoyable, and relevant for the next generation.</p>
-                  <div className="founder-socials">
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
-                    <div className="social-placeholder"></div>
+                  <div className="founder-socials" style={{ alignItems: 'center' }}>
+                    {authors.find(a => a.name === "Anish Pujari")?.linkedin_url && (
+                      <a href={authors.find(a => a.name === "Anish Pujari").linkedin_url} target="_blank" rel="noopener noreferrer" className="social-link" style={{ display: 'flex', alignItems: 'center', marginRight: '8px' }}>
+                        <FaLinkedin size={26} color="#0A66C2" />
+                      </a>
+                    )}
+                    <button 
+                      className="view-profile-btn" 
+                      onClick={() => navigate(`/authors/${authors.find(a => a.name === "Anish Pujari")?.slug || 'anish-pujari'}`)}
+                    >
+                      Full Profile →
+                    </button>
                   </div>
                 </div>
               </div>
