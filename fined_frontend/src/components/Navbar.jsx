@@ -131,7 +131,7 @@ export default function Navbar() {
           <li><NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</NavLink></li>
           {isAuthenticated ? (
             <>
-              <li><NavLink to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink></li>
+
               {isAdminUser(user) && (
                 <li><NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</NavLink></li>
               )}
