@@ -60,7 +60,12 @@ export default function CourseOverview() {
   const certificateRef = useRef(null);
   const [heroHeight, setHeroHeight] = useState('auto');
   const [isDownloading, setIsDownloading] = useState(false);
-
+  const [isMobileWidgetExpanded, setIsMobileWidgetExpanded] = useState(false);
+  const [activeMobileModule, setActiveMobileModule] = useState(null);
+  const [expandedDescModules, setExpandedDescModules] = useState({});
+  const [widgetPos, setWidgetPos] = useState({ x: 20, y: 80 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, offsetX: 0, offsetY: 0, hasMoved: false });
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
@@ -154,6 +159,47 @@ export default function CourseOverview() {
       setIsDownloading(false);
     }
   };
+  const handlePointerDown = (e) => {
+    e.target.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      offsetX: e.clientX - widgetPos.x,
+      offsetY: e.clientY - widgetPos.y,
+      hasMoved: false
+    };
+    setIsDragging(true);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return;
+    
+    if (Math.abs(e.clientX - dragRef.current.startX) > 5 || Math.abs(e.clientY - dragRef.current.startY) > 5) {
+      dragRef.current.hasMoved = true;
+    }
+
+    if (dragRef.current.hasMoved) {
+      if (e.cancelable) e.preventDefault();
+      const newX = e.clientX - dragRef.current.offsetX;
+      const newY = e.clientY - dragRef.current.offsetY;
+      
+      const maxX = window.innerWidth - 60;
+      const maxY = window.innerHeight - 60;
+      
+      setWidgetPos({
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY))
+      });
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    e.target.releasePointerCapture(e.pointerId);
+    setIsDragging(false);
+    if (!dragRef.current.hasMoved) {
+      setIsMobileWidgetExpanded(true);
+    }
+  };
 
   return (
     <div className="course-overview-page">
@@ -218,7 +264,7 @@ export default function CourseOverview() {
             {/* Modules Path */}
             <div className="course-path-container">
               {(() => {
-                const xOffsets = isMobile ? [25, 75, 30, 70, 20, 80] : [12, 68, 22, 78, 8, 73, 18, 83];
+                const xOffsets = isMobile ? [23, 77, 28, 72, 18, 82] : [12, 68, 22, 78, 8, 73, 18, 83];
                 const getX = (index) => xOffsets[index % xOffsets.length];
                 const rowHeight = 250;
                 const topPadding = 75;
@@ -278,7 +324,7 @@ export default function CourseOverview() {
                             <path
                               d={seg.d}
                               fill="none"
-                              stroke="#c7d2fe"
+                              stroke="#818cf8"
                               strokeWidth="5"
                               strokeDasharray="0 15"
                               strokeLinecap="round"
@@ -349,7 +395,7 @@ export default function CourseOverview() {
                       return (
                         <RevealOnScroll key={i} delay={0}>
                           <div className="module-node-row">
-                            <div className={`module-node ${alignmentClass}`} style={{ left: `${x1}%` }}>
+                            <div className={`module-node ${alignmentClass} ${activeMobileModule === i ? 'active-mobile' : ''}`} style={{ left: `${x1}%` }}>
                               <div className="module-base-label">
                                 <div className="module-base-number">Module {i + 1}</div>
                                 <div className="module-base-title">{module.moduleTitle}</div>
@@ -360,7 +406,17 @@ export default function CourseOverview() {
 
                               <div
                                 className={`module-circle ${statusStr}`}
-                                onClick={handleLaunchModule}
+                                onClick={() => {
+                                  if (isMobile) {
+                                    if (activeMobileModule === i) {
+                                      handleLaunchModule();
+                                    } else {
+                                      setActiveMobileModule(i);
+                                    }
+                                  } else {
+                                    handleLaunchModule();
+                                  }
+                                }}
                                 role="button"
                                 tabIndex={0}
                                 title={isClickable ? "Click to open module" : "Module Locked"}
@@ -388,9 +444,22 @@ export default function CourseOverview() {
                                   <div className={`hc-badge badge-${statusStr}`}>
                                     {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
                                   </div>
-                                  <p className="hc-desc">
-                                    {module.moduleDescription || "Explore the contents of this module to advance your knowledge."}
-                                  </p>
+                                  <div className="hc-desc-container">
+                                    <p className={`hc-desc ${isMobile && !expandedDescModules[i] ? 'line-clamp-4' : ''}`}>
+                                      {module.moduleDescription || "Explore the contents of this module to advance your knowledge."}
+                                    </p>
+                                    {isMobile && (
+                                      <button 
+                                        className="hc-read-more-btn"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedDescModules(prev => ({ ...prev, [i]: !prev[i] }));
+                                        }}
+                                      >
+                                        {expandedDescModules[i] ? "Show less" : "Read more"}
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -418,8 +487,27 @@ export default function CourseOverview() {
             {email !== 'guest@fined.com' && (
               <div style={{ position: 'relative', zIndex: 10 }}>
                 <RevealOnScroll delay={100}>
-                  <div className="dash-stats-card">
-                  <div className="dash-stats-list">
+                  {isMobile && !isMobileWidgetExpanded ? (
+                    <div 
+                      className="dash-stats-mobile-widget"
+                      style={{ left: `${widgetPos.x}px`, top: `${widgetPos.y}px`, touchAction: 'none' }}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerUp}
+                    >
+                      <img src="/dash-finscore.svg" alt="FinScore" className="widget-icon" style={{ pointerEvents: 'none' }} />
+                    </div>
+                  ) : (
+                    <div className="dash-stats-card">
+                      {isMobile && (
+                        <button 
+                          className="widget-close-btn" 
+                          onClick={() => setIsMobileWidgetExpanded(false)}
+                          aria-label="Close widget"
+                        >✕</button>
+                      )}
+                      <div className="dash-stats-list">
                     <div className="dash-stat-item">
                       <div className="dash-stat-icon-wrapper icon-streak">
                         <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
@@ -472,8 +560,9 @@ export default function CourseOverview() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </RevealOnScroll>
+                  </div>
+                  )}
+                </RevealOnScroll>
               </div>
             )}
 
