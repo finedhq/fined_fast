@@ -20,11 +20,29 @@ const renderTextWithLinks = (text) => {
     if (match.index > lastIndex) {
       parts.push(text.substring(lastIndex, match.index));
     }
-    parts.push(
-      <Link key={match.index} to={match[2]} className="ar-internal-link">
-        {match[1]}
-      </Link>
-    );
+    const label = match[1];
+    const url = match[2];
+    const isExternal = /^https?:\/\//i.test(url);
+
+    if (isExternal) {
+      parts.push(
+        <a
+          key={match.index}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ar-external-link"
+        >
+          {label}
+        </a>
+      );
+    } else {
+      parts.push(
+        <Link key={match.index} to={url} className="ar-internal-link">
+          {label}
+        </Link>
+      );
+    }
     lastIndex = regex.lastIndex;
   }
 
@@ -44,6 +62,14 @@ const createDescription = (content = "") => {
   return paragraphs[0];
 };
 
+const slugifyHeading = (text = "", index = 0) => {
+  const base = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+  return base ? `section-${base}` : `article-section-${index}`;
+};
+
 const isLikelyHeading = (text = "") => {
   const v = cleanText(text);
   if (v.length < 4 || v.length > 95) return false;
@@ -60,19 +86,6 @@ const isLikelyHeading = (text = "") => {
 const trimLabel = (v = "") => {
   return cleanText(v).replace(/[.,;:!?]+$/, "");
 };
-
-const titleCase = (v = "") =>
-  v
-    .toLowerCase()
-    .split(" ")
-    .filter(Boolean)
-    .map((w) =>
-      /^(and|or|for|to|of|in|on|with|the|a|an|is|are)$/.test(w)
-        ? w
-        : w.charAt(0).toUpperCase() + w.slice(1)
-    )
-    .join(" ")
-    .replace(/^./, (c) => c.toUpperCase());
 
 const createTocLabel = (text = "", index = 0) => {
   const v = cleanText(text);
@@ -100,7 +113,20 @@ const serializeJsonLd = (data) =>
 /* ── component ── */
 function ArticleReader({ article, onClose, children, footer, isLoadingMore = false }) {
   const navigate = useNavigate();
-  const description = useMemo(() => createDescription(article?.content), [article?.content]);
+  const description = useMemo(() => {
+    return article?.meta_description || article?.description || createDescription(article?.content);
+  }, [article?.meta_description, article?.description, article?.content]);
+
+  const seoTitle = useMemo(() => {
+    return article?.seo_title || article?.metadata?.seo_title || article?.title || "";
+  }, [article?.seo_title, article?.metadata, article?.title]);
+
+  const metaDescription = useMemo(() => {
+    const raw = article?.meta_description || article?.metadata?.meta_description || article?.description || createDescription(article?.content);
+    if (!raw) return "A clear, practical finance explainer from FinEd.";
+    return raw.length > 158 ? `${raw.slice(0, 155).trim()}...` : raw;
+  }, [article?.meta_description, article?.metadata, article?.description, article?.content]);
+
   const scrollRef = useRef(null);
   const [readingProgress, setReadingProgress] = useState(0);
   const [rating, setRating] = useState(0);
@@ -131,7 +157,6 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   }, [isMobileTocOpen]);
   const [isScrollingUp, setIsScrollingUp] = useState(true);
 
-
   const blocks = useMemo(
     () => {
       const paragraphs = getParagraphs(article?.content);
@@ -157,8 +182,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           if (isHeading) level = 2;
         }
 
+        const id = slugifyHeading(text, i);
+
         return {
-          id: `article-section-${i}`,
+          id,
           text,
           isHeading,
           level,
@@ -216,11 +243,11 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     return () => clearTimeout(timer);
   }, [activeHeadingId]);
 
-  /* title / meta */
+  /* title / meta / canonical / robots */
   useEffect(() => {
     if (!article?.title) return;
     const prevTitle = document.title;
-    const ensure = (sel, attrs) => {
+    const ensureMeta = (sel, attrs) => {
       let tag = document.head.querySelector(sel);
       if (!tag) {
         tag = document.createElement("meta");
@@ -229,16 +256,38 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       }
       return tag;
     };
-    const metaDesc = ensure('meta[name="description"]', { name: "description" });
-    const ogTitle = ensure('meta[property="og:title"]', { property: "og:title" });
-    const ogDesc = ensure('meta[property="og:description"]', { property: "og:description" });
-    const ogImage = ensure('meta[property="og:image"]', { property: "og:image" });
-    const ogUrl = ensure('meta[property="og:url"]', { property: "og:url" });
-    const ogType = ensure('meta[property="og:type"]', { property: "og:type" });
-    const twitterCard = ensure('meta[name="twitter:card"]', { name: "twitter:card" });
-    const twitterTitle = ensure('meta[name="twitter:title"]', { name: "twitter:title" });
-    const twitterDesc = ensure('meta[name="twitter:description"]', { name: "twitter:description" });
-    const twitterImage = ensure('meta[name="twitter:image"]', { name: "twitter:image" });
+
+    const articleSlug = article.slug || (article.title ? article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : '');
+    const canonicalUrl = `https://myfined.com/articles/${articleSlug}`;
+
+    let canonicalTag = document.head.querySelector('link[rel="canonical"]');
+    const createdCanonical = !canonicalTag;
+    if (!canonicalTag) {
+      canonicalTag = document.createElement("link");
+      canonicalTag.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalTag);
+    }
+    const prevCanonical = canonicalTag.getAttribute("href");
+    canonicalTag.setAttribute("href", canonicalUrl);
+
+    const metaRobots = ensureMeta('meta[name="robots"]', { name: "robots" });
+    const prevRobots = metaRobots.getAttribute("content");
+    metaRobots.setAttribute("content", "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
+
+    const metaDesc = ensureMeta('meta[name="description"]', { name: "description" });
+    const ogTitle = ensureMeta('meta[property="og:title"]', { property: "og:title" });
+    const ogDesc = ensureMeta('meta[property="og:description"]', { property: "og:description" });
+    const ogImage = ensureMeta('meta[property="og:image"]', { property: "og:image" });
+    const ogImageAlt = ensureMeta('meta[property="og:image:alt"]', { property: "og:image:alt" });
+    const ogUrl = ensureMeta('meta[property="og:url"]', { property: "og:url" });
+    const ogType = ensureMeta('meta[property="og:type"]', { property: "og:type" });
+    const ogSite = ensureMeta('meta[property="og:site_name"]', { property: "og:site_name" });
+    const twitterCard = ensureMeta('meta[name="twitter:card"]', { name: "twitter:card" });
+    const twitterSite = ensureMeta('meta[name="twitter:site"]', { name: "twitter:site" });
+    const twitterTitle = ensureMeta('meta[name="twitter:title"]', { name: "twitter:title" });
+    const twitterDesc = ensureMeta('meta[name="twitter:description"]', { name: "twitter:description" });
+    const twitterImage = ensureMeta('meta[name="twitter:image"]', { name: "twitter:image" });
+    const twitterImageAlt = ensureMeta('meta[name="twitter:image:alt"]', { name: "twitter:image:alt" });
 
     const prevDesc = metaDesc.getAttribute("content");
     const prevOgT = ogTitle.getAttribute("content");
@@ -246,17 +295,24 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     const prevOgI = ogImage.getAttribute("content");
     const prevTwitterI = twitterImage.getAttribute("content");
 
-    document.title = `${article.title} | FinEd Articles`;
-    metaDesc.setAttribute("content", description);
-    ogTitle.setAttribute("content", article.title);
-    ogDesc.setAttribute("content", description);
-    if (article.image_url) ogImage.setAttribute("content", article.image_url);
-    ogUrl.setAttribute("content", window.location.href);
+    const fullTitle = `${seoTitle} | FinEd`;
+    document.title = fullTitle;
+    metaDesc.setAttribute("content", metaDescription);
+    ogTitle.setAttribute("content", seoTitle);
+    ogDesc.setAttribute("content", metaDescription);
+    if (article.image_url) {
+      ogImage.setAttribute("content", article.image_url);
+      twitterImage.setAttribute("content", article.image_url);
+    }
+    ogImageAlt.setAttribute("content", article.title);
+    twitterImageAlt.setAttribute("content", article.title);
+    ogUrl.setAttribute("content", canonicalUrl);
     ogType.setAttribute("content", "article");
+    ogSite.setAttribute("content", "FinEd");
     twitterCard.setAttribute("content", "summary_large_image");
-    twitterTitle.setAttribute("content", article.title);
-    twitterDesc.setAttribute("content", description);
-    if (article.image_url) twitterImage.setAttribute("content", article.image_url);
+    twitterSite.setAttribute("content", "@FinEd");
+    twitterTitle.setAttribute("content", seoTitle);
+    twitterDesc.setAttribute("content", metaDescription);
 
     return () => {
       document.title = prevTitle;
@@ -265,8 +321,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       if (prevOgD) ogDesc.setAttribute("content", prevOgD);
       if (prevOgI) ogImage.setAttribute("content", prevOgI);
       if (prevTwitterI) twitterImage.setAttribute("content", prevTwitterI);
+      if (prevRobots) metaRobots.setAttribute("content", prevRobots);
+      if (prevCanonical) {
+        canonicalTag.setAttribute("href", prevCanonical);
+      } else if (createdCanonical && canonicalTag.parentNode) {
+        canonicalTag.parentNode.removeChild(canonicalTag);
+      }
     };
-  }, [article?.title, article?.image_url, description]);
+  }, [article?.title, article?.slug, article?.image_url, seoTitle, metaDescription]);
 
   /* escape key */
   useEffect(() => {
@@ -367,7 +429,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   };
 
   const publishedDate = formatDate(article.published_at || article.created_at);
-  const articleTag = article.tag;
+  const updatedDateFormatted = formatDate(article.updated_at);
+  const articleTag = article.tag || "Finance";
 
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
   const tocLineHeight = tocItems.length > 16 ? "1.3" : tocItems.length > 11 ? "1.35" : "1.4";
@@ -378,17 +441,117 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         ? "0.2rem 1rem"
         : "0.25rem 1rem";
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description,
-    image: article.image_url || undefined,
-    datePublished: article.published_at || article.created_at || undefined,
-    author: { "@type": "Organization", name: "FinEd" },
-    publisher: { "@type": "Organization", name: "FinEd" },
-  };
-  const schemaJson = serializeJsonLd(schema);
+  // Build full Schema.org graph (Article, BreadcrumbList, FAQPage)
+  const structuredData = useMemo(() => {
+    if (!article) return null;
+    const articleSlug = article.slug || (article.title ? article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
+    const canonicalUrl = `https://myfined.com/articles/${articleSlug}`;
+    const tag = article.tag || "Finance";
+    const publishedIso = article.published_at || article.created_at || new Date().toISOString();
+    const updatedIso = article.updated_at || publishedIso;
+    const authorName = article.authors?.name || article.author || "Shravan Mutha";
+    const authorSlug = article.authors?.slug || "shravan-mutha";
+
+    const faqEntities = [];
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      if (b.isHeading && (b.text.endsWith("?") || /^(what|how|why|is|can|does|should|are)\b/i.test(b.text))) {
+        let answerText = "";
+        for (let j = i + 1; j < blocks.length; j++) {
+          if (blocks[j].isHeading) break;
+          if (blocks[j].text) {
+            answerText = blocks[j].text;
+            break;
+          }
+        }
+        if (answerText) {
+          faqEntities.push({
+            "@type": "Question",
+            name: b.text,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: answerText,
+            },
+          });
+        }
+      }
+    }
+
+    const graph = [
+      {
+        "@type": "Article",
+        "@id": `${canonicalUrl}#article`,
+        isPartOf: { "@id": canonicalUrl },
+        headline: article.title,
+        description: metaDescription,
+        image: article.image_url || "https://www.myfined.com/assets/images/fined_card_banner.png",
+        datePublished: publishedIso,
+        dateModified: updatedIso,
+        mainEntityOfPage: canonicalUrl,
+        author: {
+          "@type": "Person",
+          name: authorName,
+          url: `https://myfined.com/authors/${authorSlug}`,
+          ...(article.authors?.bio ? { description: article.authors.bio } : {}),
+          ...(article.authors?.role ? { jobTitle: article.authors.role } : {})
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "FinEd",
+          url: "https://myfined.com",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://myfined.com/logo.ico",
+          },
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://myfined.com",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Articles",
+            item: "https://myfined.com/articles",
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: tag,
+            item: `https://myfined.com/tags/${tag.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 4,
+            name: article.title,
+            item: canonicalUrl,
+          },
+        ],
+      },
+    ];
+
+    if (faqEntities.length > 0) {
+      graph.push({
+        "@type": "FAQPage",
+        "@id": `${canonicalUrl}#faq`,
+        mainEntity: faqEntities,
+      });
+    }
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": graph,
+    };
+  }, [article, metaDescription, blocks]);
+
+  const schemaJson = structuredData ? serializeJsonLd(structuredData) : "";
 
   return (
     <div className="ar-overlay" role="dialog" aria-modal="true" aria-label="Article reader">
@@ -522,11 +685,19 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           <article className="ar-article" itemScope itemType="https://schema.org/Article">
             <header className="ar-header">
               <div className="ar-meta">
-                {publishedDate && <time dateTime={article.published_at || article.created_at}>{publishedDate}</time>}
+                {publishedDate && <time dateTime={article.published_at || article.created_at}>Published: {publishedDate}</time>}
+                {updatedDateFormatted && updatedDateFormatted !== publishedDate && (
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span className="ar-updated-date" style={{ color: "#059669", fontWeight: "600" }}>
+                      Updated: {updatedDateFormatted}
+                    </span>
+                  </>
+                )}
                 <span aria-hidden="true">•</span>
                 <span
                   style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/tags/${articleTag.toLowerCase()}`)}
+                  onClick={() => navigate(`/tags/${articleTag.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
                 >
                   {articleTag}
                 </span>
@@ -553,12 +724,13 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
             </header>
 
             {article.image_url && (
-              <div className="ar-image-wrap">
+              <div className="ar-image-wrap" style={{ minHeight: "240px", background: "#f1f5f9", borderRadius: "12px", overflow: "hidden" }}>
                 <img
                   src={article.image_url}
                   alt={article.title}
                   className="ar-image"
                   itemProp="image"
+                  loading="eager"
                 />
               </div>
             )}
@@ -569,21 +741,21 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               {blocks.map((block, i) => {
                 if (block.level === 2) {
                   return (
-                    <h2 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
+                    <h2 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
                       {renderTextWithLinks(block.text)}
                     </h2>
                   );
                 }
                 if (block.level === 3) {
                   return (
-                    <h3 key={`${article.id || article.title}-${i}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
+                    <h3 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
                       {renderTextWithLinks(block.text)}
                     </h3>
                   );
                 }
                 return (
                   <p
-                    key={`${article.id || article.title}-${i}`}
+                    key={`${article.id || article.title}-${block.id}`}
                     id={block.id}
                     className="ar-p"
                     itemProp={i === 0 ? "articleBody" : undefined}
@@ -592,6 +764,62 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                   </p>
                 );
               })}
+            </div>
+
+            {/* E-E-A-T AUTHOR BIO & CREDENTIALS CARD */}
+            <div className="ar-author-box">
+              <div className="ar-author-box-avatar">
+                {article.authors?.image_url ? (
+                  <img
+                    src={article.authors.image_url}
+                    alt={article.authors.name}
+                    className="ar-author-avatar-img"
+                  />
+                ) : (
+                  <div className="ar-author-avatar-initial">
+                    {(article.authors?.name || article.author || "S").charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="ar-author-box-content">
+                <div className="ar-author-box-header">
+                  <div>
+                    <h3 className="ar-author-box-name">
+                      Written by{" "}
+                      <span
+                        className="ar-author-link"
+                        onClick={() => navigate(`/authors/${article.authors?.slug || "shravan-mutha"}`)}
+                        style={{ cursor: "pointer", color: "#4A3AFF", textDecoration: "underline" }}
+                      >
+                        {article.authors?.name || article.author || "Shravan Mutha"}
+                      </span>
+                    </h3>
+                    <p className="ar-author-box-role">
+                      {article.authors?.role || "FinEd Research & Editorial"}
+                    </p>
+                  </div>
+                  {article.authors?.linkedin_url && (
+                    <a
+                      href={article.authors.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ar-author-social-link"
+                      title="Connect on LinkedIn"
+                      aria-label="LinkedIn Profile"
+                    >
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                    </a>
+                  )}
+                </div>
+                <p className="ar-author-box-bio">
+                  {article.authors?.bio || "Dedicated to breaking down complex financial systems, Indian regulatory frameworks, and market mechanisms into clear, actionable explainers."}
+                </p>
+                <div className="ar-editorial-shield">
+                  <span>🛡️ Fact-Checked &amp; Independent FinEd Research</span>
+                </div>
+              </div>
             </div>
 
             {/* RATE & SHARE CARD AT END OF ARTICLE */}

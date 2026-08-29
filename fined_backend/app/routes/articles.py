@@ -225,13 +225,15 @@ async def add_article(
     title: str = Form(...),
     content: str = Form(...),
     description: Optional[str] = Form(None),
+    seo_title: Optional[str] = Form(None),
+    meta_description: Optional[str] = Form(None),
     tag: str = Form(...),
     slug: Optional[str] = Form(None),
     author_id: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin adds an article with optional custom slug and optional image upload to Supabase Storage"""
+    """Admin adds an article with optional custom slug, SEO fields, and optional image upload to Supabase Storage"""
     try:
         image_url = ""
         if image:
@@ -250,7 +252,9 @@ async def add_article(
             image_url=image_url,
             tag=tag,
             slug=slug,
-            author_id=author_id
+            author_id=author_id,
+            seo_title=seo_title or "",
+            meta_description=meta_description or ""
         )
     except Exception as e:
         raise HTTPException(

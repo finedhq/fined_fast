@@ -16,20 +16,45 @@ class ArticleRepository:
         res = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("id", article_id).execute()
         return res.data[0] if res.data else None
 
-    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "", author_id: str = None) -> dict:
+    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "", author_id: str = None, seo_title: str = "", meta_description: str = "") -> dict:
         payload = {
             "title": title,
             "content": content,
             "description": description,
             "image_url": image_url,
             "tag": tag,
-            "slug": slug
+            "slug": slug,
+            "seo_title": seo_title,
+            "meta_description": meta_description,
+            "metadata": {
+                "seo_title": seo_title,
+                "meta_description": meta_description
+            }
         }
         if author_id:
             payload["author_id"] = author_id
 
-        res = supabase.from_("articles").insert([payload]).execute()
-        return res.data[0] if res.data else {}
+        try:
+            res = supabase.from_("articles").insert([payload]).execute()
+            return res.data[0] if res.data else {}
+        except Exception:
+            # Fallback if seo_title / meta_description columns are not yet applied via migration
+            payload_fallback = {
+                "title": title,
+                "content": content,
+                "description": description,
+                "image_url": image_url,
+                "tag": tag,
+                "slug": slug,
+                "metadata": {
+                    "seo_title": seo_title,
+                    "meta_description": meta_description
+                }
+            }
+            if author_id:
+                payload_fallback["author_id"] = author_id
+            res = supabase.from_("articles").insert([payload_fallback]).execute()
+            return res.data[0] if res.data else {}
 
     def delete(self, article_id: str):
         supabase.from_("articles").delete().eq("id", article_id).execute()
@@ -88,6 +113,7 @@ class ArticleRepository:
 
     def get_all_for_sitemap(self) -> list:
         res = supabase.from_("articles").select("id, title, slug, created_at, published_at")\
+            .eq("status", "published")\
             .order("created_at", desc=True).execute()
         return res.data or []
 
@@ -100,13 +126,13 @@ class ArticleRepository:
         return res.data[0] if res.data else None
 
     def get_articles_by_author(self, author_id: str) -> list:
-        res = supabase.from_("articles").select("*, authors(name, slug, image_url)")\
+        res = supabase.from_("articles").select("*, authors(name, slug, image_url, bio, linkedin_url, description, email)")\
             .eq("author_id", author_id).eq("status", "published")\
             .order("created_at", desc=True).execute()
         return res.data or []
 
     def get_by_slug(self, slug: str) -> dict | None:
-        res = supabase.from_("articles").select("*").eq("slug", slug).eq("status", "published").execute()
+        res = supabase.from_("articles").select("*, authors(name, slug, image_url, bio, linkedin_url, description, email)").eq("slug", slug).eq("status", "published").execute()
         return res.data[0] if res.data else None
 
     def get_adjacent(self, current_created_at: str) -> dict:
