@@ -1619,21 +1619,35 @@ button {
   .ar-grid {
     grid-template-columns: 1fr;
     gap: 15px;
+    width: 100%;
   }
 
   .ar-article {
     transform: none;
+    width: 100%;
   }
 
   .ar-toc-aside {
     position: static;
     max-height: none;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+    padding: 0 0 16px 0;
+  }
+
+  .ar-toc-nav {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
   }
 
   .ar-toc-header-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
     padding: 14px 16px;
     background: #f9fafb;
     border: 1px solid #f3f4f6;
@@ -1664,13 +1678,18 @@ button {
 
   .ar-toc-content-wrapper {
     display: none;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .ar-toc-content-wrapper.open {
     display: flex;
+    width: 100%;
   }
 
   .ar-toc-list {
+    width: 100%;
+    box-sizing: border-box;
     max-height: none;
     display: flex;
     flex-direction: column;
@@ -2729,4 +2748,175 @@ button {
     width: min(1180px, calc(100% - 32px)) !important;
     padding: 24px 20px !important;
   }
+}
+
+/* --- RELATED READS BLOCK --- */
+.ar-related-section {
+  grid-column: 2 / 4;
+  width: 100%;
+  max-width: 1162px;
+  margin: 54px 0 28px 0;
+  box-sizing: border-box;
+}
+
+.ar-footer-wrapper {
+  grid-column: 2 / 4;
+  width: 100%;
+  max-width: 1162px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 1279px) {
+  .ar-related-section {
+    grid-column: 2 / -1;
+  }
+  .ar-footer-wrapper {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ar-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: min(890px, 100%);
+    margin: 0 auto;
+  }
+  .ar-toc-aside {
+    position: static;
+    max-height: none;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+  .ar-toc-nav {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+  .ar-article {
+    width: 100%;
+  }
+  .ar-related-section {
+    width: 100%;
+    max-width: 890px;
+    margin: 36px 0 24px 0;
+  }
+  .ar-footer-wrapper {
+    width: 100%;
+    max-width: 890px;
+  }
+}
+
+.ar-related-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ar-related-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.ar-related-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.ar-related-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ar-related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .ar-related-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ar-related-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.ar-related-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  min-height: 380px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.ar-related-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.09);
+  border-color: #cbd5e1;
+}
+
+.ar-related-card:active {
+  transform: translateY(-1px);
+}
+
+.ar-related-card .ap-grid-card-img-wrap {
+  width: 100%;
+  height: 220px;
+  background: #e5e7eb;
+  overflow: hidden;
+  position: relative;
+}
+
+.ar-related-card .ap-grid-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.ar-related-card:hover .ap-grid-card-img {
+  transform: scale(1.05);
+}
+
+.ar-related-card .ap-grid-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+}
+
+.ar-related-card .ap-grid-card-content {
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }

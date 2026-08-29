@@ -70,6 +70,25 @@ class ArticleService:
             return {"previous": None, "next": None}
         return article_repo.get_adjacent(article["created_at"])
 
+    def get_related(self, slug: str, limit: int = 3) -> list:
+        """Fetch related articles: matching tag first, then backfilling with recent published articles"""
+        if not slug:
+            return []
+
+        article = self.get_by_slug(slug)
+        tag = article.get("tag") if article else None
+
+        # 1. Fetch matching tag articles
+        related = article_repo.get_related_by_tag(tag=tag, exclude_slug=slug, limit=limit)
+
+        # 2. Backfill if fewer than limit
+        if len(related) < limit:
+            exclude_slugs = [slug] + [r.get("slug") for r in related if r.get("slug")]
+            backfill = article_repo.get_recent_published(exclude_slugs=exclude_slugs, limit=limit - len(related))
+            related.extend(backfill)
+
+        return related[:limit]
+
     def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = None, author_id: str = None, seo_title: str = "", meta_description: str = "") -> dict:
         """Admin adds article — using custom slug if provided, else auto-generated from title"""
         if slug and slug.strip():

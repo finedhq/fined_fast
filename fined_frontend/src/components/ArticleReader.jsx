@@ -5,6 +5,7 @@ import { RiShareForwardLine } from "react-icons/ri";
 import { FiX } from "react-icons/fi";
 import PersonalLensSidebar from "./PersonalLens/PersonalLensSidebar";
 import ShareModal from "./ShareModal";
+import { fetchRelatedArticles } from "../services/api";
 
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
@@ -139,6 +140,26 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const tocNavRef = useRef(null);
   const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
   const [isMobileLensOpen, setIsMobileLensOpen] = useState(false);
+  const [relatedArticles, setRelatedArticles] = useState([]);
+
+  // Fetch related articles based on category / tag
+  useEffect(() => {
+    const slug = article?.slug || (article?.title ? article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
+    if (!slug) return;
+    let isMounted = true;
+    fetchRelatedArticles(slug, 3)
+      .then((data) => {
+        if (isMounted) {
+          setRelatedArticles(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not load related articles:", err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [article?.slug, article?.title]);
 
   // Close mobile TOC when clicking outside
   useEffect(() => {
@@ -808,7 +829,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       aria-label="LinkedIn Profile"
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                       </svg>
                     </a>
                   )}
@@ -822,7 +843,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               </div>
             </div>
 
-            {/* RATE & SHARE CARD AT END OF ARTICLE */}
+            {/* RATE & SHARE CARD AT END OF ARTICLE (Mobile / Tablet Only) */}
             <div className="ar-end-card">
               <div className="ar-end-card-header">
                 <div className="ar-end-card-icon">
@@ -833,7 +854,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     {rating > 0 ? "Thanks for your feedback!" : "Enjoyed this article?"}
                   </h3>
                   <p className="ar-end-card-subtitle">
-                    {rating > 0 
+                    {rating > 0
                       ? `You rated this explainer ${rating} out of 5 stars.`
                       : "Rate this explainer and share it with friends."}
                   </p>
@@ -875,8 +896,6 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </button>
               </div>
             </div>
-
-            {footer}
           </article>
 
           {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}
@@ -888,6 +907,71 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               />
             </div>
           </aside>
+
+          {/* WIDE RELATED READS SECTION (Spanning Column 2 & 3 on Desktop) */}
+          {relatedArticles && relatedArticles.length > 0 && (
+            <section className="ar-related-section" aria-label="Related Reads">
+              <div className="ar-related-header">
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+                  <h3 className="ar-related-title">Related Reads</h3>
+                </div>
+                <span className="ar-related-badge">More in {articleTag}</span>
+              </div>
+
+              <div className="ar-related-grid">
+                {relatedArticles.map((item) => {
+                  const itemSlug = item.slug || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
+                  return (
+                    <div
+                      key={item.id || itemSlug}
+                      className="ap-grid-card ar-related-card"
+                      onClick={() => {
+                        navigate(`/articles/${itemSlug}`);
+                        if (scrollRef.current) {
+                          scrollRef.current.scrollTop = 0;
+                        }
+                      }}
+                    >
+                      <div className="ap-grid-card-img-wrap">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.title}
+                            className="ap-grid-card-img"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="ap-grid-card-img-placeholder" />
+                        )}
+                      </div>
+                      <div className="ap-grid-card-content">
+                        <span className="ap-grid-category">{item.tag || articleTag}</span>
+                        <h4 className="ap-grid-title" style={{ fontSize: "1.15rem", fontWeight: "800", marginBottom: "8px", color: "#111827", lineHeight: "1.35", WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {item.title}
+                        </h4>
+                        <p className="ap-grid-date" style={{ color: "#6b7280", fontSize: "13px", margin: "0 0 10px 0" }}>
+                          {formatDate(item.published_at || item.created_at)} • By {item.authors?.name || item.author || "FinEd"}
+                        </p>
+                        {item.description && (
+                          <p className="ap-grid-excerpt" style={{ color: "#4b5563", fontSize: "0.95rem", lineHeight: "1.45", margin: 0, WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* FOOTER NAVIGATION */}
+          {footer && (
+            <div className="ar-footer-wrapper">
+              {footer}
+            </div>
+          )}
         </div>
 
         {/* Floating Share Trigger for Mobile & Tablet (Left Side) */}

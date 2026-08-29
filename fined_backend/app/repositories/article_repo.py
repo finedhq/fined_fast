@@ -143,4 +143,28 @@ class ArticleRepository:
             "next": next_res.data[0] if next_res.data else None
         }
 
+    def get_related_by_tag(self, tag: str | None, exclude_slug: str, limit: int = 3) -> list:
+        if not tag:
+            return []
+        query = supabase.from_("articles")\
+            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors(name, slug, image_url)")\
+            .eq("status", "published")\
+            .eq("tag", tag)\
+            .neq("slug", exclude_slug)\
+            .order("created_at", desc=True)\
+            .limit(limit)
+        res = query.execute()
+        return res.data or []
+
+    def get_recent_published(self, exclude_slugs: list[str], limit: int = 3) -> list:
+        res = supabase.from_("articles")\
+            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors(name, slug, image_url)")\
+            .eq("status", "published")\
+            .order("created_at", desc=True)\
+            .limit(limit + len(exclude_slugs) + 2)\
+            .execute()
+        articles = res.data or []
+        filtered = [a for a in articles if a.get("slug") not in exclude_slugs]
+        return filtered[:limit]
+
 article_repo = ArticleRepository()

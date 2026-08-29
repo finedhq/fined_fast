@@ -98,6 +98,17 @@ async def get_adjacent_articles(slug: str):
             detail=f"Failed to fetch adjacent articles: {str(e)}"
         )
 
+@router.get("/related/{slug}")
+async def get_related_articles(slug: str, limit: Optional[int] = 3):
+    """Fetch related articles matching current article's category with fallback"""
+    try:
+        return article_service.get_related(slug, limit=limit or 3)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch related articles: {str(e)}"
+        )
+
 @router.post("/saveemail")
 async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Save newsletter email subscription"""
