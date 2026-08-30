@@ -599,7 +599,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         {/* structured data */}
         <script type="application/ld+json">{schemaJson}</script>
 
-        <div className="ar-grid">
+        <div className="ar-main-content">
+          <div className="ar-grid">
           {/* TOC */}
           <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''}`}>
             <nav className="ar-toc-nav" aria-label="Article of contents" ref={tocNavRef}>
@@ -706,7 +707,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           <article className="ar-article" itemScope itemType="https://schema.org/Article">
             <header className="ar-header">
               <div className="ar-meta">
-                {publishedDate && <time dateTime={article.published_at || article.created_at}>Published: {publishedDate}</time>}
+                {publishedDate && <time dateTime={article.published_at || article.created_at}>{publishedDate}</time>}
                 {updatedDateFormatted && updatedDateFormatted !== publishedDate && (
                   <>
                     <span aria-hidden="true">•</span>
@@ -900,79 +901,104 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
           {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}
           <aside className="ar-lens-aside">
-            <div style={{ position: "sticky", top: "60px" }}>
-              <PersonalLensSidebar
-                article={article}
-                articleId={article?.slug || article?.id || "etf-101-guide"}
-              />
-            </div>
+            <PersonalLensSidebar
+              article={article}
+              articleId={article?.slug || article?.id || "etf-101-guide"}
+            />
           </aside>
-
-          {/* WIDE RELATED READS SECTION (Spanning Column 2 & 3 on Desktop) */}
-          {relatedArticles && relatedArticles.length > 0 && (
-            <section className="ar-related-section" aria-label="Related Reads">
-              <div className="ar-related-header">
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-                  <h3 className="ar-related-title">Related Reads</h3>
-                </div>
-                <span className="ar-related-badge">More in {articleTag}</span>
-              </div>
-
-              <div className="ar-related-grid">
-                {relatedArticles.map((item) => {
-                  const itemSlug = item.slug || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
-                  return (
-                    <div
-                      key={item.id || itemSlug}
-                      className="ap-grid-card ar-related-card"
-                      onClick={() => {
-                        navigate(`/articles/${itemSlug}`);
-                        if (scrollRef.current) {
-                          scrollRef.current.scrollTop = 0;
-                        }
-                      }}
-                    >
-                      <div className="ap-grid-card-img-wrap">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.title}
-                            className="ap-grid-card-img"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="ap-grid-card-img-placeholder" />
-                        )}
-                      </div>
-                      <div className="ap-grid-card-content">
-                        <span className="ap-grid-category">{item.tag || articleTag}</span>
-                        <h4 className="ap-grid-title" style={{ fontSize: "1.15rem", fontWeight: "800", marginBottom: "8px", color: "#111827", lineHeight: "1.35", WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                          {item.title}
-                        </h4>
-                        <p className="ap-grid-date" style={{ color: "#6b7280", fontSize: "13px", margin: "0 0 10px 0" }}>
-                          {formatDate(item.published_at || item.created_at)} • By {item.authors?.name || item.author || "FinEd"}
-                        </p>
-                        {item.description && (
-                          <p className="ap-grid-excerpt" style={{ color: "#4b5563", fontSize: "0.95rem", lineHeight: "1.45", margin: 0, WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* FOOTER NAVIGATION */}
-          {footer && (
-            <div className="ar-footer-wrapper">
-              {footer}
-            </div>
-          )}
         </div>
+
+        {/* WIDE RELATED READS SECTION */}
+        {relatedArticles && relatedArticles.length > 0 && (
+          <section className="ar-related-section" aria-label="Related Reads">
+            <div className="ar-related-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <h3 className="ar-related-title">Related Reads</h3>
+              </div>
+              <button
+                type="button"
+                className="ar-related-badge"
+                onClick={() => navigate(`/tags/${(articleTag || "finance").toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
+                aria-label={`View more articles in ${articleTag}`}
+              >
+                <span>More in {articleTag}</span>
+                <span style={{ fontSize: "14px", marginLeft: "2px" }}>→</span>
+              </button>
+            </div>
+
+            <div className="ar-related-grid">
+              {relatedArticles.map((item) => {
+                const itemSlug = item.slug || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
+                return (
+                  <div
+                    key={item.id || itemSlug}
+                    className="ap-grid-card ar-related-card"
+                    onClick={() => {
+                      navigate(`/articles/${itemSlug}`);
+                      if (scrollRef.current) {
+                        scrollRef.current.scrollTop = 0;
+                      }
+                    }}
+                  >
+                    <div className="ap-grid-card-img-wrap">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="ap-grid-card-img"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="ap-grid-card-img-placeholder" />
+                      )}
+                    </div>
+                    <div className="ap-grid-card-content">
+                      <span
+                        className="ap-grid-category"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const tagSlug = (item.tag || articleTag || "finance").toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                          navigate(`/tags/${tagSlug}`);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {item.tag || articleTag}
+                      </span>
+                      <h4 className="ap-grid-title" style={{ fontSize: "1.15rem", fontWeight: "800", marginBottom: "8px", color: "#111827", lineHeight: "1.35", WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                        {item.title}
+                      </h4>
+                      <p className="ap-grid-date" style={{ color: "#6b7280", fontSize: "13px", margin: "0 0 10px 0" }}>
+                        {formatDate(item.published_at || item.created_at)} • By{" "}
+                        <span
+                          style={{ color: "#0ea5e9", textDecoration: "underline", cursor: "pointer" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/authors/${item.authors?.slug || "shravan-mutha"}`);
+                          }}
+                        >
+                          {item.authors?.name || item.author || "Shravan Mutha"}
+                        </span>
+                      </p>
+                      {item.description && (
+                        <p className="ap-grid-excerpt" style={{ color: "#4b5563", fontSize: "0.95rem", lineHeight: "1.45", margin: 0, WebkitLineClamp: 2, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* FOOTER NAVIGATION */}
+        {footer && (
+          <div className="ar-footer-wrapper">
+            {footer}
+          </div>
+        )}
+      </div>
 
         {/* Floating Share Trigger for Mobile & Tablet (Left Side) */}
         <button
