@@ -160,6 +160,7 @@
 .dash-actions {
   display: flex;
   gap: 12px;
+  margin-top: 16px;
 }
 
 .dash-btn-primary {
@@ -221,11 +222,20 @@
 }
 
 @media (max-width: 899px) {
+  .dash-welcome-card {
+    padding: 32px 24px !important;
+  }
   .dash-welcome-content {
     max-width: 100%;
   }
   .dash-fox-illustration {
     display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .dash-welcome-card {
+    padding: 32px 28px !important;
   }
 }
 
@@ -881,6 +891,7 @@
   padding-bottom: 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
 }
 
 .dash-carousel-container::-webkit-scrollbar {
@@ -891,6 +902,7 @@
   min-width: 85vw;
   flex: 0 0 85vw;
   max-width: 85vw;
+  scroll-snap-align: center;
 }
 
 @media (max-width: 599px) {
@@ -901,6 +913,7 @@
     min-width: calc(100vw - 48px);
     flex: 0 0 calc(100vw - 48px);
     max-width: calc(100vw - 48px);
+    scroll-snap-align: center;
   }
   .dash-scroll-btn {
     width: 32px;
@@ -920,6 +933,7 @@
     min-width: 300px;
     flex: 0 0 300px;
     max-width: 300px;
+    scroll-snap-align: start;
   }
 }
 
@@ -928,6 +942,7 @@
     min-width: 330px;
     flex: 0 0 330px;
     max-width: 330px;
+    scroll-snap-align: start;
   }
 }
 

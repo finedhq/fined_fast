@@ -9,15 +9,29 @@ class ArticleOut(BaseModel):
     title: str
     content: str
     description: Optional[str] = None
+    seo_title: Optional[str] = None
+    meta_description: Optional[str] = None
     image_url: Optional[str] = None
     rating: Optional[float] = None
+    tag: Optional[str] = None
+    slug: Optional[str] = None
+    author_id: Optional[str] = None
+    authors: Optional[dict] = None
     created_at: Optional[str] = None
+    published_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 
 class ArticleCreate(BaseModel):
     """Admin: create a new article (image handled separately as file upload)"""
     title: str = Field(min_length=3, max_length=200)
     content: str = Field(min_length=10)
+    description: Optional[str] = None
+    seo_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    tag: Optional[str] = "Finance"
+    slug: Optional[str] = None
+    author_id: Optional[str] = None
 
 
 class RatingCreate(BaseModel):

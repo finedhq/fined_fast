@@ -3,9 +3,19 @@ export const ETF_DEMO_ARTICLE = {
   id: "etf-101-guide",
   slug: "understanding-etfs-exchange-traded-funds",
   title: "The No-Nonsense Guide to Exchange Traded Funds (ETFs)",
+  seo_title: "What Are ETFs? Complete Guide to Exchange Traded Funds",
+  meta_description: "Learn how Exchange Traded Funds (ETFs) work, compare them to mutual funds, understand expense ratios, and start investing with low fees.",
   tag: "Investing",
-  author: "FinEd Editorial Team",
+  author: "Shravan Mutha",
+  authors: {
+    name: "Shravan Mutha",
+    slug: "shravan-mutha",
+    role: "FinEd Research Lead",
+    bio: "Equity researcher and financial educator dedicated to making wealth-building concepts simple and accessible.",
+    linkedin_url: "https://www.linkedin.com/in/shravan-mutha-302247297/"
+  },
   created_at: "2026-02-15T10:00:00Z",
+  updated_at: "2026-02-28T14:30:00Z",
   image_url: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",
   editor_summary: "A plain English breakdown of ETFs: how they bundle assets, trade in real time on stock exchanges, offer low expense ratios, and compare with traditional mutual funds and direct stock picking.",
   metadata: {

@@ -648,6 +648,16 @@ body {
   transition: transform 0.2s, color 0.2s;
 }
 
+.courses-swiper .swiper-wrapper {
+  align-items: stretch !important;
+}
+
+.courses-swiper .swiper-slide {
+  height: auto !important;
+  display: flex !important;
+  align-self: stretch !important;
+}
+
 .courses-swiper-prev:hover,
 .courses-swiper-next:hover {
   color: var(--brand-indigo);
@@ -669,6 +679,10 @@ body {
   align-items: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   min-height: 415px;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .course-swiper-card:hover {
@@ -758,6 +772,18 @@ body {
   
   .course-swiper-title {
     font-size: 22px;
+  }
+
+  /* Fade out inactive slides on mobile to prevent text overlap */
+  .courses-swiper .swiper-slide:not(.swiper-slide-active) {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .courses-swiper .swiper-slide-active {
+    opacity: 1 !important;
+    transition: opacity 0.3s ease;
   }
 }
 
@@ -1391,16 +1417,17 @@ body {
 }
 
 .article-swiper-card {
-  border-radius: 16px;
-  overflow: hidden;
+  border-radius: 16px !important;
+  overflow: hidden !important;
   background: white;
   width: 100%;
   height: 100%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid #4a3aff;
+  border: none !important;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  transform: translateZ(0); /* Fix Safari overflow hidden bug */
 }
 
 .article-swiper-img {
@@ -1408,6 +1435,7 @@ body {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
+  border-radius: 16px 16px 0 0 !important;
 }
 
 @media (min-width: 901px) {
@@ -1417,10 +1445,12 @@ body {
 }
 
 .article-swiper-meta {
-  padding: 24px;
-  flex: 1;
+  padding: 24px 32px;
+  background: white;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  border-radius: 0 0 16px 16px !important;
 }
 
 .article-swiper-footer-top {
@@ -1822,17 +1852,7 @@ body {
   }
 
   .article-swiper-card {
-    border-radius: 0 !important;
-    overflow: hidden !important;
-    border: 1px solid #4a3aff !important;
-  }
-
-  .article-swiper-img {
-    border-radius: 0 !important;
-  }
-
-  .article-swiper-meta {
-    border-radius: 0 !important;
+    border: none !important;
   }
 
   .article-swiper-title {

@@ -70,13 +70,42 @@ class ArticleService:
             return {"previous": None, "next": None}
         return article_repo.get_adjacent(article["created_at"])
 
-    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = None, author_id: str = None) -> dict:
+    def get_related(self, slug: str, limit: int = 3) -> list:
+        """Fetch related articles: matching tag first, then backfilling with recent published articles"""
+        if not slug:
+            return []
+
+        article = self.get_by_slug(slug)
+        tag = article.get("tag") if article else None
+
+        # 1. Fetch matching tag articles
+        related = article_repo.get_related_by_tag(tag=tag, exclude_slug=slug, limit=limit)
+
+        # 2. Backfill if fewer than limit
+        if len(related) < limit:
+            exclude_slugs = [slug] + [r.get("slug") for r in related if r.get("slug")]
+            backfill = article_repo.get_recent_published(exclude_slugs=exclude_slugs, limit=limit - len(related))
+            related.extend(backfill)
+
+        return related[:limit]
+
+    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = None, author_id: str = None, seo_title: str = "", meta_description: str = "") -> dict:
         """Admin adds article — using custom slug if provided, else auto-generated from title"""
         if slug and slug.strip():
             final_slug = self._sanitize_slug(slug.strip())
         else:
             final_slug = self._generate_slug(title)
-        return article_repo.insert(title=title, content=content, description=description, image_url=image_url, tag=tag, slug=final_slug, author_id=author_id)
+        return article_repo.insert(
+            title=title,
+            content=content,
+            description=description,
+            image_url=image_url,
+            tag=tag,
+            slug=final_slug,
+            author_id=author_id,
+            seo_title=seo_title,
+            meta_description=meta_description
+        )
         
     def get_all_authors(self) -> list:
         return article_repo.get_all_authors()
@@ -190,24 +219,52 @@ class ArticleService:
 
     def build_sitemap_xml(self) -> str:
         articles = article_repo.get_all_for_sitemap()
+        authors = article_repo.get_all_authors()
 
         static_urls = [
-            ("https://myfined.com/", "weekly", "1.0", None),
-            ("https://myfined.com/articles", "daily", "0.8", None),
+            ("https://myfined.com/", "weekly", "1.0"),
+            ("https://myfined.com/articles", "daily", "0.9"),
+            ("https://myfined.com/about", "monthly", "0.7"),
+            ("https://myfined.com/contact", "monthly", "0.5"),
+            ("https://myfined.com/feedback", "monthly", "0.5"),
+            ("https://myfined.com/policies", "monthly", "0.5"),
+            ("https://myfined.com/courses", "weekly", "0.8"),
+        ]
+
+        tag_urls = [
+            "https://myfined.com/tags/personal-finance",
+            "https://myfined.com/tags/ipo",
+            "https://myfined.com/tags/investing",
+            "https://myfined.com/tags/deep-dives",
+            "https://myfined.com/tags/economy"
         ]
 
         entries = []
-        for loc, changefreq, priority, lastmod in static_urls:
+        for loc, changefreq, priority in static_urls:
             entries.append(f"<url><loc>{loc}</loc><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>")
+
+        for tag_loc in tag_urls:
+            entries.append(f"<url><loc>{tag_loc}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+
+        for auth in authors:
+            auth_slug = auth.get("slug")
+            if auth_slug:
+                loc = escape(f"https://myfined.com/authors/{auth_slug}")
+                entries.append(f"<url><loc>{loc}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
 
         for a in articles:
             slug = a.get("slug") or self._generate_slug(a.get("title", ""))
             loc = escape(f"https://myfined.com/articles/{slug}")
-            lastmod_raw = a.get("published_at") or a.get("created_at")
+            lastmod_raw = a.get("updated_at") or a.get("published_at") or a.get("created_at")
             lastmod = lastmod_raw[:10] if lastmod_raw else ""
-            entries.append(
-                f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>"
-            )
+            if lastmod:
+                entries.append(
+                    f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+                )
+            else:
+                entries.append(
+                    f"<url><loc>{loc}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+                )
 
         body = "".join(entries)
         return f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>'

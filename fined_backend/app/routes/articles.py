@@ -98,6 +98,17 @@ async def get_adjacent_articles(slug: str):
             detail=f"Failed to fetch adjacent articles: {str(e)}"
         )
 
+@router.get("/related/{slug}")
+async def get_related_articles(slug: str, limit: Optional[int] = 3):
+    """Fetch related articles matching current article's category with fallback"""
+    try:
+        return article_service.get_related(slug, limit=limit or 3)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch related articles: {str(e)}"
+        )
+
 @router.post("/saveemail")
 async def save_email(body: SaveEmailRequest, user: AuthUser = Depends(get_current_user)):
     """Save newsletter email subscription"""
@@ -225,13 +236,15 @@ async def add_article(
     title: str = Form(...),
     content: str = Form(...),
     description: Optional[str] = Form(None),
+    seo_title: Optional[str] = Form(None),
+    meta_description: Optional[str] = Form(None),
     tag: str = Form(...),
     slug: Optional[str] = Form(None),
     author_id: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin adds an article with optional custom slug and optional image upload to Supabase Storage"""
+    """Admin adds an article with optional custom slug, SEO fields, and optional image upload to Supabase Storage"""
     try:
         image_url = ""
         if image:
@@ -250,7 +263,9 @@ async def add_article(
             image_url=image_url,
             tag=tag,
             slug=slug,
-            author_id=author_id
+            author_id=author_id,
+            seo_title=seo_title or "",
+            meta_description=meta_description or ""
         )
     except Exception as e:
         raise HTTPException(

@@ -287,6 +287,62 @@ const TickItem = ({ children, delay = 0 }) => (
   </RevealOnScroll>
 );
 
+const CourseSlideCard = ({ heroCourse, featuredImg, navigate }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const description = heroCourse?.description || "This course will provide you everything you need to start investing in India. The stock market can seem complicated, but it doesn't have to be. This course breaks down how the market works, from stocks, IPOs, and key market terms to the basics of analysing companies and the economy.";
+  
+  // A simple heuristic for whether we need a read more button
+  const needsReadMore = description.length > 150;
+
+  return (
+    <div className="course-swiper-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <div className="w-full flex flex-col md:flex-row items-start gap-4 md:gap-6">
+        <div className="course-swiper-img-container shrink-0 w-full md:w-[45%]" style={{ flex: 'none', aspectRatio: '4/3' }}>
+          <img src={heroCourse?.thumbnail_url || featuredImg} alt={heroCourse?.title || "Basics of Stock Market"} className="course-swiper-img" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+        </div>
+        <div className="course-swiper-content w-full md:flex-1" style={{ textAlign: 'left' }}>
+          <h3 className="course-swiper-title" style={{ fontFamily: 'Nunito, sans-serif', fontSize: '28px', color: '#111827', margin: '0 0 8px 0', fontWeight: 'bold' }}>
+            {heroCourse?.title || "Basics of Stock Market"}
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-500 font-medium" style={{ color: '#6B7280', fontSize: '15px', marginBottom: '16px' }}>
+            <span>{heroCourse?.modules_count || 12} Modules</span>
+            <span>&bull;</span>
+            <span>{heroCourse?.duration || 15} mins</span>
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <p className="course-swiper-desc" style={{ 
+              fontSize: '16px', 
+              color: '#4B5563', 
+              margin: '0',
+              display: isExpanded ? 'block' : '-webkit-box',
+              WebkitLineClamp: isExpanded ? 'unset' : 4,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}>
+              {description}
+            </p>
+            {needsReadMore && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                style={{ background: 'none', border: 'none', color: '#3D5AFE', fontWeight: 'bold', padding: '4px 0', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}
+              >
+                {isExpanded ? 'Read less' : 'Read more'}
+              </button>
+            )}
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate('/courses'); }}
+            className="self-start transition-colors active:scale-95"
+            style={{ backgroundColor: '#F5A623', color: 'white', padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+          >
+            View Course
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 function Hero() {
   const navigate = useNavigate();
@@ -318,6 +374,13 @@ function Hero() {
   const [pathProgresses, setPathProgresses] = useState([]);
   const [articles, setArticles] = useState([]);
   const [heroCourse, setHeroCourse] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     async function getHeroCourse() {
@@ -733,9 +796,9 @@ function Hero() {
               }}
               coverflowEffect={{
                 rotate: 0,
-                stretch: 120,
-                depth: 180,
-                modifier: 1.5,
+                stretch: isMobile ? 0 : 120,
+                depth: isMobile ? 150 : 180,
+                modifier: isMobile ? 1 : 1.5,
                 slideShadows: false,
               }}
               autoplay={{
@@ -753,34 +816,9 @@ function Hero() {
               ].map((slide, index) => (
                 <SwiperSlide key={`slide-${index}`} style={{ width: '100%', maxWidth: '950px' }}>
                   {slide.type === 'course' ? (
-                    <div className="course-swiper-card" onClick={() => navigate('/courses')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div className="w-full flex flex-col md:flex-row items-start gap-4 md:gap-6">
-                        <div className="course-swiper-img-container shrink-0 w-full md:w-[45%]" style={{ flex: 'none', aspectRatio: '4/3' }}>
-                          <img src={heroCourse?.thumbnail_url || featuredImg} alt={heroCourse?.title || "Basics of Stock Market"} className="course-swiper-img" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
-                        </div>
-                        <div className="course-swiper-content w-full md:flex-1" style={{ textAlign: 'left' }}>
-                        <h3 className="course-swiper-title" style={{ fontFamily: 'Nunito, sans-serif', fontSize: '28px', color: '#111827', margin: '0 0 8px 0', fontWeight: 'bold' }}>
-                          {heroCourse?.title || "Basics of Stock Market"}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium" style={{ color: '#6B7280', fontSize: '15px', marginBottom: '16px' }}>
-                          <span>{heroCourse?.modules_count || 12} Modules</span>
-                          <span>&bull;</span>
-                          <span>{heroCourse?.duration || 15} mins</span>
-                        </div>
-                        <p className="course-swiper-desc" style={{ fontSize: '16px', color: '#4B5563', margin: '0 0 24px 0' }}>
-                          {heroCourse?.description || "This course will provide you everything you need to start investing in India."}
-                        </p>
-                        <button
-                          className="self-start transition-colors active:scale-95"
-                          style={{ backgroundColor: '#F5A623', color: 'white', padding: '10px 24px', borderRadius: '50px', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '16px' }}
-                        >
-                          View Course
-                        </button>
-                      </div>
-                      </div>
-                    </div>
+                    <CourseSlideCard heroCourse={heroCourse} featuredImg={featuredImg} navigate={navigate} />
                   ) : (
-                    <div className="course-swiper-card" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '415px', flexDirection: 'column', backgroundColor: '#f0f4ff', border: '1px dashed #c7d2fe' }}>
+                    <div className="course-swiper-card" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', minHeight: '415px', height: '100%', flexDirection: 'column', backgroundColor: '#f0f4ff', border: '1px dashed #c7d2fe' }}>
                       <div style={{ padding: '20px' }}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 20px auto' }}>
                           <circle cx="12" cy="12" r="10"></circle>
@@ -1045,13 +1083,15 @@ function Hero() {
                     <div
                       className="article-swiper-card"
                       onClick={() => !isPlaceholder ? navigate(`/articles/${articleData.slug || generateSlug(articleData.title)}`) : null}
+                      style={{ borderRadius: '16px', overflow: 'hidden' }}
                     >
                       <img
                         src={!isPlaceholder && articleData.image_url ? articleData.image_url : satvikImg}
                         alt={!isPlaceholder ? articleData.title : "Article"}
                         className="article-swiper-img"
+                        style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}
                       />
-                      <div className="article-swiper-meta">
+                      <div className="article-swiper-meta" style={{ borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px' }}>
                         <div className="article-swiper-footer-top">
                           <span className="article-swiper-author">By {!isPlaceholder ? (articleData.author || "Shravan Mutha") : 'Shravan Mutha'}</span>
                           <span className="article-swiper-date">

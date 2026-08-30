@@ -4,19 +4,28 @@ import { useNavigate } from "react-router-dom";
 
 function AdminArticleForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: "", slug: "", content: "", description: "", tag: "Deep Dives", author_id: "" });
+  const [form, setForm] = useState({
+    title: "",
+    slug: "",
+    content: "",
+    description: "",
+    seo_title: "",
+    meta_description: "",
+    tag: "Deep Dives",
+    author_id: ""
+  });
   const [authors, setAuthors] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
   const ARTICLE_TAGS = [
-  "Personal Finance",
-  "IPO",
-  "Investing",
-  "Deep Dives",
-  "Economy",
-];
+    "Personal Finance",
+    "IPO",
+    "Investing",
+    "Deep Dives",
+    "Economy",
+  ];
 
   useEffect(() => {
     fetchAuthors().then(setAuthors).catch(console.error);
@@ -32,13 +41,24 @@ function AdminArticleForm() {
     if (form.slug) formData.append("slug", form.slug);
     formData.append("content", form.content);
     formData.append("description", form.description);
+    if (form.seo_title) formData.append("seo_title", form.seo_title);
+    if (form.meta_description) formData.append("meta_description", form.meta_description);
     formData.append("tag", form.tag);
     if (form.author_id) formData.append("author_id", form.author_id);
     if (imageFile) formData.append("image", imageFile);
 
     try {
       await postArticle(formData);
-      setForm({ title: "", slug: "", content: "", description: "", tag: "Deep Dives", author_id: form.author_id });
+      setForm({
+        title: "",
+        slug: "",
+        content: "",
+        description: "",
+        seo_title: "",
+        meta_description: "",
+        tag: "Deep Dives",
+        author_id: form.author_id
+      });
       setImageFile(null);
       event.target.reset();
       setStatus("Article posted successfully.");
@@ -111,15 +131,52 @@ function AdminArticleForm() {
           </label>
 
           <label>
-            Custom Description (For article preview lists)
+            Custom Description (For article preview cards)
             <textarea
               name="description"
               value={form.description}
               onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-              placeholder="Short description for preview (max 3 lines)..."
-              rows={3}
+              placeholder="Short 2-3 line description shown on article cards..."
+              rows={2}
             />
           </label>
+
+          <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "10px", border: "1px solid #e2e8f0", margin: "12px 0 20px 0" }}>
+            <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: "700", color: "#1e293b" }}>
+              🔍 SEO & Technical Meta Tags (Optional)
+            </h3>
+            
+            <label style={{ marginBottom: "14px", display: "block" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>Custom SEO Title (&lt;title&gt;)</span>
+                <span style={{ fontSize: "11px", color: form.seo_title.length > 60 ? "#ef4444" : "#64748b" }}>
+                  {form.seo_title.length}/60 chars (Recommended: 40–60)
+                </span>
+              </div>
+              <input
+                name="seo_title"
+                value={form.seo_title}
+                onChange={(event) => setForm((prev) => ({ ...prev, seo_title: event.target.value }))}
+                placeholder={form.title || "e.g., How Visa Makes Money: Four-Party Model Explained | FinEd"}
+              />
+            </label>
+
+            <label style={{ display: "block", margin: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>Meta Description (&lt;meta name="description"&gt; &amp; Social Snippet)</span>
+                <span style={{ fontSize: "11px", color: form.meta_description.length > 160 ? "#ef4444" : "#64748b" }}>
+                  {form.meta_description.length}/160 chars (Recommended: 140–160)
+                </span>
+              </div>
+              <textarea
+                name="meta_description"
+                value={form.meta_description}
+                onChange={(event) => setForm((prev) => ({ ...prev, meta_description: event.target.value }))}
+                placeholder={form.description || "Compelling search snippet including primary keyword naturally..."}
+                rows={3}
+              />
+            </label>
+          </div>
 
           <label>
             Content

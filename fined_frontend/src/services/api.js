@@ -84,6 +84,23 @@ export function fetchAdjacentArticles(slug) {
   });
 }
 
+export async function fetchRelatedArticles(slug, limit = 3) {
+  try {
+    return await request(`/articles/related/${slug}?limit=${limit}`, {
+      method: "GET",
+    });
+  } catch (err) {
+    console.warn("Failed to fetch related articles, falling back to general list:", err);
+    try {
+      const data = await fetchArticles({ limit: 6 });
+      const articles = Array.isArray(data) ? data : (data.articles || []);
+      return articles.filter(a => a.slug !== slug).slice(0, limit);
+    } catch {
+      return [];
+    }
+  }
+}
+
 export function postArticle(formData) {
   return request("/articles/add", {
     method: "POST",

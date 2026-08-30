@@ -140,28 +140,114 @@ async def spa_fallback(fallback_path: str):
                     with open(index_path, "r", encoding="utf-8") as f:
                         html_content = f.read()
 
-                    title = html.escape(article.get("title") or "FinEd Article")
-                    raw_desc = article.get("description") or (article.get("content", "").split("\n")[0] if article.get("content") else "A clear, practical finance explainer from FinEd.")
-                    description = html.escape(raw_desc[:250])
+                    metadata = article.get("metadata") or {}
+                    seo_title = article.get("seo_title") or metadata.get("seo_title") or article.get("title") or "FinEd Article"
+                    title = html.escape(seo_title)
+                    display_title = html.escape(article.get("title") or seo_title)
+                    
+                    raw_desc = (
+                        article.get("meta_description")
+                        or metadata.get("meta_description")
+                        or article.get("description")
+                        or (article.get("content", "").split("\n")[0] if article.get("content") else "A clear, practical finance explainer from FinEd.")
+                    )
+                    description = html.escape(raw_desc[:160].strip())
                     image_url = html.escape(article.get("image_url") or "https://www.myfined.com/assets/images/fined_card_banner.png")
-                    article_url = f"{settings.FRONTEND_URL}/articles/{slug}"
+                    article_url = f"https://myfined.com/articles/{slug}"
+                    tag = article.get("tag") or "Finance"
+                    published_date = article.get("published_at") or article.get("created_at") or ""
+                    updated_date = article.get("updated_at") or published_date
 
-                    og_tags = f"""
+                    author_obj = article.get("authors") or {}
+                    author_name = author_obj.get("name") if isinstance(author_obj, dict) else (article.get("author") or "FinEd Editorial Team")
+                    author_slug = author_obj.get("slug") if isinstance(author_obj, dict) else "fined-editorial"
+
+                    schema_json = f"""{{
+  "@context": "https://schema.org",
+  "@graph": [
+    {{
+      "@type": "Article",
+      "headline": "{display_title}",
+      "description": "{description}",
+      "image": "{image_url}",
+      "datePublished": "{published_date}",
+      "dateModified": "{updated_date}",
+      "mainEntityOfPage": "{article_url}",
+      "author": {{
+        "@type": "Person",
+        "name": "{author_name}",
+        "url": "https://myfined.com/authors/{author_slug}"
+      }},
+      "publisher": {{
+        "@type": "Organization",
+        "name": "FinEd",
+        "url": "https://myfined.com",
+        "logo": {{
+          "@type": "ImageObject",
+          "url": "https://myfined.com/logo.ico"
+        }}
+      }}
+    }},
+    {{
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {{
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://myfined.com"
+        }},
+        {{
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Articles",
+          "item": "https://myfined.com/articles"
+        }},
+        {{
+          "@type": "ListItem",
+          "position": 3,
+          "name": "{tag}",
+          "item": "https://myfined.com/tags/{tag.lower().replace(' ', '-')}"
+        }},
+        {{
+          "@type": "ListItem",
+          "position": 4,
+          "name": "{display_title}",
+          "item": "{article_url}"
+        }}
+      ]
+    }}
+  ]
+}}"""
+
+                    seo_meta_tags = f"""
   <title>{title} | FinEd</title>
   <meta name="description" content="{description}" />
+  <link rel="canonical" href="{article_url}" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+  <!-- Open Graph -->
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="FinEd" />
   <meta property="og:title" content="{title}" />
   <meta property="og:description" content="{description}" />
   <meta property="og:image" content="{image_url}" />
+  <meta property="og:image:alt" content="{display_title}" />
   <meta property="og:url" content="{article_url}" />
+
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@FinEd" />
   <meta name="twitter:title" content="{title}" />
   <meta name="twitter:description" content="{description}" />
   <meta name="twitter:image" content="{image_url}" />
+  <meta name="twitter:image:alt" content="{display_title}" />
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json">{schema_json}</script>
 """
                     if "</head>" in html_content:
-                        html_content = html_content.replace("</head>", f"{og_tags}\n</head>", 1)
+                        html_content = html_content.replace("</head>", f"{seo_meta_tags}\n</head>", 1)
                     return Response(content=html_content, media_type="text/html")
             except Exception:
                 pass  # Fall back to standard index.html on any error
