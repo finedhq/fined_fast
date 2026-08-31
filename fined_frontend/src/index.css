@@ -930,8 +930,7 @@ button {
 .ar-lens-aside {
   position: sticky;
   top: 60px;
-  max-height: calc(100vh - 130px);
-  overflow-y: auto;
+  max-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -940,12 +939,6 @@ button {
   width: 100%;
   max-width: 330px;
   align-self: start;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.ar-lens-aside::-webkit-scrollbar {
-  display: none;
 }
 
 @media (max-width: 1279px) {

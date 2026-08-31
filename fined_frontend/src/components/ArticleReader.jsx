@@ -900,7 +900,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           </article>
 
           {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}
-          <aside className="ar-lens-aside">
+          <aside className="ar-lens-aside" data-lenis-prevent="true">
             <PersonalLensSidebar
               article={article}
               articleId={article?.slug || article?.id || "etf-101-guide"}

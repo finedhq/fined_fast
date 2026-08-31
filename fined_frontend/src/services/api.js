@@ -233,4 +233,10 @@ export function fetchArticleQuestions(articleId) {
   });
 }
 
+export function fetchArticleIndexExport() {
+  return request("/admin/article-index-export", {
+    method: "GET",
+  });
+}
+
 export { API_BASE_URL };

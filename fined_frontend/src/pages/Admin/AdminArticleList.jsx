@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ArticleReader from "../../components/ArticleReader";
-import { deleteArticle, fetchArticles } from "../../services/api";
+import { deleteArticle, fetchArticles, fetchArticleIndexExport } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 function AdminArticleList() {
@@ -40,11 +40,31 @@ function AdminArticleList() {
     }
   };
 
+  const handleDownloadIndex = async () => {
+    try {
+      setStatus("Generating AI index...");
+      const markdownText = await fetchArticleIndexExport();
+      const blob = new Blob([markdownText], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fined_article_index.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      setStatus("AI index downloaded.");
+    } catch (err) {
+      setStatus(err.message || "Failed to download AI index.");
+    }
+  };
+
   return (
     <main className="admin-list-page">
       <div className="admin-list-head">
         <h1>All Articles</h1>
         <div>
+          <button onClick={handleDownloadIndex} style={{ marginRight: '10px', backgroundColor: '#4A3AFF', color: '#fff' }}>Download AI Article Index</button>
           <button onClick={() => navigate("/admin/articles/add")}>Add Article</button>
           <button onClick={() => navigate("/admin")}>Back to Dashboard</button>
         </div>

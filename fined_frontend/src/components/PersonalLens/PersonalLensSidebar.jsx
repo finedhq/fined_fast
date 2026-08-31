@@ -177,7 +177,7 @@ export default function PersonalLensSidebar({
 
   if (!isEnabled) {
     return (
-      <div className="pl-container">
+      <div className="pl-container" data-lenis-prevent="true">
         <div className="pl-inner-card">
           {/* Integrated Minimal Top Bar */}
           <div className="pl-top-bar">
@@ -236,7 +236,7 @@ export default function PersonalLensSidebar({
   }
 
   return (
-    <div className="pl-container">
+    <div className="pl-container" data-lenis-prevent="true">
       <div className="pl-inner-card">
         {/* Integrated Minimal Top Bar */}
         <div className="pl-top-bar">
