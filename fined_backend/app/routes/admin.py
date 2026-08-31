@@ -44,3 +44,51 @@ async def send_newsletter(body: NewsletterRequest, user: AuthUser = Depends(requ
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send newsletter: {str(e)}"
         )
+
+@router.get("/article-index-export")
+async def export_article_index(user: AuthUser = Depends(require_admin)):
+    """Admin: Generates a Markdown index of all articles for AI Project Knowledge"""
+    import asyncio
+    from fastapi import Response
+    
+    articles = await asyncio.to_thread(article_repo.get_all, limit=1000)
+    
+    # Group by tag
+    grouped = {}
+    for a in articles:
+        tag = a.get("tag", "Uncategorized")
+        if tag not in grouped:
+            grouped[tag] = []
+        grouped[tag].append(a)
+    
+    lines = [
+        "# FinEd Article Database",
+        "Use this index to find relevant articles to link to when drafting. Use the exact URL slug provided.",
+        ""
+    ]
+    
+    for tag, items in grouped.items():
+        lines.append(f"## Category: {tag}")
+        for item in items:
+            title = item.get("title", "Untitled")
+            # Generate fallback slug if missing (matches logic in article_service)
+            slug = item.get("slug")
+            if not slug:
+                import re
+                slug = re.sub(r'[^a-z0-9]+', '-', title.lower().strip())
+                slug = re.sub(r'^-+|-+$', '', slug)
+                
+            summary = item.get("description", "")
+            lines.append(f"- **Title:** {title}")
+            lines.append(f"  **URL:** `/articles/{slug}`")
+            if summary:
+                lines.append(f"  **Summary:** {summary.strip()}")
+            lines.append("")
+            
+    md_content = "\n".join(lines)
+    
+    return Response(
+        content=md_content,
+        media_type="text/markdown",
+        headers={"Content-Disposition": 'attachment; filename="fined_article_index.md"'}
+    )
