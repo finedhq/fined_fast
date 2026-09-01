@@ -19,7 +19,8 @@
   font-family: inherit;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 100px);
+  height: 100%;
+  max-height: calc(100vh - 120px);
 }
 
 .pl-container:hover {
@@ -142,6 +143,28 @@
   color: #64748b;
   margin: 1px 0 0 0;
   font-weight: 400;
+}
+
+.pl-top-retake-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4f46e5;
+  background: #ffffff;
+  border: 1px solid #e0e7ff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pl-top-retake-btn:hover {
+  background: #f5f3ff;
+  border-color: #c7d2fe;
+  color: #4338ca;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.1);
 }
 
 .pl-status-pill {
@@ -522,13 +545,22 @@
 }
 
 /* --- Result Card Visualization (100% Light Mode) --- */
-.pl-result-body {
-  padding: 18px 20px 22px 20px;
+.pl-result-wrap {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   background: #ffffff;
   animation: pl-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pl-result-body {
+  padding: 16px 18px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  background: #ffffff;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -661,28 +693,39 @@
   font-size: 12.5px;
 }
 
+/* Sticky Bottom Action Bar */
+.pl-result-footer {
+  padding: 10px 18px 12px 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, #ffffff 100%);
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  z-index: 5;
+}
+
 .pl-reset-btn {
   width: 100%;
-  padding: 9px;
+  padding: 8px 12px;
   border-radius: 8px;
   background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  color: #64748b;
+  border: 1px solid #e2e8f0;
+  color: #475569;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  margin-top: 2px;
+  gap: 6px;
 }
 
 .pl-reset-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #94a3b8;
+  background: #f5f3ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
 }
 
 /* Floating Drawer / Mobile Trigger */

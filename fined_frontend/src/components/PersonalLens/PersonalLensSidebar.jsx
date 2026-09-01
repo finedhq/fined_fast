@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowRight, FiZap, FiLayers, FiCheckCircle, FiCpu } from "react-icons/fi";
+import { FiArrowRight, FiZap, FiLayers, FiCheckCircle, FiCpu, FiRefreshCw } from "react-icons/fi";
 import { IoSparkles } from "react-icons/io5";
 import LensQuestionnaire from "./LensQuestionnaire";
 import GeneratingLens from "./GeneratingLens";
@@ -236,7 +236,11 @@ export default function PersonalLensSidebar({
   }
 
   return (
-    <div className="pl-container" data-lenis-prevent="true">
+    <div
+      className="pl-container"
+      data-lenis-prevent="true"
+      onWheel={(e) => e.stopPropagation()}
+    >
       <div className="pl-inner-card">
         {/* Integrated Minimal Top Bar */}
         <div className="pl-top-bar">
@@ -253,9 +257,23 @@ export default function PersonalLensSidebar({
               <p className="pl-brand-subtitle">Pre-Reading Companion</p>
             </div>
           </div>
-          <span className="pl-status-pill">
-            {viewState === "result" ? "Personalized" : "Ready"}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {viewState === "result" && (
+              <button
+                type="button"
+                className="pl-top-retake-btn"
+                onClick={handleReset}
+                title="Change answers"
+                aria-label="Change answers"
+              >
+                <FiRefreshCw size={11} />
+                <span>Edit</span>
+              </button>
+            )}
+            <span className="pl-status-pill">
+              {viewState === "result" ? "Personalized" : "Ready"}
+            </span>
+          </div>
         </div>
 
         {/* State 1: Intro Card */}
