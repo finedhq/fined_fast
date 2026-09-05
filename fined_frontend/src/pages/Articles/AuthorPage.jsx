@@ -74,7 +74,6 @@ function AuthorPage() {
     }
     return () => {
       document.body.style.overflow = "";
-      document.title = "FinEd";
     };
   }, [selectedArticle, author]);
 

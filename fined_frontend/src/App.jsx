@@ -7,6 +7,7 @@ import { ApiTokenProvider } from "./components/ApiTokenProvider";
 import { AuthenticationGuard } from "./components/AuthenticationGuard";
 import { AdminGuard } from "./components/AdminGuard";
 import ScrollToTop from "./components/ScrollToTop";
+import PageTitleTracker from "./components/PageTitleTracker";
 
 // Lazy-load all page components — each is only fetched when the user navigates to it
 const Hero = lazy(() => import("./pages/Home/Hero"));
@@ -46,6 +47,7 @@ function App() {
       {/* Dummy div to force Tailwind to preload classes missing on first dev load */}
       <div className="hidden pt-16 pb-12 mb-16 text-2xl gap-8 aspect-[4/3] object-fill object-contain lg:w-2/3 max-w-[1280px] items-center max-w-7xl flex-1 px-6 text-gray-800 sm:w-1/3"></div>
       <ScrollToTop />
+      <PageTitleTracker />
       <Auth0ProviderWithNavigate>
         <AuthLoader>
           <ApiTokenProvider>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
 import { getBundleByCardSlug, updateCardBySlug } from "../../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
+import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import "./CardViewer.css";
 
 // Fallback FinStar defaults per card type — mirrors the backend DEFAULT_FINSTARS map
@@ -34,6 +35,12 @@ function CardViewer() {
   const [bundle, setBundle] = useState(null);
   const bundleRef = useRef(null);
   bundleRef.current = bundle;
+
+  useDocumentTitle(
+    bundle?.module_title
+      ? `${bundle.module_title} | FinEd`
+      : "Learn | FinEd"
+  );
   const [userAnswersMap, setUserAnswersMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [transitioning, setTransitioning] = useState(false);
