@@ -37,6 +37,8 @@ const ProductPage = lazy(() => import("./pages/Policies/ProductPage"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
+const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 
 // Minimal loading fallback — invisible to user
 const PageLoader = () => null;
@@ -85,14 +87,15 @@ function App() {
                   <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
                   <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
                   <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
+                  <Route path="leaderboard" element={<AuthenticationGuard component={Leaderboard} />} />
                   <Route path=":productType" element={<AuthenticationGuard component={ProductPage} />} />
                   <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
                   <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
                   <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />
                   <Route path="admin/newsletters" element={<AdminGuard><AdminNewsletter /></AdminGuard>} />
 
-                  {/* Catch-all route redirects unknown/hidden pages to the Coming Soon courses page */}
-                  <Route path="*" element={<Navigate to="/courses" replace />} />
+                  {/* Catch-all route renders a branded 404 page for unknown/hidden paths */}
+                  <Route path="*" element={<NotFoundPage />} />
                 </Route>
               </Routes>
             </Suspense>

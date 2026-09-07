@@ -13,6 +13,11 @@ class ArticleService:
     def __init__(self):
         self._slug_cache = {}
         self._slug_cache_ttl = 600  # 10 minutes
+        self._author_cache = {}
+        self._author_cache_ttl = 600  # 10 minutes
+        self._author_profile_cache = {}
+        self._author_profile_cache_ttl = 600  # 10 minutes
+
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
         """Fetch all articles — equivalent to getAllArticles"""
@@ -95,6 +100,10 @@ class ArticleService:
             final_slug = self._sanitize_slug(slug.strip())
         else:
             final_slug = self._generate_slug(title)
+        
+        self._slug_cache.clear()
+        self._author_profile_cache.clear()
+        
         return article_repo.insert(
             title=title,
             content=content,
@@ -111,12 +120,46 @@ class ArticleService:
         return article_repo.get_all_authors()
 
     def get_author_by_slug(self, slug: str) -> dict | None:
-        return article_repo.get_author_by_slug(slug)
+        now = time.time()
+        if slug in self._author_cache:
+            entry, timestamp = self._author_cache[slug]
+            if now - timestamp < self._author_cache_ttl:
+                return entry
+        author = article_repo.get_author_by_slug(slug)
+        if author:
+            self._author_cache[slug] = (author, now)
+        return author
 
-    def get_articles_by_author(self, author_id: str) -> list:
-        return article_repo.get_articles_by_author(author_id)
+    def get_articles_by_author(self, author_id: str, limit: int = 12, offset: int = 0) -> dict:
+        return article_repo.get_articles_by_author(author_id, limit=limit, offset=offset)
+
+    def get_author_profile(self, slug: str, limit: int = 12, offset: int = 0) -> dict | None:
+        now = time.time()
+        cache_key = f"{slug}:{limit}:{offset}"
+        if cache_key in self._author_profile_cache:
+            entry, timestamp = self._author_profile_cache[cache_key]
+            if now - timestamp < self._author_profile_cache_ttl:
+                return entry
+
+        author = self.get_author_by_slug(slug)
+        if not author:
+            return None
+
+        articles_data = self.get_articles_by_author(author["id"], limit=limit, offset=offset)
+
+        profile = {
+            "author": author,
+            "articles": articles_data.get("articles", []),
+            "total": articles_data.get("total", 0),
+            "has_more": articles_data.get("has_more", False)
+        }
+        self._author_profile_cache[cache_key] = (profile, now)
+        return profile
+
     def delete(self, article_id: str):
         """Admin deletes article — fixes the original bug where data was undefined"""
+        self._slug_cache.clear()
+        self._author_profile_cache.clear()
         article_repo.delete(article_id)
 
     def mark_read(self, email: str) -> dict:

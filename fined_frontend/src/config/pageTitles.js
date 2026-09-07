@@ -12,6 +12,7 @@ export const STATIC_ROUTE_TITLES = {
   "/fin-tools/expensetracker": "Expense Tracker | FinEd",
   "/policies": "Policies & Schemes | FinEd",
   "/notifications": "Notifications | FinEd",
+  "/leaderboard": "Leaderboard | FinEd",
   "/help": "Help & Support | FinEd",
   "/privacy-policy": "Privacy Policy | FinEd",
   "/termsofservice": "Terms of Service | FinEd",

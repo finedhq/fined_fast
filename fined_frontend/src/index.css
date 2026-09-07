@@ -2984,3 +2984,35 @@ button {
   display: flex;
   flex-direction: column;
 }
+
+.ap-view-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 34px;
+  background-color: #111827;
+  color: #ffffff;
+  border: 1px solid #1f2937;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.ap-view-more-btn:hover:not(:disabled) {
+  background-color: #1f2937;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.ap-view-more-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ap-view-more-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+

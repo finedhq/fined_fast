@@ -24,16 +24,11 @@ const Notifications = () => {
 	useEffect(() => {
 		if (isLoading || !isAuthenticated) return;
 
-		fetch("/api/auth/me")
-			.then(res => res.json())
-			.then(data => {
-				console.log("Data from /api/me: ", data);
-				setEmail(user.email || '')
-				setrole(data.roles?.[0] || "");
-			})
-			.catch(() => setrole(""));
+		setEmail(user.email || '')
+		const roles = user["https://fined.com/roles"] || user["https://myfined.com/roles"] || [];
+		setrole(roles[0] || "");
 
-	}, [isLoading, isAuthenticated]);
+	}, [isLoading, isAuthenticated, user]);
 	useEffect(() => {
 		console.log("Role updated:", role);
 	}, [role]);

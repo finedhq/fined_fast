@@ -10,7 +10,7 @@ import { useNavigate as useRouter, useSearchParams } from "react-router-dom";
 const PoliciesPage = () => {
 
 	const router = useRouter();
-	const searchParams = useSearchParams()
+	const [searchParams] = useSearchParams()
 
 	const { user, isLoading } = useUser();
 	const isAuthenticated = !!user;
@@ -22,16 +22,11 @@ const PoliciesPage = () => {
 	useEffect(() => {
 		if (isLoading || !isAuthenticated) return;
 
-		fetch("/api/auth/me")
-			.then(res => res.json())
-			.then(data => {
-				console.log("Data from /api/me: ", data);
-				setEmail(user.email || '')
-				setrole(data.roles?.[0] || "");
-			})
-			.catch(() => setrole(""));
+		setEmail(user.email || '')
+		const roles = user["https://fined.com/roles"] || user["https://myfined.com/roles"] || [];
+		setrole(roles[0] || "");
 
-	}, [isLoading, isAuthenticated]);
+	}, [isLoading, isAuthenticated, user]);
 	useEffect(() => {
 		console.log("Role updated:", role);
 	}, [role]);
@@ -65,7 +60,7 @@ const PoliciesPage = () => {
 				<div className="bg-amber-300 p-6 mb-8 rounded-b-3xl" >
 					<div className="flex items-center justify-between mb-4" >
 						{/* Back Button */}
-						<button onClick={() => router.push("/home")} className="flex items-center text-sm font-medium cursor-pointer rounded-full bg-white p-2">
+						<button onClick={() => router("/home")} className="flex items-center text-sm font-medium cursor-pointer rounded-full bg-white p-2">
 							<FaArrowLeft className="text-amber-400 text-xl" />
 						</button>
 
@@ -104,7 +99,7 @@ const PoliciesPage = () => {
 				<div className="space-y-3">
 					{recommendedSchemes.map((scheme, idx) => (
 						<div
-							onClick={() => { scheme.short_name ? router.push(`/${scheme.short_name}`) : toast("Coming soon !") }}
+							onClick={() => { scheme.short_name ? router(`/${scheme.short_name}`) : toast("Coming soon !") }}
 							key={idx}
 							className="flex justify-between items-start bg-white px-4 py-3 rounded-lg shadow-sm cursor-pointer hover:bg-gray-300 transition-all duration-200"
 						>

@@ -125,11 +125,22 @@ class ArticleRepository:
         res = supabase.from_("authors").select("*").eq("slug", slug).execute()
         return res.data[0] if res.data else None
 
-    def get_articles_by_author(self, author_id: str) -> list:
-        res = supabase.from_("articles").select("*, authors(name, slug, image_url, bio, linkedin_url, description, email)")\
-            .eq("author_id", author_id).eq("status", "published")\
-            .order("created_at", desc=True).execute()
-        return res.data or []
+    def get_articles_by_author(self, author_id: str, limit: int = 12, offset: int = 0) -> dict:
+        query = supabase.from_("articles").select(
+            "id, title, slug, description, image_url, tag, created_at, published_at, editor_summary, metadata, author_id",
+            count="exact"
+        ).eq("author_id", author_id).eq("status", "published")\
+         .order("created_at", desc=True)\
+         .range(offset, offset + limit - 1)
+        res = query.execute()
+        articles = res.data or []
+        total = res.count if res.count is not None else len(articles)
+        return {
+            "articles": articles,
+            "total": total,
+            "has_more": (offset + len(articles)) < total
+        }
+
 
     def get_by_slug(self, slug: str) -> dict | None:
         res = supabase.from_("articles").select("*, authors(name, slug, image_url, bio, linkedin_url, description, email)").eq("slug", slug).eq("status", "published").execute()
