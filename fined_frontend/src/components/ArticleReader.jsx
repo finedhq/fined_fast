@@ -10,41 +10,70 @@ import { fetchRelatedArticles } from "../services/api";
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
 
-const renderTextWithLinks = (text) => {
+const renderTextWithLinksAndImages = (text, onImageClick) => {
   if (typeof text !== "string") return text;
-  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  // Match either markdown image ![alt](url "title") or link [label](url)
+  const tokenRegex = /(!?\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\))/g;
   const parts = [];
   let lastIndex = 0;
   let match;
 
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = tokenRegex.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push(text.substring(lastIndex, match.index));
     }
-    const label = match[1];
-    const url = match[2];
-    const isExternal = /^https?:\/\//i.test(url);
+    const fullToken = match[1];
+    const isImage = fullToken.startsWith("!");
+    const altOrLabel = match[2] || "";
+    const url = match[3] || "";
+    const titleAttr = match[4] || "";
 
-    if (isExternal) {
+    if (isImage) {
+      let alt = altOrLabel;
+      let subtitle = titleAttr || altOrLabel;
+      if (altOrLabel.includes("|")) {
+        const [a, s] = altOrLabel.split("|");
+        alt = a.trim();
+        subtitle = s.trim();
+      }
+      const displaySubtitle = subtitle || alt;
       parts.push(
-        <a
-          key={match.index}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ar-external-link"
-        >
-          {label}
-        </a>
+        <figure key={`img-${match.index}`} className="ar-body-figure">
+          <div className="ar-body-image-wrapper">
+            <img
+              src={url}
+              alt={displaySubtitle || "Article illustration"}
+              className="ar-body-image"
+              loading="lazy"
+              onClick={() => onImageClick && onImageClick({ src: url, subtitle: displaySubtitle })}
+            />
+          </div>
+          {displaySubtitle && <figcaption className="ar-image-caption">{displaySubtitle}</figcaption>}
+        </figure>
       );
     } else {
-      parts.push(
-        <Link key={match.index} to={url} className="ar-internal-link">
-          {label}
-        </Link>
-      );
+      const isExternal = /^https?:\/\//i.test(url);
+      if (isExternal) {
+        parts.push(
+          <a
+            key={`link-${match.index}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ar-external-link"
+          >
+            {altOrLabel}
+          </a>
+        );
+      } else {
+        parts.push(
+          <Link key={`link-${match.index}`} to={url} className="ar-internal-link">
+            {altOrLabel}
+          </Link>
+        );
+      }
     }
-    lastIndex = regex.lastIndex;
+    lastIndex = tokenRegex.lastIndex;
   }
 
   if (lastIndex < text.length) {
@@ -59,8 +88,11 @@ const getParagraphs = (content = "") =>
 
 const createDescription = (content = "") => {
   const paragraphs = getParagraphs(content);
-  if (paragraphs.length === 0) return "A clear, practical finance explainer from FinEd.";
-  return paragraphs[0];
+  const textParagraphs = paragraphs.filter(
+    (p) => !p.startsWith("![") && !p.startsWith("<img") && !p.startsWith("##")
+  );
+  if (textParagraphs.length === 0) return "A clear, practical finance explainer from FinEd.";
+  return textParagraphs[0];
 };
 
 const slugifyHeading = (text = "", index = 0) => {
@@ -73,6 +105,7 @@ const slugifyHeading = (text = "", index = 0) => {
 
 const isLikelyHeading = (text = "") => {
   const v = cleanText(text);
+  if (v.startsWith("![") || v.startsWith("<img") || v.startsWith("<figure")) return false;
   if (v.length < 4 || v.length > 95) return false;
   if (/[.!]$/.test(v)) return false;
   if (v.split(" ").length > 12) return false;
@@ -133,6 +166,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const [activeHeadingId, setActiveHeadingId] = useState("");
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 });
@@ -181,16 +215,43 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const blocks = useMemo(
     () => {
       const paragraphs = getParagraphs(article?.content);
-      // Skip the first paragraph since it is used as the description above the image
-      const bodyParagraphs = paragraphs.slice(1);
+      if (!paragraphs.length) return [];
+      
+      // Determine if the first paragraph was used as the description header
+      let bodyParagraphs = paragraphs;
+      const firstIsImageOrHeading = paragraphs[0].startsWith("##") || paragraphs[0].startsWith("###") || paragraphs[0].startsWith("![") || paragraphs[0].startsWith("<img");
+      if (!article?.description && !firstIsImageOrHeading && paragraphs.length > 1) {
+        bodyParagraphs = paragraphs.slice(1);
+      }
+
       const hasExplicitHeadings = bodyParagraphs.some(p => p.startsWith("## ") || p.startsWith("### "));
 
       return bodyParagraphs.map((rawText, i) => {
         let text = rawText;
         let isHeading = false;
+        let isImage = false;
         let level = 0;
+        let imageUrl = "";
+        let imageSubtitle = "";
+        let imageAlt = "";
 
-        if (text.startsWith("### ")) {
+        // Check if this paragraph is a standalone image block: ![alt|subtitle](url "title") or ![subtitle](url)
+        const imageMatch = /^\s*!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)\s*$/.exec(text);
+        if (imageMatch) {
+          isImage = true;
+          const altOrLabel = imageMatch[1] || "";
+          imageUrl = imageMatch[2] || "";
+          const titleAttr = imageMatch[3] || "";
+
+          if (altOrLabel.includes("|")) {
+            const [a, s] = altOrLabel.split("|");
+            imageAlt = a.trim();
+            imageSubtitle = s.trim();
+          } else {
+            imageAlt = altOrLabel.trim();
+            imageSubtitle = titleAttr.trim() || altOrLabel.trim();
+          }
+        } else if (text.startsWith("### ")) {
           text = text.substring(4).trim();
           isHeading = true;
           level = 3;
@@ -203,25 +264,30 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           if (isHeading) level = 2;
         }
 
-        const id = slugifyHeading(text, i);
+        const id = isImage ? `ar-media-${i}` : slugifyHeading(text, i);
 
         return {
           id,
           text,
           isHeading,
+          isImage,
           level,
+          imageUrl,
+          imageSubtitle,
+          imageAlt,
         };
       });
     },
-    [article?.content]
+    [article?.content, article?.description]
   );
 
   const tocItems = useMemo(() => {
-    const headings = blocks.filter((b) => b.isHeading && b.level !== 3);
+    const headings = blocks.filter((b) => b.isHeading && !b.isImage && b.level !== 3);
     if (headings.length > 0) {
       return headings.map((b) => ({ id: b.id, label: trimLabel(b.text), level: b.level }));
     }
-    return blocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i), level: 2 }));
+    const textBlocks = blocks.filter((b) => !b.isImage);
+    return textBlocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i), level: 2 }));
   }, [blocks]);
 
   // Set first heading active on load
@@ -761,17 +827,50 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
             <div className="ar-body">
               {blocks.map((block, i) => {
+                if (block.isImage) {
+                  const subtitleText = block.subtitle || block.imageAlt;
+                  return (
+                    <figure
+                      key={`${article.id || article.title}-${block.id}`}
+                      id={block.id}
+                      className="ar-body-figure"
+                    >
+                      <div className="ar-body-image-wrapper">
+                        <img
+                          src={block.imageUrl}
+                          alt={subtitleText || "Article illustration"}
+                          className="ar-body-image"
+                          loading="lazy"
+                          onClick={() =>
+                            setLightboxImage({
+                              src: block.imageUrl,
+                              subtitle: subtitleText,
+                            })
+                          }
+                        />
+                        <div className="ar-image-zoom-badge" title="Click to view full image">
+                          🔍 Click to zoom
+                        </div>
+                      </div>
+                      {subtitleText && (
+                        <figcaption className="ar-image-caption">
+                          {subtitleText}
+                        </figcaption>
+                      )}
+                    </figure>
+                  );
+                }
                 if (block.level === 2) {
                   return (
                     <h2 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
-                      {renderTextWithLinks(block.text)}
+                      {renderTextWithLinksAndImages(block.text, setLightboxImage)}
                     </h2>
                   );
                 }
                 if (block.level === 3) {
                   return (
                     <h3 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
-                      {renderTextWithLinks(block.text)}
+                      {renderTextWithLinksAndImages(block.text, setLightboxImage)}
                     </h3>
                   );
                 }
@@ -782,7 +881,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     className="ar-p"
                     itemProp={i === 0 ? "articleBody" : undefined}
                   >
-                    {renderTextWithLinks(block.text)}
+                    {renderTextWithLinksAndImages(block.text, setLightboxImage)}
                   </p>
                 );
               })}
@@ -820,20 +919,36 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       {article.authors?.role || "FinEd Research & Editorial"}
                     </p>
                   </div>
-                  {article.authors?.linkedin_url && (
-                    <a
-                      href={article.authors.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ar-author-social-link"
-                      title="Connect on LinkedIn"
-                      aria-label="LinkedIn Profile"
-                    >
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                      </svg>
-                    </a>
-                  )}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {article.authors?.linkedin_url && (
+                      <a
+                        href={article.authors.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ar-author-social-link"
+                        title="Connect on LinkedIn"
+                        aria-label="LinkedIn Profile"
+                      >
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                      </a>
+                    )}
+                    {article.authors?.email && (
+                      <a
+                        href={`mailto:${article.authors.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ar-author-social-link"
+                        title={`Email ${article.authors?.name || 'Author'}`}
+                        aria-label="Email Author"
+                      >
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="#334155">
+                          <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <p className="ar-author-box-bio">
                   {article.authors?.bio || "Dedicated to breaking down complex financial systems, Indian regulatory frameworks, and market mechanisms into clear, actionable explainers."}
@@ -1079,6 +1194,40 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         article={article}
         description={description}
       />
+
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          className="ar-lightbox-overlay"
+          onClick={() => setLightboxImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Enlarged image view"
+        >
+          <div
+            className="ar-lightbox-container"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="ar-lightbox-close-btn"
+              onClick={() => setLightboxImage(null)}
+              aria-label="Close image zoom"
+            >
+              <FiX size={24} />
+            </button>
+            <div className="ar-lightbox-image-wrap">
+              <img
+                src={lightboxImage.src}
+                alt={lightboxImage.subtitle || "Enlarged illustration"}
+                className="ar-lightbox-img"
+              />
+            </div>
+            {lightboxImage.subtitle && (
+              <p className="ar-lightbox-subtitle">{lightboxImage.subtitle}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

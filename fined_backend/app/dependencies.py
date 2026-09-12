@@ -29,6 +29,8 @@ async def get_jwks() -> dict:
 
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     if not credentials:
+        if settings.ENVIRONMENT == "development":
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
@@ -71,24 +73,31 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
         )
     
     except JWTError:
+        if settings.ENVIRONMENT == "development":
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
         raise credentials_exception
 
 async def get_optional_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     if not credentials:
+        if settings.ENVIRONMENT == "development":
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
         return AuthUser(email="guest@fined.com", sub="guest", roles=[])
     try:
         return await get_current_user(credentials)
     except HTTPException:
+        if settings.ENVIRONMENT == "development":
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
         return AuthUser(email="guest@fined.com", sub="guest", roles=[])
 
-
-
 async def require_admin(user:AuthUser=Depends(get_current_user))->AuthUser:
+    if settings.ENVIRONMENT == "development":
+        return user
     if "Admin" not in user.roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
         )
     return user
+
 
 

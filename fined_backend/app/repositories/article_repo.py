@@ -2,6 +2,8 @@
 from app.integrations.supabase_client import supabase
 
 
+from datetime import datetime, timezone
+
 class ArticleRepository:
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
@@ -12,25 +14,61 @@ class ArticleRepository:
             .range(offset, offset + limit - 1).execute()
         return res.data or []
 
+    def get_all_admin(self, limit: int = 50, offset: int = 0, status: str | None = None) -> list:
+        query = supabase.from_("articles").select("*, authors(name, slug, image_url)")
+        if status and status != "all":
+            query = query.eq("status", status)
+        res = query.order("created_at", desc=True)\
+            .range(offset, offset + limit - 1).execute()
+        return res.data or []
+
     def get_by_id(self, article_id: str) -> dict | None:
         res = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("id", article_id).execute()
         return res.data[0] if res.data else None
 
-    def insert(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = "", author_id: str = None, seo_title: str = "", meta_description: str = "") -> dict:
+    def insert(
+        self,
+        title: str,
+        content: str,
+        description: str = "",
+        image_url: str = "",
+        tag: str = "Finance",
+        slug: str = "",
+        author_id: str = None,
+        seo_title: str = "",
+        meta_description: str = "",
+        status: str = "published",
+        scheduled_at: str = None,
+        editor_summary: str = "",
+        metadata: dict = None
+    ) -> dict:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        
+        merged_metadata = metadata or {}
+        if seo_title and "seo_title" not in merged_metadata:
+            merged_metadata["seo_title"] = seo_title
+        if meta_description and "meta_description" not in merged_metadata:
+            merged_metadata["meta_description"] = meta_description
+
         payload = {
             "title": title,
             "content": content,
-            "description": description,
-            "image_url": image_url,
-            "tag": tag,
+            "description": description or "",
+            "image_url": image_url or "",
+            "tag": tag or "Finance",
             "slug": slug,
-            "seo_title": seo_title,
-            "meta_description": meta_description,
-            "metadata": {
-                "seo_title": seo_title,
-                "meta_description": meta_description
-            }
+            "status": status or "published",
+            "seo_title": seo_title or "",
+            "meta_description": meta_description or "",
+            "editor_summary": editor_summary or "",
+            "metadata": merged_metadata
         }
+
+        if status == "published":
+            payload["published_at"] = now_iso
+        elif status == "scheduled" and scheduled_at:
+            payload["scheduled_at"] = scheduled_at
+
         if author_id:
             payload["author_id"] = author_id
 
@@ -38,7 +76,7 @@ class ArticleRepository:
             res = supabase.from_("articles").insert([payload]).execute()
             return res.data[0] if res.data else {}
         except Exception:
-            # Fallback if seo_title / meta_description columns are not yet applied via migration
+            # Fallback if specific columns are missing in legacy DB schema
             payload_fallback = {
                 "title": title,
                 "content": content,
@@ -46,10 +84,8 @@ class ArticleRepository:
                 "image_url": image_url,
                 "tag": tag,
                 "slug": slug,
-                "metadata": {
-                    "seo_title": seo_title,
-                    "meta_description": meta_description
-                }
+                "status": status or "published",
+                "metadata": merged_metadata
             }
             if author_id:
                 payload_fallback["author_id"] = author_id

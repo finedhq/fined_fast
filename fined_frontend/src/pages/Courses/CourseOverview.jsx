@@ -508,59 +508,87 @@ export default function CourseOverview() {
                         >✕</button>
                       )}
                       <div className="dash-stats-list">
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-streak">
-                        <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
-                      </div>
-                      <div className="dash-stat-main">
-                        <strong>{userData?.streak_count || 0}</strong> Days
-                      </div>
-                      <div className="dash-stat-label">STREAK</div>
-                    </div>
+                        <div 
+                          className="dash-stat-item"
+                          onClick={() => navigate('/rewards')}
+                          role="button"
+                          tabIndex={0}
+                          title="View Rewards & Streaks"
+                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                        >
+                          <div className="dash-stat-icon-wrapper icon-streak">
+                            <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
+                          </div>
+                          <div className="dash-stat-main">
+                            <strong>{userData?.streak_count || 0}</strong> Days
+                          </div>
+                          <div className="dash-stat-label">STREAK</div>
+                        </div>
 
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-finstars">
-                        <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
-                      </div>
-                      <div className="dash-stat-main">
-                        <strong>{userData?.fin_stars || 0}</strong>
-                      </div>
-                      <div className="dash-stat-label">FINSTARS</div>
-                    </div>
+                        <div 
+                          className="dash-stat-item"
+                          onClick={() => navigate('/rewards')}
+                          role="button"
+                          tabIndex={0}
+                          title="View Rewards & FinStars"
+                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                        >
+                          <div className="dash-stat-icon-wrapper icon-finstars">
+                            <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
+                          </div>
+                          <div className="dash-stat-main">
+                            <strong>{userData?.fin_stars || 0}</strong>
+                          </div>
+                          <div className="dash-stat-label">FINSTARS</div>
+                        </div>
 
-                    <div className="dash-stat-item">
-                      <div className="dash-stat-icon-wrapper icon-modules">
-                        <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
+                        <div 
+                          className="dash-stat-item"
+                          onClick={() => navigate('/rewards')}
+                          role="button"
+                          tabIndex={0}
+                          title="View Leaderboard & Rankings"
+                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                        >
+                          <div className="dash-stat-icon-wrapper icon-modules">
+                            <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
+                          </div>
+                          <div className="dash-stat-main">
+                            <strong>#{userData?.rank || '-'}</strong>
+                          </div>
+                          <div className="dash-stat-label">RANK</div>
+                        </div>
                       </div>
-                      <div className="dash-stat-main">
-                        <strong>#{userData?.rank || '-'}</strong>
-                      </div>
-                      <div className="dash-stat-label">RANK</div>
-                    </div>
-                  </div>
 
-                  <div className="dash-finscore-section">
-                    <div className="dash-finscore-header">
-                      <span className="dash-finscore-label">FinScore</span>
-                      <div className="info-icon-container">
-                        <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
-                          <InfoIcon />
-                        </span>
-                        <div className="info-tooltip">
-                          FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                      <div 
+                        className="dash-finscore-section"
+                        onClick={() => navigate('/rewards')}
+                        role="button"
+                        tabIndex={0}
+                        title="View FinScore details & Rewards"
+                        onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                      >
+                        <div className="dash-finscore-header">
+                          <span className="dash-finscore-label">FinScore</span>
+                          <div className="info-icon-container" onClick={(e) => e.stopPropagation()}>
+                            <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
+                              <InfoIcon />
+                            </span>
+                            <div className="info-tooltip">
+                              FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                            </div>
+                          </div>
+                        </div>
+                        <div className="dash-finscore-display">
+                          <div className="dash-finscore-value-group">
+                            <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
+                          </div>
+                          <div className="dash-finscore-chart-img-wrapper">
+                            <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="dash-finscore-display">
-                      <div className="dash-finscore-value-group">
-                        <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
-                      </div>
-                      <div className="dash-finscore-chart-img-wrapper">
-                        <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
-                      </div>
-                    </div>
-                  </div>
-                  </div>
                   )}
                 </RevealOnScroll>
               </div>

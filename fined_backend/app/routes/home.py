@@ -10,7 +10,7 @@ from app.services.notification_service import notification_service
 from app.repositories.article_repo import article_repo
 from app.repositories.course_repo import course_repo
 from app.repositories.user_repo import user_repo
-from app.dependencies import get_current_user, AuthUser
+from app.dependencies import get_current_user, get_optional_current_user, AuthUser
 from app.services.article_service import article_service
 
 router = APIRouter(prefix="/home", tags=["Home"])
@@ -33,6 +33,14 @@ class RecommendationsRequest(BaseModel):
 
 class WaitlistRequest(BaseModel):
     email: str
+
+class RewardNotifyRequest(BaseModel):
+    email: str
+
+class EarnStarsRequest(BaseModel):
+    email: str
+    action: str
+    stars: int
 
 
 # --- Route Endpoints ---
@@ -92,15 +100,32 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
         ongoing_course_data = await fetch_ongoing_course()
         log_data = await asyncio.to_thread(user_repo.get_score_logs, body.email)
         
-        user_row = user_row or {}
-        
+        current_fin_score = stats.get("fin_score", 0)
+        score_delta = 0
+        if log_data and isinstance(log_data, list):
+            # Filter specifically for FinScore logs (exclude FinStars transactions)
+            fin_score_logs = [
+                l for l in log_data
+                if "FinStars" not in (l.get("description") or "")
+            ]
+            if fin_score_logs:
+                latest_log = fin_score_logs[0]
+                delta_val = latest_log.get("change", 0)
+                if current_fin_score == 0:
+                    score_delta = 0
+                elif delta_val > current_fin_score:
+                    score_delta = current_fin_score
+                else:
+                    score_delta = delta_val
+
         user_data = {
             "fin_stars": stats.get("fin_stars", 0),
             "streak_count": stats.get("streak_count", 1),
             "rank": stats.get("rank"),
             "ongoing_course_id": ongoing_course_id,
             "ongoing_module_id": user_row.get("ongoing_module_id"),
-            "fin_score": stats.get("fin_score", 0)
+            "fin_score": current_fin_score,
+            "score_delta": score_delta
         }
         
         return {
@@ -170,31 +195,71 @@ async def fetch_fin_score_log(body: FetchDataRequest, user: AuthUser = Depends(g
 
 
 @router.get("/leaderboard")
-async def fetch_leaderboard(user: AuthUser = Depends(get_current_user)):
-    """Returns top 50 users ranked by FinScore"""
+async def fetch_leaderboard(timeframe: Optional[str] = "all_time", user: Optional[AuthUser] = Depends(get_optional_current_user)):
+    """Returns users ranked by FinScore for specified timeframe"""
     try:
         # Maps to the array structure expected by the client Leaderboard
-        raw_leaderboard = home_service.get_leaderboard()
+        raw_leaderboard = await asyncio.to_thread(home_service.get_leaderboard, timeframe=timeframe)
         
-        # Express maps columns user_sub, email, article_score, expense_score, course_score, consistency_score
-        # and dynamically computes finScore. Let's make sure both properties are included!
         leaderboard_formatted = []
         for u in raw_leaderboard:
             fin_score = u.get("fin_score", 0)
+            fin_stars = u.get("fin_stars") or fin_score
             leaderboard_formatted.append({
                 "user_sub": u.get("user_sub"),
                 "email": u.get("email"),
+                "name": (u.get("email") or "").split("@")[0].capitalize(),
                 "article_score": u.get("article_score") or 0,
                 "expense_score": u.get("expense_score") or 0,
                 "course_score": u.get("course_score") or 0,
                 "consistency_score": u.get("consistency_score") or 0,
-                "finScore": fin_score  # React maps `entry.finScore`
+                "finScore": fin_score,
+                "fin_score": fin_score,
+                "fin_stars": fin_stars,
+                "rank": u.get("rank")
             })
         return leaderboard_formatted
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch leaderboard: {str(e)}"
+        )
+
+
+@router.post("/rewards/notify")
+async def notify_reward(body: RewardNotifyRequest, user: AuthUser = Depends(get_current_user)):
+    """Record user's interest to be notified when brand rewards go live"""
+    try:
+        home_service.save_reward_notification(body.email)
+        return {"message": "Notification preference saved successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save notification preference: {str(e)}"
+        )
+
+
+@router.post("/earn-finstars")
+async def earn_finstars(body: EarnStarsRequest, user: AuthUser = Depends(get_optional_current_user)):
+    """Credit FinStars to user for completing a gamification task"""
+    try:
+        user_email = (body.email or user.email or "").strip()
+        if not user_email or user_email == "guest@fined.com":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A valid user email is required to credit FinStars"
+            )
+        updated = await asyncio.to_thread(
+            home_service.credit_finstars, user_email, body.action, body.stars
+        )
+        return updated
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to credit stars: {str(e)}"
         )
 
 

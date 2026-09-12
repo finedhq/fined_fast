@@ -108,6 +108,23 @@ export function postArticle(formData) {
   });
 }
 
+export function fetchAdminArticles({ limit = 50, offset = 0, status = "all" } = {}) {
+  const query = new URLSearchParams();
+  if (limit) query.append("limit", limit);
+  if (offset) query.append("offset", offset);
+  if (status && status !== "all") query.append("status_filter", status);
+  return request(`/articles/admin/all?${query.toString()}`, {
+    method: "GET",
+  });
+}
+
+export function uploadArticleImage(formData) {
+  return request("/articles/upload-image", {
+    method: "POST",
+    body: formData,
+  });
+}
+
 export function deleteArticle(id) {
   return request(`/articles/${id}`, {
     method: "DELETE",
@@ -233,4 +250,32 @@ export function fetchArticleQuestions(articleId) {
   });
 }
 
+export async function getLeaderboard(timeframe = "all_time") {
+  try {
+    return await request(`/home/leaderboard?timeframe=${timeframe}`, {
+      method: "GET",
+    });
+  } catch (err) {
+    console.warn("Failed to fetch leaderboard from API, fallback to default rankings:", err);
+    return null;
+  }
+}
+
+export function notifyRewardInterest(email) {
+  return request("/home/rewards/notify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function claimEarnStars(action, stars, email) {
+  return request("/home/earn-finstars", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, stars, email }),
+  });
+}
+
 export { API_BASE_URL };
+

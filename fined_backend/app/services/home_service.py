@@ -96,13 +96,50 @@ class HomeService:
             "ongoing_course_id": ongoing_course_id,
         }
 
-    def get_leaderboard(self)->list:
+    def get_leaderboard(self, timeframe: str = "all_time"):
         """
-        Returns top 50 users ranked by FinScore.
+        Returns users ranked by FinScore for the requested timeframe.
         Score computed in Python (not DB) for flexibility.
         """
-        return user_repo.get_leaderboard(limit=50)
+        return user_repo.get_leaderboard(limit=None, timeframe=timeframe)
 
+    def save_reward_notification(self, email: str):
+        """Save user waitlist interest for reward drop"""
+        user_repo.save_reward_notification(email)
+
+    def credit_finstars(self, email: str, action: str, amount: int) -> dict:
+        """Credit fin_stars to user and log transaction"""
+        user = user_repo.get_by_email(email)
+        if not user:
+            # Create user entry if not found
+            try:
+                user = user_repo.create(user_sub=f"auth0|{email}", email=email)
+            except Exception:
+                user = user_repo.get_by_email(email)
+            if not user:
+                return {"error": "User not found and could not be created"}
+        
+        current_stars = user.get("fin_stars") or 0
+        new_stars = current_stars + max(0, amount)
+        user_repo.update_fields(email, {"fin_stars": new_stars})
+        
+        try:
+            user_repo.log_score_change(
+                email=email,
+                old=current_stars,
+                new=new_stars,
+                change=amount,
+                desc=f"Earned +{amount} FinStars for {action}"
+            )
+        except Exception as log_err:
+            print(f"Score log warning: {log_err}")
+
+        return {
+            "email": email,
+            "fin_stars": new_stars,
+            "credited": amount,
+            "action": action
+        }
     
     def get_score_logs(self, email: str) -> list:
         """FinScore change history"""

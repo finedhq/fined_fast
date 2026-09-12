@@ -104,5 +104,51 @@ class PersonalLensRepository:
             logger.warning(f"Failed to fetch article questions: {e}")
             return []
 
+    def save_article_questions(self, article_id: str, questions: List[Dict[str, Any]]) -> bool:
+        """
+        Insert or replace questions for an article in `article_questions` table.
+        """
+        if not is_valid_uuid(article_id) or not questions:
+            return False
+        try:
+            import json
+            # Delete existing questions if replacing
+            supabase.from_("article_questions").delete().eq("article_id", article_id).execute()
+            
+            rows = []
+            for i, q in enumerate(questions):
+                q_text = (q.get("question") or "").strip()
+                if not q_text:
+                    continue
+                options_val = q.get("options")
+                if isinstance(options_val, str):
+                    try:
+                        options_val = json.loads(options_val)
+                    except Exception:
+                        options_val = [opt.strip() for opt in options_val.split("\n") if opt.strip()]
+                if not isinstance(options_val, list):
+                    options_val = []
+                    
+                display_order = q.get("display_order", i + 1)
+                try:
+                    display_order = int(display_order)
+                except (ValueError, TypeError):
+                    display_order = i + 1
+
+                rows.append({
+                    "article_id": article_id,
+                    "question": q_text,
+                    "options": options_val,
+                    "display_order": display_order
+                })
+            
+            if rows:
+                supabase.from_("article_questions").insert(rows).execute()
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to save article questions: {e}")
+            return False
+
 
 personal_lens_repo = PersonalLensRepository()
+

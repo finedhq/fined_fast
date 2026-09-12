@@ -36,6 +36,7 @@ const ProductPage = lazy(() => import("./pages/Policies/ProductPage"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
+const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
 
 // Minimal loading fallback — invisible to user
 const PageLoader = () => null;
@@ -65,6 +66,7 @@ function App() {
                   <Route path="feedback" element={<FeedbackPage />} />
 
                   <Route path="about" element={<AboutPage />} />
+                  <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
                   <Route path="help" element={<StaticPage />} />
                   <Route path="privacy-policy" element={<StaticPage />} />
                   <Route path="termsofservice" element={<StaticPage />} />

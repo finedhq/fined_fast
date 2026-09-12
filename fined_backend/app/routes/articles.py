@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any
 from app.services.article_service import article_service
 from app.integrations.storage import upload_to_supabase
 from app.dependencies import get_current_user, require_admin, AuthUser
+from app.repositories.personal_lens_repo import personal_lens_repo
 
 router = APIRouter(prefix="/articles", tags=["Articles"])
 
@@ -231,6 +232,24 @@ async def delete_article(id: str, user: AuthUser = Depends(require_admin)):
             detail=f"Failed to delete article: {str(e)}"
         )
 
+import json
+
+@router.get("/admin/all")
+async def get_all_articles_admin(
+    limit: Optional[int] = 50,
+    offset: Optional[int] = 0,
+    status_filter: Optional[str] = None,
+    user: AuthUser = Depends(require_admin)
+):
+    """Admin: Fetch all articles including drafts and scheduled articles"""
+    try:
+        return article_service.get_all_admin(limit=limit or 50, offset=offset or 0, status=status_filter)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch admin articles: {str(e)}"
+        )
+
 @router.post("/add")
 async def add_article(
     title: str = Form(...),
@@ -241,11 +260,52 @@ async def add_article(
     tag: str = Form(...),
     slug: Optional[str] = Form(None),
     author_id: Optional[str] = Form(None),
+    status_val: Optional[str] = Form("published", alias="status"),
+    scheduled_at: Optional[str] = Form(None),
+    editor_summary: Optional[str] = Form(None),
+    metadata: Optional[str] = Form(None),
+    metadata_json: Optional[str] = Form(None),
+    questions: Optional[str] = Form(None),
+    questions_json: Optional[str] = Form(None),
+    difficulty: Optional[str] = Form(None),
+    reading_time: Optional[str] = Form(None),
+    target_audience: Optional[str] = Form(None),
+    key_concepts: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin adds an article with optional custom slug, SEO fields, and optional image upload to Supabase Storage"""
+    """Admin adds an article with optional scheduling, questions questionnaire, direct JSON metadata, custom slug, SEO fields, and optional image upload"""
     try:
+        raw_meta = metadata or metadata_json
+        parsed_metadata = {}
+        if raw_meta:
+            try:
+                parsed_metadata = json.loads(raw_meta)
+                if not isinstance(parsed_metadata, dict):
+                    parsed_metadata = {"raw": parsed_metadata}
+            except Exception:
+                parsed_metadata = {}
+        
+        if difficulty:
+            parsed_metadata["difficulty"] = difficulty
+        if reading_time:
+            parsed_metadata["readingTime"] = reading_time
+        if target_audience:
+            parsed_metadata["targetAudience"] = target_audience
+        if key_concepts:
+            concepts_list = [c.strip() for c in key_concepts.split(",") if c.strip()]
+            parsed_metadata["keyConcepts"] = concepts_list
+
+        raw_questions = questions or questions_json
+        parsed_questions = []
+        if raw_questions:
+            try:
+                parsed_questions = json.loads(raw_questions)
+                if isinstance(parsed_questions, list):
+                    parsed_metadata["questions"] = parsed_questions
+            except Exception:
+                pass
+
         image_url = ""
         if image:
             file_bytes = await image.read()
@@ -256,7 +316,7 @@ async def add_article(
                 folder="articles",
                 title=title
             )
-        return article_service.add(
+        new_article = article_service.add(
             title=title,
             content=content,
             description=description or "",
@@ -265,10 +325,60 @@ async def add_article(
             slug=slug,
             author_id=author_id,
             seo_title=seo_title or "",
-            meta_description=meta_description or ""
+            meta_description=meta_description or "",
+            status=status_val or "published",
+            scheduled_at=scheduled_at if status_val == "scheduled" else None,
+            editor_summary=editor_summary or "",
+            metadata=parsed_metadata
         )
+        
+        # Save questions in article_questions table
+        if parsed_questions and new_article and new_article.get("id"):
+            try:
+                personal_lens_repo.save_article_questions(new_article["id"], parsed_questions)
+            except Exception:
+                pass
+
+        return new_article
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to add article: {str(e)}"
         )
+
+@router.post("/upload-image")
+async def upload_article_image(
+    image: UploadFile = File(...),
+    subtitle: Optional[str] = Form(None),
+    title: Optional[str] = Form(None),
+    user: AuthUser = Depends(require_admin)
+):
+    """Admin uploads an image for an article directly into Supabase Storage"""
+    try:
+        if not image.content_type or not image.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File provided is not a valid image."
+            )
+        file_bytes = await image.read()
+        image_name_hint = subtitle or title or image.filename
+        image_url = upload_to_supabase(
+            file_bytes=file_bytes,
+            filename=image.filename,
+            mime_type=image.content_type,
+            folder="articles",
+            title=image_name_hint
+        )
+        return {
+            "url": image_url,
+            "filename": image.filename,
+            "subtitle": subtitle or ""
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload image: {str(e)}"
+        )
+

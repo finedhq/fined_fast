@@ -89,7 +89,25 @@ class ArticleService:
 
         return related[:limit]
 
-    def add(self, title: str, content: str, description: str = "", image_url: str = "", tag: str = "Finance", slug: str = None, author_id: str = None, seo_title: str = "", meta_description: str = "") -> dict:
+    def get_all_admin(self, limit: int = 50, offset: int = 0, status: str | None = None) -> list:
+        return article_repo.get_all_admin(limit=limit, offset=offset, status=status)
+
+    def add(
+        self,
+        title: str,
+        content: str,
+        description: str = "",
+        image_url: str = "",
+        tag: str = "Finance",
+        slug: str = None,
+        author_id: str = None,
+        seo_title: str = "",
+        meta_description: str = "",
+        status: str = "published",
+        scheduled_at: str = None,
+        editor_summary: str = "",
+        metadata: dict = None
+    ) -> dict:
         """Admin adds article — using custom slug if provided, else auto-generated from title"""
         if slug and slug.strip():
             final_slug = self._sanitize_slug(slug.strip())
@@ -104,7 +122,11 @@ class ArticleService:
             slug=final_slug,
             author_id=author_id,
             seo_title=seo_title,
-            meta_description=meta_description
+            meta_description=meta_description,
+            status=status,
+            scheduled_at=scheduled_at,
+            editor_summary=editor_summary,
+            metadata=metadata
         )
         
     def get_all_authors(self) -> list:

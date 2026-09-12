@@ -164,7 +164,14 @@ const Dashboard = () => {
                 <h1 className="dash-greeting">Welcome Back, {user?.name?.split(" ")[0] || "User"}! 👋</h1>
                 <p className="dash-subtitle">Let's continue your journey towards financial freedom.</p>
 
-                <div className="dash-streak-pill">
+                <div 
+                  className="dash-streak-pill"
+                  onClick={() => navigate('/rewards')}
+                  role="button"
+                  tabIndex={0}
+                  title="View Rewards & Streaks"
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                >
                   🔥 You're on a {userData?.streak_count || 0} day streak!
                 </div>
 
@@ -219,7 +226,14 @@ const Dashboard = () => {
               </div>
 
               <div className="dash-stats-list">
-                <div className="dash-stat-item">
+                <div 
+                  className="dash-stat-item"
+                  onClick={() => navigate('/rewards')}
+                  role="button"
+                  tabIndex={0}
+                  title="View Rewards & Streaks"
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                >
                   <div className="dash-stat-tooltip-mobile">Streak</div>
                   <div className="dash-stat-icon-wrapper icon-streak">
                     <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
@@ -230,7 +244,14 @@ const Dashboard = () => {
                   <div className="dash-stat-label">STREAK</div>
                 </div>
 
-                <div className="dash-stat-item">
+                <div 
+                  className="dash-stat-item"
+                  onClick={() => navigate('/rewards')}
+                  role="button"
+                  tabIndex={0}
+                  title="View Rewards & FinStars"
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                >
                   <div className="dash-stat-tooltip-mobile">FinStars</div>
                   <div className="dash-stat-icon-wrapper icon-finstars">
                     <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
@@ -241,7 +262,14 @@ const Dashboard = () => {
                   <div className="dash-stat-label">FINSTARS</div>
                 </div>
 
-                <div className="dash-stat-item">
+                <div 
+                  className="dash-stat-item"
+                  onClick={() => navigate('/rewards')}
+                  role="button"
+                  tabIndex={0}
+                  title="View Leaderboard & Rankings"
+                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                >
                   <div className="dash-stat-tooltip-mobile">Rank</div>
                   <div className="dash-stat-icon-wrapper icon-modules">
                     <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
@@ -253,10 +281,17 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="dash-finscore-section">
+              <div 
+                className="dash-finscore-section"
+                onClick={() => navigate('/rewards')}
+                role="button"
+                tabIndex={0}
+                title="View FinScore details & Rewards"
+                onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+              >
                 <div className="dash-finscore-header">
                   <span className="dash-finscore-label">FinScore</span>
-                  <div className="info-icon-container">
+                  <div className="info-icon-container" onClick={(e) => e.stopPropagation()}>
                     <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
                       <InfoIcon />
                     </span>

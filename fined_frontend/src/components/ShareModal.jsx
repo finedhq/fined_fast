@@ -14,15 +14,18 @@ import {
   FaTelegram, 
   FaRedditAlien 
 } from "react-icons/fa6";
+import { useAuth0 } from "@auth0/auth0-react";
 import toast from "react-hot-toast";
+import { claimEarnStars } from "../services/api";
 
 /**
  * ShareModal
  * Displays a live preview card with article thumbnail, title, and description,
- * along with 1-click sharing buttons for all major platforms.
+ * along with 1-click sharing buttons for all major platforms and FinStars rewards.
  */
 export default function ShareModal({ isOpen, onClose, article, description }) {
   const [copied, setCopied] = useState(false);
+  const { user, isAuthenticated } = useAuth0();
 
   if (!isOpen || !article) return null;
 
@@ -38,6 +41,57 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
   const encodedSummary = encodeURIComponent(
     `📈 ${articleTitle}\n\n${articleExcerpt.length > 140 ? articleExcerpt.substring(0, 137) + "..." : articleExcerpt}\n\nRead more on FinEd:`
   );
+
+  const awardShareStars = async () => {
+    if (!isAuthenticated || !user?.email) {
+      toast("Tip: Log in to earn +20 FinStars whenever you share articles! 🌟", {
+        icon: "💡",
+        duration: 3500,
+        position: "bottom-center",
+        style: {
+          borderRadius: "12px",
+          background: "#1E293B",
+          color: "#fff",
+          fontSize: "13px",
+          fontWeight: "500",
+        },
+      });
+      return;
+    }
+
+    const articleKey = article.slug || article.id || articleTitle;
+    const sessionKey = `fined_shared_${articleKey}`;
+    
+    // Only reward once per session for this article to avoid duplicate spamming
+    if (sessionStorage.getItem(sessionKey)) {
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(sessionKey, "true");
+      await claimEarnStars("Share an Article", 20, user.email);
+      
+      // Dispatch custom event in case components want to refresh live stats
+      window.dispatchEvent(new CustomEvent("finstars-updated", { detail: { added: 20 } }));
+
+      toast.success(`🎉 +20 FinStars earned for sharing this article!`, {
+        duration: 4500,
+        position: "bottom-center",
+        style: {
+          borderRadius: "12px",
+          background: "#1E1B4B",
+          color: "#FFFFFF",
+          border: "1px solid #6366F1",
+          fontSize: "14px",
+          fontWeight: "600",
+          boxShadow: "0 10px 25px -5px rgba(99, 102, 241, 0.4)",
+        },
+        icon: "⭐"
+      });
+    } catch (err) {
+      console.warn("Could not award share FinStars:", err);
+    }
+  };
 
   const shareLinks = [
     {
@@ -111,6 +165,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
           fontWeight: "500",
         },
       });
+      awardShareStars();
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
       toast.error("Failed to copy link");
@@ -125,6 +180,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
           text: `${articleTitle} — ${articleExcerpt}`,
           url: currentUrl,
         });
+        awardShareStars();
       } catch (err) {
         if (err.name !== "AbortError") {
           console.error("Error sharing:", err);
@@ -182,8 +238,8 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div style={{
-              width: "36px",
-              height: "36px",
+              width: "38px",
+              height: "38px",
               borderRadius: "10px",
               backgroundColor: "#EEF2FF",
               color: "#4A3AFF",
@@ -195,10 +251,26 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
               <FiShare2 />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "700", color: "#0F172A" }}>
-                Share this Article
-              </h3>
-              <p style={{ margin: 0, fontSize: "12px", color: "#64748B" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "700", color: "#0F172A" }}>
+                  Share this Article
+                </h3>
+                <span style={{
+                  backgroundColor: "#FEF3C7",
+                  color: "#B45309",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  padding: "2px 8px",
+                  borderRadius: "9999px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  border: "1px solid #FDE68A"
+                }}>
+                  ⭐ +20 FinStars
+                </span>
+              </div>
+              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748B" }}>
                 Spread financial knowledge with friends & colleagues
               </p>
             </div>
@@ -323,9 +395,13 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
               color: "#64748B", 
               marginBottom: "10px",
               textTransform: "uppercase",
-              letterSpacing: "0.03em"
+              letterSpacing: "0.03em",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
             }}>
-              Share to
+              <span>Share to</span>
+              <span style={{ fontSize: "11px", color: "#10B981", fontWeight: "600" }}>Earn +20 stars</span>
             </div>
             <div style={{
               display: "grid",
@@ -338,6 +414,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => awardShareStars()}
                   style={{
                     display: "flex",
                     alignItems: "center",

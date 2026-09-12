@@ -40,6 +40,8 @@ Alternatively, the grocery store sells a pre-packaged, fresh fruit salad bowl th
 
 An Exchange Traded Fund (ETF) is that pre-packaged bowl for the stock market. Instead of researching and buying 50 separate company shares, you buy one single share of an ETF, and your money is automatically spread across all 50 companies.
 
+![Figure 1: Visual comparison of how a single ETF unit bundles dozens of top market assets](https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80)
+
 ## How ETFs Trade on an Exchange
 The term "Exchange Traded" simply means the fund is bought and sold on a stock exchange (like the NSE, BSE, NYSE, or Nasdaq), exactly like a normal stock share of Apple, Reliance, or Microsoft.
 
@@ -52,6 +54,8 @@ Many people confuse ETFs with Mutual Funds because both offer instant diversific
 2. **Management Style**: Most ETFs are "passive" — they simply track an existing index (like the Nifty 50 or S&P 500) using a computer algorithm. Traditional mutual funds are often "active", where a fund manager attempts to beat the market.
 3. **Fees and Expense Ratios**: Because passive ETFs don't require high-salaried research teams, their annual management fees (Total Expense Ratio or TER) are often 5x to 10x lower than active mutual funds (e.g., 0.05% vs 1.50%).
 4. **Minimum Investment**: Mutual funds often require a fixed minimum SIP (e.g. $10 or ₹500). ETFs can be purchased for the cost of a single unit on your brokerage app.
+
+![Figure 2: Expense Ratio drag comparison: Low fee ETF compounding vs High fee active funds over 20 years](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80)
 
 ## Understanding Expense Ratios & Hidden Costs
 When investing, fees are the silent drag on your wealth compounding. If a fund charges 1.5% every year and your investments grow at 10%, you are giving away 15% of your annual gains to the fund house.
