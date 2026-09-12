@@ -4,6 +4,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router-dom";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import CertificateGenerator from "../../components/Certificate/CertificateGenerator";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 import "./CourseOverview.css";
 import "../Dashboard/Dashboard.css";
 import completedModuleLogo from '../../assets/completed_module_logo.png';
@@ -49,6 +50,8 @@ export default function CourseOverview() {
   const [email, setEmail] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
+
+  useDocumentTitle(courseTitle ? `${courseTitle} | FinEd` : "Course Overview | FinEd");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [course, setCourse] = useState([]);
   const [userData, setUserData] = useState({});

@@ -1,0 +1,58 @@
+.notfound-page {
+  min-height: calc(100vh - 76px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px 80px;
+  background: #fafbff;
+  font-family: 'Nunito', sans-serif;
+}
+
+.notfound-badge {
+  font-size: clamp(72px, 14vw, 160px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #4A3AFF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.notfound-page h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  color: #111827;
+}
+
+.notfound-page p {
+  max-width: 440px;
+  margin: 0 0 32px;
+  color: #4b5563;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #4A3AFF;
+  color: #ffffff;
+  padding: 14px 32px;
+  font-weight: 800;
+  font-size: 16px;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(74, 58, 255, 0.25);
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notfound-btn:hover {
+  background: #3c2ee0;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(74, 58, 255, 0.32);
+}

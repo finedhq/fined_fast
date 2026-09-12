@@ -29,7 +29,9 @@ async function request(path, options = {}) {
 
 const articleCache = new Map();
 const singleArticleCache = new Map();
+const authorProfileCache = new Map();
 const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+
 
 export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {}) {
   const cacheKey = `articles-${limit}-${offset}-${tag || "all"}`;
@@ -221,9 +223,20 @@ export function fetchAuthors() {
   return request("/authors/");
 }
 
-export function fetchAuthorDetails(slug) {
-  return request(`/authors/${slug}`);
+export async function fetchAuthorDetails(slug, { limit = 12, offset = 0 } = {}) {
+  const cacheKey = `author-${slug}-${limit}-${offset}`;
+  if (authorProfileCache.has(cacheKey)) {
+    const { data, timestamp } = authorProfileCache.get(cacheKey);
+    if (Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
+  const data = await request(`/authors/${slug}?limit=${limit}&offset=${offset}`);
+  authorProfileCache.set(cacheKey, { data, timestamp: Date.now() });
+  return data;
 }
+
 
 export function joinWaitlist(email) {
   return request("/home/waitlist", {
@@ -246,6 +259,12 @@ export function fetchPersonalLens(articleId, answers) {
 
 export function fetchArticleQuestions(articleId) {
   return request(`/personal-lens/questions/${articleId}`, {
+    method: "GET",
+  });
+}
+
+export function fetchArticleIndexExport() {
+  return request("/admin/article-index-export", {
     method: "GET",
   });
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ArticleReader from "../../components/ArticleReader";
-import { deleteArticle, fetchAdminArticles } from "../../services/api";
+import { deleteArticle, fetchAdminArticles, fetchArticleIndexExport } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 function AdminArticleList() {
@@ -57,6 +57,25 @@ function AdminArticleList() {
     return (a.status || "published") === activeFilter;
   });
 
+  const handleDownloadIndex = async () => {
+    try {
+      setStatus("Generating AI index...");
+      const markdownText = await fetchArticleIndexExport();
+      const blob = new Blob([markdownText], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fined_article_index.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      setStatus("AI index downloaded.");
+    } catch (err) {
+      setStatus(err.message || "Failed to download AI index.");
+    }
+  };
+
   return (
     <main className="admin-list-page">
       <div className="admin-list-head">
@@ -66,7 +85,10 @@ function AdminArticleList() {
             View, schedule, and manage published and drafted educational articles.
           </p>
         </div>
-        <div>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={handleDownloadIndex} className="admin-secondary-btn" style={{ background: "#4A3AFF", color: "#fff", border: "none" }}>
+            📥 Download AI Article Index
+          </button>
           <button className="primary-btn" style={{ padding: "8px 18px", fontSize: "15px" }} onClick={() => navigate("/admin/articles/add")}>
             ➕ Add New Article
           </button>

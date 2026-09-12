@@ -131,13 +131,6 @@ function ArticlesPage() {
     return () => observer.disconnect();
   }, [articles, hasMore, offset]);
 
-  useEffect(() => {
-    document.title = "Articles | FinEd";
-    return () => {
-      document.title = "FinEd";
-    };
-  }, []);
-
   const openArticle = (article) => {
     if (!article) return;
     const targetSlug = article.slug || generateSlug(article.title);

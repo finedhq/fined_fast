@@ -110,7 +110,6 @@ function TagArticlesPage() {
     }
     return () => {
       document.body.style.overflow = "";
-      document.title = "FinEd";
     };
   }, [selectedArticle, tag]);
 

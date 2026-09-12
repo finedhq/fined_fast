@@ -1,6 +1,7 @@
 # HTTP endpoints for educational courses and quiz submissions
 import asyncio
 import re
+import uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from pydantic import BaseModel, Field, ValidationError
@@ -12,6 +13,15 @@ from app.dependencies import get_current_user, get_optional_current_user, requir
 from app.models.card_data import validate_card_data
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
+
+
+def _is_valid_uuid(value: str) -> bool:
+    """Check whether value parses as a UUID, so it's safe to pass to .eq('id'/'card_id', ...) — avoids Postgres 22P02 (invalid input syntax for type uuid) when a slug is queried as an id."""
+    try:
+        uuid.UUID(str(value))
+        return True
+    except (ValueError, AttributeError, TypeError):
+        return False
 
 # --- Request Schemas ---
 
@@ -95,6 +105,8 @@ async def get_all_courses():
 @router.delete("/{id}")
 async def delete_course(id: str, user: AuthUser = Depends(require_admin)):
     """Admin: Delete a course"""
+    if not _is_valid_uuid(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     try:
         await asyncio.to_thread(lambda: supabase.from_("courses").delete().eq("id", id).execute())
         return {"message": "Course deleted successfully."}
@@ -135,9 +147,9 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
     try:
         # Sequential database requests (Thread-safe)
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("slug", course_slug).execute())
-        if not course_res.data:
+        if not course_res.data and _is_valid_uuid(course_slug):
             course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("id", course_slug).execute())
-        
+
         if not course_res.data:
             return {"title": "", "description": "", "data": []}
             
@@ -320,7 +332,7 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
     try:
         # Resolve course_slug
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("slug", course_slug).execute())
-        if not course_res.data:
+        if not course_res.data and _is_valid_uuid(course_slug):
             course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("id", course_slug).execute())
         if not course_res.data:
             raise HTTPException(status_code=404, detail="Course not found")
@@ -330,7 +342,7 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
 
         # Resolve module_slug
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("slug", module_slug).execute())
-        if not module_res.data:
+        if not module_res.data and _is_valid_uuid(module_slug):
             module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("id", module_slug).execute())
         if not module_res.data:
             raise HTTPException(status_code=404, detail="Module not found")
@@ -356,7 +368,7 @@ async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: Au
     try:
         # Resolve card to get module_id
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("slug", card_slug).execute())
-        if not card_res.data:
+        if not card_res.data and _is_valid_uuid(card_slug):
             card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
@@ -396,21 +408,21 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
     try:
         # Resolve slugs to IDs
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("slug", course_slug).execute())
-        if not course_res.data:
+        if not course_res.data and _is_valid_uuid(course_slug):
             course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("id", course_slug).execute())
         if not course_res.data:
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
-            
+
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_slug).execute())
-        if not module_res.data:
+        if not module_res.data and _is_valid_uuid(module_slug):
             module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("id", module_slug).execute())
         if not module_res.data:
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
-        
+
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_slug).execute())
-        if not card_res.data:
+        if not card_res.data and _is_valid_uuid(card_slug):
             card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
@@ -538,21 +550,21 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         
         # Resolve slugs to IDs
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("slug", course_id).execute())
-        if not course_res.data:
+        if not course_res.data and _is_valid_uuid(course_id):
             course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("id", course_id).execute())
         if not course_res.data:
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
-            
+
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_id).execute())
-        if not module_res.data:
+        if not module_res.data and _is_valid_uuid(module_id):
             module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("id", module_id).execute())
         if not module_res.data:
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
-        
+
         card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_id).execute())
-        if not card_res_id.data:
+        if not card_res_id.data and _is_valid_uuid(card_id):
             card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
         if not card_res_id.data:
             raise HTTPException(status_code=404, detail="Card not found")
@@ -762,7 +774,7 @@ async def update_card_by_slug(card_slug: str, body: UpdateCardRequest, user: Aut
     try:
         # Resolve card to get card_id and module_id
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("slug", card_slug).execute())
-        if not card_res.data:
+        if not card_res.data and _is_valid_uuid(card_slug):
             card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")

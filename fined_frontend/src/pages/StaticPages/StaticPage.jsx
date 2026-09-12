@@ -1,10 +1,13 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 export default function StaticPage() {
   const location = useLocation();
   const path = location.pathname.replace('/', '');
   const title = path.charAt(0).toUpperCase() + path.slice(1).replace('-', ' ');
+
+  useDocumentTitle(title);
 
   return (
     <div className="min-h-[70vh] bg-gray-50 flex items-center justify-center p-4">

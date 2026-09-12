@@ -7,6 +7,7 @@ import { ApiTokenProvider } from "./components/ApiTokenProvider";
 import { AuthenticationGuard } from "./components/AuthenticationGuard";
 import { AdminGuard } from "./components/AdminGuard";
 import ScrollToTop from "./components/ScrollToTop";
+import PageTitleTracker from "./components/PageTitleTracker";
 
 // Lazy-load all page components — each is only fetched when the user navigates to it
 const Hero = lazy(() => import("./pages/Home/Hero"));
@@ -37,6 +38,8 @@ const NotificationsPage = lazy(() => import("./pages/Notifications/Notifications
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
 const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
+const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 
 // Minimal loading fallback — invisible to user
 const PageLoader = () => null;
@@ -47,6 +50,7 @@ function App() {
       {/* Dummy div to force Tailwind to preload classes missing on first dev load */}
       <div className="hidden pt-16 pb-12 mb-16 text-2xl gap-8 aspect-[4/3] object-fill object-contain lg:w-2/3 max-w-[1280px] items-center max-w-7xl flex-1 px-6 text-gray-800 sm:w-1/3"></div>
       <ScrollToTop />
+      <PageTitleTracker />
       <Auth0ProviderWithNavigate>
         <AuthLoader>
           <ApiTokenProvider>
@@ -85,14 +89,15 @@ function App() {
                   <Route path="fin-tools/expensetracker" element={<AuthenticationGuard component={ExpenseTracker} />} />
                   <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
                   <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
+                  <Route path="leaderboard" element={<AuthenticationGuard component={Leaderboard} />} />
                   <Route path=":productType" element={<AuthenticationGuard component={ProductPage} />} />
                   <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
                   <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
                   <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />
                   <Route path="admin/newsletters" element={<AdminGuard><AdminNewsletter /></AdminGuard>} />
 
-                  {/* Catch-all route redirects unknown/hidden pages to the Coming Soon courses page */}
-                  <Route path="*" element={<Navigate to="/courses" replace />} />
+                  {/* Catch-all route renders a branded 404 page for unknown/hidden paths */}
+                  <Route path="*" element={<NotFoundPage />} />
                 </Route>
               </Routes>
             </Suspense>

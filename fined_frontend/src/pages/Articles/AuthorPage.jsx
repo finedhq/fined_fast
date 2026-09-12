@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
-import { fetchAuthorDetails } from "../../services/api";
+import { fetchAuthorDetails, fetchArticleBySlug } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
 import { IoSparkles } from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
+
+const ARTICLES_PER_PAGE = 12;
 
 const generateSlug = (title) => {
   if (!title) return "";
@@ -34,30 +36,64 @@ function AuthorPage() {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
 
+  // Pagination states
+  const [offset, setOffset] = useState(0);
+  const [totalArticles, setTotalArticles] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   useEffect(() => {
-    const lenis = new Lenis()
+    const lenis = new Lenis();
     function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf)
+    requestAnimationFrame(raf);
     return () => {
-      lenis.destroy()
-    }
-  }, [])
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     setFetching(true);
     setError("");
-    fetchAuthorDetails(slug)
+    setOffset(0);
+    setArticles([]);
+
+    fetchAuthorDetails(slug, { limit: ARTICLES_PER_PAGE, offset: 0 })
       .then((data) => {
         setAuthor(data.author || {});
-        setArticles(data.articles || []);
+        const incoming = data.articles || [];
+        setArticles(incoming);
+        const total = data.total ?? incoming.length;
+        setTotalArticles(total);
+        setHasMore(data.has_more ?? (incoming.length < total));
+        setOffset(incoming.length);
       })
       .catch((err) => setError(err.message || "Failed to load author profile."))
       .finally(() => setFetching(false));
   }, [slug]);
+
+  // Load more articles
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const data = await fetchAuthorDetails(slug, { limit: ARTICLES_PER_PAGE, offset });
+      const incoming = data.articles || [];
+      setArticles((prev) => [...prev, ...incoming]);
+      const newOffset = offset + incoming.length;
+      setOffset(newOffset);
+      const total = data.total ?? totalArticles;
+      setTotalArticles(total);
+      setHasMore(data.has_more ?? (newOffset < total));
+    } catch (err) {
+      console.error("Failed to load more articles:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   // Lock body scroll when article open
   useEffect(() => {
@@ -67,33 +103,63 @@ function AuthorPage() {
       window.dispatchEvent(new CustomEvent("articleReaderOpen"));
     } else {
       document.body.style.overflow = "";
-      if (author) {
+      if (author?.name) {
         document.title = `${author.name} | FinEd`;
       }
       window.dispatchEvent(new CustomEvent("articleReaderClose"));
     }
     return () => {
       document.body.style.overflow = "";
-      document.title = "FinEd";
     };
   }, [selectedArticle, author]);
 
+  // Handle URL articleSlug changes & deep links
   useEffect(() => {
-    if (articleSlug && articles.length > 0) {
-      const article = articles.find(a => (a.slug || generateSlug(a.title)) === articleSlug);
-      if (article && (!selectedArticle || (selectedArticle.slug || generateSlug(selectedArticle.title)) !== articleSlug)) {
-        setSelectedArticle(article);
+    if (articleSlug) {
+      const match = articles.find(a => (a.slug || generateSlug(a.title)) === articleSlug);
+      if (match) {
+        if (match.content) {
+          if (!selectedArticle || (selectedArticle.slug || generateSlug(selectedArticle.title)) !== articleSlug) {
+            setSelectedArticle(match);
+          }
+        } else {
+          if (!selectedArticle || (selectedArticle.slug || generateSlug(selectedArticle.title)) !== articleSlug) {
+            setSelectedArticle(match);
+          }
+          fetchArticleBySlug(articleSlug)
+            .then((full) => {
+              if (full) setSelectedArticle(full);
+            })
+            .catch(console.error);
+        }
+      } else {
+        fetchArticleBySlug(articleSlug)
+          .then((full) => {
+            if (full) setSelectedArticle(full);
+          })
+          .catch(console.error);
       }
     } else if (!articleSlug && selectedArticle) {
       setSelectedArticle(null);
     }
   }, [articleSlug, articles]);
 
-  const openArticle = (article) => {
+  const openArticle = async (article) => {
     if (!article) return;
     const targetSlug = article.slug || generateSlug(article.title);
     navigate(`/authors/${slug}/${targetSlug}`);
     setSelectedArticle(article);
+
+    if (!article.content) {
+      try {
+        const full = await fetchArticleBySlug(targetSlug);
+        if (full) {
+          setSelectedArticle(full);
+        }
+      } catch (err) {
+        console.error("Failed to load full article content:", err);
+      }
+    }
   };
 
   const closeArticle = () => {
@@ -109,53 +175,64 @@ function AuthorPage() {
     <div className="ap-root">
       <RevealOnScroll>
         <div className="ap-hero-strip" style={{ display: 'flex', alignItems: 'center', textAlign: 'left', backgroundColor: '#d9e8ff', paddingTop: '140px', paddingBottom: '60px', color: '#000', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginBottom: '40px', marginTop: '-100px' }}>
-          <div className="author-profile-container">
-            {author?.image_url ? (
-              <img 
-                src={author.image_url} 
-                alt={author?.name} 
-                className="author-profile-image" 
-              />
-            ) : (
-              <div className="author-profile-image-placeholder">
-                {author?.name?.charAt(0) || "A"}
+          {fetching ? (
+            <div className="author-profile-container" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+              <div className="ap-skeleton-row" style={{ width: '110px', height: '110px', borderRadius: '50%', flexShrink: 0 }} />
+              <div className="author-profile-info" style={{ width: '100%', maxWidth: '580px' }}>
+                <div className="ap-skeleton-row" style={{ height: '36px', width: '220px', borderRadius: '8px', marginBottom: '16px' }} />
+                <div className="ap-skeleton-row" style={{ height: '16px', width: '100%', borderRadius: '4px', marginBottom: '8px' }} />
+                <div className="ap-skeleton-row" style={{ height: '16px', width: '70%', borderRadius: '4px' }} />
               </div>
-            )}
-            <div className="author-profile-info">
-              <h1 className="ap-headline" style={{ margin: '0', fontSize: '36px', fontWeight: 'bold', color: '#000', lineHeight: '1' }}>{author?.name || "Loading..."}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {author?.linkedin_url && (
-                  <a 
-                    href={author.linkedin_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    title="LinkedIn Profile"
-                    aria-label="LinkedIn Profile"
-                    style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                  >
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                  </a>
-                )}
-                {author?.email && (
-                  <a 
-                    href={`mailto:${author.email}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    title={`Email ${author?.name || 'Author'}`}
-                    aria-label={`Email ${author?.name || 'Author'}`}
-                    style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#333' }}
-                  >
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
-                  </a>
-                )}
-              </div>
-              <span className="author-profile-bio">{author?.bio || "No bio available."}</span>
             </div>
-          </div>
+          ) : (
+            <div className="author-profile-container">
+              {author?.image_url ? (
+                <img 
+                  src={author.image_url} 
+                  alt={author?.name} 
+                  className="author-profile-image" 
+                />
+              ) : (
+                <div className="author-profile-image-placeholder">
+                  {author?.name?.charAt(0) || "A"}
+                </div>
+              )}
+              <div className="author-profile-info">
+                <h1 className="ap-headline" style={{ margin: '0', fontSize: '36px', fontWeight: 'bold', color: '#000', lineHeight: '1' }}>{author?.name || "Author"}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {author?.linkedin_url && (
+                    <a 
+                      href={author.linkedin_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      title="LinkedIn Profile"
+                      aria-label="LinkedIn Profile"
+                      style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                    >
+                      <svg viewBox="0 0 24 24" width="24" height="24" fill="#0077b5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                  )}
+                  {author?.email && (
+                    <a 
+                      href={`mailto:${author.email}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      title={`Email ${author?.name || 'Author'}`}
+                      aria-label={`Email ${author?.name || 'Author'}`}
+                      style={{ width: '36px', height: '36px', backgroundColor: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#333' }}
+                    >
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
+                    </a>
+                  )}
+                </div>
+                <span className="author-profile-bio">{author?.bio || ""}</span>
+              </div>
+            </div>
+          )}
         </div>
       </RevealOnScroll>
 
-      {author?.description && (
+      {!fetching && author?.description && (
         <div className="author-about-section">
           {author.description.split('\n').map((line, i) => (
              line.trim() === 'About' ? <h2 key={i} className="author-about-title">{line}</h2> :
@@ -172,57 +249,98 @@ function AuthorPage() {
         </h2>
 
         {fetching ? (
-          <p className="ap-loading-more" style={{ textAlign: 'center', marginTop: '20px' }}>Loading articles...</p>
-        ) : (
           <div className="ap-articles-grid" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
-            {articles.map((article, idx) => (
-              <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
-                <div
-                  className="ap-grid-card"
-                  onClick={() => openArticle(article)}
-                >
-                  <div className="ap-grid-card-img-wrap">
-                    {article.image_url ? (
-                      <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="ap-grid-card-img"
-                      />
-                    ) : (
-                      <div className="ap-grid-card-img-placeholder" />
-                    )}
-                  </div>
-                  <div className="ap-grid-card-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                      <span
-                        className="ap-grid-category"
-                        style={{ margin: 0, cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                        }}
-                      >
-                        {article.tag?.toUpperCase()}
-                      </span>
-                      {hasAiLens(article) && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
-                          <IoSparkles size={9} /> AI Lens
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="ap-grid-title">{article.title}</h3>
-                    <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                      {article.description || ""}
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                      <span>{formatDate(article.published_at || article.created_at)}</span>
-                      <span>By {author?.name}</span>
-                    </div>
-                  </div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="ap-grid-card" style={{ pointerEvents: 'none' }}>
+                <div className="ap-grid-card-img-wrap">
+                  <div className="ap-skeleton-row" style={{ width: '100%', height: '100%' }} />
                 </div>
-              </RevealOnScroll>
+                <div className="ap-grid-card-content">
+                  <div className="ap-skeleton-row" style={{ width: '70px', height: '14px', borderRadius: '4px', marginBottom: '12px' }} />
+                  <div className="ap-skeleton-row" style={{ width: '90%', height: '20px', borderRadius: '4px', marginBottom: '8px' }} />
+                  <div className="ap-skeleton-row" style={{ width: '70%', height: '20px', borderRadius: '4px', marginBottom: '16px' }} />
+                  <div className="ap-skeleton-row" style={{ width: '100%', height: '14px', borderRadius: '4px', marginBottom: '6px' }} />
+                  <div className="ap-skeleton-row" style={{ width: '80%', height: '14px', borderRadius: '4px' }} />
+                </div>
+              </div>
             ))}
           </div>
+        ) : (
+          <>
+            <div className="ap-articles-grid" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
+              {articles.map((article, idx) => (
+                <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
+                  <div
+                    className="ap-grid-card"
+                    onClick={() => openArticle(article)}
+                  >
+                    <div className="ap-grid-card-img-wrap">
+                      {article.image_url ? (
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="ap-grid-card-img"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="ap-grid-card-img-placeholder" />
+                      )}
+                    </div>
+                    <div className="ap-grid-card-content">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <span
+                          className="ap-grid-category"
+                          style={{ margin: 0, cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
+                          }}
+                        >
+                          {article.tag?.toUpperCase()}
+                        </span>
+                        {hasAiLens(article) && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
+                            <IoSparkles size={9} /> AI Lens
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="ap-grid-title">{article.title}</h3>
+                      <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
+                        {article.description || ""}
+                      </p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                        <span>{formatDate(article.published_at || article.created_at)}</span>
+                        <span>By {author?.name}</span>
+                      </div>
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              ))}
+            </div>
+
+            {hasMore && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px', marginBottom: '32px' }}>
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="ap-view-more-btn"
+                >
+                  {loadingMore ? (
+                    <>
+                      <span style={{ display: 'inline-block', width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                      Loading more articles...
+                    </>
+                  ) : (
+                    <>
+                      View More Articles ({articles.length} of {totalArticles})
+                      <span style={{ fontSize: '15px' }}>↓</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
