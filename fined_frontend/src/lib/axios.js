@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const rawBase = (import.meta.env.VITE_API_URL || "http://localhost:8000").trim();
+const baseURL = rawBase.endsWith("/api")
+  ? rawBase
+  : `${rawBase.replace(/\/+$/, "")}/api`;
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL + '/api', // points to FastAPI /api
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -251,6 +251,7 @@ async def get_all_articles_admin(
         )
 
 @router.post("/add")
+@router.post("/add/")
 async def add_article(
     title: str = Form(...),
     content: str = Form(...),
@@ -347,6 +348,7 @@ async def add_article(
         )
 
 @router.post("/upload-image")
+@router.post("/upload-image/")
 async def upload_article_image(
     image: UploadFile = File(...),
     subtitle: Optional[str] = Form(None),

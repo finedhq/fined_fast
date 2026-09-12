@@ -1,8 +1,9 @@
 import { getAuthToken } from "../lib/axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
-  : "http://localhost:8000/api";
+const rawBase = (import.meta.env.VITE_API_URL || "http://localhost:8000").trim();
+const API_BASE_URL = rawBase.endsWith("/api")
+  ? rawBase
+  : `${rawBase.replace(/\/+$/, "")}/api`;
 
 async function request(path, options = {}) {
   const token = await getAuthToken();
@@ -13,7 +14,8 @@ async function request(path, options = {}) {
     };
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const response = await fetch(`${API_BASE_URL}${normalizedPath}`, options);
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json")
     ? await response.json()
