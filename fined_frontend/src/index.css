@@ -946,6 +946,7 @@ button {
     grid-template-columns: 240px minmax(0, 1fr);
     gap: 36px;
   }
+
   .ar-lens-aside {
     display: none;
   }
@@ -1267,8 +1268,13 @@ button {
 }
 
 @keyframes arFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .ar-lightbox-container {
@@ -3283,8 +3289,7 @@ button {
   border-color: transparent transparent #1e293b transparent;
 }
 
-.info-icon-container:hover .info-tooltip {
-}
+.info-icon-container:hover .info-tooltip {}
 
 .ar-internal-link {
   color: #4A3AFF;
@@ -3312,7 +3317,7 @@ button {
   width: fit-content;
   background-color: #fff;
   border-radius: 16px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
 }
 
@@ -3505,14 +3510,17 @@ button {
     padding: 20px;
     margin: 32px 0 20px 0;
   }
+
   .ar-end-card-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
+
   .ar-end-stars-wrap {
     justify-content: space-between;
   }
+
   .ar-end-share-btn {
     justify-content: center;
     width: 100%;
@@ -3547,6 +3555,7 @@ button {
     width: min(890px, 100%);
     margin: 0 auto;
   }
+
   .ar-grid {
     display: flex;
     flex-direction: column;
@@ -3555,6 +3564,7 @@ button {
     margin: 0 auto;
     gap: 8px;
   }
+
   .ar-toc-aside {
     position: sticky;
     top: 0;
@@ -3567,19 +3577,23 @@ button {
     max-width: 100%;
     align-items: stretch;
   }
+
   .ar-toc-nav {
     width: 100%;
     max-width: 100%;
     align-items: stretch;
   }
+
   .ar-article {
     width: 100%;
   }
+
   .ar-related-section {
     width: 100%;
     max-width: 890px;
     margin: 36px 0 24px 0;
   }
+
   .ar-footer-wrapper {
     width: 100%;
     max-width: 890px;
@@ -3739,4 +3753,3 @@ button {
   opacity: 0.7;
   cursor: not-allowed;
 }
-

@@ -1,4 +1,5 @@
 # HTTP endpoints for course cards
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form, Depends
 from app.dependencies import get_current_user, require_admin, AuthUser
 from typing import Optional, List

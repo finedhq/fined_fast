@@ -93,7 +93,9 @@ async def sitemap():
     return Response(content=xml, media_type="application/xml")
 
 from app.routes import api_router
+from app.routes.users import router as users_router
 app.include_router(api_router, prefix="/api")
+app.include_router(users_router)
 
 # Serve Frontend Static Files & SPA fallback routing (e.g. for /about)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

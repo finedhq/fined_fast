@@ -1,4 +1,5 @@
 # Main API router grouping all routes
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter
 from app.routes.home import router as home_router
 from app.routes.articles import router as articles_router
@@ -13,6 +14,7 @@ from app.routes.auth import router as auth_router
 
 from app.routes.authors import router as authors_router
 from app.routes.personal_lens import router as personal_lens_router
+from app.routes.users import router as users_router
 
 api_router = APIRouter()
 
@@ -32,5 +34,7 @@ api_router.include_router(icici_router)
 api_router.include_router(auth_router)
 api_router.include_router(modules_router)
 api_router.include_router(cards_router)
+api_router.include_router(users_router)
+
 
 

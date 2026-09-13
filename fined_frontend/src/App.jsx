@@ -39,7 +39,10 @@ const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
 const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
+import { UserProfileProvider } from "./context/UserProfileContext";
+import EditProfileModal from "./components/EditProfileModal";
 
 // Minimal loading fallback — invisible to user
 const PageLoader = () => null;
@@ -54,23 +57,27 @@ function App() {
       <Auth0ProviderWithNavigate>
         <AuthLoader>
           <ApiTokenProvider>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
-                <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
-                <Route path="/lens" element={<Navigate to="/articles" replace />} />
-                <Route path="/" element={<MainLayout />}>
-                  <Route index element={<Hero />} />
-                  <Route path="articles" element={<ArticlesPage />} />
-                  <Route path="articles/:slug" element={<SingleArticlePage />} />
-                  <Route path="tags/:tag" element={<TagArticlesPage />} />
-                  <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
-                  <Route path="courses" element={<Courses />} />
-                  <Route path="contact" element={<ContactPage />} />
-                  <Route path="feedback" element={<FeedbackPage />} />
+            <UserProfileProvider>
+              <EditProfileModal />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                  <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
+                  <Route path="/lens" element={<Navigate to="/articles" replace />} />
+                  <Route path="/" element={<MainLayout />}>
+                    <Route index element={<Hero />} />
+                    <Route path="articles" element={<ArticlesPage />} />
+                    <Route path="articles/:slug" element={<SingleArticlePage />} />
+                    <Route path="tags/:tag" element={<TagArticlesPage />} />
+                    <Route path="tags/:tag/:slug" element={<TagArticlesPage />} />
+                    <Route path="courses" element={<Courses />} />
+                    <Route path="contact" element={<ContactPage />} />
+                    <Route path="feedback" element={<FeedbackPage />} />
 
-                  <Route path="about" element={<AboutPage />} />
-                  <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
+                    <Route path="about" element={<AboutPage />} />
+                    <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
+                    <Route path="profile" element={<AuthenticationGuard component={ProfilePage} />} />
+
                   <Route path="help" element={<StaticPage />} />
                   <Route path="privacy-policy" element={<StaticPage />} />
                   <Route path="termsofservice" element={<StaticPage />} />
@@ -101,9 +108,11 @@ function App() {
                 </Route>
               </Routes>
             </Suspense>
+            </UserProfileProvider>
           </ApiTokenProvider>
         </AuthLoader>
       </Auth0ProviderWithNavigate>
+
     </BrowserRouter>
   );
 }

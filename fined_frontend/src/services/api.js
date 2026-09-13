@@ -298,5 +298,20 @@ export function claimEarnStars(action, stars, email) {
   });
 }
 
+export function fetchUserProfile() {
+  return request("/v1/users/me", {
+    method: "GET",
+  });
+}
+
+export function updateUserProfile(payload) {
+  return request("/v1/users/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
 export { API_BASE_URL };
+
 

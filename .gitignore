@@ -170,3 +170,13 @@ __marimo__/
 
 error_log.txt
 
+
+.design_references/
+.vscode/
+pyrefly.toml
+pyrightconfig.json
+
+.design_references/
+.vscode/
+pyrefly.toml
+pyrightconfig.json

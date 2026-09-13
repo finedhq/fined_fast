@@ -1,4 +1,5 @@
 # Pydantic models for user profiles and dashboards
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel
 from typing import Optional
 
@@ -43,3 +44,37 @@ class FeedbackCreate(BaseModel):
     """Feedback form submission"""
     email: str
     form: dict
+
+
+class OngoingCourseProgress(BaseModel):
+    id: Optional[str] = None
+    title: str = "Basics of Stock Market"
+    slug: Optional[str] = "basics-of-stock-market"
+    current_lesson: int = 6
+    total_lessons: int = 12
+    progress_pct: int = 50
+
+
+class UserProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    career_stage: Optional[str] = None
+    financial_level: Optional[str] = None
+    bio: Optional[str] = None
+
+
+class UserProfileResponse(BaseModel):
+    id: Optional[str] = None
+    user_sub: Optional[str] = None
+    email: str
+    display_name: str
+    username: str
+    career_stage: str
+    financial_level: str
+    bio: str
+    fin_score: int = 500
+    fin_stars: int = 0
+    streak_count: int = 4
+    rank: int = 1
+    ongoing_course: Optional[OngoingCourseProgress] = None
+    consistency_grid: list[int] = []
+

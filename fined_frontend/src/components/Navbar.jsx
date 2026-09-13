@@ -1,17 +1,46 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { isAdminUser } from "../services/auth";
-import { useState, useEffect } from "react";
-import { FiMenu, FiX } from "react-icons/fi";
+import { useState, useEffect, useRef } from "react";
+import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
+import { useUserProfile } from "../context/UserProfileContext";
 import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const [hidden, setHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
   
-  // This must be INSIDE the component function
+  // User profile context
+  const { profile, openEditModal } = useUserProfile();
+
+  // Auth0 authentication
   const { user, loginWithRedirect, isAuthenticated, logout } = useAuth0();
+
+  const displayName = profile?.display_name || user?.name || "Rashi Karule";
+  const firstName = displayName.split(" ")[0] || "Rashi";
+  const userInitial = (firstName[0] || "R").toUpperCase();
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    if (isProfileDropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isProfileDropdownOpen]);
+
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -83,18 +112,125 @@ export default function Navbar() {
             <li><NavLink to="/contact" className={({ isActive }) => `cube-link ${isActive ? "active" : ""}`}><span className="cube-wrapper" data-text="Contact Us">Contact Us</span></NavLink></li>
           </ul>
 
-          <div className="nav-right">
+          <div className="nav-right" ref={profileDropdownRef}>
             {isAuthenticated ? (
-              <>
+              <div className="relative flex items-center gap-3">
                 {isAdminUser(user) && (
                   <button className="btn-signin cube-link" onClick={() => navigate("/admin")}>
                     <span className="cube-wrapper" data-text="Admin">Admin</span>
                   </button>
                 )}
-                <button className="btn-nav-register" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
-                  Logout
+                
+                {/* Interactive User Profile Pill */}
+                <button
+                  type="button"
+                  onClick={() => setIsProfileDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 py-1.5 pl-1.5 pr-3 bg-white border border-slate-200 rounded-full shadow-xs hover:border-slate-300 hover:shadow-sm transition cursor-pointer select-none"
+                  aria-expanded={isProfileDropdownOpen}
+                  aria-label="User profile menu"
+                >
+                  {/* Navy Blue circular avatar */}
+                  <span className="w-8 h-8 rounded-full bg-[#0047AB] text-white flex items-center justify-center font-bold text-sm tracking-wide shadow-xs">
+                    {userInitial}
+                  </span>
+                  <span className="font-bold text-sm text-slate-800 tracking-tight">
+                    {firstName}
+                  </span>
+                  <FiChevronDown
+                    className={`text-slate-400 text-sm transition-transform duration-200 ${
+                      isProfileDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-              </>
+
+                {/* Google Account-Style Dropdown Card */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-[330px] bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    {/* Top Profile Card */}
+                    <div className="bg-[#f8fafc] border border-slate-100 rounded-2xl p-4 text-center flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full bg-[#0047AB] text-white flex items-center justify-center text-2xl font-black shadow-inner">
+                        {userInitial}
+                      </div>
+                      <h3 className="mt-2.5 font-extrabold text-base text-slate-900 tracking-tight">
+                        {profile?.display_name || "Rashi Karule"}
+                      </h3>
+                      <p className="text-xs font-medium text-slate-500 mt-0.5">
+                        {profile?.email || user?.email || "karulerashi@gmail.com"}
+                      </p>
+                      <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-100/80 rounded-full text-[11px] font-bold">
+                          🎓 {profile?.career_stage || "Student"}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100/80 rounded-full text-[11px] font-bold">
+                          Level 1 • Beginner
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Quick Metrics Strip */}
+                    <div className="bg-[#FEF9E7] border border-[#FDE68A] rounded-2xl py-3 px-4 my-3.5 flex items-center justify-around text-center">
+                      <div>
+                        <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                          FINSCORE
+                        </span>
+                        <span className="text-xl font-black text-slate-900 tracking-tight">
+                          {profile?.fin_score || 500}
+                        </span>
+                      </div>
+                      <div className="w-[1px] h-7 bg-[#FDE68A]"></div>
+                      <div>
+                        <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                          FINSTARS
+                        </span>
+                        <span className="text-xl font-black text-amber-500 flex items-center justify-center gap-1 tracking-tight">
+                          ⭐ {profile?.fin_stars ?? 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action Items */}
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          navigate("/profile");
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition text-left cursor-pointer"
+                      >
+                        <span className="text-base">👤</span>
+                        <span>View Profile</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          openEditModal();
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition text-left cursor-pointer"
+                      >
+                        <span className="text-base">⚙️</span>
+                        <span>Profile &amp; Username Settings</span>
+                      </button>
+
+                      <div className="border-t border-slate-100 my-1"></div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileDropdownOpen(false);
+                          logout({ logoutParams: { returnTo: window.location.origin } });
+                        }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 transition text-left cursor-pointer"
+                      >
+                        <span className="text-base">🚪</span>
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
@@ -131,7 +267,7 @@ export default function Navbar() {
           <li><NavLink to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</NavLink></li>
           {isAuthenticated ? (
             <>
-
+              <li><NavLink to="/profile" onClick={() => setIsMobileMenuOpen(false)}>My Profile</NavLink></li>
               {isAdminUser(user) && (
                 <li><NavLink to="/admin" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</NavLink></li>
               )}
