@@ -17,6 +17,8 @@ class ArticleOut(BaseModel):
     slug: Optional[str] = None
     author_id: Optional[str] = None
     authors: Optional[dict] = None
+    reviewer_id: Optional[str] = None
+    reviewer: Optional[dict] = None
     created_at: Optional[str] = None
     published_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -32,6 +34,7 @@ class ArticleCreate(BaseModel):
     tag: Optional[str] = "Finance"
     slug: Optional[str] = None
     author_id: Optional[str] = None
+    reviewer_id: Optional[str] = None
 
 
 class RatingCreate(BaseModel):

@@ -162,6 +162,19 @@ async def spa_fallback(fallback_path: str):
                     author_name = author_obj.get("name") if isinstance(author_obj, dict) else (article.get("author") or "FinEd Editorial Team")
                     author_slug = author_obj.get("slug") if isinstance(author_obj, dict) else "fined-editorial"
 
+                    reviewer_obj = article.get("reviewer")
+                    reviewed_by_json = ""
+                    if reviewer_obj and isinstance(reviewer_obj, dict):
+                        rev_name = html.escape(reviewer_obj.get("name") or "")
+                        rev_slug = html.escape(reviewer_obj.get("slug") or "")
+                        if rev_name:
+                            reviewed_by_json = f""",
+      "reviewedBy": {{
+        "@type": "Person",
+        "name": "{rev_name}",
+        "url": "https://myfined.com/authors/{rev_slug}"
+      }}"""
+
                     schema_json = f"""{{
   "@context": "https://schema.org",
   "@graph": [
@@ -177,7 +190,7 @@ async def spa_fallback(fallback_path: str):
         "@type": "Person",
         "name": "{author_name}",
         "url": "https://myfined.com/authors/{author_slug}"
-      }},
+      }}{reviewed_by_json},
       "publisher": {{
         "@type": "Organization",
         "name": "FinEd",

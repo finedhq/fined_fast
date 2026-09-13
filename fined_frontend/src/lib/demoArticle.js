@@ -14,6 +14,13 @@ export const ETF_DEMO_ARTICLE = {
     bio: "Equity researcher and financial educator dedicated to making wealth-building concepts simple and accessible.",
     linkedin_url: "https://www.linkedin.com/in/shravan-mutha-302247297/"
   },
+  reviewer: {
+    name: "Anish Patil",
+    slug: "anish-patil",
+    role: "Senior Financial Analyst & Fact-Checker",
+    bio: "Certified financial expert specializing in algorithmic trading, equity derivatives, and regulatory compliance.",
+    linkedin_url: "https://www.linkedin.com/in/anish-patil"
+  },
   created_at: "2026-02-15T10:00:00Z",
   updated_at: "2026-02-28T14:30:00Z",
   image_url: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",

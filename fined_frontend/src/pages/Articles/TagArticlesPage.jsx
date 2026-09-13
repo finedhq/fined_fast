@@ -192,24 +192,56 @@ function TagArticlesPage() {
                   <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
                     {article.description || ""}
                   </p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                    <span>{formatDate(article.published_at || article.created_at)}</span>
-                    {article.authors ? (
-                      <span
-                        style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                        onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
-                      >
-                        By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
-                      </span>
-                    ) : (
-                      <span
-                        style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                        onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
-                      >
-                        By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
-                      </span>
-                    )}
-                  </div>
+                  {/* Author, Date & Reviewer */}
+                  {article.reviewer ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {article.authors ? (
+                          <span
+                            style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
+                          >
+                            By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
+                          </span>
+                        ) : (
+                          <span
+                            style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                          >
+                            By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                        <span>{formatDate(article.published_at || article.created_at)}</span>
+                        <span
+                          style={{ cursor: 'pointer', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.reviewer.slug}`); }}
+                        >
+                          <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span> Reviewed by <span style={{ textDecoration: 'underline' }}>{article.reviewer.name}</span>
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
+                      <span style={{ fontSize: '12px' }}>{formatDate(article.published_at || article.created_at)}</span>
+                      {article.authors ? (
+                        <span
+                          style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
+                        >
+                          By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
+                        </span>
+                      ) : (
+                        <span
+                          style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                        >
+                          By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </RevealOnScroll>

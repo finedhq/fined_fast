@@ -519,6 +519,13 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const updatedDateFormatted = formatDate(article.updated_at);
   const articleTag = article.tag || "Finance";
 
+  const authorName = article.authors?.name || article.author || "Shravan Mutha";
+  const authorSlug = article.authors?.slug || "shravan-mutha";
+  const authorRole = article.authors?.role || "FinEd Research & Editorial";
+  const authorBio = article.authors?.bio || "Dedicated to breaking down complex financial systems, Indian regulatory frameworks, and market mechanisms into clear, actionable explainers.";
+  const authorLinkedin = article.authors?.linkedin_url || (authorSlug === "shravan-mutha" ? "https://www.linkedin.com/in/shravan-mutha-302247297/" : null);
+  const authorEmail = article.authors?.email || null;
+
   const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
   const tocLineHeight = tocItems.length > 16 ? "1.3" : tocItems.length > 11 ? "1.35" : "1.4";
   const tocRowPadding =
@@ -536,8 +543,6 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     const tag = article.tag || "Finance";
     const publishedIso = article.published_at || article.created_at || new Date().toISOString();
     const updatedIso = article.updated_at || publishedIso;
-    const authorName = article.authors?.name || article.author || "Shravan Mutha";
-    const authorSlug = article.authors?.slug || "shravan-mutha";
 
     const faqEntities = [];
     for (let i = 0; i < blocks.length; i++) {
@@ -582,6 +587,15 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           ...(article.authors?.bio ? { description: article.authors.bio } : {}),
           ...(article.authors?.role ? { jobTitle: article.authors.role } : {})
         },
+        ...(article.reviewer ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: article.reviewer.name,
+            url: `https://myfined.com/authors/${article.reviewer.slug}`,
+            ...(article.reviewer.bio ? { description: article.reviewer.bio } : {}),
+            ...(article.reviewer.role ? { jobTitle: article.reviewer.role } : {})
+          }
+        } : {}),
         publisher: {
           "@type": "Organization",
           name: "FinEd",
@@ -791,23 +805,27 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </span>
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
-              {article.authors ? (
+              <div className="ar-byline-row">
                 <p
                   className="ar-byline"
                   style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                  onClick={() => navigate(`/authors/${article.authors.slug}`)}
+                  onClick={() => navigate(`/authors/${article.authors?.slug || "shravan-mutha"}`)}
                 >
-                  By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
+                  By <span style={{ textDecoration: 'underline' }}>{article.authors?.name || article?.author || "Shravan Mutha"}</span>
                 </p>
-              ) : (
-                <p
-                  className="ar-byline"
-                  style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                  onClick={() => navigate(`/authors/shravan-mutha`)}
-                >
-                  By <span style={{ textDecoration: 'underline' }}>{article?.author || "Shravan Mutha"}</span>
-                </p>
-              )}
+                {article.reviewer && (
+                  <div
+                    className="ar-byline-reviewed"
+                    onClick={() => navigate(`/authors/${article.reviewer.slug}`)}
+                    title={`Fact-checked and verified by ${article.reviewer.name}`}
+                  >
+                    <span className="ar-reviewed-badge-icon">✓</span>
+                    <span className="ar-reviewed-text">
+                      Reviewed by <span className="ar-reviewed-name">{article.reviewer.name}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
               <p className="ar-description" itemProp="description">{description}</p>
             </header>
 
@@ -893,12 +911,12 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 {article.authors?.image_url ? (
                   <img
                     src={article.authors.image_url}
-                    alt={article.authors.name}
+                    alt={authorName}
                     className="ar-author-avatar-img"
                   />
                 ) : (
                   <div className="ar-author-avatar-initial">
-                    {(article.authors?.name || article.author || "S").charAt(0)}
+                    {authorName.charAt(0)}
                   </div>
                 )}
               </div>
@@ -909,10 +927,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       Written by{" "}
                       <span
                         className="ar-author-link"
-                        onClick={() => navigate(`/authors/${article.authors?.slug || "shravan-mutha"}`)}
+                        onClick={() => navigate(`/authors/${authorSlug}`)}
                         style={{ cursor: "pointer", color: "#4A3AFF", textDecoration: "underline" }}
                       >
-                        {article.authors?.name || article.author || "Shravan Mutha"}
+                        {authorName}
                       </span>
                     </h3>
                     <p className="ar-author-box-role">
@@ -920,13 +938,13 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     </p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    {article.authors?.linkedin_url && (
+                    {(article.authors?.linkedin_url || (authorSlug === "shravan-mutha" ? "https://www.linkedin.com/in/shravan-mutha-302247297/" : null)) && (
                       <a
-                        href={article.authors.linkedin_url}
+                        href={article.authors?.linkedin_url || "https://www.linkedin.com/in/shravan-mutha-302247297/"}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ar-author-social-link"
-                        title="Connect on LinkedIn"
+                        title={`Connect with ${authorName} on LinkedIn`}
                         aria-label="LinkedIn Profile"
                       >
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
@@ -940,7 +958,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ar-author-social-link"
-                        title={`Email ${article.authors?.name || 'Author'}`}
+                        title={`Email ${authorName}`}
                         aria-label="Email Author"
                       >
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="#334155">
@@ -958,6 +976,85 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </div>
               </div>
             </div>
+
+            {/* E-E-A-T REVIEWER BIO & CREDENTIALS CARD */}
+            {article.reviewer && (
+              <div className="ar-author-box ar-reviewer-box">
+                <div className="ar-author-box-avatar">
+                  {article.reviewer.image_url ? (
+                    <img
+                      src={article.reviewer.image_url}
+                      alt={article.reviewer.name}
+                      className="ar-author-avatar-img ar-reviewer-avatar-img"
+                    />
+                  ) : (
+                    <div className="ar-author-avatar-initial ar-reviewer-avatar-initial">
+                      {(article.reviewer.name || "R").charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="ar-author-box-content">
+                  <div className="ar-author-box-header">
+                    <div>
+                      <h3 className="ar-author-box-name">
+                        <span className="ar-verified-pill">
+                          <span className="ar-verified-pill-icon">✓</span> Fact-Checked &amp; Reviewed
+                        </span>
+                        <div style={{ marginTop: '6px' }}>
+                          Reviewed by{" "}
+                          <span
+                            className="ar-author-link"
+                            onClick={() => navigate(`/authors/${article.reviewer.slug}`)}
+                            style={{ cursor: "pointer", color: "#059669", textDecoration: "underline" }}
+                          >
+                            {article.reviewer.name}
+                          </span>
+                        </div>
+                      </h3>
+                      <p className="ar-author-box-role">
+                        {article.reviewer.role || "Financial Expert & Technical Reviewer"}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      {article.reviewer.linkedin_url && (
+                        <a
+                          href={article.reviewer.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ar-author-social-link"
+                          title={`Connect with ${article.reviewer.name} on LinkedIn`}
+                          aria-label="LinkedIn Profile"
+                        >
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="#0077b5">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                          </svg>
+                        </a>
+                      )}
+                      {article.reviewer.email && (
+                        <a
+                          href={`mailto:${article.reviewer.email}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ar-author-social-link"
+                          title={`Email ${article.reviewer.name}`}
+                          aria-label="Email Reviewer"
+                        >
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="#334155">
+                            <path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <p className="ar-author-box-bio">
+                    {article.reviewer.bio || "Thoroughly verified for mathematical precision, factual accuracy, Indian regulatory compliance, and clarity."}
+                  </p>
+                  <div className="ar-editorial-shield ar-reviewer-shield">
+                    <span>🛡️ Verified for Accuracy &amp; Integrity</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* RATE & SHARE CARD AT END OF ARTICLE (Mobile / Tablet Only) */}
             <div className="ar-end-card">

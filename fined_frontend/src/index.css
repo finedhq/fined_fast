@@ -1357,11 +1357,70 @@ button {
   color: #1d4ed8;
 }
 
+.ar-byline-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 16px auto 14px auto;
+  text-align: center;
+}
+
+.ar-byline-row .ar-byline {
+  margin: 0;
+  text-align: center;
+}
+
+.ar-byline-reviewed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #166534;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-byline-reviewed:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.ar-reviewed-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #16a34a;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ar-reviewed-text {
+  color: #166534;
+}
+
+.ar-reviewed-name {
+  font-weight: 700;
+  text-decoration: underline;
+  color: #15803d;
+}
+
 .ar-author-box {
   order: 3;
   width: 100%;
   max-width: 890px;
-  margin: 40px auto 20px auto;
+  margin: 40px auto 16px auto;
   padding: 24px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -1370,6 +1429,13 @@ button {
   display: flex;
   gap: 20px;
   align-items: flex-start;
+}
+
+.ar-reviewer-box {
+  order: 4;
+  margin-top: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+  border: 1px solid #bbf7d0;
 }
 
 @media (max-width: 640px) {
@@ -1392,6 +1458,10 @@ button {
   border: 2px solid #e2e8f0;
 }
 
+.ar-reviewer-avatar-img {
+  border: 2px solid #86efac;
+}
+
 .ar-author-avatar-initial {
   width: 64px;
   height: 64px;
@@ -1405,6 +1475,10 @@ button {
   justify-content: center;
 }
 
+.ar-reviewer-avatar-initial {
+  background: linear-gradient(135deg, #059669, #0d9488);
+}
+
 .ar-author-box-content {
   flex: 1;
   min-width: 0;
@@ -1416,6 +1490,26 @@ button {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
+}
+
+.ar-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.ar-verified-pill-icon {
+  font-weight: 900;
+  color: #059669;
 }
 
 .ar-author-box-name {
@@ -1467,6 +1561,12 @@ button {
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.ar-reviewer-shield {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #6ee7b7;
 }
 
 .ar-article>.ap-reader-footer {

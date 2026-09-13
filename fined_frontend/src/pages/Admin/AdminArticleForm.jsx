@@ -14,7 +14,8 @@ function AdminArticleForm() {
     seo_title: "",
     meta_description: "",
     tag: "Deep Dives",
-    author_id: ""
+    author_id: "",
+    reviewer_id: ""
   });
   const [authors, setAuthors] = useState([]);
   const [headerImageFile, setHeaderImageFile] = useState(null);
@@ -388,6 +389,7 @@ function AdminArticleForm() {
     if (form.meta_description) formData.append("meta_description", form.meta_description);
     formData.append("tag", form.tag);
     if (form.author_id) formData.append("author_id", form.author_id);
+    if (form.reviewer_id) formData.append("reviewer_id", form.reviewer_id);
     if (headerImageFile) formData.append("image", headerImageFile);
 
     // Status & Scheduling
@@ -449,7 +451,8 @@ function AdminArticleForm() {
         seo_title: "",
         meta_description: "",
         tag: "Deep Dives",
-        author_id: form.author_id
+        author_id: form.author_id,
+        reviewer_id: ""
       });
       setHeaderImageFile(null);
       setHeaderImagePreview("");
@@ -1107,6 +1110,23 @@ function AdminArticleForm() {
                   onChange={(event) => setForm((prev) => ({ ...prev, author_id: event.target.value }))}
                 >
                   <option value="">-- No Author --</option>
+                  {authors.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="admin-field-refined">
+                <label className="admin-label-refined">
+                  Reviewed By (Optional)
+                </label>
+                <select
+                  name="reviewer_id"
+                  className="admin-select-refined"
+                  value={form.reviewer_id}
+                  onChange={(event) => setForm((prev) => ({ ...prev, reviewer_id: event.target.value }))}
+                >
+                  <option value="">-- No Reviewer --</option>
                   {authors.map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}

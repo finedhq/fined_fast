@@ -6,25 +6,86 @@ from datetime import datetime, timezone
 
 class ArticleRepository:
 
+    def _enrich_reviewer(self, article: dict, authors_map: dict = None) -> dict:
+        if not article or not isinstance(article, dict):
+            return article
+        
+        if "reviewer" in article and article["reviewer"]:
+            return article
+
+        reviewer_id = article.get("reviewer_id")
+        if not reviewer_id:
+            meta = article.get("metadata") or {}
+            if isinstance(meta, dict):
+                reviewer_id = meta.get("reviewer_id")
+
+        if not reviewer_id:
+            article["reviewer"] = None
+            return article
+
+        if authors_map is None:
+            all_authors = self.get_all_authors()
+            authors_map = {str(a["id"]): a for a in all_authors if "id" in a}
+
+        rev_author = authors_map.get(str(reviewer_id))
+        if rev_author:
+            article["reviewer"] = {
+                "id": rev_author.get("id"),
+                "name": rev_author.get("name"),
+                "slug": rev_author.get("slug"),
+                "image_url": rev_author.get("image_url"),
+                "role": rev_author.get("role") or rev_author.get("description"),
+                "bio": rev_author.get("bio"),
+                "linkedin_url": rev_author.get("linkedin_url"),
+                "email": rev_author.get("email"),
+            }
+        else:
+            article["reviewer"] = None
+        return article
+
+    def _enrich_reviewers_list(self, articles: list) -> list:
+        if not articles:
+            return []
+        has_reviewer = any(
+            a.get("reviewer_id") or (isinstance(a.get("metadata"), dict) and a.get("metadata", {}).get("reviewer_id"))
+            for a in articles if isinstance(a, dict)
+        )
+        if not has_reviewer:
+            for a in articles:
+                if isinstance(a, dict) and "reviewer" not in a:
+                    a["reviewer"] = None
+            return articles
+
+        all_authors = self.get_all_authors()
+        authors_map = {str(a["id"]): a for a in all_authors if "id" in a}
+        for a in articles:
+            if isinstance(a, dict):
+                self._enrich_reviewer(a, authors_map)
+        return articles
+
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
-        query = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("status", "published")
+        query = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)").eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
         res = query.order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
-        return res.data or []
+        articles = res.data or []
+        return self._enrich_reviewers_list(articles)
 
     def get_all_admin(self, limit: int = 50, offset: int = 0, status: str | None = None) -> list:
-        query = supabase.from_("articles").select("*, authors(name, slug, image_url)")
+        query = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")
         if status and status != "all":
             query = query.eq("status", status)
         res = query.order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
-        return res.data or []
+        articles = res.data or []
+        return self._enrich_reviewers_list(articles)
 
     def get_by_id(self, article_id: str) -> dict | None:
-        res = supabase.from_("articles").select("*, authors(name, slug, image_url)").eq("id", article_id).execute()
-        return res.data[0] if res.data else None
+        res = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)").eq("id", article_id).execute()
+        if not res.data:
+            return None
+        return self._enrich_reviewer(res.data[0])
 
     def insert(
         self,
@@ -35,6 +96,7 @@ class ArticleRepository:
         tag: str = "Finance",
         slug: str = "",
         author_id: str = None,
+        reviewer_id: str = None,
         seo_title: str = "",
         meta_description: str = "",
         status: str = "published",
@@ -49,6 +111,8 @@ class ArticleRepository:
             merged_metadata["seo_title"] = seo_title
         if meta_description and "meta_description" not in merged_metadata:
             merged_metadata["meta_description"] = meta_description
+        if reviewer_id:
+            merged_metadata["reviewer_id"] = reviewer_id
 
         payload = {
             "title": title,
@@ -71,10 +135,13 @@ class ArticleRepository:
 
         if author_id:
             payload["author_id"] = author_id
+        if reviewer_id:
+            payload["reviewer_id"] = reviewer_id
 
         try:
             res = supabase.from_("articles").insert([payload]).execute()
-            return res.data[0] if res.data else {}
+            inserted = res.data[0] if res.data else {}
+            return self._enrich_reviewer(inserted)
         except Exception:
             # Fallback if specific columns are missing in legacy DB schema
             payload_fallback = {
@@ -89,8 +156,14 @@ class ArticleRepository:
             }
             if author_id:
                 payload_fallback["author_id"] = author_id
+            if reviewer_id:
+                try:
+                    payload_fallback["reviewer_id"] = reviewer_id
+                except Exception:
+                    pass
             res = supabase.from_("articles").insert([payload_fallback]).execute()
-            return res.data[0] if res.data else {}
+            inserted = res.data[0] if res.data else {}
+            return self._enrich_reviewer(inserted)
 
     def delete(self, article_id: str):
         supabase.from_("articles").delete().eq("id", article_id).execute()
@@ -169,7 +242,7 @@ class ArticleRepository:
          .order("created_at", desc=True)\
          .range(offset, offset + limit - 1)
         res = query.execute()
-        articles = res.data or []
+        articles = self._enrich_reviewers_list(res.data or [])
         total = res.count if res.count is not None else len(articles)
         return {
             "articles": articles,
@@ -179,8 +252,10 @@ class ArticleRepository:
 
 
     def get_by_slug(self, slug: str) -> dict | None:
-        res = supabase.from_("articles").select("*, authors(name, slug, image_url, bio, linkedin_url, description, email)").eq("slug", slug).eq("status", "published").execute()
-        return res.data[0] if res.data else None
+        res = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)").eq("slug", slug).eq("status", "published").execute()
+        if not res.data:
+            return None
+        return self._enrich_reviewer(res.data[0])
 
     def get_adjacent(self, current_created_at: str) -> dict:
         prev_res = supabase.from_("articles").select("title, slug, created_at").eq("status", "published").lt("created_at", current_created_at).order("created_at", desc=True).limit(1).execute()
@@ -194,24 +269,25 @@ class ArticleRepository:
         if not tag:
             return []
         query = supabase.from_("articles")\
-            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors(name, slug, image_url)")\
+            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")\
             .eq("status", "published")\
             .eq("tag", tag)\
             .neq("slug", exclude_slug)\
             .order("created_at", desc=True)\
             .limit(limit)
         res = query.execute()
-        return res.data or []
+        articles = res.data or []
+        return self._enrich_reviewers_list(articles)
 
     def get_recent_published(self, exclude_slugs: list[str], limit: int = 3) -> list:
         res = supabase.from_("articles")\
-            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors(name, slug, image_url)")\
+            .select("id, title, slug, description, image_url, tag, created_at, published_at, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")\
             .eq("status", "published")\
             .order("created_at", desc=True)\
             .limit(limit + len(exclude_slugs) + 2)\
             .execute()
         articles = res.data or []
         filtered = [a for a in articles if a.get("slug") not in exclude_slugs]
-        return filtered[:limit]
+        return self._enrich_reviewers_list(filtered[:limit])
 
 article_repo = ArticleRepository()
