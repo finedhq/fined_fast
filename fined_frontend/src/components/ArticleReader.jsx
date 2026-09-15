@@ -10,6 +10,76 @@ import { fetchRelatedArticles } from "../services/api";
 /* ── text helpers ── */
 const cleanText = (v = "") => v.replace(/\s+/g, " ").trim();
 
+const cleanDisclaimerText = (text = "") => {
+  let cleaned = text.trim();
+  if (cleaned.startsWith("*") && cleaned.endsWith("*")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  } else if (cleaned.startsWith("_") && cleaned.endsWith("_")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if (/^disclaimer:\s*/i.test(cleaned)) {
+    cleaned = cleaned.replace(/^disclaimer:\s*/i, "");
+  }
+  return cleaned;
+};
+
+const isDisclaimerBlock = (text = "") => {
+  if (typeof text !== "string") return false;
+  const v = text.trim();
+  const lower = v.toLowerCase();
+  if (
+    lower.startsWith("*disclaimer") ||
+    lower.startsWith("disclaimer:") ||
+    lower.startsWith("*this article is for educational") ||
+    lower.startsWith("this article is for educational")
+  ) {
+    return true;
+  }
+  if ((v.startsWith("*") && v.endsWith("*")) || (v.startsWith("_") && v.endsWith("_"))) {
+    if (
+      lower.includes("educational purposes") ||
+      lower.includes("investment advice") ||
+      lower.includes("financial advice") ||
+      lower.includes("disclaimer") ||
+      lower.includes("verify current") ||
+      lower.includes("registered financial advisor") ||
+      lower.includes("licensed financial advisor")
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const formatInlineMarkdown = (text, keyPrefix = "fmt") => {
+  if (typeof text !== "string") return text;
+  // Match bold (**text**), italic (*text* or _text_), or inline code (`code`)
+  const inlineRegex = /(\*\*([^*]+)\*\*|\*([^*]+)\*|_([^_]+)_|`([^`]+)`)/g;
+  const elements = [];
+  let lastIdx = 0;
+  let m;
+
+  while ((m = inlineRegex.exec(text)) !== null) {
+    if (m.index > lastIdx) {
+      elements.push(text.substring(lastIdx, m.index));
+    }
+    if (m[2]) {
+      elements.push(<strong key={`${keyPrefix}-b-${m.index}`}>{m[2]}</strong>);
+    } else if (m[3]) {
+      elements.push(<em key={`${keyPrefix}-i-${m.index}`}>{m[3]}</em>);
+    } else if (m[4]) {
+      elements.push(<em key={`${keyPrefix}-i-${m.index}`}>{m[4]}</em>);
+    } else if (m[5]) {
+      elements.push(<code key={`${keyPrefix}-c-${m.index}`} className="ar-inline-code">{m[5]}</code>);
+    }
+    lastIdx = inlineRegex.lastIndex;
+  }
+  if (lastIdx < text.length) {
+    elements.push(text.substring(lastIdx));
+  }
+  return elements.length > 0 ? elements : text;
+};
+
 const renderTextWithLinksAndImages = (text, onImageClick) => {
   if (typeof text !== "string") return text;
   // Match either markdown image ![alt](url "title") or link [label](url)
@@ -20,7 +90,13 @@ const renderTextWithLinksAndImages = (text, onImageClick) => {
 
   while ((match = tokenRegex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index));
+      const plainSegment = text.substring(lastIndex, match.index);
+      const formatted = formatInlineMarkdown(plainSegment, `seg-${match.index}`);
+      if (Array.isArray(formatted)) {
+        parts.push(...formatted);
+      } else {
+        parts.push(formatted);
+      }
     }
     const fullToken = match[1];
     const isImage = fullToken.startsWith("!");
@@ -77,7 +153,13 @@ const renderTextWithLinksAndImages = (text, onImageClick) => {
   }
 
   if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
+    const plainSegment = text.substring(lastIndex);
+    const formatted = formatInlineMarkdown(plainSegment, `seg-end-${lastIndex}`);
+    if (Array.isArray(formatted)) {
+      parts.push(...formatted);
+    } else {
+      parts.push(formatted);
+    }
   }
 
   return parts.length > 0 ? parts : text;
@@ -230,6 +312,10 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         let text = rawText;
         let isHeading = false;
         let isImage = false;
+        let isBullet = false;
+        let isNumbered = false;
+        let itemNumber = "";
+        const isDisclaimer = isDisclaimerBlock(text);
         let level = 0;
         let imageUrl = "";
         let imageSubtitle = "";
@@ -259,18 +345,33 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           text = text.substring(3).trim();
           isHeading = true;
           level = 2;
-        } else if (!hasExplicitHeadings) {
-          isHeading = isLikelyHeading(text);
-          if (isHeading) level = 2;
+        } else if (!hasExplicitHeadings && !isDisclaimer && isLikelyHeading(text)) {
+          isHeading = true;
+          level = 2;
+        } else if (!isDisclaimer) {
+          const bulletMatch = /^[-*•]\s+(.*)$/.exec(text);
+          const numMatch = /^(\d+)\.\s+(.*)$/.exec(text);
+          if (bulletMatch) {
+            isBullet = true;
+            text = bulletMatch[1].trim();
+          } else if (numMatch) {
+            isNumbered = true;
+            itemNumber = numMatch[1];
+            text = numMatch[2].trim();
+          }
         }
 
-        const id = isImage ? `ar-media-${i}` : slugifyHeading(text, i);
+        const id = isImage ? `ar-media-${i}` : (isDisclaimer ? `ar-disclaimer-${i}` : slugifyHeading(text, i));
 
         return {
           id,
           text,
           isHeading,
           isImage,
+          isDisclaimer,
+          isBullet,
+          isNumbered,
+          itemNumber,
           level,
           imageUrl,
           imageSubtitle,
@@ -282,11 +383,11 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   );
 
   const tocItems = useMemo(() => {
-    const headings = blocks.filter((b) => b.isHeading && !b.isImage && b.level !== 3);
+    const headings = blocks.filter((b) => b.isHeading && !b.isImage && !b.isDisclaimer && b.level !== 3);
     if (headings.length > 0) {
       return headings.map((b) => ({ id: b.id, label: trimLabel(b.text), level: b.level }));
     }
-    const textBlocks = blocks.filter((b) => !b.isImage);
+    const textBlocks = blocks.filter((b) => !b.isImage && !b.isDisclaimer && !b.isBullet && !b.isNumbered);
     return textBlocks.map((b, i) => ({ id: b.id, label: createTocLabel(b.text, i), level: 2 }));
   }, [blocks]);
 
@@ -312,18 +413,16 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
 
     // Slight delay to ensure DOM has painted the updated active classes
     const timer = setTimeout(() => {
-      const activeEl = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`)?.parentElement;
-      if (activeEl) {
+      const activeLink = tocListRef.current.querySelector(`[href="#${activeHeadingId}"]`);
+      if (activeLink) {
         setIndicatorStyle({
-          top: activeEl.offsetTop,
-          height: activeEl.offsetHeight
+          top: activeLink.offsetTop,
+          height: activeLink.offsetHeight
         });
 
         // Auto scroll TOC
-        // We use scrollTo with 'auto' instead of scrollIntoView to prevent cancelling 
-        // the main article's smooth scroll (a known issue in Chrome)
         const tocList = tocListRef.current;
-        const scrollPos = activeEl.offsetTop - (tocList.clientHeight / 2) + (activeEl.offsetHeight / 2);
+        const scrollPos = activeLink.offsetTop - (tocList.clientHeight / 2) + (activeLink.offsetHeight / 2);
         tocList.scrollTo({ top: scrollPos, behavior: 'auto' });
       }
     }, 10);
@@ -526,14 +625,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const authorLinkedin = article.authors?.linkedin_url || (authorSlug === "shravan-mutha" ? "https://www.linkedin.com/in/shravan-mutha-302247297/" : null);
   const authorEmail = article.authors?.email || null;
 
-  const tocFontSize = tocItems.length > 16 ? "13px" : tocItems.length > 11 ? "14px" : "16px";
-  const tocLineHeight = tocItems.length > 16 ? "1.3" : tocItems.length > 11 ? "1.35" : "1.4";
+  const tocFontSize = tocItems.length > 16 ? "14px" : tocItems.length > 11 ? "15px" : "16.5px";
+  const tocLineHeight = tocItems.length > 16 ? "1.35" : tocItems.length > 11 ? "1.4" : "1.45";
   const tocRowPadding =
     tocItems.length > 16
-      ? "0.15rem 1rem"
+      ? "0.25rem 1rem"
       : tocItems.length > 11
-        ? "0.2rem 1rem"
-        : "0.25rem 1rem";
+        ? "0.3rem 1.1rem"
+        : "0.4rem 1.15rem";
 
   // Build full Schema.org graph (Article, BreadcrumbList, FAQPage)
   const structuredData = useMemo(() => {
@@ -688,7 +787,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}
                 onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
               >
-                <p className="ar-toc-heading">Table of Contents</p>
+                <p className="ar-toc-heading">CONTENTS</p>
                 <span className="ar-toc-icon">▼</span>
               </div>
 
@@ -699,32 +798,23 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     position: 'absolute',
                     left: '-2px',
                     top: `${indicatorStyle.top}px`,
-                    width: '2px',
+                    width: '3.5px',
                     height: `${indicatorStyle.height}px`,
-                    backgroundColor: '#4A3AFF',
-                    transition: 'top 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    backgroundColor: '#1d4ed8',
+                    transition: 'top 0.22s cubic-bezier(0.4, 0, 0.2, 1), height 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
                     opacity: activeHeadingId && indicatorStyle.height > 0 ? 1 : 0,
                     pointerEvents: 'none',
                     zIndex: 10
                   }} />
 
-                  {tocItems.map((item, i) => (
+                  {tocItems.map((item) => (
                     <li key={item.id} className="ar-toc-item">
                       <a
                         href={`#${item.id}`}
-                        className={`ar-toc-link ${activeHeadingId === item.id ? "active" : ""}`}
+                        className={`ar-toc-link ${activeHeadingId === item.id ? "active" : ""} ${item.level === 3 ? "level-3" : ""}`}
                         onClick={(event) => {
                           scrollToSection(event, item.id);
                           setIsMobileTocOpen(false);
-                        }}
-                        style={{
-                          display: 'block',
-                          fontSize: item.level === 3 ? "13px" : tocFontSize,
-                          lineHeight: tocLineHeight,
-                          padding: tocRowPadding,
-                          paddingLeft: item.level === 3 ? '2.25rem' : '1.25rem',
-                          fontWeight: activeHeadingId === item.id ? "600" : (item.level === 3 ? "400" : "500"),
-                          color: activeHeadingId === item.id ? "#4A3AFF" : "#6B7280",
                         }}
                       >
                         <span className="ar-toc-label">{item.label}</span>
@@ -806,12 +896,14 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               </div>
               <h1 className="ar-title" itemProp="headline">{article.title}</h1>
               <div className="ar-byline-row">
-                <p
-                  className="ar-byline"
-                  style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                  onClick={() => navigate(`/authors/${article.authors?.slug || "shravan-mutha"}`)}
-                >
-                  By <span style={{ textDecoration: 'underline' }}>{article.authors?.name || article?.author || "Shravan Mutha"}</span>
+                <p className="ar-byline">
+                  By{" "}
+                  <span
+                    className="ar-byline-author-name"
+                    onClick={() => navigate(`/authors/${article.authors?.slug || "shravan-mutha"}`)}
+                  >
+                    {article.authors?.name || article?.author || "Shravan Mutha"}
+                  </span>
                 </p>
                 {article.reviewer && (
                   <div
@@ -830,7 +922,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
             </header>
 
             {article.image_url && (
-              <div className="ar-image-wrap" style={{ minHeight: "240px", background: "#f1f5f9", borderRadius: "12px", overflow: "hidden" }}>
+              <div className="ar-image-wrap">
                 <img
                   src={article.image_url}
                   alt={article.title}
@@ -878,16 +970,58 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                     </figure>
                   );
                 }
+                if (block.isDisclaimer) {
+                  return (
+                    <div
+                      key={`${article.id || article.title}-${block.id}`}
+                      id={block.id}
+                      className="ar-disclaimer-box"
+                    >
+                      <span className="ar-disclaimer-badge">Disclaimer</span>
+                      <p className="ar-disclaimer-text">
+                        {renderTextWithLinksAndImages(cleanDisclaimerText(block.text), setLightboxImage)}
+                      </p>
+                    </div>
+                  );
+                }
+                if (block.isBullet) {
+                  return (
+                    <div
+                      key={`${article.id || article.title}-${block.id}`}
+                      id={block.id}
+                      className="ar-list-item"
+                    >
+                      <span className="ar-bullet-dot" aria-hidden="true" />
+                      <div className="ar-list-content">
+                        {renderTextWithLinksAndImages(block.text, setLightboxImage)}
+                      </div>
+                    </div>
+                  );
+                }
+                if (block.isNumbered) {
+                  return (
+                    <div
+                      key={`${article.id || article.title}-${block.id}`}
+                      id={block.id}
+                      className="ar-list-item ar-numbered-item"
+                    >
+                      <span className="ar-number-badge">{block.itemNumber}</span>
+                      <div className="ar-list-content">
+                        {renderTextWithLinksAndImages(block.text, setLightboxImage)}
+                      </div>
+                    </div>
+                  );
+                }
                 if (block.level === 2) {
                   return (
-                    <h2 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h2" style={{ scrollMarginTop: '100px' }}>
+                    <h2 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h2">
                       {renderTextWithLinksAndImages(block.text, setLightboxImage)}
                     </h2>
                   );
                 }
                 if (block.level === 3) {
                   return (
-                    <h3 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h3" style={{ scrollMarginTop: '100px' }}>
+                    <h3 key={`${article.id || article.title}-${block.id}`} id={block.id} className="ar-h3">
                       {renderTextWithLinksAndImages(block.text, setLightboxImage)}
                     </h3>
                   );

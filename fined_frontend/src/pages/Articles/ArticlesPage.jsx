@@ -1,13 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchArticles } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
-import { IoSparkles } from "react-icons/io5";
+import { 
+  IoSparkles, 
+  IoSearchOutline, 
+  IoCloseCircleOutline,
+  IoArrowForward,
+  IoArrowBack,
+  IoCheckmarkCircle
+} from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
+import "./ArticlesPage.css";
 
-const ARTICLES_PER_PAGE = 30;
+const ARTICLES_PER_PAGE = 9;
 
 function formatDate(date) {
   if (!date) return "";
@@ -26,63 +34,53 @@ const generateSlug = (title) => {
     .replace(/(^-|-$)+/g, '');
 };
 
+const CATEGORIES = ["All", "Deep Dives", "Personal Finance", "IPO", "Economy", "Investing"];
+
 function ArticlesPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
-  const categories = ["All", "Deep Dives", "Personal Finance", "IPO", "Economy", "Investing"];
+  const [searchQuery, setSearchQuery] = useState("");
   const [articles, setArticles] = useState([]);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [fetchingArticle, setFetchingArticle] = useState(false);
   const [error, setError] = useState("");
-  const carouselRef = useRef(null);
-  const loaderRef = useRef(null);
-  const loadingRef = useRef(false);
-
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(false);
+  const exploreSectionRef = useRef(null);
 
   useEffect(() => {
-    const lenis = new Lenis()
+    const lenis = new Lenis();
     function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf)
+    requestAnimationFrame(raf);
     return () => {
-      lenis.destroy()
-    }
-  }, [])
+      lenis.destroy();
+    };
+  }, []);
 
-  const loadArticles = async (nextOffset = 0, append = false) => {
-    if (loadingRef.current || (!hasMore && append)) return;
-    loadingRef.current = true;
+  const loadArticles = async () => {
     setFetchingArticle(true);
     setError("");
     try {
-      const limit = nextOffset === 0 ? 37 : ARTICLES_PER_PAGE;
       let incoming = [];
       try {
-        const data = await fetchArticles({ limit, offset: nextOffset });
+        const data = await fetchArticles({ limit: 100, offset: 0 });
         incoming = Array.isArray(data) ? data : data.articles || [];
       } catch (err) {
         console.warn("Could not fetch articles from server, using local fallback", err);
       }
 
       // Ensure ETF demo article is available as fallback or appended
-      if (!append && incoming.length === 0) {
+      if (incoming.length === 0) {
         incoming = [ETF_DEMO_ARTICLE];
-      } else if (!append && !incoming.some((a) => (a.slug || "").includes("etf") || (a.title || "").toLowerCase().includes("etf"))) {
+      } else if (!incoming.some((a) => (a.slug || "").includes("etf") || (a.title || "").toLowerCase().includes("etf"))) {
         incoming = [...incoming, ETF_DEMO_ARTICLE];
       }
 
-      setArticles((prev) => (append ? [...prev, ...incoming] : incoming));
-      setOffset(nextOffset + incoming.length);
-      setHasMore(incoming.length === limit);
+      setArticles(incoming);
     } catch (err) {
       setError(err.message || "Failed to load articles.");
     } finally {
-      loadingRef.current = false;
       setFetchingArticle(false);
     }
   };
@@ -93,43 +91,13 @@ function ArticlesPage() {
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-    loadArticles(0, false);
+    loadArticles();
   }, []);
 
-
-  const checkScroll = () => {
-    const el = carouselRef.current;
-    if (!el) return;
-    setCanScrollUp(el.scrollTop > 4);
-    setCanScrollDown(el.scrollTop < el.scrollHeight - el.clientHeight - 4);
-  };
-
+  // Reset page to 1 whenever category or search query changes
   useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", checkScroll);
-    const ro = new ResizeObserver(checkScroll);
-    ro.observe(el);
-    checkScroll();
-    return () => {
-      el.removeEventListener("scroll", checkScroll);
-      ro.disconnect();
-    };
-  }, [articles]);
-
-  useEffect(() => {
-    if (!loaderRef.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loadingRef.current && hasMore) {
-          loadArticles(offset, true);
-        }
-      },
-      { threshold: 1 }
-    );
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [articles, hasMore, offset]);
+    setCurrentPage(1);
+  }, [activeCategory, searchQuery]);
 
   const openArticle = (article) => {
     if (!article) return;
@@ -137,414 +105,567 @@ function ArticlesPage() {
     navigate(`/articles/${targetSlug}`);
   };
 
-  const scrollUp = () => {
-    carouselRef.current?.scrollBy({ top: -300, behavior: "smooth" });
+  // Dynamic counts per category
+  const categoryCounts = useMemo(() => {
+    const counts = { All: articles.length };
+    CATEGORIES.forEach((cat) => {
+      if (cat !== "All") {
+        counts[cat] = articles.filter((a) => (a.tag || "").toLowerCase() === cat.toLowerCase()).length;
+      }
+    });
+    return counts;
+  }, [articles]);
+
+  // Filtered articles list based on active category & search query
+  const filteredArticles = useMemo(() => {
+    let result = articles;
+    if (activeCategory !== "All") {
+      result = result.filter(
+        (a) => (a.tag || "").toLowerCase() === activeCategory.toLowerCase()
+      );
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (a) =>
+          (a.title || "").toLowerCase().includes(q) ||
+          (a.description || "").toLowerCase().includes(q) ||
+          (a.tag || "").toLowerCase().includes(q) ||
+          (a.author || "").toLowerCase().includes(q) ||
+          (a.authors?.name || "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [articles, activeCategory, searchQuery]);
+
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE));
+  const paginatedArticles = useMemo(() => {
+    const start = (currentPage - 1) * ARTICLES_PER_PAGE;
+    return filteredArticles.slice(start, start + ARTICLES_PER_PAGE);
+  }, [filteredArticles, currentPage]);
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    setCurrentPage(page);
+    if (exploreSectionRef.current) {
+      exploreSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
-  const scrollDown = () => {
-    carouselRef.current?.scrollBy({ top: 300, behavior: "smooth" });
-  };
-
-  // Calculate filtered articles
-  const exploreArticles = activeCategory === "All"
-    ? articles
-    : articles.filter(article => article.tag === activeCategory);
-
-  const latestArticle = articles[0] || ETF_DEMO_ARTICLE;
+  // Lead featured story and trending top picks
+  const leadArticle = articles[0] || ETF_DEMO_ARTICLE;
+  const trendingArticles = articles.slice(1, 5);
 
   return (
     <div className="ap-root">
 
-      {/* HERO STRIP */}
-      <RevealOnScroll>
-        <div className="ap-hero-strip">
-          <h1 className="ap-headline">Articles</h1>
-          <p className="ap-sub">Fresh financial explainers, backed by real research.</p>
-        </div>
-      </RevealOnScroll>
+      {/* ── PUBLICATION MASTHEAD & SEARCH BAR ── */}
+      <section className="ap-masthead-section">
+        <div className="ap-container">
+          <RevealOnScroll>
+            <div className="ap-masthead-header">
+              <div className="ap-masthead-text">
+                <span className="ap-eyebrow-tag">FINANCIAL KNOWLEDGE HUB</span>
+                <h1 className="ap-main-title">Articles & Insights</h1>
+                <p className="ap-main-subtitle">
+                  Clear, research-backed financial explainers, deep dives, and market perspectives.
+                </p>
+              </div>
 
-      {/* PERSONAL LENS SPOTLIGHT BANNER */}
-      <RevealOnScroll>
-        <div
-          style={{
-            background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-            borderRadius: "20px",
-            padding: "24px 28px",
-            margin: "0 auto 36px auto",
-            maxWidth: "1280px",
-            color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "20px",
-            flexWrap: "wrap",
-            boxShadow: "0 10px 30px -5px rgba(79, 70, 229, 0.3)",
-            position: "relative",
-            overflow: "hidden"
-          }}
-          className="ap-spotlight-banner"
-        >
-          <div style={{ maxWidth: "720px", zIndex: 2 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
-              <IoSparkles size={12} />
-              <span>Personal Lens AI</span>
+              {/* Real-time search box */}
+              <div className="ap-search-wrapper">
+                <div className="ap-search-input-box">
+                  <IoSearchOutline className="ap-search-icon" size={18} />
+                  <input
+                    type="text"
+                    className="ap-search-input"
+                    placeholder="Search articles or topics..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Search articles"
+                  />
+                  {searchQuery && (
+                    <button
+                      className="ap-search-clear"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
+                    >
+                      <IoCloseCircleOutline size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <h2 style={{ fontSize: "22px", fontWeight: "800", margin: "0 0 6px 0", color: "#ffffff" }}>
-              FinEd Personal Lens - Your AI Pre-Reading Coach
-            </h2>
-            <p style={{ fontSize: "14px", opacity: "0.9", margin: "0", lineHeight: "1.5" }}>
-              Answer 4 quick questions (~20s) inside any article to get personalized analogies, priority sections, and plain-English takeaways tailored to your exact experience level.
-            </p>
-          </div>
-          <button
-            onClick={() => openArticle(latestArticle)}
-            style={{
-              background: "#ffffff",
-              color: "#4f46e5",
-              border: "none",
-              borderRadius: "12px",
-              padding: "12px 22px",
-              fontSize: "14px",
-              fontWeight: "700",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-              zIndex: 2,
-              transition: "transform 0.2s"
-            }}
-          >
-            <span>Try on Latest Article</span>
-            <span>→</span>
-          </button>
+          </RevealOnScroll>
         </div>
-      </RevealOnScroll>
+      </section>
 
+      {/* ── PERSONAL LENS SPOTLIGHT BANNER ── */}
+      <section className="ap-spotlight-section">
+        <div className="ap-container">
+          <RevealOnScroll>
+            <div className="ap-spotlight-banner">
+              <div className="ap-spotlight-content">
+                <div className="ap-spotlight-tag">
+                  <IoSparkles size={11} color="#FFB600" />
+                  <span>Personal Lens AI</span>
+                </div>
+                <h2 className="ap-spotlight-title">
+                  FinEd Personal Lens — Your AI Pre-Reading Coach
+                </h2>
+                <p className="ap-spotlight-desc">
+                  Answer 4 quick questions (~20s) inside any article to get personalized analogies, priority sections, and plain-English takeaways tailored to your experience level.
+                </p>
+              </div>
+              <button
+                onClick={() => openArticle(leadArticle)}
+                className="ap-spotlight-btn"
+              >
+                <span>Try on Latest Article</span>
+                <IoArrowForward size={14} />
+              </button>
+            </div>
+          </RevealOnScroll>
+        </div>
+      </section>
 
-      {error && <div className="ap-error">{error}</div>}
+      {error && (
+        <div className="ap-container">
+          <div className="ap-error">{error}</div>
+        </div>
+      )}
 
+      {/* Loading Skeletons */}
       {articles.length === 0 && fetchingArticle && (
-        <div className="ap-skeleton-wrap">
-          <div className="ap-skeleton-featured" />
-          <div className="ap-skeleton-list">
-            {[1, 2, 3, 4].map((i) => <div key={i} className="ap-skeleton-row" />)}
+        <div className="ap-container">
+          <div className="ap-skeleton-hero">
+            <div className="ap-skeleton-featured" />
+            <div className="ap-skeleton-list">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="ap-skeleton-row" />
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {articles.length > 0 && (
-        <>
-          <div className="ap-body">
-            {/* FEATURED CARD COLUMN */}
-            <div>
-              <h2 style={{ margin: '0 0 16px 0', fontSize: '24px', fontWeight: 'bold' }}>
-                Today's Article
-              </h2>
-              <RevealOnScroll delay={100}>
-                <div
-                  className="ap-featured"
-                  onClick={() => openArticle(articles[0])}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && openArticle(articles[0])}
-                >
-                  <div className="ap-featured-img-wrap">
-                    {articles[0]?.image_url ? (
-                      <img
-                        src={articles[0].image_url}
-                        alt={articles[0].title}
-                        className="ap-featured-img"
-                        loading="eager"
-                        onLoad={checkScroll}
-                      />
-                    ) : (
-                      <div className="ap-featured-img-placeholder" />
-                    )}
+      {/* ── FEATURED HERO SECTION ── */}
+      {!searchQuery.trim() && articles.length > 0 && (
+        <section className="ap-hero-section">
+          <div className="ap-container">
+            <div className="ap-hero-grid">
 
-                  </div>
-                  <div className="ap-featured-body">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <span
-                        className="ap-grid-category"
-                        style={{ margin: 0, cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (articles[0]?.tag) navigate(`/tags/${generateSlug(articles[0].tag)}`);
-                        }}
-                      >
-                        {articles[0]?.tag?.toUpperCase()}
-                      </span>
-                      {hasAiLens(articles[0]) && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#eef2ff', color: '#4f46e5', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>
-                          <IoSparkles size={10} /> AI Lens Ready
+              {/* Lead Feature Story Column */}
+              <div className="ap-lead-col">
+                <div className="ap-section-label-row">
+                  <span className="ap-section-kicker">FEATURE STORY</span>
+                  <span className="ap-section-dot" />
+                  <span className="ap-section-meta">Today's Top Pick</span>
+                </div>
+
+                <RevealOnScroll delay={100}>
+                  <article
+                    className="ap-lead-card"
+                    onClick={() => openArticle(leadArticle)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === "Enter" && openArticle(leadArticle)}
+                  >
+                    <div className="ap-lead-img-wrap">
+                      {leadArticle.image_url ? (
+                        <img
+                          src={leadArticle.image_url}
+                          alt={leadArticle.title}
+                          className="ap-lead-img"
+                          loading="eager"
+                        />
+                      ) : (
+                        <div className="ap-lead-img-placeholder" />
+                      )}
+                      {leadArticle.tag && (
+                        <span
+                          className="ap-floating-tag"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/tags/${generateSlug(leadArticle.tag)}`);
+                          }}
+                        >
+                          {leadArticle.tag.toUpperCase()}
                         </span>
                       )}
                     </div>
-                    <h2 className="ap-featured-title">{articles[0]?.title || ""}</h2>
-                    <p className="ap-featured-excerpt">
-                      {articles[0]?.description || ""}
-                    </p>
-                    <p className="ap-featured-date" style={{ marginTop: '16px' }}>{formatDate(articles[0]?.published_at || articles[0]?.created_at)}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px 16px', marginTop: '6px' }}>
-                      {articles[0]?.authors ? (
-                        <p
-                          className="ap-featured-date"
-                          style={{ margin: 0, cursor: 'pointer', color: '#0ea5e9' }}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${articles[0].authors.slug}`); }}
-                        >
-                          By <span style={{ textDecoration: 'underline' }}>{articles[0].authors.name}</span>
-                        </p>
-                      ) : (
-                        <p
-                          className="ap-featured-date"
-                          style={{ margin: 0, cursor: 'pointer', color: '#0ea5e9' }}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
-                        >
-                          By <span style={{ textDecoration: 'underline' }}>{articles[0]?.author || "Shravan Mutha"}</span>
-                        </p>
+
+                    <div className="ap-lead-body">
+                      {hasAiLens(leadArticle) && (
+                        <div className="ap-lead-badges">
+                          <span className="ap-lens-pill">
+                            <IoSparkles size={10} color="#FFB600" /> AI Lens Ready
+                          </span>
+                        </div>
                       )}
-                      {articles[0]?.reviewer && (
-                        <p
-                          className="ap-featured-date"
-                          style={{ margin: 0, cursor: 'pointer', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${articles[0].reviewer.slug}`); }}
-                        >
-                          <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span> Reviewed by <span style={{ textDecoration: 'underline' }}>{articles[0].reviewer.name}</span>
-                        </p>
-                      )}
+
+                      <h2 className="ap-lead-title">{leadArticle.title}</h2>
+                      <p className="ap-lead-excerpt">{leadArticle.description}</p>
+
+                      {/* Footer: Date on Left, Author & Reviewer on Right */}
+                      <div className="ap-lead-footer">
+                        <span className="ap-date">
+                          {formatDate(leadArticle.published_at || leadArticle.created_at)}
+                        </span>
+
+                        <div className="ap-lead-authors-col">
+                          {leadArticle.authors ? (
+                            <span
+                              className="ap-author-name"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/authors/${leadArticle.authors.slug}`);
+                              }}
+                            >
+                              By {leadArticle.authors.name}
+                            </span>
+                          ) : (
+                            <span
+                              className="ap-author-name"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/authors/shravan-mutha`);
+                              }}
+                            >
+                              By {leadArticle.author || "Shravan Mutha"}
+                            </span>
+                          )}
+
+                          {leadArticle.reviewer && (
+                            <span
+                              className="ap-reviewer-tag"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/authors/${leadArticle.reviewer.slug}`);
+                              }}
+                            >
+                              <IoCheckmarkCircle size={12} color="#4100BC" />
+                              <span>Reviewed by {leadArticle.reviewer.name}</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-
-                  </div>
-                </div>
-              </RevealOnScroll>
-            </div>
-
-            {/* SCROLLABLE LIST */}
-            <div className="ap-side-wrap">
-
-              {/* New Right-Side Title with Arrows */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ margin: '0 0 16px 0', fontSize: '24px', fontWeight: 'bold', marginLeft: "16px" }}>
-                  Featured Articles
-                </h2>
-
-                {/* We override the absolute positioning of the arrows so they sit nicely next to the title */}
-                {/* <div className="ap-scroll-arrows" style={{ position: 'static' }}>
-                  <button
-                    className={`ap-arrow ${canScrollUp ? "active" : ""}`}
-                    onClick={scrollUp}
-                    disabled={!canScrollUp}
-                    aria-label="Scroll up"
-                  >❮</button>
-                  <button
-                    className={`ap-arrow ${canScrollDown ? "active" : ""}`}
-                    onClick={scrollDown}
-                    disabled={!canScrollDown}
-                    aria-label="Scroll down"
-                  >❯</button>
-                </div> */}
+                  </article>
+                </RevealOnScroll>
               </div>
 
-              {/* FIX: ADDED EXTRA <div> HERE SO REVEALONSCROLL DOESN'T STEAL CAROUSEL REF */}
-              <RevealOnScroll delay={200}>
-                <div>
-                  <div className="ap-carousel" ref={carouselRef}>
-                    {articles.slice(1, 5).map((article, idx) => (
-                      <div
-                        key={article.id}
+              {/* Trending Stories Side Column (140px 4:3 Image Thumbnails) */}
+              <div className="ap-trending-col">
+                <div className="ap-section-label-row">
+                  <span className="ap-section-kicker">TRENDING</span>
+                  <span className="ap-section-dot" />
+                  <span className="ap-section-meta">Featured Articles</span>
+                </div>
+
+                <div className="ap-trending-stack">
+                  {trendingArticles.map((article, idx) => (
+                    <RevealOnScroll key={article.id} delay={150 + idx * 50}>
+                      <article
                         className="ap-row"
                         onClick={() => openArticle(article)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
                       >
+                        <div className="ap-row-img-wrap">
+                          {article.image_url ? (
+                            <img
+                              src={article.image_url}
+                              alt={article.title}
+                              className="ap-row-img"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="ap-row-img-placeholder" />
+                          )}
+                        </div>
+
+                        <div className="ap-row-body">
+                          <div className="ap-row-top-meta">
+                            <div className="ap-row-tag-group">
+                              {article.tag && (
+                                <span
+                                  className="ap-category-tag-link"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/tags/${generateSlug(article.tag)}`);
+                                  }}
+                                >
+                                  {article.tag.toUpperCase()}
+                                </span>
+                              )}
+                              {hasAiLens(article) && (
+                                <span className="ap-lens-pill-mini">
+                                  <IoSparkles size={9} color="#FFB600" /> Lens
+                                </span>
+                              )}
+                            </div>
+                            <span className="ap-row-date">
+                              {formatDate(article.published_at || article.created_at)}
+                            </span>
+                          </div>
+
+                          <h3 className="ap-row-title">{article.title}</h3>
+                          
+                          {article.description && (
+                            <p className="ap-row-excerpt">{article.description}</p>
+                          )}
+
+                          <div className="ap-row-footer">
+                            <span
+                              className="ap-author-link"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (article.authors?.slug) {
+                                  navigate(`/authors/${article.authors.slug}`);
+                                } else {
+                                  navigate(`/authors/shravan-mutha`);
+                                }
+                              }}
+                            >
+                              By {article.authors?.name || article.author || "Shravan Mutha"}
+                            </span>
+                          </div>
+                        </div>
+                      </article>
+                    </RevealOnScroll>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── EXPLORE ARTICLES & CATEGORY FILTER SECTION ── */}
+      <section className="ap-explore-section" ref={exploreSectionRef}>
+        <div className="ap-container">
+          
+          <div className="ap-filter-header">
+            <div className="ap-filter-title-group">
+              <h2 className="ap-explore-heading">
+                {searchQuery.trim() ? `Search Results (${filteredArticles.length})` : "Explore All Articles"}
+              </h2>
+              <p className="ap-explore-sub">
+                {searchQuery.trim()
+                  ? `Showing articles matching "${searchQuery}"`
+                  : "Browse by financial category or dive into our full library."}
+              </p>
+            </div>
+
+            {/* Category Filter Toggles (White active toggle) */}
+            <div className="ap-filter-nav" role="tablist">
+              {CATEGORIES.map((cat) => {
+                const count = categoryCounts[cat] || 0;
+                const isActive = activeCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`ap-filter-btn ${isActive ? "active" : ""}`}
+                    onClick={() => setActiveCategory(cat)}
+                  >
+                    <span>{cat}</span>
+                    <span className="ap-btn-count">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3-Column Editorial Grid */}
+          {paginatedArticles.length > 0 ? (
+            <>
+              <div className="ap-articles-grid">
+                {paginatedArticles.map((article, idx) => (
+                  <RevealOnScroll key={article.id} delay={100 + (idx % 3) * 60}>
+                    <article
+                      className="ap-grid-card"
+                      onClick={() => openArticle(article)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === "Enter" && openArticle(article)}
+                    >
+                      {/* 4:3 Aspect Ratio Image Wrap */}
+                      <div className="ap-grid-img-wrap">
                         {article.image_url ? (
                           <img
                             src={article.image_url}
                             alt={article.title}
-                            className="ap-row-img"
+                            className="ap-grid-img"
                             loading="lazy"
                           />
                         ) : (
-                          <div className="ap-row-img-placeholder" />
+                          <div className="ap-grid-img-placeholder" />
                         )}
-
-                        <div className="ap-row-body">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <p className="ap-row-date" style={{ margin: 0, fontSize: '12px' }}>{formatDate(article.published_at || article.created_at)}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span
-                                className="ap-grid-category"
-                                style={{ margin: 0, fontSize: '11px', cursor: 'pointer' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                                }}
-                              >
-                                {article.tag?.toUpperCase()}
-                              </span>
-                              {hasAiLens(article) && (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
-                                  <IoSparkles size={9} /> Lens
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <h3 className="ap-row-title" style={{ fontSize: '18px', WebkitLineClamp: 2, margin: '4px 0' }}>{article.title}</h3>
-                          {article.description && (
-                            <p className="ap-row-excerpt" style={{ fontSize: '13px', color: '#6b7280', WebkitLineClamp: 2, marginTop: '2px', lineHeight: 1.2 }}>
-                              {article.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </RevealOnScroll>
-
-              <div ref={loaderRef} className="ap-sentinel" />
-
-              {fetchingArticle && (
-                <p className="ap-loading-more">Loading more articles...</p>
-              )}
-
-            </div>
-          </div>
-
-          {/* EXPLORE ARTICLES SECTION */}
-          <div className="ap-explore-section" style={{ width: 'min(1180px, calc(100% - 32px))', margin: '0 auto' }}>
-            <div className="ap-explore-header">
-              <h2 className="exp-ar-button" style={{
-                fontSize: "34px", fontWeight: "bolder", marginLeft: "0px"
-              }}>Explore Articles</h2>
-
-              <p className="mobile-swipe-hint">Swipe to see more tags ➔</p>
-
-              <div className="ap-mini-navbar">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    className={`ap-category-btn ${activeCategory === cat ? "active" : ""}`}
-                    onClick={() => setActiveCategory(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="ap-articles-grid">
-              {exploreArticles.map((article, idx) => (
-                <RevealOnScroll key={article.id} delay={100 + (idx % 4) * 50}>
-                  <div
-                    className="ap-grid-card"
-                    onClick={() => openArticle(article)}
-                  >
-                    {/* Image Section */}
-                    <div className="ap-grid-card-img-wrap">
-                      {article.image_url ? (
-                        <img
-                          src={article.image_url}
-                          alt={article.title}
-                          className="ap-grid-card-img"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="ap-grid-card-img-placeholder" />
-                      )}
-                    </div>
-
-                    {/* Text Section */}
-                    <div className="ap-grid-card-content">
-
-                      {/* Category & Lens Tag */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                        <span
-                          className="ap-grid-category"
-                          style={{ margin: 0, cursor: 'pointer' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (article.tag) navigate(`/tags/${generateSlug(article.tag)}`);
-                          }}
-                        >
-                          {article.tag?.toUpperCase()}
-                        </span>
-                        {hasAiLens(article) && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
-                            <IoSparkles size={9} /> AI Lens
+                        {article.tag && (
+                          <span
+                            className="ap-grid-card-tag"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/tags/${generateSlug(article.tag)}`);
+                            }}
+                          >
+                            {article.tag.toUpperCase()}
                           </span>
                         )}
                       </div>
 
-                      {/* Title */}
-                      <h3 className="ap-grid-title">{article.title}</h3>
+                      <div className="ap-grid-card-content">
+                        {hasAiLens(article) && (
+                          <div className="ap-grid-card-top-meta">
+                            <span className="ap-lens-pill-mini">
+                              <IoSparkles size={9} color="#FFB600" /> AI Lens
+                            </span>
+                          </div>
+                        )}
 
-                      {/* Excerpt */}
-                      <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                        {article.description || ""}
-                      </p>
+                        <h3 className="ap-grid-title">{article.title}</h3>
+                        <p className="ap-grid-excerpt">{article.description}</p>
 
-                      {/* Author, Date & Reviewer */}
-                      {article.reviewer ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {/* Footer: Date on left, Author & Reviewer right aligned */}
+                        <div className="ap-grid-footer">
+                          <span className="ap-card-date">
+                            {formatDate(article.published_at || article.created_at)}
+                          </span>
+
+                          <div className="ap-grid-authors-col">
                             {article.authors ? (
                               <span
-                                style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
-                                onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
+                                className="ap-author-link"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/authors/${article.authors.slug}`);
+                                }}
                               >
-                                By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
+                                By {article.authors.name}
                               </span>
                             ) : (
                               <span
-                                style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
-                                onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
+                                className="ap-author-link"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/authors/shravan-mutha`);
+                                }}
                               >
-                                By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
+                                By {article.author || "Shravan Mutha"}
+                              </span>
+                            )}
+
+                            {article.reviewer && (
+                              <span
+                                className="ap-reviewer-pill"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/authors/${article.reviewer.slug}`);
+                                }}
+                              >
+                                <IoCheckmarkCircle size={12} color="#4100BC" />
+                                <span>Reviewed by {article.reviewer.name}</span>
                               </span>
                             )}
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                            <span>{formatDate(article.published_at || article.created_at)}</span>
-                            <span
-                              style={{ cursor: 'pointer', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}
-                              onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.reviewer.slug}`); }}
-                            >
-                              <span style={{ color: '#16a34a', fontWeight: 'bold' }}>✓</span> Reviewed by <span style={{ textDecoration: 'underline' }}>{article.reviewer.name}</span>
-                            </span>
-                          </div>
                         </div>
-                      ) : (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                          <span style={{ fontSize: '12px' }}>{formatDate(article.published_at || article.created_at)}</span>
-                          {article.authors ? (
-                            <span
-                              style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
-                              onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
-                            >
-                              By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
-                            </span>
-                          ) : (
-                            <span
-                              style={{ cursor: 'pointer', color: '#0ea5e9', fontWeight: '500' }}
-                              onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
-                            >
-                              By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </RevealOnScroll>
-              ))}
-            </div>
+                      </div>
+                    </article>
+                  </RevealOnScroll>
+                ))}
+              </div>
 
-          </div>
-        </>
-      )}
+              {/* ── PAGINATION CONTROLS ── */}
+              {totalPages > 1 && (
+                <div className="ap-pagination-container">
+                  <div className="ap-pagination-info">
+                    Showing {(currentPage - 1) * ARTICLES_PER_PAGE + 1}–
+                    {Math.min(currentPage * ARTICLES_PER_PAGE, filteredArticles.length)} of {filteredArticles.length} articles
+                  </div>
+
+                  <div className="ap-pagination-bar">
+                    <button
+                      className="ap-page-nav-btn"
+                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      aria-label="Previous Page"
+                    >
+                      <IoArrowBack size={15} />
+                      <span>Previous</span>
+                    </button>
+
+                    <div className="ap-page-numbers">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={pageNum}
+                              className={`ap-page-btn ${pageNum === currentPage ? "active" : ""}`}
+                              onClick={() => handlePageChange(pageNum)}
+                              aria-current={pageNum === currentPage ? "page" : undefined}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        }
+                        if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                          return <span key={pageNum} className="ap-page-ellipsis">…</span>;
+                        }
+                        return null;
+                      })}
+                    </div>
+
+                    <button
+                      className="ap-page-nav-btn"
+                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      aria-label="Next Page"
+                    >
+                      <span>Next</span>
+                      <IoArrowForward size={15} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="ap-empty-state">
+              <div className="ap-empty-icon">🔍</div>
+              <h3 className="ap-empty-title">No articles found</h3>
+              <p className="ap-empty-desc">
+                We couldn't find any articles matching "{searchQuery}" in {activeCategory}.
+              </p>
+              <button
+                className="ap-reset-btn"
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveCategory("All");
+                }}
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
+
+          {fetchingArticle && (
+            <div className="ap-loading-wrap">
+              <span className="ap-loading-pulse" />
+              <p className="ap-loading-text">Loading research & articles...</p>
+            </div>
+          )}
+
+        </div>
+      </section>
 
     </div>
   );

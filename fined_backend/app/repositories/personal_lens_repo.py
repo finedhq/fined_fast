@@ -73,33 +73,34 @@ class PersonalLensRepository:
         """
         Fetch questionnaire definitions for an article from Supabase.
         Supports:
-        1. Embedded questions inside `articles.metadata->'questions'` JSONB.
-        2. Rows in `article_questions` table linked by article UUID.
+        1. Rows in `article_questions` table linked by article UUID (primary).
+        2. Fallback to embedded questions inside `articles.metadata->'questions'` JSONB if table has no rows.
         """
         try:
             # 1. Resolve article by UUID or slug
             article = self.get_article_metadata(article_id)
             uuid_id = str(article.get("id")) if article and article.get("id") else None
 
-            # 2. Check if questions are stored directly in articles.metadata JSON
+            # 2. Query article_questions table using the resolved UUID
+            target_id = uuid_id if is_valid_uuid(uuid_id) else (article_id if is_valid_uuid(article_id) else None)
+            if target_id:
+                res = (
+                    supabase.from_("article_questions")
+                    .select("id, question, options, display_order")
+                    .eq("article_id", target_id)
+                    .order("display_order", desc=False)
+                    .execute()
+                )
+                if res and res.data and len(res.data) > 0:
+                    return res.data
+
+            # 3. Fallback: Check if questions are stored directly in legacy articles.metadata JSON
             if article and article.get("metadata") and isinstance(article["metadata"], dict):
                 meta_questions = article["metadata"].get("questions")
                 if meta_questions and isinstance(meta_questions, list) and len(meta_questions) > 0:
                     return meta_questions
 
-            # 3. Query article_questions table using the resolved UUID
-            target_id = uuid_id if is_valid_uuid(uuid_id) else (article_id if is_valid_uuid(article_id) else None)
-            if not target_id:
-                return []
-
-            res = (
-                supabase.from_("article_questions")
-                .select("id, question, options, display_order")
-                .eq("article_id", target_id)
-                .order("display_order", desc=False)
-                .execute()
-            )
-            return res.data or []
+            return []
         except Exception as e:
             logger.warning(f"Failed to fetch article questions: {e}")
             return []
@@ -113,7 +114,7 @@ class PersonalLensRepository:
         try:
             import json
             # Delete existing questions if replacing
-            supabase.from_("article_questions").delete().eq("article_id", article_id).execute()
+            supabase.from_("article_questions").delete().eq("article_id", str(article_id)).execute()
             
             rows = []
             for i, q in enumerate(questions):
@@ -136,7 +137,7 @@ class PersonalLensRepository:
                     display_order = i + 1
 
                 rows.append({
-                    "article_id": article_id,
+                    "article_id": str(article_id),
                     "question": q_text,
                     "options": options_val,
                     "display_order": display_order
@@ -144,9 +145,10 @@ class PersonalLensRepository:
             
             if rows:
                 supabase.from_("article_questions").insert(rows).execute()
+                logger.info(f"Successfully saved {len(rows)} questions into article_questions table for article {article_id}")
             return True
         except Exception as e:
-            logger.warning(f"Failed to save article questions: {e}")
+            logger.error(f"Failed to save article questions into article_questions table: {e}", exc_info=True)
             return False
 
 

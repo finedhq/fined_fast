@@ -1,11 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import instance from "../../lib/axios";
-import toast from "react-hot-toast";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import {
+  IoLayersOutline,
+  IoArrowForward
+} from "react-icons/io5";
 import SmartImage from "../../uiComponents/SmartImage";
 import RevealOnScroll from "../../components/RevealOnScroll";
-
+import "./Courses.css";
 
 export default function Courses() {
   const navigate = useNavigate();
@@ -19,14 +22,7 @@ export default function Courses() {
   const [error, setError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const coursesPerPage = 8;
-  const currentCourses = courses.slice(
-    (currentPage - 1) * coursesPerPage,
-    currentPage * coursesPerPage
-  );
-  const totalPages = Math.ceil(courses.length / coursesPerPage);
-
-  const carouselRef = useRef(null);
+  const coursesPerPage = 9;
 
   useEffect(() => {
     if (isLoading) return;
@@ -60,7 +56,7 @@ export default function Courses() {
         setOngoingCourse(res.data);
       }
     } catch (err) {
-      setWarning("Failed to load ongoing course.");
+      console.warn("Could not fetch ongoing course:", err);
     } finally {
       setIsFetchingOngoing(false);
     }
@@ -78,167 +74,213 @@ export default function Courses() {
 
   const targetCourse = ongoingCourse?.id
     ? ongoingCourse
-    : courses[courses.length - 1];
+    : courses.length > 0
+    ? courses[0]
+    : null;
+
+  const totalPages = Math.ceil(courses.length / coursesPerPage) || 1;
+  const currentCourses = useMemo(() => {
+    return courses.slice(
+      (currentPage - 1) * coursesPerPage,
+      currentPage * coursesPerPage
+    );
+  }, [courses, currentPage, coursesPerPage]);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans w-full flex flex-col items-center">
-      <main className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 flex-1 flex flex-col">
-        {loading ? (
-          <div className="w-full space-y-12 animate-pulse">
-            <div>
-              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 w-full max-w-3xl h-48 flex gap-6 shadow-sm">
-                <div className="w-1/3 bg-gray-200 rounded-xl h-full"></div>
-                <div className="w-2/3 flex flex-col justify-center space-y-4">
-                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-10 bg-gray-200 rounded-full w-32 mt-4"></div>
-                </div>
+    <div className="courses-page-container">
+      <main className="courses-main-wrapper">
+        {/* ── HERO SECTION ── */}
+        <RevealOnScroll>
+          <section className="courses-hero-section">
+            <h1 className="courses-hero-title">
+              Master Finance in <span className="courses-hero-brand">15-Minute Lessons</span>
+            </h1>
+
+            <p className="courses-hero-subtitle">
+              Visual, gamified, and practical courses on investing, market mechanics, budgeting, and wealth building designed for everyday investors.
+            </p>
+
+            {/* Highlights Trust Strip */}
+            <div className="courses-highlights-strip">
+              <div className="courses-highlight-item">
+                <span className="courses-highlight-icon">⚡</span>
+                <span>100% Free &amp; Interactive</span>
+              </div>
+              <div className="courses-highlight-dot">•</div>
+              <div className="courses-highlight-item">
+                <span className="courses-highlight-icon">🏆</span>
+                <span>Gamified Scenarios</span>
+              </div>
+              <div className="courses-highlight-dot">•</div>
+              <div className="courses-highlight-item">
+                <span className="courses-highlight-icon">📜</span>
+                <span>Earn Certificates</span>
               </div>
             </div>
-            <div>
-              <div className="h-8 bg-gray-200 rounded w-64 mb-8"></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl border border-gray-200 h-80 flex flex-col overflow-hidden shadow-sm">
-                    <div className="h-44 bg-gray-200 w-full"></div>
-                    <div className="p-5 flex flex-col gap-3 flex-1">
-                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-6 bg-gray-200 rounded w-5/6"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full mt-auto"></div>
-                    </div>
-                  </div>
-                ))}
+          </section>
+        </RevealOnScroll>
+
+        {loading ? (
+          /* SKELETON LOADING STATE */
+          <div className="w-full flex flex-col gap-10">
+            <div className="courses-resume-card animate-pulse">
+              <div className="courses-skeleton-img" />
+              <div className="flex flex-col gap-4">
+                <div className="courses-skeleton-line h-6 w-1/3" />
+                <div className="courses-skeleton-line h-8 w-3/4" />
+                <div className="courses-skeleton-line h-4 w-full" />
+                <div className="courses-skeleton-line h-11 w-40 mt-2" />
               </div>
+            </div>
+
+            <div className="courses-cards-grid">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="courses-skeleton-card animate-pulse">
+                  <div className="courses-skeleton-img" />
+                  <div className="courses-skeleton-body">
+                    <div className="courses-skeleton-line h-4 w-1/3" />
+                    <div className="courses-skeleton-line h-6 w-5/6" />
+                    <div className="courses-skeleton-line h-4 w-full mt-auto" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ) : (
-          <div className="w-full flex flex-col gap-16">
-            {isAuthenticated && (
-              <section className="w-full flex flex-col gap-6">
-                <RevealOnScroll>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">
-                    Continue Learning
-                  </h2>
-                </RevealOnScroll>
-                
-                {isFetchingOngoing ? (
-                  <RevealOnScroll>
-                    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 w-full max-w-3xl h-48 flex gap-6 shadow-sm animate-pulse">
-                      <div className="w-1/3 bg-gray-200 rounded-xl h-full"></div>
-                      <div className="w-2/3 flex flex-col justify-center space-y-4">
-                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="w-full flex flex-col gap-14">
+            {/* ── CONTINUE LEARNING RESUME CARD (When logged in or course active) ── */}
+            {isAuthenticated && targetCourse && (
+              <RevealOnScroll>
+                <section className="courses-resume-section">
+                  <div className="courses-resume-card">
+                    <div className="courses-resume-image-wrap">
+                      <SmartImage
+                        src={targetCourse.thumbnail_url}
+                        alt={targetCourse.title}
+                        className="courses-resume-img"
+                        containerClassName="w-full h-full"
+                      />
+                      <div className="courses-resume-badge">
+                        <span className="courses-pulse-dot" />
+                        <span>{ongoingCourse?.id ? "In Progress" : "Recommended for You"}</span>
                       </div>
                     </div>
-                  </RevealOnScroll>
-                ) : targetCourse ? (
-                  <RevealOnScroll>
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4 sm:p-5 w-full max-w-4xl flex flex-col sm:flex-row gap-5 sm:gap-8 items-center">
-                      <div className="w-full sm:w-2/5 aspect-[4/3] rounded-xl overflow-hidden shrink-0 bg-gray-100">
-                        <SmartImage
-                          src={targetCourse.thumbnail_url}
-                          alt={targetCourse.title}
-                          className="w-full h-full object-cover"
-                          containerClassName="w-full h-full"
-                        />
+
+                    <div className="courses-resume-content">
+                      <div className="courses-resume-meta">
+                        <span className="courses-meta-chip">
+                          <IoLayersOutline /> {targetCourse.modules_count || 0} Modules
+                        </span>
                       </div>
-                      <div className="w-full sm:w-3/5 flex flex-col justify-center py-2">
-                        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium mb-2">
-                          <span>{targetCourse.modules_count} Modules</span>
-                          <span>&bull;</span>
-                          <span>{targetCourse.duration} mins</span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
-                          {targetCourse.title}
-                        </h3>
-                        <p className="text-gray-600 mb-6 line-clamp-2 text-sm sm:text-base leading-relaxed">
-                          {targetCourse.description}
-                        </p>
+
+                      <h2 className="courses-resume-title">
+                        {targetCourse.title}
+                      </h2>
+
+                      <p className="courses-resume-desc">
+                        {targetCourse.description || "Pick up right where you left off and master the next interactive concept."}
+                      </p>
+
+                      <div className="courses-resume-actions">
                         <button
+                          type="button"
                           onClick={() => navigate(`/courses/${targetCourse.slug || targetCourse.id}`)}
-                          className="self-start bg-amber-400 hover:bg-amber-500 text-white font-semibold py-2.5 px-6 rounded-full transition-colors active:scale-95"
+                          className="courses-primary-btn"
                         >
-                          {ongoingCourse?.id ? "Continue Course" : "Start Now"}
+                          <span>{ongoingCourse?.id ? "Continue Course" : "Start Learning Now"}</span>
+                          <IoArrowForward className="courses-btn-arrow" />
                         </button>
                       </div>
                     </div>
-                  </RevealOnScroll>
-                ) : (
-                  <RevealOnScroll>
-                    <div className="text-gray-500 italic">No courses available.</div>
-                  </RevealOnScroll>
-                )}
-              </section>
+                  </div>
+                </section>
+              </RevealOnScroll>
             )}
 
-            <section className="w-full flex flex-col gap-8">
-              <RevealOnScroll>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight">
-                  Recommended Courses
-                </h2>
-              </RevealOnScroll>
-              
-              <div ref={carouselRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-                {currentCourses.map((course, index) => (
-                  <RevealOnScroll key={course.id} delay={(index % 3) * 150}>
-                    <div className="h-full flex flex-col">
-                      <CourseCard
-                        course={course}
-                        isAuthenticated={isAuthenticated}
-                        navigate={navigate}
-                      />
-                    </div>
-                  </RevealOnScroll>
-                ))}
+            {/* ── COURSES GRID SECTION ── */}
+            <section className="courses-grid-section">
+              <div className="courses-grid-header">
+                <div>
+                  <h2 className="courses-section-title">
+                    Available Courses
+                  </h2>
+                  <p className="courses-section-subtitle">
+                    {courses.length} {courses.length === 1 ? "course" : "interactive courses"} available
+                  </p>
+                </div>
               </div>
 
-              
+              {courses.length === 0 ? (
+                /* EMPTY STATE */
+                <div className="courses-empty-state">
+                  <div className="courses-empty-icon">📚</div>
+                  <h3 className="courses-empty-title">No courses available yet</h3>
+                  <p className="courses-empty-desc">
+                    New interactive finance modules are being crafted. Check back shortly!
+                  </p>
+                </div>
+              ) : (
+                /* COURSE CARDS GRID */
+                <div className="courses-cards-grid">
+                  {currentCourses.map((course, index) => (
+                    <RevealOnScroll key={course.id || index} delay={(index % 3) * 100}>
+                      <CourseCard
+                        course={course}
+                        navigate={navigate}
+                      />
+                    </RevealOnScroll>
+                  ))}
+                </div>
+              )}
+
+              {/* ── PAGINATION ── */}
               {totalPages > 1 && (
-                <RevealOnScroll>
-                  <div className="flex justify-center items-center gap-3 mt-10">
+                <div className="courses-pagination">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage((p) => p - 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
+                    }}
+                    className="courses-page-nav-btn"
+                  >
+                    Previous
+                  </button>
+
+                  {[...Array(totalPages)].map((_, i) => (
                     <button
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((p) => p - 1)}
-                      className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setCurrentPage(i + 1);
+                        window.scrollTo({ top: 380, behavior: "smooth" });
+                      }}
+                      className={`courses-page-num-btn ${currentPage === i + 1 ? "active" : ""}`}
                     >
-                      Previous
+                      {i + 1}
                     </button>
-                    <div className="flex gap-2 hidden sm:flex">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`w-10 h-10 rounded-xl font-bold transition-colors ${
-                            currentPage === i + 1
-                              ? "bg-amber-400 text-white shadow-sm"
-                              : "border border-gray-200 text-gray-600 hover:bg-gray-100"
-                          }`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="sm:hidden font-medium text-gray-600">
-                      {currentPage} / {totalPages}
-                    </span>
-                    <button
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage((p) => p + 1)}
-                      className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </RevealOnScroll>
+                  ))}
+
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage((p) => p + 1);
+                      window.scrollTo({ top: 380, behavior: "smooth" });
+                    }}
+                    className="courses-page-nav-btn"
+                  >
+                    Next
+                  </button>
+                </div>
               )}
             </section>
-
           </div>
         )}
       </main>
 
-      {/* MODALS */}
+      {/* ERROR MODAL */}
       {(warning || error) && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-sm flex flex-col gap-4 transform transition-all">
@@ -246,7 +288,7 @@ export default function Courses() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <h3 className="text-xl font-bold">Alert</h3>
+              <h3 className="text-xl font-bold font-['Plus_Jakarta_Sans']">Notice</h3>
             </div>
             <p className="text-gray-700 font-medium">
               {warning || error}
@@ -259,7 +301,7 @@ export default function Courses() {
                   navigate("/");
                 }
               }}
-              className="mt-2 bg-amber-400 hover:bg-amber-500 text-white font-bold py-2.5 px-4 rounded-xl transition-colors w-full"
+              className="mt-2 bg-[#4100BC] hover:bg-[#2D007F] text-white font-bold py-2.5 px-4 rounded-xl transition-colors w-full"
             >
               Close
             </button>
@@ -270,39 +312,54 @@ export default function Courses() {
   );
 }
 
-function CourseCard({ course, isAuthenticated, navigate }) {
+function CourseCard({ course, navigate }) {
+  const courseSlug = course.slug || course.id;
+
   return (
     <div
-      onClick={() => {
-        navigate(`/courses/${course.slug || course.id}`);
-      }}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full h-full cursor-pointer flex flex-col overflow-hidden group"
+      onClick={() => navigate(`/courses/${courseSlug}`)}
+      className="course-card-modern group"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && navigate(`/courses/${courseSlug}`)}
     >
-      <div className="w-full aspect-[4/3] bg-gray-100 relative overflow-hidden shrink-0">
+      <div className="course-card-img-wrap">
         <SmartImage
           src={course.thumbnail_url}
           alt={course.title}
-          className="w-full h-full object-fill group-hover:scale-105 transition-transform duration-500"
+          className="course-card-img"
           containerClassName="w-full h-full"
         />
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300"></div>
       </div>
-      <div className="p-6 flex flex-col flex-1 bg-white justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+
+      <div className="course-card-body">
+        <div className="course-card-meta-row">
+          <span className="course-card-modules-badge">
+            <IoLayersOutline size={13} />
             <span>{course.modules_count || 0} Modules</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <span>{course.duration || 0} mins</span>
-          </div>
-          <h3 className="font-bold text-gray-900 text-xl leading-snug mb-3 line-clamp-2 min-h-[3.25rem] group-hover:text-amber-500 transition-colors">
-            {course.title}
-          </h3>
+          </span>
+          <span className="course-card-free-badge">
+            Free
+          </span>
         </div>
-        <p className="text-sm sm:text-base text-gray-500 line-clamp-2 leading-relaxed min-h-[2.5rem] mt-auto">
-          {course.description || "No description provided."}
+
+        <h3 className="course-card-title">
+          {course.title}
+        </h3>
+
+        <p className="course-card-desc">
+          {course.description || "Master core financial concepts through visual scenarios, bite-sized lessons, and interactive quiz cards."}
         </p>
+
+        <div className="course-card-footer">
+          <span className="course-card-cta-text">
+            Start Learning
+          </span>
+          <span className="course-card-arrow-circle">
+            <IoArrowForward size={14} />
+          </span>
+        </div>
       </div>
     </div>
   );
 }
-

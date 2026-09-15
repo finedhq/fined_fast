@@ -298,15 +298,18 @@ async def add_article(
             concepts_list = [c.strip() for c in key_concepts.split(",") if c.strip()]
             parsed_metadata["keyConcepts"] = concepts_list
 
+        # Ensure questions are NOT appended to metadata JSON (they belong strictly in the article_questions table)
+        parsed_metadata.pop("questions", None)
+
         raw_questions = questions or questions_json
         parsed_questions = []
         if raw_questions:
             try:
                 parsed_questions = json.loads(raw_questions)
-                if isinstance(parsed_questions, list):
-                    parsed_metadata["questions"] = parsed_questions
+                if not isinstance(parsed_questions, list):
+                    parsed_questions = []
             except Exception:
-                pass
+                parsed_questions = []
 
         image_url = ""
         if image:
@@ -335,12 +338,16 @@ async def add_article(
             metadata=parsed_metadata
         )
         
-        # Save questions in article_questions table
+        # Save questions exclusively in article_questions table
         if parsed_questions and new_article and new_article.get("id"):
             try:
-                personal_lens_repo.save_article_questions(new_article["id"], parsed_questions)
-            except Exception:
-                pass
+                saved = personal_lens_repo.save_article_questions(new_article["id"], parsed_questions)
+                if not saved:
+                    import logging
+                    logging.getLogger(__name__).warning(f"Could not save questions into article_questions for article {new_article.get('id')}")
+            except Exception as q_err:
+                import logging
+                logging.getLogger(__name__).error(f"Error saving questions to article_questions: {q_err}", exc_info=True)
 
         return new_article
     except Exception as e:

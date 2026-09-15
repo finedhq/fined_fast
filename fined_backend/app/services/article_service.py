@@ -12,11 +12,11 @@ import time
 class ArticleService:
     def __init__(self):
         self._slug_cache = {}
-        self._slug_cache_ttl = 600  # 10 minutes
+        self._slug_cache_ttl = 30  # 30 seconds (quick sync with database edits)
         self._author_cache = {}
-        self._author_cache_ttl = 600  # 10 minutes
+        self._author_cache_ttl = 30
         self._author_profile_cache = {}
-        self._author_profile_cache_ttl = 600  # 10 minutes
+        self._author_profile_cache_ttl = 30
 
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:

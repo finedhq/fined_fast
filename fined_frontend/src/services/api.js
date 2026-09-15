@@ -32,7 +32,7 @@ async function request(path, options = {}) {
 const articleCache = new Map();
 const singleArticleCache = new Map();
 const authorProfileCache = new Map();
-const CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+const CACHE_TTL_MS = 1000 * 30; // 30 seconds for quick sync with database changes
 
 
 export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {}) {
