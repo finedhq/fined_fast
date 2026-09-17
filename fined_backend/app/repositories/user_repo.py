@@ -12,14 +12,27 @@ class UserRepository:
         res = supabase.from_("users").select("*").eq("email", email).limit(1).execute()
         return res.data[0] if res and res.data else None
     
-    def create(self, user_sub: str, email: str) -> dict:
-        res = supabase.from_("users").insert([{
+    def create(self, user_sub: str, email: str, name: str = None) -> dict:
+        payload = {
             "user_sub": user_sub,
             "email": email,
-            "streak_count": 1,
+            "streak_count": 0,
             "fin_stars": 0,
-        }]).execute()
-        return res.data[0] if res.data else {}
+        }
+        if name:
+            payload["name"] = name
+        try:
+            res = supabase.from_("users").insert([payload]).execute()
+            return res.data[0] if res and res.data else payload
+        except Exception:
+            if "name" in payload:
+                payload.pop("name", None)
+                try:
+                    res = supabase.from_("users").insert([payload]).execute()
+                    return res.data[0] if res and res.data else payload
+                except Exception:
+                    return payload
+            return payload
 
     def update_fields(self, email: str, fields: dict):
         supabase.from_("users").update(fields).eq("email", email).execute()
@@ -166,16 +179,19 @@ class UserRepository:
     # In-memory store for profile fields (ensures instant persistence even if DB migration is pending)
     _PROFILE_STORE = {}
 
-    def get_profile(self, email: str, user_sub: str = None) -> dict:
+    def get_profile(self, email: str, user_sub: str = None, name: str = None) -> dict:
         """Fetch user profile details including metrics and course progress"""
+        from datetime import datetime, timezone, timedelta
         user = self.get_by_email(email)
         if not user and user_sub:
             user = self.get_by_sub(user_sub)
         if not user:
             try:
-                user = self.create(user_sub or f"auth0|{email}", email)
+                user = self.create(user_sub or f"auth0|{email}", email, name=name)
             except Exception:
-                user = {"email": email, "user_sub": user_sub, "streak_count": 4, "fin_stars": 0}
+                user = {"email": email, "user_sub": user_sub, "streak_count": 0, "fin_stars": 0}
+        if not user:
+            user = {"email": email, "user_sub": user_sub, "streak_count": 0, "fin_stars": 0}
 
         # Check DB columns or fallback store
         store_data = self._PROFILE_STORE.get(email, {})
@@ -189,61 +205,153 @@ class UserRepository:
         financial_level = store_data.get("financial_level") or user.get("financial_level") or "Beginner (Level 1) - Starting with basics"
         bio = store_data.get("bio") or user.get("bio") or "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd."
 
-        # Compute fin_score
-        from app.services.score_service import score_service
-        fin_score = score_service.compute_total(user)
-        if fin_score == 0:
-            fin_score = 500  # Default demo baseline consistency score matching design
+        # Compute fin_score directly using the 4 columns from the user dict
+        fin_score = int(
+            (user.get("article_score") or 0) +
+            (user.get("expense_score") or 0) +
+            (user.get("course_score") or 0) +
+            (user.get("consistency_score") or 0)
+        )
 
-        streak_count = user.get("streak_count") or 4
-        fin_stars = user.get("fin_stars") or 0
+        # Read streak_count directly from users table
+        streak_count = int(user.get("streak_count") or user.get("streak") or 0)
+
+        # Base fin_stars directly from users table
+        fin_stars = int(user.get("fin_stars") or user.get("finstars") or 0)
+
         rank = self.get_rank(email) or 1
 
-        # Derive display name
-        if "karulerashi" in email.lower() or "rashi" in email.lower():
+        # Derive display name / full name
+        if name:
+            display_name = name
+        elif user.get("name"):
+            display_name = user.get("name")
+        elif user.get("display_name"):
+            display_name = user.get("display_name")
+        elif "karulerashi" in email.lower() or "rashi" in email.lower():
             display_name = "Rashi Karule"
         else:
             display_name = email.split("@")[0].replace(".", " ").title()
 
-        # Ongoing course calculation
-        ongoing_course_id = user.get("ongoing_course_id")
-        ongoing_module_id = user.get("ongoing_module_id")
-        ongoing_course = {
-            "id": ongoing_course_id or "2936ac1c-1c2f-4c91-8ead-476f9bad635b",
-            "title": "Basics of Stock Market",
-            "slug": "basics-of-stock-market",
-            "current_lesson": 6,
-            "total_lessons": 12,
-            "progress_pct": 50,
-        }
+        # Query user activity dates from finScoreLogs and userCourses for the past 365 days,
+        # and trace total accrued FinStars across event logs and completed course modules.
+        activity_map = {}
+        now = datetime.now(timezone.utc)
+        one_year_ago_iso = (now - timedelta(days=365)).isoformat()
 
+        stars_from_logs = 0
+        try:
+            logs_res = supabase.from_("finScoreLogs").select("change, description, created_at").eq("email", email).execute()
+            for log in (logs_res.data or []):
+                created_at = log.get("created_at")
+                if created_at and str(created_at) >= one_year_ago_iso:
+                    date_str = str(created_at)[:10]
+                    activity_map[date_str] = activity_map.get(date_str, 0) + 1
+                
+                desc = str(log.get("description") or "").lower()
+                if "finstar" in desc or "star" in desc:
+                    stars_from_logs += max(0, int(log.get("change") or 0))
+        except Exception as e:
+            print(f"Notice: finScoreLogs query: {e}")
+
+        stars_from_courses = 0
+        try:
+            uc_res = supabase.from_("userCourses").select("module_id, card_id, progress_type, status, completion_date, created_at").eq("email", email).eq("status", "completed").execute()
+            completed_rows = uc_res.data or []
+            completed_modules_set = set()
+            completed_cards_count = 0
+            for row in completed_rows:
+                d = row.get("completion_date") or row.get("created_at")
+                if d and str(d) >= one_year_ago_iso:
+                    date_str = str(d)[:10]
+                    activity_map[date_str] = activity_map.get(date_str, 0) + 1
+
+                if row.get("module_id"):
+                    completed_modules_set.add(row["module_id"])
+                if row.get("progress_type") == "card" or row.get("card_id"):
+                    completed_cards_count += 1
+
+            # Check completed modules either from distinct module_ids or course_score (20 pts per module)
+            course_score = int(user.get("course_score") or 0)
+            estimated_modules_from_score = course_score // 20
+            total_completed_modules = max(len(completed_modules_set), estimated_modules_from_score)
+
+            # Reward rate: 10 FinStars per completed module (or 2 FinStars per completed card)
+            stars_from_courses = max(total_completed_modules * 10, completed_cards_count * 2)
+        except Exception as e:
+            print(f"Notice: userCourses query: {e}")
+
+        # Read fin_stars directly from users table
+        fin_stars = int(user.get("fin_stars") or user.get("finstars") or 0)
+
+        # If fin_stars is 0 or null, calculate total FinStars accrued from event logs and completed course modules
+        if fin_stars == 0:
+            total_accrued_stars = max(
+                stars_from_logs + stars_from_courses,
+                stars_from_logs,
+                stars_from_courses
+            )
+            fin_stars = total_accrued_stars
+
+            # Sync back to users table if accrued stars found
+            if fin_stars > 0:
+                try:
+                    self.update_fields(email, {"fin_stars": fin_stars})
+                    user["fin_stars"] = fin_stars
+                except Exception as e:
+                    print(f"Notice: syncing accrued fin_stars to users: {e}")
+        elif stars_from_logs > fin_stars:
+            fin_stars = stars_from_logs
+
+        # Ongoing course calculation - Real course progress from userCourses / users
+        ongoing_course_id = user.get("ongoing_course_id")
+        if not ongoing_course_id:
+            try:
+                recent_uc = supabase.from_("userCourses").select("course_id").eq("email", email).not_.is_("course_id", "null").order("created_at", desc=True).limit(1).execute()
+                if recent_uc.data and recent_uc.data[0].get("course_id"):
+                    ongoing_course_id = recent_uc.data[0]["course_id"]
+            except Exception as e:
+                print(f"Notice: checking userCourses for active course: {e}")
+
+        ongoing_course = None
         if ongoing_course_id:
             try:
-                c_res = supabase.from_("courses").select("title, slug").eq("id", ongoing_course_id).limit(1).execute()
+                c_res = supabase.from_("courses").select("id, title, slug").eq("id", ongoing_course_id).limit(1).execute()
                 if c_res.data:
-                    ongoing_course["title"] = c_res.data[0].get("title", ongoing_course["title"])
-                    ongoing_course["slug"] = c_res.data[0].get("slug", ongoing_course["slug"])
-                
-                # Fetch module count
-                m_res = supabase.from_("modules").select("id, order_index").eq("course_id", ongoing_course_id).order("order_index").execute()
-                if m_res.data:
-                    ongoing_course["total_lessons"] = len(m_res.data)
-                    if ongoing_module_id:
-                        for m in m_res.data:
-                            if m["id"] == ongoing_module_id:
-                                ongoing_course["current_lesson"] = m.get("order_index", 6)
-                                break
-                    ongoing_course["progress_pct"] = int((ongoing_course["current_lesson"] / max(1, ongoing_course["total_lessons"])) * 100)
-            except Exception as e:
-                print(f"Error resolving course details for profile: {e}")
+                    course_row = c_res.data[0]
+                    m_res = supabase.from_("modules").select("id, order_index").eq("course_id", ongoing_course_id).order("order_index").execute()
+                    modules = m_res.data or []
+                    total_modules = len(modules)
 
-        # 28-day habit tracker indicators matching the 4x7 grid in dashboard_ref.jpeg
-        # Values: 0 = empty, 1 = light mint, 2 = medium emerald, 3 = deep emerald
+                    completed_modules_count = 0
+                    try:
+                        uc_progress = supabase.from_("userCourses").select("module_id, progress_type, status").eq("email", email).eq("course_id", ongoing_course_id).eq("status", "completed").execute()
+                        completed_mod_ids = {p["module_id"] for p in (uc_progress.data or []) if p.get("module_id")}
+                        completed_modules_count = len(completed_mod_ids)
+                    except Exception as e:
+                        print(f"Notice: counting completed course modules: {e}")
+
+                    current_lesson = min(completed_modules_count + 1, total_modules) if total_modules > 0 else 0
+                    progress_pct = int((completed_modules_count / max(1, total_modules)) * 100) if total_modules > 0 else 0
+
+                    ongoing_course = {
+                        "id": course_row.get("id"),
+                        "title": course_row.get("title", "Active Course"),
+                        "slug": course_row.get("slug"),
+                        "current_lesson": current_lesson,
+                        "completed_modules": completed_modules_count,
+                        "total_lessons": total_modules,
+                        "total_modules": total_modules,
+                        "progress_pct": progress_pct,
+                    }
+            except Exception as e:
+                print(f"Error resolving real course details for profile: {e}")
+
         consistency_grid = [
-            0, 0, 3, 2, 0, 3, 1,
-            3, 1, 0, 3, 3, 1, 0,
-            2, 3, 1, 0, 3, 2, 3,
-            3, 3, 3, 3, 3, 3, 3
+            0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0
         ]
 
         return {
@@ -251,19 +359,24 @@ class UserRepository:
             "user_sub": user.get("user_sub") or user_sub,
             "email": email,
             "display_name": display_name,
+            "full_name": display_name,
             "username": username,
             "career_stage": career_stage,
             "financial_level": financial_level,
             "bio": bio,
             "fin_score": fin_score,
+            "finscore": fin_score,
             "fin_stars": fin_stars,
+            "finstars": fin_stars,
             "streak_count": streak_count,
+            "streak": streak_count,
             "rank": rank,
             "ongoing_course": ongoing_course,
             "consistency_grid": consistency_grid,
+            "activity_map": activity_map,
         }
 
-    def update_profile(self, email: str, fields: dict) -> dict:
+    def update_profile(self, email: str, fields: dict, user_sub: str = None) -> dict:
         """Update profile fields with database persistence and memory sync"""
         # Save to memory store first for immediate consistency
         current = self._PROFILE_STORE.get(email, {})
@@ -275,12 +388,14 @@ class UserRepository:
             allowed_cols = ["username", "career_stage", "financial_level", "bio"]
             db_update = {k: v for k, v in fields.items() if k in allowed_cols and v is not None}
             if db_update:
-                supabase.from_("users").update(db_update).eq("email", email).execute()
+                res = supabase.from_("users").update(db_update).eq("email", email).execute()
+                if (not res or not res.data) and user_sub:
+                    supabase.from_("users").update(db_update).eq("user_sub", user_sub).execute()
         except Exception as e:
             # Fallback if DB columns are not yet created on remote Supabase instance
             print(f"Notice: Supabase column update skipped ({e}). Maintained in profile repository.")
 
-        return self.get_profile(email)
+        return self.get_profile(email, user_sub)
 
 
 user_repo = UserRepository()

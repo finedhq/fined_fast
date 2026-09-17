@@ -48,11 +48,13 @@ class FeedbackCreate(BaseModel):
 
 class OngoingCourseProgress(BaseModel):
     id: Optional[str] = None
-    title: str = "Basics of Stock Market"
-    slug: Optional[str] = "basics-of-stock-market"
-    current_lesson: int = 6
-    total_lessons: int = 12
-    progress_pct: int = 50
+    title: str
+    slug: Optional[str] = None
+    current_lesson: Optional[int] = 0
+    completed_modules: Optional[int] = 0
+    total_lessons: Optional[int] = 0
+    total_modules: Optional[int] = 0
+    progress_pct: int = 0
 
 
 class UserProfileUpdate(BaseModel):
@@ -67,14 +69,19 @@ class UserProfileResponse(BaseModel):
     user_sub: Optional[str] = None
     email: str
     display_name: str
+    full_name: Optional[str] = None
     username: str
     career_stage: str
     financial_level: str
     bio: str
-    fin_score: int = 500
+    fin_score: int = 0
+    finscore: Optional[int] = None
     fin_stars: int = 0
-    streak_count: int = 4
+    finstars: Optional[int] = None
+    streak_count: int = 0
+    streak: Optional[int] = None
     rank: int = 1
     ongoing_course: Optional[OngoingCourseProgress] = None
     consistency_grid: list[int] = []
+    activity_map: dict[str, int] = {}
 

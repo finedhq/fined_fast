@@ -15,8 +15,24 @@ const FINANCIAL_LEVELS = [
   "Advanced (Level 3) - Actively investing & tax planning",
 ];
 
-export default function EditProfileModal() {
-  const { profile, isEditModalOpen, closeEditModal, saveProfile } = useUserProfile();
+export default function EditProfileModal({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  profile: propProfile,
+  onSave: propOnSave,
+} = {}) {
+  let context = null;
+  try {
+    context = useUserProfile();
+  } catch {
+    // context not available
+  }
+
+  const isControlled = propIsOpen !== undefined;
+  const isOpen = isControlled ? propIsOpen : context?.isEditModalOpen;
+  const currentProfile = propProfile || context?.profile;
+  const handleClose = isControlled ? propOnClose : context?.closeEditModal;
+  const handleSave = propOnSave || context?.saveProfile;
 
   const [username, setUsername] = useState("");
   const [careerStage, setCareerStage] = useState(CAREER_STAGES[0]);
@@ -26,16 +42,16 @@ export default function EditProfileModal() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setUsername(profile.username || "");
-      setCareerStage(profile.career_stage || CAREER_STAGES[0]);
-      setFinancialLevel(profile.financial_level || FINANCIAL_LEVELS[0]);
-      setBio(profile.bio || "");
+    if (currentProfile) {
+      setUsername(currentProfile.username || "");
+      setCareerStage(currentProfile.career_stage || CAREER_STAGES[0]);
+      setFinancialLevel(currentProfile.financial_level || FINANCIAL_LEVELS[0]);
+      setBio(currentProfile.bio || "");
       setError("");
     }
-  }, [profile, isEditModalOpen]);
+  }, [currentProfile, isOpen]);
 
-  if (!isEditModalOpen) return null;
+  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,13 +76,17 @@ export default function EditProfileModal() {
 
     setSaving(true);
     try {
-      await saveProfile({
-        username: cleanUsername,
-        career_stage: careerStage,
-        financial_level: financialLevel,
-        bio: bio.trim(),
-      });
-      closeEditModal();
+      if (handleSave) {
+        await handleSave({
+          username: cleanUsername,
+          career_stage: careerStage,
+          financial_level: financialLevel,
+          bio: bio.trim(),
+        });
+      }
+      if (handleClose) {
+        handleClose();
+      }
     } catch (err) {
       setError(err?.message || "Failed to save profile changes.");
     } finally {
@@ -89,7 +109,7 @@ export default function EditProfileModal() {
           </h2>
           <button
             type="button"
-            onClick={closeEditModal}
+            onClick={handleClose}
             className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
             aria-label="Close"
           >
@@ -113,7 +133,7 @@ export default function EditProfileModal() {
             </label>
             <input
               type="text"
-              value={profile?.display_name || "Rashi Karule"}
+              value={currentProfile?.full_name || currentProfile?.display_name || "User"}
               readOnly
               disabled
               className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200/80 rounded-2xl text-slate-600 font-semibold text-sm cursor-not-allowed select-none"
@@ -210,7 +230,7 @@ export default function EditProfileModal() {
           <div className="pt-3 flex items-center justify-end gap-3">
             <button
               type="button"
-              onClick={closeEditModal}
+              onClick={handleClose}
               disabled={saving}
               className="px-5 py-2.5 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm transition cursor-pointer"
             >

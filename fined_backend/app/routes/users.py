@@ -14,7 +14,9 @@ async def get_my_profile(current_user: AuthUser = Depends(get_current_user)):
     """
     Get current logged-in user's profile details, metrics, and course progress.
     """
-    profile = await asyncio.to_thread(user_repo.get_profile, current_user.email, current_user.sub)
+    profile = await asyncio.to_thread(
+        user_repo.get_profile, current_user.email, current_user.sub, current_user.name
+    )
     return profile
 
 @router.patch("/me", response_model=UserProfileResponse)
@@ -41,6 +43,6 @@ async def update_my_profile(payload: UserProfileUpdate, current_user: AuthUser =
         update_data["username"] = username
 
     updated_profile = await asyncio.to_thread(
-        user_repo.update_profile, current_user.email, update_data
+        user_repo.update_profile, current_user.email, update_data, current_user.sub
     )
     return updated_profile

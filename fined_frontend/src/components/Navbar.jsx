@@ -19,9 +19,15 @@ export default function Navbar() {
   // Auth0 authentication
   const { user, loginWithRedirect, isAuthenticated, logout } = useAuth0();
 
-  const displayName = profile?.display_name || user?.name || "Rashi Karule";
+  const displayName = profile?.full_name || profile?.display_name || user?.name || "Rashi Karule";
   const firstName = displayName.split(" ")[0] || "Rashi";
   const userInitial = (firstName[0] || "R").toUpperCase();
+  const financialLevel = profile?.financial_level || "";
+  const shortLevelDisplay = financialLevel.includes("Intermediate")
+    ? "Level 2 • Intermediate"
+    : financialLevel.includes("Advanced")
+    ? "Level 3 • Advanced"
+    : "Level 1 • Beginner";
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -152,7 +158,7 @@ export default function Navbar() {
                         {userInitial}
                       </div>
                       <h3 className="mt-2.5 font-extrabold text-base text-slate-900 tracking-tight">
-                        {profile?.display_name || "Rashi Karule"}
+                        {displayName}
                       </h3>
                       <p className="text-xs font-medium text-slate-500 mt-0.5">
                         {profile?.email || user?.email || "karulerashi@gmail.com"}
@@ -162,7 +168,7 @@ export default function Navbar() {
                           🎓 {profile?.career_stage || "Student"}
                         </span>
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100/80 rounded-full text-[11px] font-bold">
-                          Level 1 • Beginner
+                          {shortLevelDisplay}
                         </span>
                       </div>
                     </div>
@@ -174,7 +180,7 @@ export default function Navbar() {
                           FINSCORE
                         </span>
                         <span className="text-xl font-black text-slate-900 tracking-tight">
-                          {profile?.fin_score || 500}
+                          {profile?.fin_score ?? profile?.finscore ?? 0}
                         </span>
                       </div>
                       <div className="w-[1px] h-7 bg-[#FDE68A]"></div>
@@ -183,7 +189,7 @@ export default function Navbar() {
                           FINSTARS
                         </span>
                         <span className="text-xl font-black text-amber-500 flex items-center justify-center gap-1 tracking-tight">
-                          ⭐ {profile?.fin_stars ?? 0}
+                          ⭐ {profile?.fin_stars ?? profile?.finstars ?? 0}
                         </span>
                       </div>
                     </div>

@@ -11,9 +11,12 @@ const DEFAULT_PROFILE = {
   career_stage: "Student",
   financial_level: "Beginner (Level 1) - Starting with basics",
   bio: "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd.",
-  fin_score: 500,
+  fin_score: 0,
+  finscore: 0,
   fin_stars: 0,
-  streak_count: 4,
+  finstars: 0,
+  streak_count: 0,
+  streak: 0,
   rank: 1,
   ongoing_course: {
     id: "2936ac1c-1c2f-4c91-8ead-476f9bad635b",
@@ -32,7 +35,7 @@ const DEFAULT_PROFILE = {
 };
 
 export const UserProfileProvider = ({ children }) => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const [profile, setProfile] = useState(() => ({
     ...DEFAULT_PROFILE,
     display_name: user?.name || DEFAULT_PROFILE.display_name,
@@ -45,12 +48,18 @@ export const UserProfileProvider = ({ children }) => {
     if (!isAuthenticated) return;
     setLoading(true);
     try {
-      const data = await fetchUserProfile();
+      let token = null;
+      try {
+        token = await getAccessTokenSilently();
+      } catch (tokErr) {
+        console.warn("Could not get access token silently:", tokErr);
+      }
+      const data = await fetchUserProfile(token);
       if (data) {
         setProfile((prev) => ({
           ...prev,
           ...data,
-          display_name: data.display_name || user?.name || prev.display_name,
+          display_name: data.full_name || data.display_name || user?.name || prev.display_name,
           email: data.email || user?.email || prev.email,
         }));
       }
@@ -59,7 +68,7 @@ export const UserProfileProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, getAccessTokenSilently]);
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
@@ -69,11 +78,20 @@ export const UserProfileProvider = ({ children }) => {
 
   const saveProfile = async (payload) => {
     try {
-      const updated = await updateUserProfile(payload);
+      let token = null;
+      if (isAuthenticated) {
+        try {
+          token = await getAccessTokenSilently();
+        } catch (tokErr) {
+          console.warn("Could not get access token silently for save:", tokErr);
+        }
+      }
+      const updated = await updateUserProfile(payload, token);
       if (updated) {
         setProfile((prev) => ({
           ...prev,
           ...updated,
+          ...payload,
         }));
       } else {
         setProfile((prev) => ({

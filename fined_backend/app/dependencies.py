@@ -8,12 +8,15 @@ import httpx
 
 from app.config import settings
 
+from typing import Optional
+
 bearer_scheme=HTTPBearer(auto_error=False)
 
 class AuthUser(BaseModel):
     email:str
     sub:str #auth0 userid
     roles:list[str]=[] #auth0 roles claim
+    name:Optional[str]=None
 
 _jwks = None
 
@@ -30,7 +33,7 @@ async def get_jwks() -> dict:
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     if not credentials:
         if settings.ENVIRONMENT == "development":
-            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"], name="Admin User")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
@@ -61,7 +64,10 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
         roles: list[str] = payload.get(
             "https://fined.com/roles", payload.get("https://myfined.com/roles", [])
         )
-
+        name: Optional[str] = payload.get(
+            "name",
+            payload.get("nickname", payload.get("https://fined.com/name", payload.get("https://myfined.com/name", None)))
+        )
 
         if not sub:
             raise credentials_exception
@@ -69,12 +75,13 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
         return AuthUser(
             email=email,
             sub=sub,
-            roles=roles
+            roles=roles,
+            name=name
         )
     
     except JWTError:
         if settings.ENVIRONMENT == "development":
-            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"])
+            return AuthUser(email="admin@myfined.com", sub="dev-admin", roles=["Admin"], name="Admin User")
         raise credentials_exception
 
 async def get_optional_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:

@@ -6,13 +6,14 @@ const API_BASE_URL = rawBase.endsWith("/api")
   : `${rawBase.replace(/\/+$/, "")}/api`;
 
 async function request(path, options = {}) {
-  const token = await getAuthToken();
-  if (token) {
-    options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${token}`
-    };
+  const fallbackToken = await getAuthToken();
+  const headers = {
+    ...(options.headers || {}),
+  };
+  if (fallbackToken && !headers.Authorization && !headers.authorization) {
+    headers.Authorization = `Bearer ${fallbackToken}`;
   }
+  options.headers = headers;
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const response = await fetch(`${API_BASE_URL}${normalizedPath}`, options);
@@ -298,19 +299,32 @@ export function claimEarnStars(action, stars, email) {
   });
 }
 
-export function fetchUserProfile() {
+export function getUserProfile(token) {
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
   return request("/v1/users/me", {
     method: "GET",
+    headers,
   });
 }
 
-export function updateUserProfile(payload) {
+export function updateUserProfile(payload, token) {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
   return request("/v1/users/me", {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
   });
 }
+
+export const fetchUserProfile = getUserProfile;
 
 export { API_BASE_URL };
 
