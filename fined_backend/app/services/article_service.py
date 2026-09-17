@@ -3,6 +3,7 @@
 from datetime import date
 from app.repositories.article_repo import article_repo
 from app.repositories.user_repo import user_repo
+from app.repositories.course_repo import course_repo
 from app.services.score_service import score_service
 import re
 from xml.sax.saxutils import escape
@@ -12,11 +13,11 @@ import time
 class ArticleService:
     def __init__(self):
         self._slug_cache = {}
-        self._slug_cache_ttl = 600  # 10 minutes
+        self._slug_cache_ttl = 30  # 30 seconds (quick sync with database edits)
         self._author_cache = {}
-        self._author_cache_ttl = 600  # 10 minutes
+        self._author_cache_ttl = 30
         self._author_profile_cache = {}
-        self._author_profile_cache_ttl = 600  # 10 minutes
+        self._author_profile_cache_ttl = 30
 
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
@@ -287,6 +288,10 @@ class ArticleService:
     def build_sitemap_xml(self) -> str:
         articles = article_repo.get_all_for_sitemap()
         authors = article_repo.get_all_authors()
+        try:
+            courses = course_repo.get_all()
+        except Exception:
+            courses = []
 
         static_urls = [
             ("https://myfined.com/", "weekly", "1.0"),
@@ -295,7 +300,10 @@ class ArticleService:
             ("https://myfined.com/contact", "monthly", "0.5"),
             ("https://myfined.com/feedback", "monthly", "0.5"),
             ("https://myfined.com/policies", "monthly", "0.5"),
-            ("https://myfined.com/courses", "weekly", "0.8"),
+            ("https://myfined.com/courses", "weekly", "0.9"),
+            ("https://myfined.com/help", "monthly", "0.5"),
+            ("https://myfined.com/privacy-policy", "monthly", "0.5"),
+            ("https://myfined.com/termsofservice", "monthly", "0.5"),
         ]
 
         tag_urls = [
@@ -318,6 +326,21 @@ class ArticleService:
             if auth_slug:
                 loc = escape(f"https://myfined.com/authors/{auth_slug}")
                 entries.append(f"<url><loc>{loc}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+
+        for c in courses:
+            c_slug = c.get("slug") or c.get("id")
+            if c_slug:
+                loc = escape(f"https://myfined.com/courses/{c_slug}")
+                lastmod_raw = c.get("updated_at") or c.get("created_at")
+                lastmod = lastmod_raw[:10] if lastmod_raw else ""
+                if lastmod:
+                    entries.append(
+                        f"<url><loc>{loc}</loc><lastmod>{lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+                    )
+                else:
+                    entries.append(
+                        f"<url><loc>{loc}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+                    )
 
         for a in articles:
             slug = a.get("slug") or self._generate_slug(a.get("title", ""))

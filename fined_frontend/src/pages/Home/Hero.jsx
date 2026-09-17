@@ -22,7 +22,7 @@ import wfInteractiveLearning from "../../assets/wf-interactivelearning.png";
 import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
 import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
 import satvikImg from "../../assets/satvik-img.png"
-import { fetchArticles, joinWaitlist } from "../../services/api";
+import { fetchArticles, joinWaitlist, fetchAuthors } from "../../services/api";
 import instance from "../../lib/axios";
 import newLandingpagebgm from "../../assets/newlandingpagebg.png";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -150,6 +150,15 @@ const TESTIMONIAL_DATA = [
     author: " Ananya, 19"
   }
 ];
+
+const AUTHOR_TITLES = {
+  "Shishir Bhartia": "Directional Strategy Consultant Ex Head Times Group Alliances and Brand Capital West",
+  "Shravan Mutha": "Co-founder, FinEd",
+  "Anish Pujari": "Co-founder, FinEd",
+  "Deepan Datta": "Investment Writer",
+  "Dharsana Gandhi R": "Finance Professional",
+  "Madhvendra": "Finance Writer"
+};
 
 const TestimonialsCarousel = React.forwardRef(({ className, style }, ref) => {
   const desktopPrevRef = useRef(null);
@@ -373,8 +382,23 @@ function Hero() {
   const [pathOffsets, setPathOffsets] = useState([]);
   const [pathProgresses, setPathProgresses] = useState([]);
   const [articles, setArticles] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [heroCourse, setHeroCourse] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    async function getAuthorsData() {
+      try {
+        const data = await fetchAuthors();
+        if (data && data.length > 0) {
+          setAuthors(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch authors", err);
+      }
+    }
+    getAuthorsData();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -840,6 +864,33 @@ function Hero() {
             <button className="btn-hero-secondary-blue" onClick={() => navigate("/courses")}>Explore all courses</button>
           </div>
         </RevealOnScroll>
+
+        {authors.length > 0 && (
+          <div className="authors-marquee-container">
+            <RevealOnScroll delay={150}>
+              <div className="authors-marquee-header">
+                <h3>About Our Authors</h3>
+                <p>Learn from industry experts with years of experience in finance.</p>
+              </div>
+            </RevealOnScroll>
+            <div className="authors-marquee">
+              {[...authors, ...authors].map((author, index) => (
+                <div key={index} className="author-marquee-card">
+                  <div className="author-marquee-inner">
+                     <div className="author-marquee-img-wrapper">
+                       <img src={author.profile_image_url || author.image_url || satvikImg} alt={author.name} className="author-marquee-img" />
+                     </div>
+                     <div className="author-marquee-desc">
+                       <strong className="author-marquee-name">{author.name}</strong>
+                       <span className="author-marquee-role">{AUTHOR_TITLES[author.name] || "Writer at FinEd"}</span>
+                       <p className="author-marquee-bio">{author.bio || author.description || author.desc || "Financial author and writer at FinEd."}</p>
+                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* POPULAR COURSES SECTION

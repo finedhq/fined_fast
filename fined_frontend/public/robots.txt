@@ -2,5 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /cards/
+Disallow: /dashboard
+Disallow: /rewards
 
 Sitemap: https://myfined.com/sitemap.xml
