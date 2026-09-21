@@ -62,6 +62,7 @@ class UserProfileUpdate(BaseModel):
     career_stage: Optional[str] = None
     financial_level: Optional[str] = None
     bio: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserProfileResponse(BaseModel):
@@ -74,6 +75,7 @@ class UserProfileResponse(BaseModel):
     career_stage: str
     financial_level: str
     bio: str
+    location: Optional[str] = "Nagpur, IN"
     fin_score: int = 0
     finscore: Optional[int] = None
     fin_stars: int = 0

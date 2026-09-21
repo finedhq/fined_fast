@@ -37,6 +37,7 @@ export default function EditProfileModal({
   const [username, setUsername] = useState("");
   const [careerStage, setCareerStage] = useState(CAREER_STAGES[0]);
   const [financialLevel, setFinancialLevel] = useState(FINANCIAL_LEVELS[0]);
+  const [location, setLocation] = useState("");
   const [bio, setBio] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -46,6 +47,7 @@ export default function EditProfileModal({
       setUsername(currentProfile.username || "");
       setCareerStage(currentProfile.career_stage || CAREER_STAGES[0]);
       setFinancialLevel(currentProfile.financial_level || FINANCIAL_LEVELS[0]);
+      setLocation(currentProfile.location || "Nagpur, IN");
       setBio(currentProfile.bio || "");
       setError("");
     }
@@ -81,6 +83,7 @@ export default function EditProfileModal({
           username: cleanUsername,
           career_stage: careerStage,
           financial_level: financialLevel,
+          location: location.trim(),
           bio: bio.trim(),
         });
       }
@@ -209,6 +212,24 @@ export default function EditProfileModal({
                 size={18}
               />
             </div>
+          </div>
+
+          {/* Location / City Input */}
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">
+              Location / City
+            </label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Mumbai, IN"
+              maxLength={50}
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-slate-800 font-semibold text-sm focus:outline-none focus:border-[#FA7516] focus:ring-2 focus:ring-[#FA7516]/20 transition"
+            />
+            <span className="text-[10px] text-slate-400 mt-1 block">
+              Your city and country (e.g. Mumbai, IN).
+            </span>
           </div>
 
           {/* Bio & Learning Goal Textarea */}

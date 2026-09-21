@@ -11,6 +11,7 @@ const DEFAULT_PROFILE = {
   career_stage: "Student",
   financial_level: "Beginner (Level 1) - Starting with basics",
   bio: "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd.",
+  location: "Nagpur, IN",
   fin_score: 0,
   finscore: 0,
   fin_stars: 0,

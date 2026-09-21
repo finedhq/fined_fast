@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiSettings, FiShare2, FiCheck } from "react-icons/fi";
+import { FiSettings, FiShare2, FiCheck, FiTrendingUp } from "react-icons/fi";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getUserProfile, updateUserProfile } from "../services/api";
 import { useUserProfile } from "../context/UserProfileContext";
@@ -113,18 +113,20 @@ function ProfileSkeleton() {
         </div>
 
         {/* 2. Four Metric Cards Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-6">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between h-44"
+              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-3 sm:p-5 flex flex-col justify-between min-h-[90px] sm:min-h-[110px]"
             >
               <div>
-                <div className="h-3 w-28 bg-slate-200 rounded-md mb-3" />
-                <div className="h-10 w-20 bg-slate-200 rounded-xl mb-3" />
-                <div className="h-5 w-32 bg-slate-100 rounded-full" />
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="h-3 w-14 sm:w-18 bg-slate-200 rounded-md" />
+                  <div className="h-3.5 w-8 sm:w-10 bg-slate-100 rounded-full" />
+                </div>
+                <div className="h-6 sm:h-7 w-20 sm:w-24 bg-slate-200 rounded-lg my-1" />
               </div>
-              <div className="h-3 w-40 bg-slate-100 rounded-md" />
+              <div className="h-2.5 w-3/4 bg-slate-100 rounded-md mt-1" />
             </div>
           ))}
         </div>
@@ -225,11 +227,43 @@ export default function ProfilePage() {
     return merged;
   };
 
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard?.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/profile?u=${profile?.username || username || 'user'}`;
+    const shareData = {
+      title: `${displayName} on FinEd`,
+      text: `Check out ${displayName}'s financial learning journey and FinScore on FinEd!`,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (clipErr) {
+      console.error("Failed to copy profile link:", clipErr);
+    }
   };
 
   // 52-week activity heatmap based on real activity map
@@ -270,6 +304,7 @@ export default function ProfilePage() {
   const finStars = profile?.fin_stars ?? profile?.finstars ?? 0;
   const streak = profile?.streak_count ?? profile?.streak ?? 0;
   const rank = profile?.rank ?? 1;
+  const personalBest = profile?.personal_best ?? profile?.best_streak ?? streak;
 
   // Real ongoing course (or null if none active)
   const ongoingCourse = profile?.ongoing_course || null;
@@ -293,36 +328,36 @@ export default function ProfilePage() {
         )}
 
         {/* 1. Header Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-6 relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 flex-1">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-8 mb-5 sm:mb-6 relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+            <div className="flex flex-row items-start gap-3.5 sm:gap-6 flex-1 w-full">
               {/* Avatar: Auth0 picture or deep navy initial box */}
               {user?.picture && !avatarError ? (
                 <img
                   src={user.picture}
                   alt={displayName}
                   onError={() => setAvatarError(true)}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover shadow-md flex-shrink-0 border-2 border-slate-100"
+                  className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl object-cover shadow-md flex-shrink-0 border-2 border-slate-100"
                 />
               ) : (
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-[#0047AB] text-white flex items-center justify-center text-4xl sm:text-5xl font-black shadow-md flex-shrink-0 select-none">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-[#0047AB] text-white flex items-center justify-center text-3xl sm:text-5xl font-black shadow-md flex-shrink-0 select-none">
                   {userInitial}
                 </div>
               )}
 
               {/* User Bio & Identity */}
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight truncate">
                     {displayName}
                   </h1>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[11px] sm:text-sm font-semibold text-slate-500 bg-slate-100 px-2 sm:px-2.5 py-0.5 rounded-full">
                     @{username}
                   </span>
                 </div>
 
                 {/* Badges / Sub-meta */}
-                <div className="flex flex-wrap items-center gap-2 mt-2 text-xs sm:text-sm font-bold text-slate-600">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 text-xs sm:text-sm font-bold text-slate-600">
                   <span className="flex items-center gap-1 text-slate-700">
                     🎓 {careerStage}
                   </span>
@@ -332,35 +367,35 @@ export default function ProfilePage() {
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="text-slate-500">
-                    Nagpur, IN
+                    {profile?.location || "India"}
                   </span>
                 </div>
 
                 {/* Bio text */}
-                <p className="text-sm sm:text-base text-slate-600 mt-2.5 leading-relaxed font-medium max-w-2xl">
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 leading-relaxed font-medium max-w-2xl">
                   {bio}
                 </p>
               </div>
             </div>
 
             {/* Action Buttons Top Right */}
-            <div className="flex items-center gap-2.5 self-stretch sm:self-start justify-end flex-shrink-0 pt-1 sm:pt-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 self-start sm:self-start justify-end flex-shrink-0 mt-3 sm:mt-0">
               <button
                 type="button"
                 onClick={handleShare}
-                className="hidden sm:flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs hover:border-slate-300 transition cursor-pointer"
-                title="Share internal portfolio link"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm shrink-0 transition cursor-pointer"
+                title="Share profile link"
               >
-                <FiShare2 size={15} />
+                <FiShare2 size={14} />
                 <span>Share</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[#FA7516] hover:bg-[#EA580C] text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow transition cursor-pointer"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-[#FA7516] hover:bg-[#e0650f] text-white shadow-sm shrink-0 transition cursor-pointer"
               >
-                <FiSettings size={15} />
+                <FiSettings size={14} />
                 <span>Edit Profile</span>
               </button>
             </div>
@@ -368,88 +403,105 @@ export default function ProfilePage() {
         </div>
 
         {/* 2. Standardized 4-Metric Cards Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-          {/* Card 1: Consistency Rating / FinScore */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-6">
+          {/* Card 1: FinScore */}
+          <Link
+            to="/courses"
+            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
+          >
             <div>
-              <span className="text-[11px] font-extrabold tracking-wider uppercase text-slate-400 block">
-                CONSISTENCY RATING
-              </span>
-              <div className="mt-3 text-4xl sm:text-5xl font-black text-[#0047AB] tracking-tight">
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
+                  FinScore
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-emerald-50 border border-emerald-200/70 text-emerald-700">
+                  <FiTrendingUp size={11} />
+                  <span>{finScore > 0 ? "Active" : "New"}</span>
+                </span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-[#0047AB] tracking-tight whitespace-nowrap">
                 {finScore}
               </div>
-              <div className="mt-3">
-                <span className="inline-flex items-center px-2.5 py-0.5 bg-emerald-50 border border-emerald-200/80 rounded-full text-emerald-700 font-extrabold text-xs">
-                  {finScore > 0 ? "Top Platform" : "Beginner Rating"}
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
+              Consistency rating
+            </p>
+          </Link>
+
+          {/* Card 2: FinStars Balance */}
+          <Link
+            to="/rewards"
+            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
+                  <span className="inline sm:hidden">FinStars</span>
+                  <span className="hidden sm:inline">FinStars Balance</span>
+                </span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-amber-50 border border-amber-200/70 text-amber-600">
+                  {finStars % 100}/100
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-xl sm:text-2xl text-amber-500">⭐</span>
+                <span className="text-2xl sm:text-3xl font-black text-slate-900">{finStars}</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
+              {finStars % 100} of 100 to reward
+            </p>
+          </Link>
+
+          {/* Card 3: Current Streak */}
+          <Link
+            to="/courses"
+            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
+                  <span className="inline sm:hidden">Streak</span>
+                  <span className="hidden sm:inline">Current Streak</span>
+                </span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-orange-50 border border-orange-200/70 text-orange-600">
+                  Best: {personalBest || streak}d
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-xl sm:text-2xl">🔥</span>
+                <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                  {streak} {streak === 1 ? 'Day' : 'Days'}
                 </span>
               </div>
             </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mt-4">
-              Reflects daily modules &amp; quiz retention.
+            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
+              Best: {personalBest || streak} Days
             </p>
-          </div>
+          </Link>
 
-          {/* Card 2: Rewards Accrued / FinStars */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+          {/* Card 4: Rank */}
+          <Link
+            to="/leaderboard"
+            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
+          >
             <div>
-              <span className="text-[11px] font-extrabold tracking-wider uppercase text-slate-400 block">
-                REWARDS ACCRUED
-              </span>
-              <div className="mt-3 flex items-center gap-1.5 text-4xl sm:text-5xl font-black text-amber-500 tracking-tight">
-                <span className="text-3xl sm:text-4xl text-amber-400">⭐</span>
-                <span>{finStars}</span>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs font-bold text-slate-600 block">
-                  {finStars % 100} of 100 to next reward
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
+                  Rank
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-purple-50 border border-purple-200/70 text-purple-700">
+                  📊 Global
                 </span>
               </div>
-            </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mt-4">
-              Earned through streaks &amp; quizzes.
-            </p>
-          </div>
-
-          {/* Card 3: Active Discipline (Streak) */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
-            <div>
-              <span className="text-[11px] font-extrabold tracking-wider uppercase text-slate-400 block">
-                ACTIVE DISCIPLINE
-              </span>
-              <div className="mt-3 flex items-center gap-1.5 text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                <span className="text-3xl sm:text-4xl">🔥</span>
-                <span>{streak} {streak === 1 ? "Day" : "Days"}</span>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs font-bold text-slate-600 block">
-                  Current Streak: {streak} {streak === 1 ? "Day" : "Days"}
-                </span>
-              </div>
-            </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mt-4">
-              Log in tomorrow to extend streak.
-            </p>
-          </div>
-
-          {/* Card 4: Cohort Standing */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
-            <div>
-              <span className="text-[11px] font-extrabold tracking-wider uppercase text-slate-400 block">
-                COHORT STANDING
-              </span>
-              <div className="mt-3 text-4xl sm:text-5xl font-black text-purple-700 tracking-tight">
+              <div className="text-2xl sm:text-3xl font-black text-purple-700 tracking-tight whitespace-nowrap">
                 #{rank}
               </div>
-              <div className="mt-3">
-                <span className="inline-flex items-center px-2.5 py-0.5 bg-purple-50 border border-purple-200/80 rounded-full text-purple-700 font-extrabold text-xs">
-                  Beginner Tier Leader
-                </span>
-              </div>
             </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed mt-4">
-              Rank recalculated every Sunday.
+            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
+              Leaderboard standing
             </p>
-          </div>
+          </Link>
         </div>
 
         {/* 3. Full-Width 52-Week Learning Activity & Consistency Heatmap */}

@@ -30,6 +30,8 @@ def test_get_user_profile(client):
     assert "career_stage" in data
     assert "financial_level" in data
     assert "bio" in data
+    assert "location" in data
+    assert data["location"] == "Nagpur, IN"
     assert "fin_score" in data
     assert "finscore" in data
     assert data["finscore"] == data["fin_score"]
@@ -50,7 +52,8 @@ def test_update_user_profile(client):
         "username": "rashi_test",
         "career_stage": "Student",
         "financial_level": "Beginner (Level 1) - Starting with basics",
-        "bio": "Testing user profile updates"
+        "bio": "Testing user profile updates",
+        "location": "Mumbai, IN"
     }
     response = client.patch("/api/v1/users/me", json=update_payload)
     assert response.status_code == 200
@@ -58,6 +61,7 @@ def test_update_user_profile(client):
     assert data["username"] == "rashi_test"
     assert data["career_stage"] == "Student"
     assert data["bio"] == "Testing user profile updates"
+    assert data["location"] == "Mumbai, IN"
 
 
 def test_update_invalid_username(client):
