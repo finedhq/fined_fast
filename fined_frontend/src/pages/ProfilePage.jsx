@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiSettings, FiShare2, FiCheck, FiTrendingUp } from "react-icons/fi";
+import { FiSettings, FiShare2, FiCheck, FiTrendingUp, FiInfo } from "react-icons/fi";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getUserProfile, updateUserProfile } from "../services/api";
 import { useUserProfile } from "../context/UserProfileContext";
 import EditProfileModal from "../components/EditProfileModal";
+import MetricTooltip from "../components/MetricTooltip";
 
 const COLOR_LEVELS = {
   0: "bg-slate-100",
@@ -112,23 +113,23 @@ function ProfileSkeleton() {
           </div>
         </div>
 
-        {/* 2. Four Metric Cards Skeleton */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-3 sm:p-5 flex flex-col justify-between min-h-[90px] sm:min-h-[110px]"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="h-3 w-14 sm:w-18 bg-slate-200 rounded-md" />
-                  <div className="h-3.5 w-8 sm:w-10 bg-slate-100 rounded-full" />
+        {/* 2. Unified Metric Banner Skeleton */}
+        <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-4 w-24 bg-slate-200 rounded-md" />
+                    <div className="h-4 w-4 bg-slate-100 rounded-full" />
+                  </div>
+                  <div className="h-8 w-20 bg-slate-200 rounded-lg mt-2 mb-2" />
+                  <div className="h-3 w-4/5 bg-slate-100 rounded-md mb-4" />
                 </div>
-                <div className="h-6 sm:h-7 w-20 sm:w-24 bg-slate-200 rounded-lg my-1" />
+                <div className="h-8 w-28 bg-slate-100 rounded-full" />
               </div>
-              <div className="h-2.5 w-3/4 bg-slate-100 rounded-md mt-1" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* 3. Heatmap Skeleton */}
@@ -167,6 +168,26 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [hoveredTooltip, setHoveredTooltip] = useState(null);
+
+  const toggleTooltip = (key) => {
+    setActiveTooltip((prev) => (prev === key ? null : key));
+  };
+
+  const isTooltipVisible = (key) => {
+    return hoveredTooltip === key || activeTooltip === key;
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      setActiveTooltip(null);
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, []);
 
   // Fetch dynamic user profile from backend on mount
   useEffect(() => {
@@ -402,106 +423,164 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 2. Standardized 4-Metric Cards Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 mb-5 sm:mb-6">
-          {/* Card 1: FinScore */}
-          <Link
-            to="/courses"
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
-                  FinScore
-                </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-emerald-50 border border-emerald-200/70 text-emerald-700">
-                  <FiTrendingUp size={11} />
-                  <span>{finScore > 0 ? "Active" : "New"}</span>
-                </span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-black text-[#0047AB] tracking-tight whitespace-nowrap">
-                {finScore}
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
-              Consistency rating
-            </p>
-          </Link>
+        {/* 2. Unified Rewards Metric Banner (White Theme) */}
+        <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
+            {/* Card 1: FinScore */}
+            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <img src="/dash-finscore.svg" alt="FinScore Icon" className="w-[18px] h-[18px] object-contain" />
+                    <span>FinScore</span>
+                  </div>
+                  <MetricTooltip
+                    metricKey="finscore"
+                    position="col1"
+                    activeKey={activeTooltip}
+                    hoveredKey={hoveredTooltip}
+                    onToggle={toggleTooltip}
+                    onHover={setHoveredTooltip}
+                  />
+                </div>
 
-          {/* Card 2: FinStars Balance */}
-          <Link
-            to="/rewards"
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
-                  <span className="inline sm:hidden">FinStars</span>
-                  <span className="hidden sm:inline">FinStars Balance</span>
-                </span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-amber-50 border border-amber-200/70 text-amber-600">
-                  {finStars % 100}/100
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-xl sm:text-2xl text-amber-500">⭐</span>
-                <span className="text-2xl sm:text-3xl font-black text-slate-900">{finStars}</span>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
-              {finStars % 100} of 100 to reward
-            </p>
-          </Link>
+                <div className="flex items-center gap-2 mt-3 mb-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">{finScore}</span>
+                  {finScore > 0 && (
+                    <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                      <FiTrendingUp size={12} /> +20
+                    </span>
+                  )}
+                </div>
 
-          {/* Card 3: Current Streak */}
-          <Link
-            to="/courses"
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
-                  <span className="inline sm:hidden">Streak</span>
-                  <span className="hidden sm:inline">Current Streak</span>
-                </span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-orange-50 border border-orange-200/70 text-orange-600">
-                  Best: {personalBest || streak}d
-                </span>
+                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                  Overall financial knowledge &amp; consistency score.
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-xl sm:text-2xl">🔥</span>
-                <span className="text-2xl sm:text-3xl font-black text-slate-900">
-                  {streak} {streak === 1 ? 'Day' : 'Days'}
-                </span>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
-              Best: {personalBest || streak} Days
-            </p>
-          </Link>
 
-          {/* Card 4: Rank */}
-          <Link
-            to="/leaderboard"
-            className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-slate-300 p-3 sm:p-5 flex flex-col justify-between transition group cursor-pointer block select-none"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-1 mb-1.5">
-                <span className="text-[11px] font-bold tracking-wide uppercase text-slate-500 truncate">
-                  Rank
-                </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 bg-purple-50 border border-purple-200/70 text-purple-700">
-                  📊 Global
-                </span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-black text-purple-700 tracking-tight whitespace-nowrap">
-                #{rank}
+              <div>
+                <Link
+                  to="/courses"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                >
+                  Boost Score &rarr;
+                </Link>
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate mt-1">
-              Leaderboard standing
-            </p>
-          </Link>
+
+            {/* Card 2: FinStars Balance */}
+            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <img src="/dash-finstar.svg" alt="FinStar Icon" className="w-[18px] h-[18px] object-contain" />
+                    <span>FinStars Balance</span>
+                  </div>
+                  <MetricTooltip
+                    metricKey="finstars"
+                    position="col2"
+                    activeKey={activeTooltip}
+                    hoveredKey={hoveredTooltip}
+                    onToggle={toggleTooltip}
+                    onHover={setHoveredTooltip}
+                  />
+                </div>
+
+                <div className="mt-3 mb-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">{finStars}</span>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                  Exchange your FinStars for rewards and coupons.
+                </p>
+              </div>
+
+              <div>
+                <Link
+                  to="/rewards"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                >
+                  Redeem Now &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 3: Rank */}
+            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <img src="/dash-rank.png" alt="Rank Icon" className="w-[18px] h-[18px] object-contain" />
+                    <span>Rank</span>
+                  </div>
+                  <MetricTooltip
+                    metricKey="rank"
+                    position="col3"
+                    activeKey={activeTooltip}
+                    hoveredKey={hoveredTooltip}
+                    onToggle={toggleTooltip}
+                    onHover={setHoveredTooltip}
+                  />
+                </div>
+
+                <div className="mt-3 mb-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">#{rank}</span>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                  Your current standing among all active learners!
+                </p>
+              </div>
+
+              <div>
+                <Link
+                  to="/leaderboard"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                >
+                  View Leaderboard &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Card 4: Current Streak */}
+            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <img src="/dash-fire.png" alt="Streak Icon" className="w-[18px] h-[18px] object-contain" />
+                    <span>Current Streak</span>
+                  </div>
+                  <MetricTooltip
+                    metricKey="streak"
+                    position="col4"
+                    activeKey={activeTooltip}
+                    hoveredKey={hoveredTooltip}
+                    onToggle={toggleTooltip}
+                    onHover={setHoveredTooltip}
+                  />
+                </div>
+
+                <div className="mt-3 mb-1">
+                  <span className="text-3xl font-black text-slate-900 tracking-tight">
+                    {streak} {streak === 1 ? 'Day' : 'Days'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                  Personal Best: <strong className="font-bold text-slate-700">{personalBest || streak} Days</strong>. Keep learning daily!
+                </p>
+              </div>
+
+              <div>
+                <Link
+                  to="/courses"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                >
+                  Keep Streak &rarr;
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* 3. Full-Width 52-Week Learning Activity & Consistency Heatmap */}
