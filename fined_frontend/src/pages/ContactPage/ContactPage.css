@@ -17,7 +17,7 @@
   min-height: 100vh;
   background: linear-gradient(180deg, #F7F4FF 0%, #F8F7FA 260px, #FFFFFF 600px);
   color: #171321;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Nunito', sans-serif;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -47,7 +47,7 @@
 }
 
 .contact-hero-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 800;
   line-height: 1.18;
@@ -131,7 +131,7 @@
 }
 
 .contact-email-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 19px;
   font-weight: 750;
   color: #171321;
@@ -178,7 +178,7 @@
 }
 
 .contact-email-link {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 15.5px;
   font-weight: 700;
   color: #4100BC;
@@ -201,6 +201,7 @@
   background: #FFFFFF;
   border: 1px solid #E6E1EC;
   color: #171321;
+  font-family: 'Manrope', sans-serif;
   font-size: 12.5px;
   font-weight: 600;
   padding: 6px 12px;
@@ -232,7 +233,7 @@
 }
 
 .contact-direct-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 11.5px;
   font-weight: 750;
   color: #625D6D;
@@ -271,7 +272,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px 8px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 15px;
   font-weight: 700;
 }
@@ -320,7 +321,7 @@
 }
 
 .contact-hours-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 11px;
   font-weight: 750;
   color: #625D6D;
@@ -329,7 +330,7 @@
 }
 
 .contact-hours-text {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   color: #171321;
@@ -360,7 +361,7 @@
 }
 
 .contact-form-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 22px;
   font-weight: 800;
   color: #171321;
@@ -382,7 +383,7 @@
 
 /* Topic Pills */
 .contact-topic-pills-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   color: #171321;
@@ -402,7 +403,7 @@
   border: 1px solid #E6E1EC;
   background: #FFFFFF;
   color: #625D6D;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
@@ -430,7 +431,7 @@
 }
 
 .contact-form-label {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   color: #171321;
@@ -460,7 +461,7 @@
   background: #F8F7FA;
   border: 1.5px solid #E6E1EC;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 15px;
   color: #171321;
   outline: none;
@@ -484,7 +485,7 @@
   background: #F8F7FA;
   border: 1.5px solid #E6E1EC;
   border-radius: 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 15px;
   color: #171321;
   outline: none;
@@ -517,7 +518,7 @@
   color: #FFFFFF;
   border: none;
   border-radius: 14px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-size: 15.5px;
   font-weight: 750;
   cursor: pointer;

@@ -865,7 +865,8 @@ function Hero() {
           </div>
         </RevealOnScroll>
 
-        {authors.length > 0 && (
+        {/* Experts / Authors Section (Temporarily commented out until permissions & credentials confirmation)
+        authors.length > 0 && (
           <div className="authors-marquee-container">
             <RevealOnScroll delay={150}>
               <div className="authors-marquee-header">
@@ -890,7 +891,8 @@ function Hero() {
               ))}
             </div>
           </div>
-        )}
+        )
+        */}
       </section>
 
       {/* POPULAR COURSES SECTION
