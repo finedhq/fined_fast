@@ -11,8 +11,16 @@ router = APIRouter(prefix="/cards", tags=["Cards"])
 async def get_cards_by_module(moduleId: str, user: AuthUser = Depends(get_current_user)):
     """Get all cards for a module"""
     try:
+        from app.repositories.course_repo import course_repo
+        from app.services.course_visibility import can_view_course, can_view_module
+        module = course_repo.get_module_by_id(moduleId)
+        course = course_repo.get_by_id(module["course_id"]) if module and module.get("course_id") else None
+        if (course and not can_view_course(course, user)) or (module and not can_view_module(module, user)):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cards not found")
         cards = course_service.get_cards(moduleId)
         return cards
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -21,10 +29,18 @@ async def get_cards_by_module(moduleId: str, user: AuthUser = Depends(get_curren
 
 @router.delete("/{id}")
 async def delete_card(id: str, user: AuthUser = Depends(require_admin)):
-    """Delete a card"""
+    """Delete a card (draft courses, or a module not released yet)"""
     try:
+        from app.repositories.course_repo import course_repo
+        from app.services.course_authoring import require_draft_module
+        card = course_repo.get_card(id)
+        if not card:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+        require_draft_module(card["module_id"])
         course_service.delete_card(id)
         return {"message": "Card deleted successfully."}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -50,7 +66,9 @@ async def add_card(
     video_file: Optional[UploadFile] = File(None),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin adds a course card with optional multipart media uploads to Supabase storage"""
+    """Admin adds a course card with optional multipart media uploads to Supabase storage (draft courses only)"""
+    from app.services.course_authoring import require_draft_module
+    require_draft_module(moduleId)
     try:
         media_urls = {}
         from app.integrations.storage import upload_to_supabase

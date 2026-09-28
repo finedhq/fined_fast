@@ -11,6 +11,12 @@ from app.integrations.storage import upload_to_supabase
 from app.integrations.supabase_client import supabase
 from app.dependencies import get_current_user, get_optional_current_user, require_admin, AuthUser
 from app.models.card_data import validate_card_data
+from app.repositories.course_repo import course_repo
+from app.services.course_visibility import (
+    COURSE_STATUSES, can_view_course, can_view_module, course_can_complete, course_status, is_listed,
+    is_released, visible_modules,
+)
+from app.services.course_authoring import checked_slug, require_draft_module, require_free_slug, slug_from_title
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
@@ -22,6 +28,21 @@ def _is_valid_uuid(value: str) -> bool:
         return True
     except (ValueError, AttributeError, TypeError):
         return False
+
+
+async def _hidden_from(course_id: str, user: AuthUser) -> bool:
+    """True if course_id is a course this user may not open (a draft, for non-admins)."""
+    course = await asyncio.to_thread(course_repo.get_by_id, course_id)
+    return course is not None and not can_view_course(course, user)
+
+
+async def _hidden_module_from(module_id: str, user: AuthUser) -> bool:
+    """True if the module is not released yet, or belongs to a course this
+    user may not open (both only for non-admins)."""
+    module = await asyncio.to_thread(course_repo.get_module_by_id, module_id)
+    if module is None:
+        return False
+    return not can_view_module(module, user) or await _hidden_from(module.get("course_id"), user)
 
 # --- Request Schemas ---
 
@@ -51,9 +72,16 @@ async def add_course(
     modules_count: str = Form(...),
     duration: str = Form(...),
     thumbnail_file: Optional[UploadFile] = File(None),
+    course_status_value: str = Form("draft", alias="status"),
     user: AuthUser = Depends(require_admin)
 ):
-    """Admin: Adds a new course pathway with optional thumbnail upload"""
+    """Admin: Adds a new course pathway with optional thumbnail upload.
+    New courses start as drafts (hidden) unless a status is sent."""
+    if course_status_value not in COURSE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"status must be one of {', '.join(COURSE_STATUSES)}",
+        )
     try:
         thumbnail_url = ""
         if thumbnail_file:
@@ -72,14 +100,18 @@ async def add_course(
         slug = re.sub(r'[\s_-]+', '-', slug)
         
         # Insert course row
-        res = await asyncio.to_thread(lambda: supabase.from_("courses").insert([{
+        row = {
             "title": title,
             "description": description,
             "modules_count": int(modules_count),
             "duration": int(duration),
             "thumbnail_url": thumbnail_url,
-            "slug": slug
-        }]).execute())
+            "slug": slug,
+            "status": course_status_value,
+        }
+        if course_status_value == "published":
+            row["published_at"] = datetime.utcnow().isoformat() + "Z"
+        res = await asyncio.to_thread(lambda: supabase.from_("courses").insert([row]).execute())
         
         return res.data[0] if res.data else {}
     except Exception as e:
@@ -91,10 +123,22 @@ async def add_course(
 
 @router.get("/getall")
 async def get_all_courses():
-    """Fetch all courses — public"""
+    """Fetch all published courses — public"""
     try:
-        res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").order("created_at", desc=True).execute())
-        return res.data or []
+        return await asyncio.to_thread(course_repo.get_listed)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch courses: {str(e)}"
+        )
+
+
+@router.get("/admin/all")
+async def get_all_courses_admin(user: AuthUser = Depends(require_admin)):
+    """Admin: every course, any status, newest first"""
+    try:
+        courses = await asyncio.to_thread(course_repo.get_all)
+        return [{**c, "status": course_status(c)} for c in courses]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -130,6 +174,10 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
             return {"error": "No ongoing course found for this user."}
             
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute())
+        # Only a published course is "continue learning" — not a draft, and not
+        # an archived course that was replaced (it still opens by old links).
+        if course_res and course_res.data and not is_listed(course_res.data[0]):
+            return {"error": "No ongoing course found for this user."}
         return course_res.data[0] if course_res and course_res.data else {}
     except Exception as e:
         raise HTTPException(
@@ -146,11 +194,12 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
     """
     try:
         # Sequential database requests (Thread-safe)
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("slug", course_slug).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("slug", course_slug).execute())
         if not course_res.data and _is_valid_uuid(course_slug):
-            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, description, thumbnail_url").eq("id", course_slug).execute())
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_slug).execute())
 
-        if not course_res.data:
+        # A draft looks exactly like a missing course to non-admins
+        if not course_res.data or not can_view_course(course_res.data[0], user):
             return {"title": "", "description": "", "data": []}
             
         course_id = course_res.data[0]["id"]
@@ -158,10 +207,10 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
         course_description = course_res.data[0].get("description", "")
         thumbnail_url = course_res.data[0].get("thumbnail_url", "")
             
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, description").eq("course_id", course_id).order("order_index").execute())
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course_id).order("order_index").execute())
         progress_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status").eq("email", user.email).eq("progress_type", "card").execute())
         
-        modules = modules_res.data or []
+        modules = visible_modules(modules_res.data or [], user)  # modules not released yet stay hidden
         if not modules:
             return {"title": course_title, "description": course_description, "data": []}
             
@@ -206,7 +255,13 @@ async def get_a_course(course_slug: str, body: GetCourseRequest, user: AuthUser 
                 "cards": module_cards
             })
             
-        return {"title": course_title, "description": course_description, "thumbnail_url": thumbnail_url, "data": formatted_data}
+        result = {"title": course_title, "description": course_description, "thumbnail_url": thumbnail_url, "data": formatted_data}
+        # A course released module by module says how many modules it will have,
+        # so the page's certificate waits for all of them (sent only when set).
+        planned = course_res.data[0].get("planned_modules")
+        if planned is not None:
+            result["planned_modules"] = planned
+        return result
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -226,7 +281,14 @@ DEFAULT_FINSTARS: dict[str, int] = {
     "interactive": 2,
     "quiz": 10,
     "completion": 0,
+    "narrative": 0,
+    "hero": 0,
+    "model": 10,
 }
+
+# For these card types the server decides the stars (from the card itself) and
+# ignores the amount the browser sends. Older types keep today's behaviour.
+SERVER_STARS_TEMPLATES = {"narrative", "hero", "model"}
 
 def get_card_finstars(card_data: dict, card_template: str) -> int:
     """Return allotted_finstars for a card, falling back to the template default."""
@@ -236,8 +298,13 @@ def get_card_finstars(card_data: dict, card_template: str) -> int:
     return int(val)
 
 
-async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str):
+async def _noop():
+    return None
+
+
+async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str, write_ongoing: bool = True, viewer: AuthUser = None):
     # 1. Parallel lookups: cards, user progress, course modules, ongoing state
+    #    (draft previews don't move the viewer's "continue learning" pointer)
     cards_res, progress_res, modules_res, _ = await asyncio.gather(
         asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute()),
         asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, status, user_answer").match({
@@ -245,18 +312,20 @@ async def _build_bundle_response(course_id: str, course_title: str, course_slug:
             "module_id": module_id,
             "progress_type": "card"
         }).execute()),
-        asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("course_id", course_id).order("order_index").execute()),
+        asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course_id).order("order_index").execute()),
         asyncio.to_thread(lambda: supabase.from_("users").update({
             "ongoing_module_id": module_id,
             "ongoing_course_id": course_id
-        }).eq("email", user_email).execute())
+        }).eq("email", user_email).execute()) if write_ongoing else _noop()
     )
 
     all_cards = cards_res.data or []
     progress_map = {row["card_id"]: row for row in (progress_res.data or [])}
 
-    # 2. Adjacent modules navigation lookup
+    # 2. Adjacent modules navigation lookup (a module not released yet is never
+    #    "Up next" for learners; admins previewing it still get their bearings)
     modules = modules_res.data or []
+    modules = [m for m in modules if m["id"] == module_id or can_view_module(m, viewer)]
     module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
     prev_module = modules[module_index - 1] if module_index > 0 else None
     next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
@@ -331,26 +400,33 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
     """
     try:
         # Resolve course_slug
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("slug", course_slug).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("slug", course_slug).execute())
         if not course_res.data and _is_valid_uuid(course_slug):
-            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("id", course_slug).execute())
-        if not course_res.data:
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_slug).execute())
+        if not course_res.data or not can_view_course(course_res.data[0], user):
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
         course_title = course_res.data[0].get("title")
         c_slug_real = course_res.data[0].get("slug")
 
         # Resolve module_slug
-        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("slug", module_slug).execute())
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("slug", module_slug).execute())
         if not module_res.data and _is_valid_uuid(module_slug):
-            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index").eq("id", module_slug).execute())
+            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("id", module_slug).execute())
         if not module_res.data:
+            raise HTTPException(status_code=404, detail="Module not found")
+        module_course_id = module_res.data[0].get("course_id")
+        if module_course_id != course_id and await _hidden_from(module_course_id, user):
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
         module_title = module_res.data[0].get("title")
         module_order = module_res.data[0].get("order_index", 0)
+        module_row = await asyncio.to_thread(course_repo.get_module_by_id, module_id)
+        if not can_view_module(module_row, user):
+            raise HTTPException(status_code=404, detail="Module not found")
 
-        return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email)
+        is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
+        return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email, write_ongoing=not is_draft, viewer=user)
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -383,13 +459,19 @@ async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: Au
         c_id = module_res.data[0]["course_id"]
 
         # Resolve course to get details
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id, title, slug").eq("id", c_id).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", c_id).execute())
         if not course_res.data:
             raise HTTPException(status_code=404, detail="Course not found")
+        if not can_view_course(course_res.data[0], user):
+            raise HTTPException(status_code=404, detail="Card not found")
+        module_row = await asyncio.to_thread(course_repo.get_module_by_id, m_id)
+        if not can_view_module(module_row, user):
+            raise HTTPException(status_code=404, detail="Card not found")
         c_title = course_res.data[0].get("title")
         c_slug_real = course_res.data[0].get("slug")
 
-        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email)
+        is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
+        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user)
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -407,12 +489,13 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
     """
     try:
         # Resolve slugs to IDs
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("slug", course_slug).execute())
+        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("slug", course_slug).execute())
         if not course_res.data and _is_valid_uuid(course_slug):
-            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("id").eq("id", course_slug).execute())
-        if not course_res.data:
+            course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_slug).execute())
+        if not course_res.data or not can_view_course(course_res.data[0], user):
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
+        is_draft = not is_listed(course_res.data[0])  # draft or archived: never "continue learning"
 
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_slug).execute())
         if not module_res.data and _is_valid_uuid(module_slug):
@@ -421,12 +504,15 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
 
-        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_slug).execute())
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("slug", card_slug).execute())
         if not card_res.data and _is_valid_uuid(card_slug):
-            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_slug).execute())
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res.data[0]["card_id"]
+        # Slugs are looked up globally, so also check the course the card really belongs to
+        if await _hidden_module_from(module_id, user) or await _hidden_module_from(card_res.data[0].get("module_id"), user):
+            raise HTTPException(status_code=404, detail="Card not found")
 
         # 1. Fetch current cards, user progress, and update active state sequentially (Thread-safe)
         cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute())
@@ -436,11 +522,13 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
             "card_id": card_id,
             "progress_type": "card"
         }).limit(1).execute())
-        await asyncio.to_thread(lambda: supabase.from_("users").update({
-            "ongoing_module_id": module_id,
-            "ongoing_course_id": course_id
-        }).eq("email", user.email).execute())
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, order_index").eq("course_id", course_id).order("order_index").execute())
+        module_row = await asyncio.to_thread(course_repo.get_module_by_id, module_id)
+        if not is_draft and is_released(module_row):
+            await asyncio.to_thread(lambda: supabase.from_("users").update({
+                "ongoing_module_id": module_id,
+                "ongoing_course_id": course_id
+            }).eq("email", user.email).execute())
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course_id).order("order_index").execute())
         
         all_cards = cards_res.data or []
         current_index = next((i for i, c in enumerate(all_cards) if c["card_id"] == card_id), -1)
@@ -450,8 +538,10 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
         current_card = all_cards[current_index]
         user_progress = progress_res.data[0] if progress_res and progress_res.data else {}
         
-        # 2. Adjacent modules navigation lookup
-        modules = modules_res.data or []
+        # 2. Adjacent modules navigation lookup (modules not released yet are skipped for learners)
+        modules = [m for m in (modules_res.data or []) if m["id"] == module_id or can_view_module(m, user)]
+        # same fields as before (this route never returned module slugs)
+        modules = [{k: m.get(k) for k in ("id", "title", "order_index")} for m in modules]
         module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
         current_module_title = modules[module_index]["title"] if module_index != -1 else None
         current_module_order = modules[module_index]["order_index"] if module_index != -1 else 0
@@ -563,17 +653,24 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             raise HTTPException(status_code=404, detail="Module not found")
         module_id = module_res.data[0]["id"]
 
-        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("slug", card_id).execute())
+        card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("slug", card_id).execute())
         if not card_res_id.data and _is_valid_uuid(card_id):
-            card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").eq("card_id", card_id).execute())
+            card_res_id = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, module_id").eq("card_id", card_id).execute())
         if not card_res_id.data:
             raise HTTPException(status_code=404, detail="Card not found")
         card_id = card_res_id.data[0]["card_id"]
-        
+
+        # Non-admins cannot save progress into a draft course
+        if (await _hidden_from(course_id, user)
+                or await _hidden_module_from(module_id, user)
+                or await _hidden_module_from(card_res_id.data[0].get("module_id"), user)):
+            raise HTTPException(status_code=404, detail="Card not found")
+
         # 1. Fetch card details and user scoring metrics concurrently
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("card_id", card_id).single().execute())
         user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute())
-        existing_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id").match({
+        # "status" is needed so a card completed before never pays stars/bonuses again
+        existing_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id, status").match({
             "email": user.email,
             "module_id": module_id,
             "card_id": card_id,
@@ -583,7 +680,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         card_data = card_res.data
         db_user = user_res.data[0] if user_res and user_res.data else {}
         existing_progress = existing_res.data[0] if existing_res and existing_res.data else None
-        
+
         # Parse answer tag if a valid option index is provided
         options_tags = []
         if isinstance(card_data.get("options_tags"), str):
@@ -620,9 +717,12 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             
         # 3. Update stars if earned (and only if first time completing)
         was_already_completed = existing_progress and existing_progress.get("status") == "completed"
-        if body.finStars and body.status == "completed" and not was_already_completed:
+        stars_earned = body.finStars
+        if card_data.get("card_template") in SERVER_STARS_TEMPLATES:
+            stars_earned = get_card_finstars(card_data.get("card_data") or {}, card_data["card_template"])
+        if stars_earned and body.status == "completed" and not was_already_completed:
             current_stars = db_user.get("fin_stars") or 0
-            current_stars += body.finStars
+            current_stars += stars_earned
             await asyncio.to_thread(lambda: supabase.from_("users").update({"fin_stars": current_stars}).eq("email", user.email).execute())
             
         # 4. Fetch module details to calculate module completion progress
@@ -673,10 +773,14 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
                     "description": "+20 for completing module"
                 })
                 
-        # 6. Check full Course completion & evaluate quiz score
-        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("course_id", course_id).order("order_index").execute())
+        # 6. Check full Course completion & evaluate quiz score — only once the
+        #    course is whole (every planned module released), so a course that
+        #    grows week by week never pays its completion reward early or twice
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course_id).order("order_index").execute())
         modules = modules_res.data or []
         module_ids = [m["id"] for m in modules]
+        course_row = await asyncio.to_thread(course_repo.get_by_id, course_id)
+        course_whole = course_can_complete(course_row, modules)
         
         all_course_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id").in_("module_id", module_ids).execute())
         completed_course_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id").match({
@@ -686,7 +790,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             "status": "completed"
         }).execute())
         
-        if len(all_course_res.data or []) == len(completed_course_res.data or []) and not was_already_completed and course_count < 5:
+        if course_whole and len(all_course_res.data or []) == len(completed_course_res.data or []) and not was_already_completed and course_count < 5:
             # Course completed! Fetch answers and correct keys to compute score
             answers_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("user_answer, card_id").match({"email": user.email, "course_id": course_id, "progress_type": "card"}).execute())
             keys_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, card_data").in_("module_id", module_ids).execute())
@@ -755,6 +859,8 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             "module_progress": module_progress,
             "module_total_cards": module_total_cards
         }
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         with open("error_log.txt", "a") as f:
@@ -802,37 +908,55 @@ class AddCardRequest(BaseModel):
     card_type: str
     title: str  # admin-facing label, shown in the admin card list
     card_data: dict
- 
- 
-@router.post("/cards/add")
-async def add_card(body: AddCardRequest):
-    """
-    Admin: adds a new card of any type to a module.
-    card_data is validated against the schema registered for card_type
-    before it is written to the database.
-    """
+    slug: Optional[str] = None  # defaults to one made from the title
+
+
+class EditCardRequest(BaseModel):
+    """Every field optional: send only what changes. The card type never changes."""
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    order_index: Optional[int] = None
+    card_data: Optional[dict] = None
+
+
+def _validated_card_data(card_type: str, raw: dict) -> dict:
     try:
-        validated_data = validate_card_data(body.card_type, body.card_data)
+        return validate_card_data(card_type, raw)
     except ValidationError as e:
+        # e.g. "steps #1 › heading: Field required" (list positions counted from 1, like the admin form)
+        problems = "; ".join(
+            f"{' › '.join(f'#{p + 1}' if isinstance(p, int) else str(p) for p in err['loc']) or 'card_data'}: "
+            f"{err['msg'].removeprefix('Value error, ')}"
+            for err in e.errors(include_url=False, include_context=False)
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid card_data for type '{body.card_type}': {e.errors()}",
+            detail=f"Invalid card_data for type '{card_type}': {problems}",
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
- 
+
+
+@router.post("/cards/add")
+async def add_card(body: AddCardRequest, user: AuthUser = Depends(require_admin)):
+    """
+    Admin: adds a new card of any type to a module of a DRAFT course.
+    card_data is validated against the schema registered for card_type
+    before it is written to the database.
+    """
+    validated_data = _validated_card_data(body.card_type, body.card_data)
+
+    await asyncio.to_thread(require_draft_module, body.module_id)
+    slug = checked_slug(body.slug) if body.slug else slug_from_title(body.title)
+    await asyncio.to_thread(require_free_slug, slug)
+
     try:
-        import re
-        slug = body.title.lower().strip()
-        slug = re.sub(r'[^\w\s-]', '', slug)
-        slug = re.sub(r'[\s_-]+', '-', slug)
-        
         res = await asyncio.to_thread(
             lambda: supabase.from_("cards")
             .insert([{
                 "module_id": body.module_id,
                 "order_index": body.order_index,
-                "card_template": body.card_type,  
+                "card_template": body.card_type,
                 "title": body.title,
                 "slug": slug,
                 "card_data": validated_data,
@@ -844,4 +968,42 @@ async def add_card(body: AddCardRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to add card: {str(e)}",
+        )
+
+
+@router.put("/cards/{card_id}")
+async def edit_card(card_id: str, body: EditCardRequest, user: AuthUser = Depends(require_admin)):
+    """
+    Admin: edits a card of a DRAFT course in place. The card keeps its id,
+    so any progress already recorded against it stays attached.
+    """
+    if not _is_valid_uuid(card_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+    card = await asyncio.to_thread(course_repo.get_card, card_id)
+    if not card:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+    await asyncio.to_thread(require_draft_module, card["module_id"])
+
+    changes: Dict[str, Any] = {}
+    if body.title is not None:
+        changes["title"] = body.title
+    if body.order_index is not None:
+        changes["order_index"] = body.order_index
+    if body.slug is not None and body.slug != card.get("slug"):
+        changes["slug"] = checked_slug(body.slug)
+        await asyncio.to_thread(require_free_slug, changes["slug"], card_id)
+    if body.card_data is not None:
+        changes["card_data"] = _validated_card_data(card["card_template"], body.card_data)
+    if not changes:
+        return card
+
+    try:
+        res = await asyncio.to_thread(
+            lambda: supabase.from_("cards").update(changes).eq("card_id", card_id).execute()
+        )
+        return res.data[0] if res.data else {**card, **changes}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to edit card: {str(e)}",
         )

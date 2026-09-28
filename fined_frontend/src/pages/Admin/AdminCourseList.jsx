@@ -4,6 +4,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import SmartImage from "../../uiComponents/SmartImage";
 
+// draft = hidden from learners; published = live; archived = unlisted, opens by URL
+const STATUS_BADGE = {
+  draft: { label: "Draft", className: "bg-amber-100 text-amber-800", hint: "Hidden — only admins can open it" },
+  published: { label: "Published", className: "bg-green-100 text-green-800", hint: "Live — listed for everyone" },
+  archived: { label: "Archived", className: "bg-gray-200 text-gray-700", hint: "Not listed — still opens by direct link" },
+};
+
 const AdminCourseList = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +20,8 @@ const AdminCourseList = () => {
 
   const fetchCourses = async () => {
     try {
-      const res = await instance.get("/courses/getall");
+      // admin endpoint: every course, including drafts and archived ones
+      const res = await instance.get("/courses/admin/all");
       setCourses(res.data);
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -100,6 +108,17 @@ const AdminCourseList = () => {
                       Delete
                     </button>
                   </div>
+                  {(() => {
+                    const badge = STATUS_BADGE[course.status] || STATUS_BADGE.published;
+                    return (
+                      <p className="mb-3 flex items-center gap-2 text-xs text-gray-500">
+                        <span className={`px-2 py-0.5 rounded-full font-semibold ${badge.className}`}>
+                          {badge.label}
+                        </span>
+                        {badge.hint}
+                      </p>
+                    );
+                  })()}
                   <p className="text-gray-700 mb-5 line-clamp-3 text-sm flex-grow">
                     {course.description}
                   </p>

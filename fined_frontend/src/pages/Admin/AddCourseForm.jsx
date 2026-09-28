@@ -12,6 +12,7 @@ const AddCourseForm = () => {
     description: "",
     modules_count: "",
     duration: "",
+    status: "draft",
   });
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -47,9 +48,14 @@ const AddCourseForm = () => {
         description: "",
         modules_count: "",
         duration: "",
+        status: "draft",
       });
       setThumbnailFile(null);
-      setStatus("✅ Course successfully added!");
+      setStatus(
+        form.status === "published"
+          ? "✅ Course added and published — learners can see it now."
+          : `✅ Course added as ${form.status} — learners can't see it in course lists.`
+      );
     } catch (error) {
       console.error("❌ Error adding course:", error.response?.data || error.message);
       setStatus("Failed to add course.");
@@ -159,6 +165,28 @@ const AddCourseForm = () => {
               required
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 resize-y focus:ring-2 focus:ring-indigo-500"
             />
+          </div>
+
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              Visibility
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="draft">Draft — hidden, only admins can open it (recommended)</option>
+              <option value="published">Published — live for everyone immediately</option>
+              <option value="archived">Archived — not listed, opens only by direct link</option>
+            </select>
+            {form.status === "published" && (
+              <p className="mt-1 text-xs text-amber-700">
+                This course will appear on the Courses page, landing page, dashboard and sitemap as soon as you post it.
+              </p>
+            )}
           </div>
 
           <button

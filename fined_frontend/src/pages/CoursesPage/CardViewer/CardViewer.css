@@ -242,3 +242,39 @@
 .cv-card-box.cv-card-transitioning {
   opacity: 0;
 }
+
+/* Simple module loader (ModuleLoader.jsx) — shown before any module opens,
+   old or new course. Colours sit between the card player's and the new
+   module page's backgrounds. */
+.cv-simple-loader {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #fafbff;
+}
+
+.cv-simple-loader-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #e6e1ec;
+  border-top-color: #4100bc;
+  animation: cv-simple-spin 0.8s linear infinite;
+}
+
+.cv-simple-loader-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #625d6d;
+}
+
+@keyframes cv-simple-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-simple-loader-spinner { animation-duration: 2.4s; }
+}
