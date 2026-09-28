@@ -1,6 +1,7 @@
 # Database queries for user profile metrics
 
 from app.integrations.supabase_client import supabase
+from app.services.course_visibility import course_status, is_released
 
 class UserRepository:
 
@@ -317,11 +318,12 @@ class UserRepository:
         ongoing_course = None
         if ongoing_course_id:
             try:
-                c_res = supabase.from_("courses").select("id, title, slug").eq("id", ongoing_course_id).limit(1).execute()
-                if c_res.data:
+                c_res = supabase.from_("courses").select("*").eq("id", ongoing_course_id).limit(1).execute()
+                # a draft course is never shown as "ongoing" on the profile
+                if c_res.data and course_status(c_res.data[0]) != "draft":
                     course_row = c_res.data[0]
-                    m_res = supabase.from_("modules").select("id, order_index").eq("course_id", ongoing_course_id).order("order_index").execute()
-                    modules = m_res.data or []
+                    m_res = supabase.from_("modules").select("*").eq("course_id", ongoing_course_id).order("order_index").execute()
+                    modules = [m for m in (m_res.data or []) if is_released(m)]  # learners' view: released modules only
                     total_modules = len(modules)
 
                     completed_modules_count = 0

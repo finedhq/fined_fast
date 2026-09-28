@@ -23,6 +23,8 @@ const AdminArticleList = lazy(() => import("./pages/Admin/AdminArticleList"));
 const AdminArticleForm = lazy(() => import("./pages/Admin/AdminArticleForm"));
 const AdminNewsletter = lazy(() => import("./pages/Admin/AdminNewsletter"));
 const CardViewer = lazy(() => import("./pages/CoursesPage/CardViewer/CardViewer"));
+const ModulePagePreview = lazy(() => import("./pages/Admin/ModulePagePreview"));
+const AdminSources = lazy(() => import("./pages/Admin/AdminSources"));
 const AddCardForm = lazy(() => import("./pages/Admin/AddCardForm"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const CourseOverview = lazy(() => import("./pages/Courses/CourseOverview"));
@@ -30,6 +32,8 @@ const AddCourseForm = lazy(() => import("./pages/Admin/AddCourseForm"));
 const AdminCourseList = lazy(() => import("./pages/Admin/AdminCourseList"));
 const AdminModuleList = lazy(() => import("./pages/Admin/AdminModuleList"));
 const AddModuleForm = lazy(() => import("./pages/Admin/AddModuleForm"));
+const AdminModuleCards = lazy(() => import("./pages/Admin/AdminModuleCards"));
+const EditCardForm = lazy(() => import("./pages/Admin/EditCardForm"));
 const FinToolsPage = lazy(() => import("./pages/FinTools/FinToolsPage"));
 const ExpenseTracker = lazy(() => import("./pages/FinTools/ExpenseTracker/ExpenseTracker"));
 const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
@@ -62,6 +66,8 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                  {/* Admin preview of a new-course module page: full window, like /cards (no site navbar) */}
+                  <Route path="/admin/courses/:courseId/modules/:moduleId/preview" element={<AdminGuard><ModulePagePreview /></AdminGuard>} />
                   <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
                   <Route path="/lens" element={<Navigate to="/articles" replace />} />
                   <Route path="/" element={<MainLayout />}>
@@ -90,6 +96,9 @@ function App() {
                   <Route path="admin/courses" element={<AdminGuard><AdminCourseList /></AdminGuard>} />
                   <Route path="admin/courses/:courseId/modules" element={<AdminGuard><AdminModuleList /></AdminGuard>} />
                   <Route path="admin/courses/:courseId/modules/add" element={<AdminGuard><AddModuleForm /></AdminGuard>} />
+                  <Route path="admin/courses/:courseId/modules/:moduleId/cards" element={<AdminGuard><AdminModuleCards /></AdminGuard>} />
+                  <Route path="admin/courses/:courseId/modules/:moduleId/cards/:cardId/edit" element={<AdminGuard><EditCardForm /></AdminGuard>} />
+                  <Route path="admin/sources" element={<AdminGuard><AdminSources /></AdminGuard>} />
                   <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                   <Route path="courses/:courseSlug" element={<CourseOverview />} />
                   <Route path="fin-tools" element={<AuthenticationGuard component={FinToolsPage} />} />

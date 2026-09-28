@@ -137,9 +137,9 @@ class CourseService:
     def delete_course(self, course_id: str):
         course_repo.delete(course_id)
 
-    def add_module(self, course_id: str, title: str, description: str, order_index: int) -> dict:
-        slug = self._generate_slug(title)
-        return course_repo.insert_module(course_id, title, description, order_index, slug)
+    def add_module(self, course_id: str, title: str, description: str, order_index: int, slug: str | None = None, status: str | None = None) -> dict:
+        slug = slug or self._generate_slug(title)
+        return course_repo.insert_module(course_id, title, description, order_index, slug, status)
 
     def delete_module(self, module_id: str):
         course_repo.delete_module(module_id)

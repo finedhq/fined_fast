@@ -29,6 +29,11 @@ function AdminDashboard() {
       action: () => navigate("/admin/newsletters"),
     },
     {
+      label: "Content Sources",
+      icon: "🔗",
+      action: () => navigate("/admin/sources"),
+    },
+    {
       label: "Settings (Coming Soon)",
       icon: "⚙",
       action: null,

@@ -11,6 +11,7 @@ const AddModuleForm = () => {
     title: '',
     description: '',
     order_index: '',
+    slug: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -30,8 +31,10 @@ const AddModuleForm = () => {
     setLoading(true);
     setStatus("");
     try {
+      const { slug, ...rest } = form;
       await instance.post(`/modules/add/${courseId}`, {
-        ...form,
+        ...rest,
+        ...(slug.trim() ? { slug: slug.trim() } : {}),
         order_index: parseInt(form.order_index, 10)
       });
       setStatus("✅ Module added successfully!");
@@ -39,10 +42,12 @@ const AddModuleForm = () => {
         title: '',
         description: '',
         order_index: '',
+        slug: '',
       });
     } catch (err) {
       console.error("❌ Error adding module:", err.response?.data || err.message);
-      setStatus("Failed to add module. Please try again.");
+      const detail = err.response?.data?.detail;
+      setStatus(`Failed to add module. ${typeof detail === "string" ? detail : "Please try again."}`);
     } finally {
       setLoading(false);
     }
@@ -115,6 +120,25 @@ const AddModuleForm = () => {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
             />
+          </div>
+
+          <div>
+            <label htmlFor="slug" className="block mb-1 font-medium text-gray-700">
+              Slug (web address, optional)
+            </label>
+            <input
+              type="text"
+              name="slug"
+              id="slug"
+              placeholder="e.g., v2-why-the-stock-market-exists"
+              value={form.slug}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Left empty, it's made from the title. Module slugs must be unique across the whole site, so a new version of an
+              existing module needs its own slug (e.g. start with <code>v2-</code>). In a live course a new module starts hidden — release it from the module list when it's ready. Archived courses can't take new modules.
+            </p>
           </div>
 
           <button

@@ -289,7 +289,7 @@ class ArticleService:
         articles = article_repo.get_all_for_sitemap()
         authors = article_repo.get_all_authors()
         try:
-            courses = course_repo.get_all()
+            courses = course_repo.get_listed()
         except Exception:
             courses = []
 

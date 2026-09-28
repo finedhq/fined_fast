@@ -182,6 +182,59 @@ export function addCard(payload) {
   });
 }
 
+// ── Admin course authoring (draft courses only; the backend enforces it) ──
+
+export function editCard(cardId, changes) {
+  return request(`/courses/cards/${cardId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(changes),
+  });
+}
+
+export function deleteCard(cardId) {
+  return request(`/cards/${cardId}`, { method: "DELETE" });
+}
+
+export function getModuleCards(moduleId) {
+  return request(`/cards/${moduleId}/getall`, { method: "GET" });
+}
+
+export function getCourseModules(courseId) {
+  return request(`/modules/course/${courseId}`, { method: "GET" });
+}
+
+export function getAdminCourses() {
+  return request("/courses/admin/all", { method: "GET" });
+}
+
+// Admin-only list of content sources: the links behind facts and numbers in
+// course content (backend routes/sources.py). Learners never see these.
+export function getSources(moduleId) {
+  const query = moduleId ? `?module_id=${encodeURIComponent(moduleId)}` : "";
+  return request(`/sources${query}`, { method: "GET" });
+}
+
+export function addSource(source) {
+  return request("/sources", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(source),
+  });
+}
+
+export function editSource(sourceId, changes) {
+  return request(`/sources/${sourceId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(changes),
+  });
+}
+
+export function deleteSource(sourceId) {
+  return request(`/sources/${sourceId}`, { method: "DELETE" });
+}
+
 export function getModuleBundle(courseId, moduleId, email) {
   return request(`/courses/course/${courseId}/module/${moduleId}/bundle`, {
     method: "POST",

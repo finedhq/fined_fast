@@ -1,0 +1,118 @@
+/* App-only additions to the ported prototype stylesheet (scrolly.css).
+   Kept separate so scrolly.css stays a faithful copy of the prototype. */
+
+/* The site's global CSS (index.css and Tailwind's base) makes buttons and
+   inputs inherit the page font and line-height; the prototype's use the
+   browser defaults. Put the defaults back inside the module page so controls
+   measure exactly as in the prototype (class rules still set their own fonts). */
+.nc-root button,
+.nc-root input,
+.nc-root textarea,
+.nc-root select {
+  font: revert;
+  letter-spacing: normal;
+}
+
+.nc-root button {
+  font-family: var(--font-action);
+}
+
+/* The tooltip's portal wrapper carries .nc-root for the design tokens, but
+   must not take the page's background / full height. */
+.nc-root.nc-root--portal {
+  min-height: 0;
+  background: none;
+  position: static;
+}
+
+/* Back arrow to the course page (decision 7b) — the only addition to the
+   prototype's top bar. Sits just left of the FinEd logo. */
+.nc-root .nc-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.nc-root .nc-back:hover {
+  color: var(--purple);
+  border-color: var(--purple-border);
+  background: var(--purple-surface);
+}
+
+@media (max-width: 640px) {
+  .nc-root .nc-back {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Leak Lab: the month its rates date from (owner-approved addition). Same
+   look as the tool's other notes, sitting just under the neutrality note. */
+.nc-root .control-note.nc-rates-as-of {
+  margin-top: 4px;
+}
+
+/* Completion: "Up next" opens the next module (decision 7c). It is a link,
+   so it needs block layout like the prototype's div; a slight lift on hover
+   says it can be clicked. */
+.nc-root a.next-module-card {
+  display: block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nc-root a.next-module-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -18px rgba(23, 19, 33, 0.55);
+}
+
+/* Completion: the one line linking back to a skipped quick check / tool
+   (decision 7d) — the only new element on the page. Existing tokens only. */
+.nc-root .nc-skipped {
+  margin: -12px 0 24px;
+  padding: 12px 16px;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  background: var(--amber-surface);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-md);
+}
+
+.nc-root .nc-skipped a {
+  font-weight: 700;
+  color: var(--purple);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Completion: the next module isn't released yet (weekly releases, plan §0.2).
+   The "Up next" box stays as the prototype draws it, plus one small pill. */
+.nc-root .next-module-card.nc-coming-soon .next-module-tag { padding-right: 110px; }
+
+.nc-root .nc-coming-soon-pill {
+  position: absolute;
+  top: 24px;
+  right: 26px;
+  z-index: 1;
+  padding: 4px 12px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 640px) {
+  .nc-root .nc-coming-soon-pill { top: 20px; right: 18px; }
+}

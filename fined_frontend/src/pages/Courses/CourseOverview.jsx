@@ -54,6 +54,7 @@ export default function CourseOverview() {
   useDocumentTitle(courseTitle ? `${courseTitle} | FinEd` : "Course Overview | FinEd");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [course, setCourse] = useState([]);
+  const [plannedModules, setPlannedModules] = useState(null);
   const [userData, setUserData] = useState({});
   const [showLockedAlert, setShowLockedAlert] = useState(false);
   const [showSignInAlert, setShowSignInAlert] = useState(false);
@@ -130,6 +131,7 @@ export default function CourseOverview() {
       setCourseDescription(courseRes.data.description || "");
       setThumbnailUrl(courseRes.data.thumbnail_url || "");
       setCourse(courseRes.data.data || []);
+      setPlannedModules(courseRes.data.planned_modules || null);
 
       if (results.length > 1 && results[1].data?.userData) {
         setUserData(results[1].data.userData);
@@ -152,6 +154,9 @@ export default function CourseOverview() {
   ).length;
 
   const totalModulesCount = course.length;
+  // A course released module by module (plan §0.2) lists only released modules;
+  // its certificate needs every planned module done, not just the ones out so far.
+  const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
   const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
   const level = Math.floor((userData?.fin_score || 0) / 500) + 1;
 
@@ -599,7 +604,7 @@ export default function CourseOverview() {
 
             {/* Certificate Card */}
             <RevealOnScroll delay={50}>
-              {(completedModulesCount > 0 && completedModulesCount === totalModulesCount && email !== 'guest@fined.com') ? (
+              {(completedModulesCount > 0 && completedModulesCount === certificateModulesCount && email !== 'guest@fined.com') ? (
                 <div className="sidebar-card certificate-card" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: 'white', border: 'none' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.75rem' }}>
                     <span style={{ fontSize: '2.5rem' }}>🏆</span>
@@ -646,7 +651,11 @@ export default function CourseOverview() {
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.75rem' }}>
                     <span style={{ fontSize: '2.5rem', opacity: 0.8 }}>🔒</span>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0, color: '#334155' }}>Course Certificate</h3>
-                    <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>Complete all modules in this course to unlock your certificate.</p>
+                    <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                      {certificateModulesCount > totalModulesCount
+                        ? `Complete all ${certificateModulesCount} modules of this course to unlock your certificate — new modules are being added.`
+                        : 'Complete all modules in this course to unlock your certificate.'}
+                    </p>
                   </div>
                 </div>
               )}

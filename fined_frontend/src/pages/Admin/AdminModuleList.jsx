@@ -7,6 +7,8 @@ const AdminModuleList = () => {
   const { courseId } = useParams();
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  // The course's own status: module release only matters once the course is live.
+  const [courseStatus, setCourseStatus] = useState(null);
   const navigate = useNavigate();
 
   const { isLoading, isAuthenticated } = useAuth0();
@@ -23,10 +25,37 @@ const AdminModuleList = () => {
       }
     };
 
+    const fetchCourseStatus = async () => {
+      try {
+        const res = await instance.get('/courses/admin/all');
+        const course = (res.data || []).find((c) => c.id === courseId);
+        setCourseStatus(course?.status || 'published');
+      } catch (err) {
+        console.error('❌ Error fetching course status:', err);
+      }
+    };
+
     if (courseId) {
       fetchModules();
+      fetchCourseStatus();
     }
   }, [courseId]);
+
+  // Weekly releases (plan §0.2): a module of a live course is hidden ("draft")
+  // until an admin releases it; releasing only changes who can see it.
+  const handleSetStatus = async (mod, status) => {
+    const message = status === 'published'
+      ? `Release "${mod.title}" to learners now?\n\nIt appears on the live course page straight away, and its cards can no longer be edited here.`
+      : `Hide "${mod.title}" from learners again?\n\nLearners who already started it won't see it until it's released again. Use this only to take something back quickly.`;
+    if (!window.confirm(message)) return;
+    try {
+      const res = await instance.put(`/modules/${mod.id}/status`, { status });
+      setModules((prev) => prev.map((m) => (m.id === mod.id ? { ...m, ...res.data, status } : m)));
+    } catch (err) {
+      console.error('Failed to change module status', err);
+      alert(err?.response?.data?.detail || 'Failed to change the module status.');
+    }
+  };
 
   const handleDeleteModule = async (id) => {
     if (!window.confirm("Are you sure you want to delete this module?")) return;
@@ -98,16 +127,34 @@ const AdminModuleList = () => {
                     Delete
                   </button>
                 </div>
+                {courseStatus === 'published' && (
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    {(mod.status || 'published') === 'published' ? (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800">Released</span>
+                    ) : (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Hidden — not released</span>
+                    )}
+                    {(mod.status || 'published') === 'published' ? (
+                      <button onClick={() => handleSetStatus(mod, 'draft')} className="text-xs text-gray-500 hover:text-gray-800 underline cursor-pointer">
+                        Hide
+                      </button>
+                    ) : (
+                      <button onClick={() => handleSetStatus(mod, 'published')} className="text-xs font-semibold px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 cursor-pointer">
+                        Release to learners
+                      </button>
+                    )}
+                  </div>
+                )}
                 <p className="text-gray-600 text-sm mb-4 flex-grow">
                   {mod.description || <span className="italic text-gray-400">No description provided.</span>}
                 </p>
                 <div className="flex justify-between items-center mt-3">
                   <span className="text-xs font-bold text-gray-400">Order: {mod.order_index}</span>
                   <button
-                    onClick={() => navigate(`/admin/cards/add?moduleId=${mod.id}`)}
+                    onClick={() => navigate(`/admin/courses/${courseId}/modules/${mod.id}/cards`)}
                     className="text-indigo-600 hover:underline text-sm font-medium cursor-pointer"
                   >
-                    + Add Card to Module
+                    Cards →
                   </button>
                 </div>
               </div>

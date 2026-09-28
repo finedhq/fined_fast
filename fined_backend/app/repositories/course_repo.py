@@ -1,5 +1,6 @@
 # Database queries for courses, modules, and cards
 from app.integrations.supabase_client import supabase
+from app.services.course_visibility import is_listed
 
 
 class CourseRepository:
@@ -8,6 +9,10 @@ class CourseRepository:
     def get_all(self) -> list:
         res = supabase.from_("courses").select("*").order("created_at", desc=True).execute()
         return res.data or []
+
+    def get_listed(self) -> list:
+        """Courses shown on public lists (published only), newest first."""
+        return [c for c in self.get_all() if is_listed(c)]
 
     def get_by_id(self, course_id: str) -> dict | None:
         res = supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute()
@@ -46,14 +51,21 @@ class CourseRepository:
         res = query.limit(1).execute()
         return res.data[0] if res and res.data else None
 
-    def insert_module(self, course_id: str, title: str, description: str, order_index: int, slug: str = "") -> dict:
-        res = supabase.from_("modules").insert([{
+    def insert_module(self, course_id: str, title: str, description: str, order_index: int, slug: str = "", status: str | None = None) -> dict:
+        row = {
             "course_id": course_id,
             "title": title,
             "description": description,
             "order_index": order_index,
             "slug": slug
-        }]).execute()
+        }
+        if status:  # only sent when needed, so this also works before migration 005
+            row["status"] = status
+        res = supabase.from_("modules").insert([row]).execute()
+        return res.data[0] if res.data else {}
+
+    def set_module_status(self, module_id: str, status: str, published_at: str | None) -> dict:
+        res = supabase.from_("modules").update({"status": status, "published_at": published_at}).eq("id", module_id).execute()
         return res.data[0] if res.data else {}
 
     def delete_module(self, module_id: str):

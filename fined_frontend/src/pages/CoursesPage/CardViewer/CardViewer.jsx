@@ -1,30 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
+import ModuleLoader from "./ModuleLoader";
 import { getBundleByCardSlug, updateCardBySlug } from "../../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import "./CardViewer.css";
-
 // Fallback FinStar defaults per card type — mirrors the backend DEFAULT_FINSTARS map
-const DEFAULT_FINSTARS = {
-  cinematic: 0,
-  concept: 2,
-  chart: 2,
-  scenario: 3,
-  risk_spectrum: 2,
-  slider_calculator: 2,
-  pill_selector: 3,
-  interactive: 2,
-  quiz: 10,
-  completion: 0,
-};
+import { getCardFinstars } from "../../../utils/finstars";
+import { isScrollyModule } from "../../../components/scrolly/templates";
 
-function getCardFinstars(cardData, cardTemplate) {
-  const val = cardData?.allotted_finstars;
-  if (val === null || val === undefined) return DEFAULT_FINSTARS[cardTemplate] ?? 2;
-  return val;
-}
+// New-course modules are drawn as one long page, like the prototype (loaded only when needed).
+const ScrollyModulePage = lazy(() => import("../../../components/scrolly/ScrollyModulePage"));
 
 
 function CardViewer() {
@@ -219,42 +206,8 @@ function CardViewer() {
   // Loading state (only shown once when opening the module)
   const backToCourseLink = bundle?.course_slug ? `/courses/${bundle.course_slug}` : "/courses";
 
-  if (loading) {
-    return (
-      <div className="cv-page">
-        <div className="cv-top-left-nav">
-          <Link to="/" className="cv-logo" aria-label="FinEd Home">
-            <img src="/logo.ico" alt="FinEd" />
-          </Link>
-          {bundle?.course_slug && (
-            <Link to={backToCourseLink} className="cv-back-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              <span>Back to Course</span>
-            </Link>
-          )}
-        </div>
-
-        <div className="cv-top-section cv-skeleton-shimmer">
-          <div className="cv-header">
-            <div className="cv-skeleton-pill" style={{ width: "120px", height: "18px" }}></div>
-            <div className="cv-skeleton-pill" style={{ width: "40px", height: "18px" }}></div>
-          </div>
-          <div className="cv-progress-track">
-            <div className="cv-progress-fill" style={{ width: "15%" }} />
-          </div>
-        </div>
-
-        <div className="cv-main-container cv-loader-container">
-          <div className="cv-spinner-orbit">
-            <div className="cv-spinner-dot"></div>
-          </div>
-          <p className="cv-loader-text">Loading module experience...</p>
-        </div>
-      </div>
-    );
-  }
+  // One simple loader for every module, old course and new (owner, 2026-09-26).
+  if (loading) return <ModuleLoader />;
 
   if (error) {
     return (
@@ -262,6 +215,16 @@ function CardViewer() {
         <p>{error}</p>
         <Link to={backToCourseLink}>Back to course</Link>
       </div>
+    );
+  }
+
+  // A new-course module: the whole module is one long page (older modules never
+  // contain these card types, so they take exactly the path below as before).
+  if (bundle && isScrollyModule(bundle.cards)) {
+    return (
+      <Suspense fallback={<ModuleLoader />}>
+        <ScrollyModulePage key={bundle.module_id} bundle={bundle} focusSlug={cardSlug} email={email} />
+      </Suspense>
     );
   }
 
