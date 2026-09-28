@@ -174,7 +174,9 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
             return {"error": "No ongoing course found for this user."}
             
         course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute())
-        if course_res and course_res.data and not can_view_course(course_res.data[0], user):
+        # Only a published course is "continue learning" — not a draft, and not
+        # an archived course that was replaced (it still opens by old links).
+        if course_res and course_res.data and not is_listed(course_res.data[0]):
             return {"error": "No ongoing course found for this user."}
         return course_res.data[0] if course_res and course_res.data else {}
     except Exception as e:
@@ -423,7 +425,7 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
         if not can_view_module(module_row, user):
             raise HTTPException(status_code=404, detail="Module not found")
 
-        is_draft = course_status(course_res.data[0]) == "draft" or not is_released(module_row)
+        is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
         return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email, write_ongoing=not is_draft, viewer=user)
     except HTTPException as he:
         raise he
@@ -468,7 +470,7 @@ async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: Au
         c_title = course_res.data[0].get("title")
         c_slug_real = course_res.data[0].get("slug")
 
-        is_draft = course_status(course_res.data[0]) == "draft" or not is_released(module_row)
+        is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
         return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user)
     except HTTPException as he:
         raise he
@@ -493,7 +495,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
         if not course_res.data or not can_view_course(course_res.data[0], user):
             raise HTTPException(status_code=404, detail="Course not found")
         course_id = course_res.data[0]["id"]
-        is_draft = course_status(course_res.data[0]) == "draft"
+        is_draft = not is_listed(course_res.data[0])  # draft or archived: never "continue learning"
 
         module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_slug).execute())
         if not module_res.data and _is_valid_uuid(module_slug):

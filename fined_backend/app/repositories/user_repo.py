@@ -319,8 +319,9 @@ class UserRepository:
         if ongoing_course_id:
             try:
                 c_res = supabase.from_("courses").select("*").eq("id", ongoing_course_id).limit(1).execute()
-                # a draft course is never shown as "ongoing" on the profile
-                if c_res.data and course_status(c_res.data[0]) != "draft":
+                # only a published course is shown as "ongoing" on the profile
+                # (never a draft, nor an archived course that was replaced)
+                if c_res.data and course_status(c_res.data[0]) == "published":
                     course_row = c_res.data[0]
                     m_res = supabase.from_("modules").select("*").eq("course_id", ongoing_course_id).order("order_index").execute()
                     modules = [m for m in (m_res.data or []) if is_released(m)]  # learners' view: released modules only

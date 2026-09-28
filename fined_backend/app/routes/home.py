@@ -9,7 +9,7 @@ from app.services.home_service import home_service
 from app.services.notification_service import notification_service
 from app.repositories.article_repo import article_repo
 from app.repositories.course_repo import course_repo
-from app.services.course_visibility import can_view_course
+from app.services.course_visibility import can_view_course, is_listed
 from app.repositories.user_repo import user_repo
 from app.dependencies import get_current_user, get_optional_current_user, AuthUser
 from app.services.article_service import article_service
@@ -83,7 +83,8 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
             if not ongoing_course_id:
                 return None
             course = await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
-            if not course or not can_view_course(course, user):
+            # only a published course is "continue learning" (not a draft, not an archived one)
+            if not course or not can_view_course(course, user) or not is_listed(course):
                 return None
             
             lesson_number = 1
