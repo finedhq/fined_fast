@@ -104,11 +104,11 @@ export default function EditProfileModal({
     try {
       if (handleSave) {
         await handleSave({
-          username: cleanUsername,
-          career_stage: careerStage,
+          location: location.trim() || "Nagpur, IN",
           financial_level: financialLevel,
-          location: location.trim(),
+          career_stage: careerStage,
           bio: bio.trim(),
+          username: cleanUsername,
         });
       }
       if (handleClose) {

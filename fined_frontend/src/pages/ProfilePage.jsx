@@ -388,7 +388,7 @@ export default function ProfilePage() {
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="text-slate-500">
-                    {profile?.location || "India"}
+                    {profile?.location || 'Nagpur, IN'}
                   </span>
                 </div>
 

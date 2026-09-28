@@ -1,6 +1,4 @@
-# Pydantic models for user profiles and dashboards
-# pyrefly: ignore [missing-import]
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from typing import Optional
 
 
@@ -61,8 +59,17 @@ class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
     career_stage: Optional[str] = None
     financial_level: Optional[str] = None
+    knowledge_level: Optional[str] = None
     bio: Optional[str] = None
-    location: Optional[str] = None
+    location: Optional[str] = "Nagpur, IN"
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_financial_level(cls, data):
+        if isinstance(data, dict):
+            if data.get("financial_level") is None and data.get("knowledge_level") is not None:
+                data["financial_level"] = data.get("knowledge_level")
+        return data
 
 
 class UserProfileResponse(BaseModel):
@@ -73,7 +80,8 @@ class UserProfileResponse(BaseModel):
     full_name: Optional[str] = None
     username: str
     career_stage: str
-    financial_level: str
+    financial_level: Optional[str] = None
+    knowledge_level: Optional[str] = None
     bio: str
     location: Optional[str] = "Nagpur, IN"
     fin_score: int = 0
@@ -86,4 +94,15 @@ class UserProfileResponse(BaseModel):
     ongoing_course: Optional[OngoingCourseProgress] = None
     consistency_grid: list[int] = []
     activity_map: dict[str, int] = {}
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_level_and_location(cls, data):
+        if isinstance(data, dict):
+            lvl = data.get("financial_level") or data.get("knowledge_level") or "Beginner (Level 1) - Starting with basics"
+            data["financial_level"] = lvl
+            data["knowledge_level"] = lvl
+            if not data.get("location"):
+                data["location"] = "Nagpur, IN"
+        return data
 

@@ -193,18 +193,19 @@ class UserRepository:
         if not user:
             user = {"email": email, "user_sub": user_sub, "streak_count": 0, "fin_stars": 0}
 
-        # Check DB columns or fallback store
+        record = user or {}
         store_data = self._PROFILE_STORE.get(email, {})
-        username = store_data.get("username") or user.get("username")
+
+        # Read directly from Supabase query result record; in-memory fallback only if column is not set in DB
+        location = record.get("location") or store_data.get("location") or "Nagpur, IN"
+        financial_level = record.get("financial_level") or record.get("knowledge_level") or store_data.get("financial_level") or "Beginner (Level 1) - Starting with basics"
+        career_stage = record.get("career_stage") or store_data.get("career_stage") or "Student"
+        bio = record.get("bio") if record.get("bio") is not None else (store_data.get("bio") or "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd.")
+        username = record.get("username") or store_data.get("username")
         if not username:
             email_user = email.split("@")[0].replace(".", "_")
             # If default user is rashi, set handle to rashi
             username = "rashi" if "rashi" in email_user.lower() else email_user[:20]
-
-        career_stage = store_data.get("career_stage") or user.get("career_stage") or "Student"
-        financial_level = store_data.get("financial_level") or user.get("financial_level") or "Beginner (Level 1) - Starting with basics"
-        bio = store_data.get("bio") or user.get("bio") or "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd."
-        location = store_data.get("location") or user.get("location") or "Nagpur, IN"
 
         # Compute fin_score directly using the 4 columns from the user dict
         fin_score = int(
@@ -380,22 +381,46 @@ class UserRepository:
 
     def update_profile(self, email: str, fields: dict, user_sub: str = None) -> dict:
         """Update profile fields with database persistence and memory sync"""
-        # Save to memory store first for immediate consistency
-        current = self._PROFILE_STORE.get(email, {})
-        current.update({k: v for k, v in fields.items() if v is not None})
-        self._PROFILE_STORE[email] = current
+        allowed_fields = ['username', 'location', 'bio', 'career_stage', 'financial_level']
 
-        # Try to persist to Supabase users table
+        payload = {}
+        for col in allowed_fields:
+            if col in fields and fields[col] is not None:
+                payload[col] = fields[col]
+
+        # Backward compatibility if knowledge_level was passed
+        if "financial_level" not in payload and "knowledge_level" in fields and fields["knowledge_level"] is not None:
+            payload["financial_level"] = fields["knowledge_level"]
+
+        # Fetch user record to obtain primary key id
+        user = self.get_by_email(email)
+        if not user and user_sub:
+            user = self.get_by_sub(user_sub)
+
+        user_id = user.get("id") if user else None
+
+        # Directly update Supabase users table
         try:
-            allowed_cols = ["username", "career_stage", "financial_level", "bio", "location"]
-            db_update = {k: v for k, v in fields.items() if k in allowed_cols and v is not None}
-            if db_update:
-                res = supabase.from_("users").update(db_update).eq("email", email).execute()
-                if (not res or not res.data) and user_sub:
-                    supabase.from_("users").update(db_update).eq("user_sub", user_sub).execute()
+            if payload:
+                if user_id:
+                    res = supabase.table('users').update(payload).eq('id', user_id).execute()
+                else:
+                    res = supabase.table('users').update(payload).eq('email', email).execute()
+                    if (not res or not res.data) and user_sub:
+                        res = supabase.table('users').update(payload).eq('user_sub', user_sub).execute()
+
+                # Sync in-memory store without overwriting DB records
+                current = self._PROFILE_STORE.get(email, {})
+                if res and res.data:
+                    current.update({k: v for k, v in res.data[0].items() if k in allowed_fields and v is not None})
+                else:
+                    current.update(payload)
+                self._PROFILE_STORE[email] = current
         except Exception as e:
-            # Fallback if DB columns are not yet created on remote Supabase instance
-            print(f"Notice: Supabase column update skipped ({e}). Maintained in profile repository.")
+            print(f"Notice: Supabase update error ({e}). Maintained in profile repository.")
+            current = self._PROFILE_STORE.get(email, {})
+            current.update(payload)
+            self._PROFILE_STORE[email] = current
 
         return self.get_profile(email, user_sub)
 

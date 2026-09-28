@@ -3,6 +3,26 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.dependencies import get_current_user, AuthUser
 
+@pytest.fixture(autouse=True)
+def reset_test_user_profile():
+    def _reset():
+        try:
+            from app.integrations.supabase_client import supabase
+            supabase.table("users").update({
+                "location": "Nagpur, IN",
+                "username": "rashi",
+                "career_stage": "Student",
+                "financial_level": "Beginner (Level 1) - Starting with basics",
+                "bio": "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd."
+            }).eq("email", "karulerashi@gmail.com").execute()
+        except Exception:
+            pass
+
+    _reset()
+    yield
+    _reset()
+
+
 @pytest.fixture
 def client():
     # Mock authentication dependency
@@ -62,6 +82,18 @@ def test_update_user_profile(client):
     assert data["career_stage"] == "Student"
     assert data["bio"] == "Testing user profile updates"
     assert data["location"] == "Mumbai, IN"
+
+
+def test_update_user_profile_knowledge_level_backward_compat(client):
+    update_payload = {
+        "knowledge_level": "Intermediate (Level 2) - Familiar with mutual funds & stocks",
+        "location": "Nagpur, IN"
+    }
+    response = client.patch("/api/v1/users/me", json=update_payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["financial_level"] == "Intermediate (Level 2) - Familiar with mutual funds & stocks"
+    assert data["location"] == "Nagpur, IN"
 
 
 def test_update_invalid_username(client):
