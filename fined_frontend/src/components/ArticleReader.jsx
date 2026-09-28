@@ -5,6 +5,7 @@ import { RiShareForwardLine } from "react-icons/ri";
 import { FiX } from "react-icons/fi";
 import PersonalLensSidebar from "./PersonalLens/PersonalLensSidebar";
 import ShareModal from "./ShareModal";
+import ArticleCommunityBanner from "./Community/ArticleCommunityBanner";
 import { fetchRelatedArticles } from "../services/api";
 
 /* ── text helpers ── */
@@ -1243,6 +1244,9 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                 </button>
               </div>
             </div>
+
+            {/* COMMUNITY WHATSAPP BANNER (End of Article, before Related Reads) */}
+            <ArticleCommunityBanner />
           </article>
 
           {/* PERSONAL LENS COMPANION (Desktop 3rd Column) */}

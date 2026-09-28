@@ -16,6 +16,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
 import { useNavigate } from "react-router-dom";
+import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
 import investingImg from "../../assets/investing-img.png";
 import wfBiteSizeLessson from "../../assets/wf-bite-size-lessons.png";
 import wfInteractiveLearning from "../../assets/wf-interactivelearning.png";
@@ -1209,6 +1210,7 @@ function Hero() {
           </div>
         </RevealOnScroll>
       </section>
+      <FloatingWhatsAppButton />
     </>
   );
 }

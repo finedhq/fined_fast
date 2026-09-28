@@ -3781,6 +3781,14 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* --- INLINE ARTICLE COMMUNITY WHATSAPP BANNER --- */
+.ar-community-banner {
+  order: 10 !important;
+  width: 100%;
+  max-width: 1080px;
+  box-sizing: border-box;
+}
+
 /* --- RELATED READS BLOCK --- */
 .ar-related-section {
   width: 100%;

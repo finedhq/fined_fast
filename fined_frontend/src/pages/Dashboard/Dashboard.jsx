@@ -11,6 +11,7 @@ import SmartImage from '../../uiComponents/SmartImage';
 
 import { IoSparkles } from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
+import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -476,6 +477,7 @@ const Dashboard = () => {
           </div>
         </RevealOnScroll>
       </div>
+      <FloatingWhatsAppButton />
     </div>
   );
 };
