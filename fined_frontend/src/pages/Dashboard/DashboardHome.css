@@ -394,6 +394,23 @@
   .dh-continue-ring { width: 128px; height: 128px; }
 }
 
+/* Phones: button spans the card under the ring + text instead of overflowing */
+.dh-continue-btn {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  justify-content: center;
+  margin-top: 0;
+}
+
+@media (min-width: 560px) {
+  .dh-continue-ring { grid-row: span 2; }
+  .dh-continue-btn {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: -10px;
+  }
+}
+
 .dh-continue-ring--empty {
   border-radius: 50%;
   background: var(--dh-violet-50);

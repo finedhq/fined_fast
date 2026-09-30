@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { PiArrowRightBold } from 'react-icons/pi';
 import FullLeaderboardModal from './FullLeaderboardModal';
+import { getUserLevel } from '../../../utils/level';
+
+const TIMEFRAMES = [['this_week', 'This Week'], ['this_month', 'This Month'], ['all_time', 'All Time']];
 
 // Mock learners fallback for week / month / all time
 const SAMPLE_LEADERBOARD = {
@@ -40,7 +44,8 @@ const LeaderboardSection = ({
     ? apiLeaderboard
     : (SAMPLE_LEADERBOARD[timeframe] || []);
 
-  const currentList = fullLeaderboard.slice(0, 4);
+  // Podium (top 3) plus the next five learners
+  const currentList = fullLeaderboard.slice(0, 8);
 
   // Find user's specific rank and score in current timeframe list if available
   const userEntryInList = fullLeaderboard.find(e => 
@@ -51,126 +56,82 @@ const LeaderboardSection = ({
     ? (userEntryInList.fin_score ?? userEntryInList.finScore ?? 0) 
     : (timeframe === 'all_time' ? finScore : 0);
   const activeUserRank = userEntryInList ? userEntryInList.rank : userRank;
+  const levelInfo = getUserLevel(userData);
 
-  // Highest score in current list for relative bar width normalization
-  const maxScore = Math.max(
-    activeUserScore,
-    currentList[0]?.fin_score || currentList[0]?.finScore || 1000
-  );
+
+  const top3 = currentList.slice(0, 3);
+  const rest = currentList.slice(3);
+  const nameOf = (entry, rank) => entry.name || entry.email?.split('@')[0] || `Learner #${rank}`;
+  const scoreOf = (entry) => entry.fin_score ?? entry.finScore ?? 0;
+  const youName = userData?.name || 'You';
 
   return (
-    <section className="leaderboard-section" id="leaderboard-section">
-      <div className="leaderboard-header-row">
-        <h2 className="section-title">Leaderboard</h2>
-        <button 
-          className="view-full-btn"
-          onClick={() => setIsModalOpen(true)}
-          type="button"
-        >
-          View Full Leaderboard &rarr;
-        </button>
+    <section className="rw-section rw-board" id="leaderboard-section" aria-labelledby="rw-board-title">
+      <div className="rw-section-head">
+        <h2 id="rw-board-title" className="rw-section-title">Leaderboard</h2>
+        <div className="rw-tabs" role="tablist" aria-label="Leaderboard period">
+          {TIMEFRAMES.map(([key, label]) => (
+            <button
+              key={key}
+              role="tab"
+              aria-selected={timeframe === key}
+              className={`rw-tab${timeframe === key ? ' is-active' : ''}`}
+              onClick={() => onTimeframeChange(key)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Timeframe selector tabs */}
-      <div className="time-filter-tabs">
-        <button
-          className={`time-tab-btn ${timeframe === 'this_week' ? 'active' : ''}`}
-          onClick={() => onTimeframeChange('this_week')}
-          type="button"
-        >
-          This Week
-        </button>
-        <button
-          className={`time-tab-btn ${timeframe === 'this_month' ? 'active' : ''}`}
-          onClick={() => onTimeframeChange('this_month')}
-          type="button"
-        >
-          This Month
-        </button>
-        <button
-          className={`time-tab-btn ${timeframe === 'all_time' ? 'active' : ''}`}
-          onClick={() => onTimeframeChange('all_time')}
-          type="button"
-        >
-          All Time
-        </button>
-      </div>
-
-      {/* Top Ranked Learners Rows */}
-      <div className="leaderboard-rows-list">
-        {currentList.map((entry, idx) => {
-          const rank = entry.rank || idx + 1;
-          const name = entry.name || entry.email?.split('@')[0] || `Learner #${rank}`;
-          const score = entry.fin_score ?? entry.finScore ?? 0;
-          const progressPercent = Math.min(100, Math.max(20, (score / maxScore) * 100));
-
-          let rankBadge = <span className="rank-numeric-badge">{rank}</span>;
-          if (rank === 1) rankBadge = <span role="img" aria-label="1st Place">🥇</span>;
-          else if (rank === 2) rankBadge = <span role="img" aria-label="2nd Place">🥈</span>;
-          else if (rank === 3) rankBadge = <span role="img" aria-label="3rd Place">🥉</span>;
-
-          return (
-            <div key={name + rank} className="leader-row">
-              <div className="leader-rank-col">
-                {rankBadge}
-              </div>
-
-              <div className="leader-user-col">
-                <div className="leader-avatar">
+      <div className={`rw-panel rw-board-panel${loadingLeaderboard ? ' is-loading' : ''}`}>
+        {/* Podium for the top three */}
+        <ol className="rw-podium">
+          {top3.map((entry, idx) => {
+            const rank = entry.rank || idx + 1;
+            const name = nameOf(entry, rank);
+            return (
+              <li key={name + rank} className={`rw-podium-spot rw-podium-spot--${rank}`}>
+                <span className="rw-podium-avatar">
                   {name.charAt(0).toUpperCase()}
-                </div>
-                <div className="leader-name-group">
-                  <span className="leader-name">{name}</span>
-                </div>
-              </div>
+                  <span className="rw-podium-rank">{rank}</span>
+                </span>
+                <span className="rw-podium-name">{name}</span>
+                <span className="rw-podium-score">{scoreOf(entry)} <small>pts</small></span>
+              </li>
+            );
+          })}
+        </ol>
 
-              <div className="leader-progress-col">
-                <div className="leader-progress-bar-track">
-                  <div 
-                    className="leader-progress-bar-fill"
-                    style={{ width: `${progressPercent}%` }}
-                  ></div>
-                </div>
-              </div>
+        {rest.length > 0 && (
+          <ol className="rw-rows" start={4}>
+            {rest.map((entry, idx) => {
+              const rank = entry.rank || idx + 4;
+              const name = nameOf(entry, rank);
+              return (
+                <li key={name + rank} className="rw-row">
+                  <span className="rw-row-rank">{rank}</span>
+                  <span className="rw-row-avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}</span>
+                  <span className="rw-row-name">{name}</span>
+                  <span className="rw-row-score">{scoreOf(entry)} <small>pts</small></span>
+                </li>
+              );
+            })}
+          </ol>
+        )}
 
-              <div className="leader-points-col">
-                <span className="leader-score-val">{score}</span>
-                <span className="leader-score-pts">pts</span>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Highlighted 'You' Row */}
-        <div className="leader-row user-highlight-row">
-          <div className="leader-rank-col">
-            <span className="user-rank-badge">#{activeUserRank}</span>
-          </div>
-
-          <div className="leader-user-col">
-            <div className="leader-avatar user-avatar-highlight">
-              👤
-            </div>
-            <div className="leader-name-group">
-              <span className="leader-name">You</span>
-            </div>
-          </div>
-
-          <div className="leader-progress-col">
-            <div className="leader-progress-bar-track">
-              <div 
-                className="leader-progress-bar-fill"
-                style={{ width: `${Math.min(100, Math.max(20, (activeUserScore / maxScore) * 100))}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="leader-points-col">
-            <span className="leader-score-val">{activeUserScore}</span>
-            <span className="leader-score-pts">pts</span>
-          </div>
+        {/* The current user's standing */}
+        <div className="rw-row rw-row--you">
+          <span className="rw-row-rank">#{activeUserRank}</span>
+          <span className="rw-row-avatar" aria-hidden="true">{youName.charAt(0).toUpperCase()}</span>
+          <span className="rw-row-name">You <small>{levelInfo.label}</small></span>
+          <span className="rw-row-score">{activeUserScore} <small>pts</small></span>
         </div>
 
+        <button className="rw-ghost rw-board-more" onClick={() => setIsModalOpen(true)} type="button">
+          View Full Leaderboard <PiArrowRightBold aria-hidden="true" />
+        </button>
       </div>
 
       {/* Full Leaderboard Modal */}

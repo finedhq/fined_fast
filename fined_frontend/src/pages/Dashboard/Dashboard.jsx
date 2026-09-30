@@ -297,11 +297,12 @@ const Dashboard = () => {
             {hasCourse && totalLessons > 0 && (
               <p className="dh-continue-lesson">Lesson {currentLesson} of {totalLessons}</p>
             )}
-            <button type="button" className="dh-btn" onClick={() => navigate(courseLink)}>
-              {hasCourse ? "Continue learning" : "Browse courses"}
-              <PiArrowRightBold aria-hidden="true" />
-            </button>
           </div>
+          {/* Outside the text column so it can take the full card width on phones */}
+          <button type="button" className="dh-btn dh-continue-btn" onClick={() => navigate(courseLink)}>
+            {hasCourse ? "Continue learning" : "Browse courses"}
+            <PiArrowRightBold aria-hidden="true" />
+          </button>
         </section>
 
         {/* Stats */}
