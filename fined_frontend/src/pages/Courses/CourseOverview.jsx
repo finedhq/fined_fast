@@ -10,6 +10,7 @@ import "../Dashboard/Dashboard.css";
 import completedModuleLogo from '../../assets/completed_module_logo.png';
 import currentModuleLogo from '../../assets/current_module_logo.png';
 import lockedModuleLogo from '../../assets/locked_module_logo.png';
+import NotFoundPage from '../NotFound/NotFoundPage';
 // SVG Icons for statuses
 const CheckIcon = () => (
   <svg fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
@@ -158,7 +159,6 @@ export default function CourseOverview() {
   // its certificate needs every planned module done, not just the ones out so far.
   const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
   const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
-  const level = Math.floor((userData?.fin_score || 0) / 500) + 1;
 
   const handleDownloadCertificate = async () => {
     if (certificateRef.current) {
@@ -208,6 +208,11 @@ export default function CourseOverview() {
       setIsMobileWidgetExpanded(true);
     }
   };
+
+  // The API answers a missing (or draft, for non-admins) course with an empty title
+  if (!loading && email && !warning && !courseTitle) {
+    return <NotFoundPage />;
+  }
 
   return (
     <div className="course-overview-page">

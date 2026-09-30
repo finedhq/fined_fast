@@ -222,10 +222,10 @@ export default function EditProfileModal({
             </div>
           </div>
 
-          {/* Financial Knowledge Level Dropdown */}
+          {/* Financial experience (self-chosen; the level shown elsewhere comes from FinScore) */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">
-              Financial Knowledge Level
+              Financial Experience
             </label>
             <div className="relative">
               <select
@@ -235,7 +235,7 @@ export default function EditProfileModal({
               >
                 {FINANCIAL_LEVELS.map((lvl) => (
                   <option key={lvl} value={lvl}>
-                    {lvl}
+                    {lvl.replace(/ \(Level \d\)/, "")}
                   </option>
                 ))}
               </select>
