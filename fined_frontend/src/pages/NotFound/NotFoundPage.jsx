@@ -1,14 +1,16 @@
 import { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import planeImg from "../../assets/newnewplane.png";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./NotFoundPage.css";
 
-// Same dashed flight path language as the home hero, but the plane loses its way
-const DETOUR_PATH =
-  "M 10,190 C 70,180 90,120 60,95 C 30,70 70,30 110,60 C 150,90 120,140 160,140 C 200,140 190,80 230,70 C 260,62 280,50 292,30";
+const QUICK_LINKS = [
+  { to: "/courses", label: "Courses", hint: "Byte-sized lessons" },
+  { to: "/articles", label: "Articles", hint: "Money, simplified" },
+  { to: "/about", label: "About FinEd", hint: "Who we are" },
+];
 
 export default function NotFoundPage() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Page Not Found | FinEd";
@@ -29,46 +31,51 @@ export default function NotFoundPage() {
     };
   }, []);
 
+  const canGoBack = typeof window !== "undefined" && window.history.state?.idx > 0;
+
   return (
-    <section className="nf-page" aria-labelledby="nf-title">
-      <div className="nf-flight" aria-hidden="true">
-        <svg viewBox="0 0 300 200" className="nf-flight-svg">
-          <mask id="nf-flight-mask">
-            <path className="nf-flight-reveal" d={DETOUR_PATH} fill="none" stroke="white" strokeWidth="6" />
-          </mask>
-          <path
-            d={DETOUR_PATH}
-            fill="none"
-            stroke="#00b4d8"
-            strokeWidth="4"
-            strokeDasharray="8 8"
-            strokeLinecap="round"
-            mask="url(#nf-flight-mask)"
-          />
-        </svg>
-        <img src={planeImg} alt="" className="nf-plane" />
-      </div>
-
-      <div className="nf-content">
-        <p className="nf-code" aria-label="Error 404">
-          <span>4</span>
-          <span className="nf-coin">₹</span>
-          <span>4</span>
-        </p>
-
-        <h1 id="nf-title" className="nf-title">
-          This page took a <span className="nf-highlight">wrong turn</span>
-        </h1>
-
-        <p className="nf-sub">
-          We couldn’t find <code className="nf-path">{pathname}</code>. The link may be
-          broken or the page may have moved.
-        </p>
-
-        <div className="nf-actions">
-          <Link to="/" className="nf-btn-primary">Back to Home</Link>
-          <Link to="/courses" className="nf-btn-secondary">Explore Courses</Link>
+    <section className="notfound-page" aria-labelledby="notfound-title">
+      <div className="notfound-card">
+        <div className="notfound-art" aria-hidden="true">
+          <span className="notfound-digit">4</span>
+          <svg className="notfound-coin" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="54" className="coin-rim" />
+            <circle cx="60" cy="60" r="42" className="coin-face" />
+            <text x="60" y="76" textAnchor="middle" className="coin-symbol">₹</text>
+          </svg>
+          <span className="notfound-digit">4</span>
         </div>
+
+        <p className="notfound-eyebrow">Error 404</p>
+        <h1 id="notfound-title">This page went off-budget</h1>
+        <p className="notfound-copy">
+          We couldn’t find <code className="notfound-path">{pathname}</code>. It may have
+          moved, or the link might have a typo. Your progress and FinStars are safe.
+        </p>
+
+        <div className="notfound-actions">
+          <Link to="/" className="notfound-btn notfound-btn--primary">Back to Home</Link>
+          {canGoBack && (
+            <button type="button" className="notfound-btn notfound-btn--ghost" onClick={() => navigate(-1)}>
+              Go back
+            </button>
+          )}
+        </div>
+
+        <nav className="notfound-links" aria-label="Popular pages">
+          <p className="notfound-links-title">Or pick up where most learners go</p>
+          <ul>
+            {QUICK_LINKS.map(({ to, label, hint }) => (
+              <li key={to}>
+                <Link to={to}>
+                  <span className="notfound-link-label">{label}</span>
+                  <span className="notfound-link-hint">{hint}</span>
+                  <span className="notfound-link-arrow" aria-hidden="true">→</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </section>
   );
