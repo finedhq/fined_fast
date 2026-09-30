@@ -6,6 +6,8 @@ import Lenis from 'lenis';
 import './DashboardHome.css';
 import { getCourses, fetchArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
+import { getUserLevel } from "../../utils/level";
+import { useUserProfile } from "../../context/UserProfileContext";
 import {
   PiArrowRightBold,
   PiBookOpenTextBold,
@@ -22,13 +24,6 @@ const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
-
-const getLevelTitle = (lvl) => {
-  if (lvl <= 3) return "Beginner";
-  if (lvl <= 6) return "Planner";
-  if (lvl <= 9) return "Strategist";
-  return "Master";
 };
 
 function Avatar({ src, name }) {
@@ -117,6 +112,7 @@ function DashboardSkeleton() {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { refreshProfile } = useUserProfile();
 
   const [userData, setUserData] = useState({});
   const [ongoingCourse, setOngoingCourse] = useState({});
@@ -180,13 +176,14 @@ const Dashboard = () => {
 
     getAccessTokenSilently().then(token => {
       setAuthToken(token);
-      fetchData(user.email, user.sub);
+      // getdata can change FinScore (e.g. inactivity penalty), so let the navbar catch up after it
+      return fetchData(user.email, user.sub).then(() => refreshProfile());
     }).catch(err => {
       console.error("Error fetching access token", err);
       setError("Authentication error. Please log in again.");
       setLoadingData(false);
     });
-  }, [isLoading, isAuthenticated, user, getAccessTokenSilently]);
+  }, [isLoading, isAuthenticated, user, getAccessTokenSilently, refreshProfile]);
 
   if (isLoading || loadingData) {
     return <DashboardSkeleton />;
@@ -209,8 +206,7 @@ const Dashboard = () => {
   const finStars = userData?.fin_stars || 0;
   const finScore = userData?.fin_score || 0;
   const streak = userData?.streak_count || 0;
-  const level = Math.floor(finStars / 100) + 1;
-  const levelTitle = getLevelTitle(level);
+  const levelInfo = getUserLevel(userData);
 
   const hasCourse = Boolean(ongoingCourse?.title);
   const totalLessons = ongoingCourse?.modules_count || 0;
@@ -245,7 +241,7 @@ const Dashboard = () => {
           </Link>
           <div className="dh-card-top">
             <span className="dh-card-logo"><img src="/logo.ico" alt="FinEd" /></span>
-            <span className="dh-card-level">Level {level} · {levelTitle}</span>
+            <span className="dh-card-level">{levelInfo.label}</span>
           </div>
 
           <div className="dh-card-score">
@@ -264,6 +260,11 @@ const Dashboard = () => {
               </button>
             </span>
             <span className="dh-card-score-value">{finScore}</span>
+            <span className="dh-card-next">
+              {levelInfo.pointsToNext === null
+                ? "Top level reached"
+                : `${levelInfo.pointsToNext} points to ${levelInfo.nextName}`}
+            </span>
           </div>
 
           <div className="dh-card-holder">

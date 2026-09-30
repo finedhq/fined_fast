@@ -4,6 +4,7 @@ import { isAdminUser } from "../services/auth";
 import { useState, useEffect, useRef } from "react";
 import { FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 import { useUserProfile } from "../context/UserProfileContext";
+import { getUserLevel } from "../utils/level";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -22,12 +23,7 @@ export default function Navbar() {
   const displayName = profile?.full_name || profile?.display_name || user?.name || "Rashi Karule";
   const firstName = displayName.split(" ")[0] || "Rashi";
   const userInitial = (firstName[0] || "R").toUpperCase();
-  const financialLevel = profile?.financial_level || "";
-  const shortLevelDisplay = financialLevel.includes("Intermediate")
-    ? "Level 2 • Intermediate"
-    : financialLevel.includes("Advanced")
-    ? "Level 3 • Advanced"
-    : "Level 1 • Beginner";
+  const shortLevelDisplay = getUserLevel(profile).label;
 
   // Close dropdown on outside click
   useEffect(() => {

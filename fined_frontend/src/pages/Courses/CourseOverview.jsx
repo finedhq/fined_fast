@@ -159,7 +159,6 @@ export default function CourseOverview() {
   // its certificate needs every planned module done, not just the ones out so far.
   const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
   const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
-  const level = Math.floor((userData?.fin_score || 0) / 500) + 1;
 
   const handleDownloadCertificate = async () => {
     if (certificateRef.current) {

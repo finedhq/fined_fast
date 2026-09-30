@@ -223,6 +223,13 @@
 
 .dh-card-top,
 .dh-card-score,
+.dh-card-next {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .dh-card-holder {
   position: relative;
   pointer-events: none; /* clicks fall through to the card link */
