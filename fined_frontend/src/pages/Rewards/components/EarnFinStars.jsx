@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FiUsers, FiShare2, FiZap, FiBookOpen, FiCheck, FiCopy } from 'react-icons/fi';
+import {
+  PiArrowRightBold,
+  PiBookOpenTextFill,
+  PiCheckBold,
+  PiCopyBold,
+  PiLightningFill,
+  PiShareNetworkFill,
+  PiStarFill,
+  PiUsersThreeFill,
+} from 'react-icons/pi';
 
 const EarnFinStars = ({ userEmail }) => {
   const navigate = useNavigate();
@@ -47,11 +56,11 @@ Start your financial freedom journey:
         duration: 4000,
         style: {
           borderRadius: '12px',
-          background: '#1e1b4b',
+          background: '#171321',
           color: '#fff',
           fontWeight: '600',
           fontSize: '14px',
-          boxShadow: '0 10px 25px -5px rgba(67, 56, 202, 0.4)',
+          boxShadow: '0 10px 25px -5px rgba(65, 0, 188, 0.4)',
         },
         icon: '📋'
       });
@@ -109,7 +118,7 @@ Start your financial freedom journey:
         duration: 4000,
         style: {
           borderRadius: '12px',
-          background: '#1e1b4b',
+          background: '#171321',
           color: '#fff',
           fontWeight: '600',
         },
@@ -123,126 +132,77 @@ Start your financial freedom journey:
     }
   };
 
+  const WAYS = [
+    {
+      key: 'refer',
+      icon: <PiUsersThreeFill />,
+      stars: 100,
+      title: 'Refer a Friend',
+      desc: 'Invite friends to FinEd. When they join and complete their first lesson, you both receive 100 FinStars!',
+    },
+    {
+      key: 'share',
+      icon: <PiShareNetworkFill />,
+      stars: 20,
+      title: 'Share an Article',
+      desc: 'Share interesting financial articles and insights with friends or on LinkedIn to earn FinStars daily.',
+      action: 'Browse Articles',
+      to: '/articles',
+    },
+    {
+      key: 'streak',
+      icon: <PiLightningFill />,
+      stars: 50,
+      title: '7-Day Streak Bonus',
+      desc: 'Build the habit of daily financial awareness. Maintain a 7-day learning streak to unlock a bonus reward.',
+      action: 'Continue Streak',
+      to: '/courses',
+    },
+    {
+      key: 'lessons',
+      icon: <PiBookOpenTextFill />,
+      stars: 30,
+      title: 'Finish Course Lessons',
+      desc: 'Master interactive micro-lessons and pass module checkpoints to earn stars while boosting your FinScore.',
+      action: 'Explore Courses',
+      to: '/courses',
+    },
+  ];
+
   return (
-    <section className="earn-section">
-      <div className="section-top-row">
-        <div className="section-heading-group">
-          <h2 className="section-title">Earn FinStars</h2>
-          <p className="section-subtitle">
-            Complete daily learning activities and invite peers to stack up your FinStars balance.
-          </p>
-        </div>
-      </div>
+    <section className="rw-section rw-earn" aria-labelledby="rw-earn-title">
+      <h2 id="rw-earn-title" className="rw-section-title">Earn FinStars</h2>
+      <p className="rw-section-sub">Complete daily learning activities and invite peers to stack up your FinStars balance.</p>
 
-      <div className="earn-grid">
-        {/* 1. Refer a Friend */}
-        <div className="earn-card">
-          <div className="earn-card-badge">
-            <span>+100</span>
-            <img src="/dash-finstar.svg" alt="FinStars" className="earn-badge-star-img" />
-          </div>
-          <div>
-            <div className="earn-card-icon-wrapper earn-icon-purple">
-              <FiUsers />
+      <ul className="rw-panel rw-ways">
+        {WAYS.map((way) => (
+          <li key={way.key} className={`rw-way${way.key === 'refer' ? ' rw-way--featured' : ''}`}>
+            <span className="rw-way-icon" aria-hidden="true">{way.icon}</span>
+            <div className="rw-way-body">
+              <div className="rw-way-head">
+                <h3>{way.title}</h3>
+                <span className="rw-stars-pill"><PiStarFill aria-hidden="true" /> +{way.stars}</span>
+              </div>
+              <p>{way.desc}</p>
+              {way.key === 'refer' ? (
+                <button
+                  className={`rw-btn rw-btn--small${copiedInvite ? ' is-done' : ''}`}
+                  onClick={handleCopyInvite}
+                  type="button"
+                  id="copy-invite-link-btn"
+                  aria-label={copiedInvite ? "Invite link copied" : "Copy invite link"}
+                >
+                  {copiedInvite ? <><PiCheckBold aria-hidden="true" /> Invite Link Copied!</> : <><PiCopyBold aria-hidden="true" /> Copy Invite Link</>}
+                </button>
+              ) : (
+                <button className="rw-ghost" onClick={() => navigate(way.to)} type="button">
+                  {way.action} <PiArrowRightBold aria-hidden="true" />
+                </button>
+              )}
             </div>
-            <h3 className="earn-card-title">Refer a Friend</h3>
-            <p className="earn-card-desc">
-              Invite friends to FinEd. When they join and complete their first lesson, you both receive 100 FinStars!
-            </p>
-          </div>
-          <button 
-            className={`earn-action-btn ${copiedInvite ? 'copied' : ''}`}
-            onClick={handleCopyInvite}
-            type="button"
-            id="copy-invite-link-btn"
-            aria-label={copiedInvite ? "Invite link copied" : "Copy invite link"}
-          >
-            {copiedInvite ? (
-              <>
-                <FiCheck className="earn-btn-check-icon" size={16} />
-                <span>Invite Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <FiCopy size={15} />
-                <span>Copy Invite Link</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* 2. Share an Article */}
-        <div className="earn-card">
-          <div className="earn-card-badge">
-            <span>+20</span>
-            <img src="/dash-finstar.svg" alt="FinStars" className="earn-badge-star-img" />
-          </div>
-          <div>
-            <div className="earn-card-icon-wrapper earn-icon-emerald">
-              <FiShare2 />
-            </div>
-            <h3 className="earn-card-title">Share an Article</h3>
-            <p className="earn-card-desc">
-              Share interesting financial articles and insights with friends or on LinkedIn to earn FinStars daily.
-            </p>
-          </div>
-          <button 
-            className="earn-action-btn secondary"
-            onClick={() => navigate('/articles')}
-            type="button"
-          >
-            Browse Articles
-          </button>
-        </div>
-
-        {/* 3. 7-Day Streak Milestone */}
-        <div className="earn-card">
-          <div className="earn-card-badge">
-            <span>+50</span>
-            <img src="/dash-finstar.svg" alt="FinStars" className="earn-badge-star-img" />
-          </div>
-          <div>
-            <div className="earn-card-icon-wrapper earn-icon-amber">
-              <FiZap />
-            </div>
-            <h3 className="earn-card-title">7-Day Streak Bonus</h3>
-            <p className="earn-card-desc">
-              Build the habit of daily financial awareness. Maintain a 7-day learning streak to unlock a bonus reward.
-            </p>
-          </div>
-          <button 
-            className="earn-action-btn secondary"
-            onClick={() => navigate('/courses')}
-            type="button"
-          >
-            Continue Streak
-          </button>
-        </div>
-
-        {/* 4. Complete Course Module */}
-        <div className="earn-card">
-          <div className="earn-card-badge">
-            <span>+30</span>
-            <img src="/dash-finstar.svg" alt="FinStars" className="earn-badge-star-img" />
-          </div>
-          <div>
-            <div className="earn-card-icon-wrapper earn-icon-blue">
-              <FiBookOpen />
-            </div>
-            <h3 className="earn-card-title">Finish Course Lessons</h3>
-            <p className="earn-card-desc">
-              Master interactive micro-lessons and pass module checkpoints to earn stars while boosting your FinScore.
-            </p>
-          </div>
-          <button 
-            className="earn-action-btn secondary"
-            onClick={() => navigate('/courses')}
-            type="button"
-          >
-            Explore Courses
-          </button>
-        </div>
-      </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 };
