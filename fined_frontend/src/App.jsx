@@ -37,7 +37,7 @@ const EditCardForm = lazy(() => import("./pages/Admin/EditCardForm"));
 const FinToolsPage = lazy(() => import("./pages/FinTools/FinToolsPage"));
 const ExpenseTracker = lazy(() => import("./pages/FinTools/ExpenseTracker/ExpenseTracker"));
 const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
-const ProductPage = lazy(() => import("./pages/Policies/ProductPage"));
+const ProductRoute = lazy(() => import("./pages/Policies/ProductRoute"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
@@ -106,7 +106,7 @@ function App() {
                   <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
                   <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
                   <Route path="leaderboard" element={<AuthenticationGuard component={Leaderboard} />} />
-                  <Route path=":productType" element={<AuthenticationGuard component={ProductPage} />} />
+                  <Route path=":productType" element={<ProductRoute />} />
                   <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
                   <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
                   <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />

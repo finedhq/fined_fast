@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticleBySlug, fetchAdjacentArticles } from "../../services/api";
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
+import NotFoundPage from "../NotFound/NotFoundPage";
 
 function SingleArticlePage() {
   const { slug } = useParams();
@@ -12,14 +13,18 @@ function SingleArticlePage() {
   const [error, setError] = useState("");
   const [adjacent, setAdjacent] = useState({ previous: null, next: null });
 
+  const notFound = !loading && (error || !article);
+
+  // The reader is a full-screen overlay; the 404 page needs normal scrolling
   useEffect(() => {
+    if (notFound) return;
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     return () => {
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [notFound]);
 
   useEffect(() => {
     async function loadArticle() {
@@ -30,6 +35,7 @@ function SingleArticlePage() {
       }
 
       try {
+        setError("");
         setLoading(true);
         const data = await fetchArticleBySlug(slug);
         setArticle(data);
@@ -46,14 +52,14 @@ function SingleArticlePage() {
           setLoading(false);
         } else {
           setError("Article not found.");
-          navigate("/articles", { replace: true });
+          setLoading(false);
         }
       }
     }
     if (slug) {
       loadArticle();
     }
-  }, [slug, navigate]);
+  }, [slug]);
 
   const closeArticle = () => {
     navigate("/articles");
@@ -68,7 +74,7 @@ function SingleArticlePage() {
   }
 
   if (error || !article) {
-    return null; // the useEffect will redirect
+    return <NotFoundPage />;
   }
 
   return (

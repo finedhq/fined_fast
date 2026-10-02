@@ -1,45 +1,22 @@
-import React from 'react';
-import { FiTag, FiChevronRight } from 'react-icons/fi';
+const STEPS = [
+  'Choose a reward you like',
+  'Click on Redeem Now',
+  'Confirm & exchange FinStars',
+  'Get your voucher instantly!',
+];
 
-const HowItWorksBanner = () => {
-  return (
-    <div className="how-it-works-banner">
-      <div className="how-it-works-tag">
-        <div className="tag-icon-circle">
-          <FiTag />
-        </div>
-        <span>How it works?</span>
-      </div>
-
-      <div className="how-steps-flow">
-        <div className="how-step-item">
-          <span className="how-step-number">1</span>
-          <span>Choose a reward you like</span>
-        </div>
-
-        <FiChevronRight className="how-step-arrow" />
-
-        <div className="how-step-item">
-          <span className="how-step-number">2</span>
-          <span>Click on Redeem Now</span>
-        </div>
-
-        <FiChevronRight className="how-step-arrow" />
-
-        <div className="how-step-item">
-          <span className="how-step-number">3</span>
-          <span>Confirm & exchange FinStars</span>
-        </div>
-
-        <FiChevronRight className="how-step-arrow" />
-
-        <div className="how-step-item">
-          <span className="how-step-number">4</span>
-          <span>Get your voucher instantly!</span>
-        </div>
-      </div>
-    </div>
-  );
-};
+const HowItWorksBanner = () => (
+  <div className="rw-how">
+    <h4 className="rw-how-title">How it works?</h4>
+    <ol className="rw-how-steps">
+      {STEPS.map((step, i) => (
+        <li key={step}>
+          <span className="rw-how-num" aria-hidden="true">{i + 1}</span>
+          {step}
+        </li>
+      ))}
+    </ol>
+  </div>
+);
 
 export default HowItWorksBanner;

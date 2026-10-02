@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
-import RevealOnScroll from '../../components/RevealOnScroll';
-import dashboardWateringGuy from '../../assets/dashboard_watering_guy.png';
-import './Dashboard.css';
+import './DashboardHome.css';
 import { getCourses, fetchArticles } from '../../services/api';
-import SmartImage from '../../uiComponents/SmartImage';
-
-import { IoSparkles } from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
 import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
+import { getUserLevel } from "../../utils/level";
+import { useUserProfile } from "../../context/UserProfileContext";
+import {
+  PiArrowRightBold,
+  PiBookOpenTextBold,
+  PiCaretRightBold,
+  PiFireFill,
+  PiInfoBold,
+  PiSparkleFill,
+  PiStarFill,
+  PiTrophyFill,
+  PiWarningCircleBold,
+} from "react-icons/pi";
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -19,26 +27,102 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-const InfoIcon = () => (
-  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dash-info-icon-svg">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
+function Avatar({ src, name }) {
+  const [broken, setBroken] = useState(false);
+  if (src && !broken) {
+    return <img src={src} alt="" className="dh-avatar" onError={() => setBroken(true)} />;
+  }
+  return <span className="dh-avatar dh-avatar--initial" aria-hidden="true">{(name || "U").charAt(0).toUpperCase()}</span>;
+}
+
+function ProgressRing({ percent }) {
+  return (
+    <svg className="dh-ring" viewBox="0 0 120 120" aria-hidden="true">
+      <circle className="dh-ring-track" cx="60" cy="60" r="50" pathLength="100" />
+      {percent > 0 && (
+        <circle
+          className="dh-ring-fill"
+          cx="60"
+          cy="60"
+          r="50"
+          pathLength="100"
+          style={{ strokeDasharray: `${percent} 100` }}
+        />
+      )}
+    </svg>
+  );
+}
+
+function StatRow({ icon, tone, label, value, onClick, title }) {
+  return (
+    <li>
+      <button type="button" className="dh-stat" onClick={onClick} title={title}>
+        <span className={`dh-stat-icon dh-stat-icon--${tone}`} aria-hidden="true">{icon}</span>
+        <span className="dh-stat-label">{label}</span>
+        <span className="dh-stat-value">{value}</span>
+        <PiCaretRightBold className="dh-stat-caret" aria-hidden="true" />
+      </button>
+    </li>
+  );
+}
+
+function ArticleRow({ article, onAuthor }) {
+  const authorName = article.authors?.name || article.author || "Shravan Mutha";
+  const authorSlug = article.authors?.slug || "shravan-mutha";
+  return (
+    <li className="dh-read">
+      <div className="dh-read-thumb">
+        {article.image_url ? <img src={article.image_url} alt="" loading="lazy" /> : <PiBookOpenTextBold aria-hidden="true" />}
+      </div>
+      <div className="dh-read-body">
+        <div className="dh-read-tags">
+          <span className="dh-tag">{article.tag || "Finance"}</span>
+          {hasAiLens(article) && (
+            <span className="dh-tag dh-tag--ai"><PiSparkleFill aria-hidden="true" /> AI Lens</span>
+          )}
+        </div>
+        <h3 className="dh-read-title">
+          <Link to={`/articles/${article.slug || article.id}`} className="dh-stretch">{article.title}</Link>
+        </h3>
+        {article.description && <p className="dh-read-desc">{article.description}</p>}
+        <p className="dh-read-meta">
+          <span>{formatDate(article.published_at || article.created_at)}</span>
+          <button type="button" className="dh-author" onClick={() => onAuthor(authorSlug)}>
+            By {authorName}
+          </button>
+        </p>
+      </div>
+    </li>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="dh-page" aria-busy="true" aria-label="Loading dashboard">
+      <div className="dh-grid">
+        <div className="dh-skel dh-area-greet dh-skel--greet" />
+        <div className="dh-skel dh-area-card dh-skel--card" />
+        <div className="dh-skel dh-area-continue dh-skel--block" />
+        <div className="dh-skel dh-area-stats dh-skel--block" />
+        <div className="dh-skel dh-area-course dh-skel--block" />
+      </div>
+    </div>
+  );
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { refreshProfile } = useUserProfile();
 
   const [userData, setUserData] = useState({});
   const [ongoingCourse, setOngoingCourse] = useState({});
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState("");
-  
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
+
   const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [recommendedArticles, setRecommendedArticles] = useState([]);
-
-  const articlesScrollRef = React.useRef(null);
 
   useEffect(() => {
     const lenis = new Lenis();
@@ -52,19 +136,6 @@ const Dashboard = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isLoading || !isAuthenticated || !user) return;
-
-    getAccessTokenSilently().then(token => {
-      setAuthToken(token);
-      fetchData(user.email, user.sub);
-    }).catch(err => {
-      console.error("Error fetching access token", err);
-      setError("Authentication error. Please log in again.");
-      setLoadingData(false);
-    });
-  }, [isLoading, isAuthenticated, user, getAccessTokenSilently]);
-
   async function fetchData(userEmail, userId) {
     setLoadingData(true);
     try {
@@ -73,19 +144,18 @@ const Dashboard = () => {
         setUserData(res.data.userData);
         setOngoingCourse(res.data.ongoingCourseData || {});
       }
-      
+
       // Fetch recommendations concurrently
       try {
         const [coursesRes, articlesRes] = await Promise.all([
           getCourses(),
           fetchArticles({ limit: 10, offset: 0 })
         ]);
-        
+
         const allCourses = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
         const sortedCourses = allCourses
-          .sort((a, b) => new Date(b.created_at || b.published_at || 0) - new Date(a.created_at || a.published_at || 0))
-          .slice(0, 3); // For now, the user requested only 1 course to be shown, but this will handle up to 3 naturally as requested (latest 3 courses and 3 articles)
-        setRecommendedCourses(sortedCourses.slice(0, 1)); // Enforce showing only 1 course as per user prompt "for now put only 1 course we have"
+          .sort((a, b) => new Date(b.created_at || b.published_at || 0) - new Date(a.created_at || a.published_at || 0));
+        setRecommendedCourses(sortedCourses.slice(0, 1)); // only one course for now
 
         const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
         const sortedArticles = allArticles
@@ -95,387 +165,223 @@ const Dashboard = () => {
         console.error("Failed to fetch recommendations:", recError);
       }
 
-    } catch (error) {
+    } catch {
       setError("Failed to fetch your data.");
     } finally {
       setLoadingData(false);
     }
   }
 
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || !user) return;
+
+    getAccessTokenSilently().then(token => {
+      setAuthToken(token);
+      // getdata can change FinScore (e.g. inactivity penalty), so let the navbar catch up after it
+      return fetchData(user.email, user.sub).then(() => refreshProfile());
+    }).catch(err => {
+      console.error("Error fetching access token", err);
+      setError("Authentication error. Please log in again.");
+      setLoadingData(false);
+    });
+  }, [isLoading, isAuthenticated, user, getAccessTokenSilently, refreshProfile]);
+
   if (isLoading || loadingData) {
-    return (
-      <div className="dash-loading-container">
-        <div className="dash-spinner"></div>
-        <p>Loading Dashboard...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="dash-loading-container">
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-          <h2 style={{ fontSize: '1.5rem', color: '#dc2626', marginBottom: '0.5rem' }}>Oops! Something went wrong</h2>
-          <p style={{ color: '#4b5563', marginBottom: '1.5rem' }}>{error}</p>
-          <button
-            onClick={() => navigate('/')}
-            style={{ padding: '0.75rem 1.5rem', backgroundColor: '#3b82f6', color: 'white', borderRadius: '0.5rem', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Return to Home
-          </button>
+      <div className="dh-page dh-page--center">
+        <div className="dh-error" role="alert">
+          <PiWarningCircleBold className="dh-error-icon" aria-hidden="true" />
+          <h2>Something went wrong</h2>
+          <p>{error}</p>
+          <button type="button" className="dh-btn" onClick={() => navigate('/')}>Return to Home</button>
         </div>
       </div>
     );
   }
 
-  // Derive level
-  const level = Math.floor((userData?.fin_stars || 0) / 100) + 1;
+  const firstName = user?.name?.split(" ")[0] || "User";
+  const finStars = userData?.fin_stars || 0;
+  const finScore = userData?.fin_score || 0;
+  const streak = userData?.streak_count || 0;
+  const levelInfo = getUserLevel(userData);
 
-  const getLevelTitle = (lvl) => {
-    if (lvl <= 3) return "Beginner";
-    if (lvl <= 6) return "Planner";
-    if (lvl <= 9) return "Strategist";
-    return "Master";
-  };
-  const levelTitle = getLevelTitle(level);
-
+  const hasCourse = Boolean(ongoingCourse?.title);
+  const totalLessons = ongoingCourse?.modules_count || 0;
   const currentLesson = ongoingCourse?.current_lesson || 1;
-  const progressPercent = ongoingCourse?.modules_count
-    ? Math.floor((currentLesson / ongoingCourse.modules_count) * 100)
+  const progressPercent = totalLessons
+    ? Math.min(100, Math.floor((currentLesson / totalLessons) * 100))
     : 0;
+  const courseLink = ongoingCourse?.id ? `/courses/${ongoingCourse.slug || ongoingCourse.id}` : '/courses';
 
-  const scrollArticles = (direction) => {
-    if (articlesScrollRef.current) {
-      const scrollAmount = 370; // card width + gap
-      articlesScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-    }
-  };
+  const goToRewards = () => navigate('/rewards');
+  const course = recommendedCourses[0];
 
   return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard-container">
-        {/* TOP SECTION */}
-        <div className="dash-top-section">
+    <div className="dh-page">
+      <div className="dh-grid">
+        {/* Greeting */}
+        <header className="dh-area-greet dh-greet">
+          <div>
+            <h1 className="dh-title">Welcome back, {firstName}</h1>
+            <p className="dh-sub">Let's continue your journey towards financial freedom.</p>
+          </div>
+          <button type="button" className="dh-streak" onClick={goToRewards} title="View Rewards & Streaks">
+            <PiFireFill aria-hidden="true" />
+            {streak > 0 ? `You're on a ${streak} day streak!` : "Start your streak today"}
+          </button>
+        </header>
 
-          {/* LEFT CARD (Welcome & Course) */}
-          <RevealOnScroll delay={100}>
-            <div className="dash-welcome-card">
-              <div className="dash-welcome-content">
-                <h1 className="dash-greeting">Welcome Back, {user?.name?.split(" ")[0] || "User"}! 👋</h1>
-                <p className="dash-subtitle">Let's continue your journey towards financial freedom.</p>
+        {/* FinEd card: identity + FinScore */}
+        <section className="dh-area-card dh-card" aria-label="Your FinEd card">
+          <Link to="/rewards" className="dh-card-link" title="View FinScore details & Rewards">
+            <span className="dh-sr-only">View FinScore details and rewards</span>
+          </Link>
+          <div className="dh-card-top">
+            <span className="dh-card-logo"><img src="/logo.ico" alt="FinEd" /></span>
+            <span className="dh-card-level">{levelInfo.label}</span>
+          </div>
 
-                <div 
-                  className="dash-streak-pill"
-                  onClick={() => navigate('/rewards')}
-                  role="button"
-                  tabIndex={0}
-                  title="View Rewards & Streaks"
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                >
-                  🔥 You're on a {userData?.streak_count || 0} day streak!
-                </div>
-
-                <div className="dash-course-module">
-                  <div className="dash-course-info">
-                    <div className="dash-course-img-placeholder">
-                      <span>🌱</span>
-                    </div>
-                    <div className="dash-course-details">
-                      <span className="dash-course-label">Continue Learning</span>
-                      <h3 className="dash-course-title">{ongoingCourse?.title || "No course started yet"}</h3>
-                      {ongoingCourse?.modules_count && (
-                        <>
-                          <span className="dash-course-lesson">Lesson {currentLesson} of {ongoingCourse.modules_count}</span>
-                          <div className="dash-progress-container">
-                            <div className="dash-progress-bar">
-                              <div className="dash-progress-fill" style={{ width: `${progressPercent}%` }}></div>
-                            </div>
-                            <span className="dash-progress-text">{progressPercent}%</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="dash-actions">
-                  <button
-                    className="dash-btn-primary"
-                    onClick={() => navigate(ongoingCourse?.id ? `/courses/${ongoingCourse.slug || ongoingCourse.id}` : '/courses')}
-                  >
-                    Continue Learning →
-                  </button>
-                </div>
-              </div>
-
-              <div className="dash-fox-illustration">
-                <img src={dashboardWateringGuy} alt="Dashboard Icon" className="dash-fox-img" />
-              </div>
-            </div>
-          </RevealOnScroll>
-
-          {/* RIGHT CARD (Stats & FinScore) */}
-          <RevealOnScroll delay={300}>
-            <div className="dash-stats-card">
-              <div className="dash-profile-section">
-                <img src={user?.picture || "/profile.png"} alt="Profile" className="dash-profile-pic" />
-                <div className="dash-profile-info">
-                  <h3 className="dash-profile-name">{user?.name || "User Name"}</h3>
-                  <p className="dash-profile-level">Level {level} • {levelTitle}</p>
-                </div>
-              </div>
-
-              <div className="dash-stats-list">
-                <div 
-                  className="dash-stat-item"
-                  onClick={() => navigate('/rewards')}
-                  role="button"
-                  tabIndex={0}
-                  title="View Rewards & Streaks"
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                >
-                  <div className="dash-stat-tooltip-mobile">Streak</div>
-                  <div className="dash-stat-icon-wrapper icon-streak">
-                    <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
-                  </div>
-                  <div className="dash-stat-main">
-                    <strong>{userData?.streak_count || 0}</strong>{" "}<span className="dash-stat-text-hide-mobile">Days</span>
-                  </div>
-                  <div className="dash-stat-label">STREAK</div>
-                </div>
-
-                <div 
-                  className="dash-stat-item"
-                  onClick={() => navigate('/rewards')}
-                  role="button"
-                  tabIndex={0}
-                  title="View Rewards & FinStars"
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                >
-                  <div className="dash-stat-tooltip-mobile">FinStars</div>
-                  <div className="dash-stat-icon-wrapper icon-finstars">
-                    <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
-                  </div>
-                  <div className="dash-stat-main">
-                    <strong>{userData?.fin_stars || 0}</strong>
-                  </div>
-                  <div className="dash-stat-label">FINSTARS</div>
-                </div>
-
-                <div 
-                  className="dash-stat-item"
-                  onClick={() => navigate('/rewards')}
-                  role="button"
-                  tabIndex={0}
-                  title="View Leaderboard & Rankings"
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                >
-                  <div className="dash-stat-tooltip-mobile">Rank</div>
-                  <div className="dash-stat-icon-wrapper icon-modules">
-                    <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
-                  </div>
-                  <div className="dash-stat-main">
-                    <strong>#{userData?.rank || '-'}</strong>
-                  </div>
-                  <div className="dash-stat-label">RANK</div>
-                </div>
-              </div>
-
-              <div 
-                className="dash-finscore-section"
-                onClick={() => navigate('/rewards')}
-                role="button"
-                tabIndex={0}
-                title="View FinScore details & Rewards"
-                onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+          <div className="dh-card-score">
+            <span className="dh-card-score-label">
+              FinScore
+              <button
+                type="button"
+                className="dh-info-btn"
+                aria-expanded={showScoreInfo}
+                aria-controls="dh-score-info"
+                onClick={() => setShowScoreInfo((v) => !v)}
+                onBlur={() => setShowScoreInfo(false)}
               >
-                <div className="dash-finscore-header">
-                  <span className="dash-finscore-label">FinScore</span>
-                  <div className="info-icon-container" onClick={(e) => e.stopPropagation()}>
-                    <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
-                      <InfoIcon />
-                    </span>
-                    <div className="info-tooltip">
-                      FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
-                    </div>
-                  </div>
-                </div>
-                <div className="dash-finscore-display">
-                  <div className="dash-finscore-value-group">
-                    <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
-                  </div>
-                  <div className="dash-finscore-chart-img-wrapper">
-                    <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </RevealOnScroll>
-
-        </div>
-
-        {/* BOTTOM SECTION (Today's Challenge) */}
-        <RevealOnScroll delay={200}>
-          <div className="dash-challenge-card">
-            <div className="dash-challenge-left">
-              <div className="dash-challenge-illustration">
-                <span className="dash-challenge-target">🎯</span>
-              </div>
-              <div className="dash-challenge-content">
-                <div className="dash-challenge-header">
-                  <span className="dash-challenge-title">Today's Challenge</span>
-                  <span className="dash-challenge-badge">New</span>
-                </div>
-                <h3 className="dash-challenge-heading">Set a weekly food budget</h3>
-                <p className="dash-challenge-desc">Plan your meals and stick to your budget for the week.</p>
-              </div>
-            </div>
-
-            <div className="dash-challenge-right">
-              <div className="dash-challenge-reward">
-                <span className="dash-reward-label">Reward</span>
-                <div className="dash-reward-value">
-                  <span className="dash-reward-icon">⭐</span>
-                  <div className="dash-reward-text-group">
-                    <span className="dash-reward-amount">+25</span>
-                    <span className="dash-reward-text">FinStars</span>
-                  </div>
-                </div>
-              </div>
-              <button className="dash-btn-primary">
-                Start Challenge →
+                <PiInfoBold aria-hidden="true" />
+                <span className="dh-sr-only">What is FinScore?</span>
               </button>
-            </div>
+            </span>
+            <span className="dh-card-score-value">{finScore}</span>
+            <span className="dh-card-next">
+              {levelInfo.pointsToNext === null
+                ? "Top level reached"
+                : `${levelInfo.pointsToNext} points to ${levelInfo.nextName}`}
+            </span>
           </div>
-        </RevealOnScroll>
 
-      </div>
-      
-      {/* RECOMMENDATIONS SECTION */}
-      <div className="dashboard-container" style={{ marginTop: '20px' }}>
-        <RevealOnScroll delay={300}>
-          <div className="dash-recommendations-section">
-            <h2 className="dash-rec-header" style={{ marginBottom: '16px' }}>Recommended Course</h2>
-            <div className="ap-articles-grid">
-              {recommendedCourses.map(course => (
-                <div 
-                  key={course.id} 
-                  className="ap-grid-card"
-                  onClick={() => navigate(`/courses/${course.slug || course.id}`)}
-                >
-                  <div className="ap-grid-card-img-wrap">
-                    <img
-                      src={course.thumbnail_url} 
-                      alt={course.title} 
-                      className="ap-grid-card-img"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="ap-grid-card-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                      <span className="ap-grid-category" style={{ margin: 0 }}>
-                        {`${course.modules_count || 0} MODULES`}
-                      </span>
-                    </div>
-                    <h3 className="ap-grid-title">{course.title}</h3>
-                    <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                      {course.description || ""}
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                      <span>{formatDate(course.created_at || course.published_at)}</span>
-                      <span style={{ color: '#0ea5e9' }}>
-                        By <span style={{ textDecoration: 'underline' }}>FinEd</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {recommendedCourses.length === 0 && (
-                <p style={{ color: '#64748b' }}>No courses available right now.</p>
-              )}
-            </div>
+          <div className="dh-card-holder">
+            <Avatar src={user?.picture} name={user?.name} />
+            <span className="dh-card-name">{user?.name || "User Name"}</span>
           </div>
-        </RevealOnScroll>
 
-        <RevealOnScroll delay={400}>
-          <div className="dash-recommendations-section" style={{ marginTop: '32px', marginBottom: '32px' }}>
-            <div className="dash-rec-header-container">
-              <h2 className="dash-rec-header">Recommended Articles</h2>
-              <div className="dash-rec-actions">
-                <span 
-                  onClick={() => navigate('/articles')} 
-                  className="dash-view-all-link"
-                >
-                  View all <span className="dash-view-all-arrow">→</span>
-                </span>
+          <p id="dh-score-info" role="tooltip" className={`dh-info-body${showScoreInfo ? " is-open" : ""}`}>
+            FinScore is your overall engagement score! It grows as you complete Courses, read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+          </p>
+        </section>
+
+        {/* Continue learning */}
+        <section className="dh-area-continue dh-panel dh-continue" aria-labelledby="dh-continue-title">
+          {hasCourse && totalLessons > 0 ? (
+            <div className="dh-continue-ring">
+              <ProgressRing percent={progressPercent} />
+              <span className="dh-continue-pct">{progressPercent}%</span>
+            </div>
+          ) : (
+            <div className="dh-continue-ring dh-continue-ring--empty" aria-hidden="true">
+              <PiBookOpenTextBold />
+            </div>
+          )}
+          <div className="dh-continue-body">
+            <span className="dh-kicker">Continue learning</span>
+            <h2 id="dh-continue-title" className="dh-continue-title">
+              {hasCourse ? ongoingCourse.title : "No course started yet"}
+            </h2>
+            {hasCourse && totalLessons > 0 && (
+              <p className="dh-continue-lesson">Lesson {currentLesson} of {totalLessons}</p>
+            )}
+          </div>
+          {/* Outside the text column so it can take the full card width on phones */}
+          <button type="button" className="dh-btn dh-continue-btn" onClick={() => navigate(courseLink)}>
+            {hasCourse ? "Continue learning" : "Browse courses"}
+            <PiArrowRightBold aria-hidden="true" />
+          </button>
+        </section>
+
+        {/* Stats */}
+        <section className="dh-area-stats" aria-labelledby="dh-stats-heading">
+          <h2 id="dh-stats-heading" className="dh-section-title">Your progress</h2>
+          <ul className="dh-panel dh-stats">
+            <StatRow
+              icon={<PiFireFill />}
+              tone="streak"
+              label="Streak"
+              value={`${streak} ${streak === 1 ? "day" : "days"}`}
+              onClick={goToRewards}
+              title="View Rewards & Streaks"
+            />
+            <StatRow
+              icon={<PiStarFill />}
+              tone="stars"
+              label="FinStars"
+              value={finStars}
+              onClick={goToRewards}
+              title="View Rewards & FinStars"
+            />
+            <StatRow
+              icon={<PiTrophyFill />}
+              tone="rank"
+              label="Rank"
+              value={userData?.rank ? `#${userData.rank}` : "-"}
+              onClick={goToRewards}
+              title="View Leaderboard & Rankings"
+            />
+          </ul>
+        </section>
+
+        {/* Recommended course */}
+        <section className="dh-area-course" aria-labelledby="dh-course-heading">
+          <h2 id="dh-course-heading" className="dh-section-title">Recommended course</h2>
+          {course ? (
+            <article className="dh-panel dh-course">
+              <div className="dh-course-media">
+                {course.thumbnail_url ? <img src={course.thumbnail_url} alt="" loading="lazy" /> : <PiBookOpenTextBold aria-hidden="true" />}
               </div>
-            </div>
-            <div className="dash-carousel-wrapper">
-              <button onClick={() => scrollArticles('left')} className="dash-scroll-btn dash-scroll-btn-left">‹</button>
-              <div className="dash-carousel-container" ref={articlesScrollRef}>
+              <div className="dh-course-body">
+                <span className="dh-tag">{course.modules_count || 0} modules</span>
+                <h3 className="dh-course-title">
+                  <Link to={`/courses/${course.slug || course.id}`} className="dh-stretch">{course.title}</Link>
+                </h3>
+                {course.description && <p className="dh-course-desc">{course.description}</p>}
+                <p className="dh-read-meta">
+                  <span>{formatDate(course.created_at || course.published_at)}</span>
+                  <span className="dh-by">By FinEd</span>
+                </p>
+              </div>
+            </article>
+          ) : (
+            <p className="dh-empty">No courses available right now.</p>
+          )}
+        </section>
+
+        {/* Recommended articles */}
+        <section className="dh-area-articles" aria-labelledby="dh-articles-heading">
+          <div className="dh-section-head">
+            <h2 id="dh-articles-heading" className="dh-section-title">Recommended articles</h2>
+            <Link to="/articles" className="dh-view-all">View all <PiArrowRightBold aria-hidden="true" /></Link>
+          </div>
+          {recommendedArticles.length > 0 ? (
+            <ul className="dh-reads">
               {recommendedArticles.map(article => (
-                <div 
-                  key={article.id} 
-                  className="ap-grid-card"
-                  onClick={() => navigate(`/articles/${article.slug || article.id}`)}
-                >
-                  <div className="ap-grid-card-img-wrap">
-                    {article.image_url ? (
-                      <img
-                        src={article.image_url} 
-                        alt={article.title} 
-                        className="ap-grid-card-img"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="ap-grid-card-img-placeholder" />
-                    )}
-                  </div>
-                  <div className="ap-grid-card-content">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                      <span className="ap-grid-category" style={{ margin: 0 }}>
-                        {article.tag?.toUpperCase() || "FINANCE"}
-                      </span>
-                      {hasAiLens(article) && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#eef2ff', color: '#4f46e5', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700' }}>
-                          <IoSparkles size={9} /> AI Lens
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="ap-grid-title">{article.title}</h3>
-                    <p className="ap-grid-excerpt" style={{ flexGrow: 1 }}>
-                      {article.description || ""}
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '13px', color: '#6b7280' }}>
-                      <span>{formatDate(article.published_at || article.created_at)}</span>
-                      {article.authors ? (
-                        <span
-                          style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/${article.authors.slug}`); }}
-                        >
-                          By <span style={{ textDecoration: 'underline' }}>{article.authors.name}</span>
-                        </span>
-                      ) : (
-                        <span
-                          style={{ cursor: 'pointer', color: '#0ea5e9' }}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/authors/shravan-mutha`); }}
-                        >
-                          By <span style={{ textDecoration: 'underline' }}>{article.author || "Shravan Mutha"}</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ArticleRow
+                  key={article.id}
+                  article={article}
+                  onAuthor={(slug) => navigate(`/authors/${slug}`)}
+                />
               ))}
-              {recommendedArticles.length === 0 && (
-                <p style={{ color: '#64748b' }}>No articles available right now.</p>
-              )}
-              </div>
-              <button onClick={() => scrollArticles('right')} className="dash-scroll-btn dash-scroll-btn-right">›</button>
-            </div>
-          </div>
-        </RevealOnScroll>
+            </ul>
+          ) : (
+            <p className="dh-empty">No articles available right now.</p>
+          )}
+        </section>
       </div>
       <FloatingWhatsAppButton />
     </div>
