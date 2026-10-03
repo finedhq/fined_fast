@@ -94,7 +94,7 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
                     lesson_number = mod.get("order_index", 1)
             
             course["current_lesson"] = lesson_number
-            return course
+            return (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
 
         # 3. Run all independent DB queries sequentially (Thread-safe)
         articles = await asyncio.to_thread(article_repo.get_all, 1)
