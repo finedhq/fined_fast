@@ -170,12 +170,25 @@ class UserRepository:
         return ranked
 
     def get_rank(self, email: str) -> int:
-        """Get a specific user's rank position"""
-        leaderboard = self.get_leaderboard(limit=None, timeframe="all_time")
-        for entry in leaderboard:
-            if entry.get("email") == email:
-                return entry["rank"]
-        return 1
+        """Get rank via a single COUNT query instead of fetching all users."""
+        user = self.get_by_email(email)
+        if not user:
+            return 1
+        
+        my_score = (
+            (user.get("article_score") or 0) +
+            (user.get("expense_score") or 0) +
+            (user.get("course_score") or 0) +
+            (user.get("consistency_score") or 0)
+        )
+        
+        try:
+            res = supabase.rpc("count_users_above_score", {"score_threshold": my_score}).execute()
+            count = res.data if isinstance(res.data, int) else 0
+            return count + 1
+        except Exception as e:
+            print(f"Notice: Failed to fetch rank via RPC, defaulting to 1: {e}")
+            return 1
 
     # In-memory store for profile fields (ensures instant persistence even if DB migration is pending)
     _PROFILE_STORE = {}
