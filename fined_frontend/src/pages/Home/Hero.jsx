@@ -1,43 +1,43 @@
 import "./Hero.css";
-import bgImage from "../../assets/landingpage-bg.png";
-import budgetingBasicsImg from "../../assets/budgeting-basics.png";
-import biteSizeLessonsImg from "../../assets/bite-size-lessons.png";
-import interactiveLearningImg from "../../assets/interactive-learning.png";
-import retirementIncomePlanning1Img from "../../assets/retirement-income-planning-1.png";
-import retirementIncomePlanning2Img from "../../assets/retirement-income-planning-2.png";
-import featuredImg from "../../assets/featured-img.png";
-import savingRuleImg from "../../assets/500dollarsaving.png";
-import footerImg from "../../assets/new-footer-bg.png";
-import imgBiteSized from "../../assets/bite-sized-learning-abt-us.png";
-import imgInteractive from "../../assets/interactivelearning-abt-us.png";
-import imgRewards from "../../assets/realrewards-abtus.png";
-import imgLeaderboards from "../../assets/leaderboards-abtus.png";
+import bgImage from "../../assets/landingpage-bg.webp";
+import budgetingBasicsImg from "../../assets/budgeting-basics.webp";
+import biteSizeLessonsImg from "../../assets/bite-size-lessons.webp";
+import interactiveLearningImg from "../../assets/interactive-learning.webp";
+import retirementIncomePlanning1Img from "../../assets/retirement-income-planning-1.webp";
+import retirementIncomePlanning2Img from "../../assets/retirement-income-planning-2.webp";
+import featuredImg from "../../assets/featured-img.webp";
+import savingRuleImg from "../../assets/500dollarsaving.webp";
+import footerImg from "../../assets/new-footer-bg.webp";
+import imgBiteSized from "../../assets/bite-sized-learning-abt-us.webp";
+import imgInteractive from "../../assets/interactivelearning-abt-us.webp";
+import imgRewards from "../../assets/realrewards-abtus.webp";
+import imgLeaderboards from "../../assets/leaderboards-abtus.webp";
 import React, { useRef, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import Lenis from 'lenis';
 import { useNavigate } from "react-router-dom";
-import investingImg from "../../assets/investing-img.png";
-import wfBiteSizeLessson from "../../assets/wf-bite-size-lessons.png";
-import wfInteractiveLearning from "../../assets/wf-interactivelearning.png";
-import wfPersonalRecommend from "../../assets/wf-personalrecommend.png";
-import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.png";
-import satvikImg from "../../assets/satvik-img.png"
+import investingImg from "../../assets/investing-img.webp";
+import wfBiteSizeLessson from "../../assets/wf-bite-size-lessons.webp";
+import wfInteractiveLearning from "../../assets/wf-interactivelearning.webp";
+import wfPersonalRecommend from "../../assets/wf-personalrecommend.webp";
+import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.webp";
+import satvikImg from "../../assets/satvik-img.webp"
 import { fetchArticles, joinWaitlist, fetchAuthors } from "../../services/api";
 import instance from "../../lib/axios";
-import newLandingpagebgm from "../../assets/newlandingpagebg.png";
+import newLandingpagebgm from "../../assets/newlandingpagebg.webp";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Pagination, Autoplay, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import planeImg1 from "../../assets/image 27.png";
-import planeImg2 from "../../assets/image 28.png";
-import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.png"
-import newBgImg from "../../assets/newnewbg-imgofhomepg.png";
-import newPlaneImg from "../../assets/newnewplane.png";
-import test1 from "../../assets/testbgimg1.png";
-import test2 from "../../assets/testbgimg2.png"
+import planeImg1 from "../../assets/image 27.webp";
+import planeImg2 from "../../assets/image 28.webp";
+import newfooterImg from "../../assets/file_000000008f747208b046fb7821caefc9.webp"
+import newBgImg from "../../assets/newnewbg-imgofhomepg.webp";
+import newPlaneImg from "../../assets/newnewplane.webp";
+import test1 from "../../assets/testbgimg1.webp";
+import test2 from "../../assets/testbgimg2.webp"
 const generateSlug = (title) => {
   if (!title) return "";
   return title

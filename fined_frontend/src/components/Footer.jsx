@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./Footer.css";
-import footerLogo from "../assets/fined-footer-logo.png";
+import footerLogo from "../assets/fined-footer-logo.webp";
 import { Link } from "react-router-dom";
 function RevealOnScroll({ children, delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);

@@ -233,7 +233,6 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
   letter-spacing: 0;
   font-weight: bold;
-  /* margin-left: 15px; */
   font-family: 'Nunito', sans-serif;
 }
 
@@ -243,7 +242,6 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 22px;
   line-height: 1.5;
   margin-top: 25px;
-  /* margin-left: 16px; */
   font-family: 'Nunito', sans-serif;
 }
 

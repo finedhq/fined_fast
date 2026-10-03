@@ -22,9 +22,9 @@ import {
   PiStarFill,
   PiTrophyFill,
 } from "react-icons/pi";
-import completedModuleLogo from '../../assets/completed_module_logo.png';
-import currentModuleLogo from '../../assets/current_module_logo.png';
-import lockedModuleLogo from '../../assets/locked_module_logo.png';
+import completedModuleLogo from '../../assets/completed_module_logo.webp';
+import currentModuleLogo from '../../assets/current_module_logo.webp';
+import lockedModuleLogo from '../../assets/locked_module_logo.webp';
 import NotFoundPage from '../NotFound/NotFoundPage';
 // SVG Icons for statuses
 const CheckIcon = () => (

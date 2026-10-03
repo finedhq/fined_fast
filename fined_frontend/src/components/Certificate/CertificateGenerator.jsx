@@ -2,7 +2,7 @@ import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import './CertificateGenerator.css';
-import footerLogo from '../../assets/fined-footer-logo.png';
+import footerLogo from '../../assets/fined-footer-logo.webp';
 
 const CertificateGenerator = forwardRef(({ userName, courseName }, ref) => {
   const certificateRef = useRef(null);
