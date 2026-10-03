@@ -96,11 +96,13 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
             course["current_lesson"] = lesson_number
             return (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
 
-        # 3. Run all independent DB queries sequentially (Thread-safe)
-        articles = await asyncio.to_thread(article_repo.get_all, 1)
-        courses = await asyncio.to_thread(course_repo.get_listed)
-        ongoing_course_data = await fetch_ongoing_course()
-        log_data = await asyncio.to_thread(user_repo.get_score_logs, body.email)
+        # 3. Run all independent DB queries concurrently (Thread-safe)
+        articles, courses, ongoing_course_data, log_data = await asyncio.gather(
+            asyncio.to_thread(article_repo.get_all, 1),
+            asyncio.to_thread(course_repo.get_listed),
+            fetch_ongoing_course(),
+            asyncio.to_thread(user_repo.get_score_logs, body.email),
+        )
         
         current_fin_score = stats.get("fin_score", 0)
         score_delta = 0
@@ -135,8 +137,7 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
             "featuredArticle": articles[0] if articles else None,
             "recommendedCourses": courses[:8],
             "userData": user_data,
-            "ongoingCourseData": ongoing_course_data,
-            "logData": log_data
+            "ongoingCourseData": ongoing_course_data
         }
     except Exception as e:
         traceback.print_exc()

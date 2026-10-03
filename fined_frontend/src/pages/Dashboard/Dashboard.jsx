@@ -169,8 +169,9 @@ const Dashboard = () => {
 
     getAccessTokenSilently().then(token => {
       setAuthToken(token);
-      // getdata can change FinScore (e.g. inactivity penalty), so let the navbar catch up after it
-      return fetchData(user.email, user.sub).then(() => refreshProfile());
+      // Fire and forget - don't block the UI rendering on refreshProfile()
+      fetchData(user.email, user.sub);
+      refreshProfile();
     }).catch(err => {
       console.error("Error fetching access token", err);
       setError("Authentication error. Please log in again.");
