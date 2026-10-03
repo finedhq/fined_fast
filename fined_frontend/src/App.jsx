@@ -38,6 +38,8 @@ const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
 const ProductRoute = lazy(() => import("./pages/Policies/ProductRoute"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
+const PrivacyPolicy = lazy(() => import("./pages/StaticPages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/StaticPages/TermsOfService"));
 const AboutPage = lazy(() => import("./pages/AboutPage/AboutPage"));
 const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
@@ -83,8 +85,8 @@ function App() {
                     <Route path="profile" element={<AuthenticationGuard component={ProfilePage} />} />
 
                   <Route path="help" element={<StaticPage />} />
-                  <Route path="privacy-policy" element={<StaticPage />} />
-                  <Route path="termsofservice" element={<StaticPage />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="termsofservice" element={<TermsOfService />} />
 
                   <Route path="authors/:slug" element={<AuthorPage />} />
                   <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />
