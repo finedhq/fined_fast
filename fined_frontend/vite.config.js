@@ -9,7 +9,6 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext', // Targets modern browsers for smaller, faster code
-    minify: 'esbuild',
     cssMinify: true,
     rollupOptions: {
       output: {
@@ -27,9 +26,6 @@ export default defineConfig({
       }
     }
   },
-  esbuild: {
-    drop: ['console', 'debugger'], // Automatically removes console.logs in production
-  }
 })
 
 
