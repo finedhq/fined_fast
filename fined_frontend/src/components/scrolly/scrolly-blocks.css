@@ -955,3 +955,35 @@
   .nc-root .vp-scene { width: min(170px, 50%); }
   .nc-root .vp-holding { min-height: 72px; }
 }
+
+/* ── Opening screen: "best on a laptop or desktop" (phones and tablets only) ── */
+.nc-root .hero-device-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--purple-border);
+  border-radius: var(--radius-md);
+  background: var(--purple-surface);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.nc-root .hero-device-tip svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--purple);
+}
+
+.nc-root .hero-device-tip strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+@media (min-width: 1024px) {
+  .nc-root .hero-device-tip { display: none; }
+}

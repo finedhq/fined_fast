@@ -5,7 +5,9 @@
  *
  * Shape rule: cards/panels 20px, thumbnails and rows 14px, buttons/chips pill.
  */
-.dh-page {
+/* Tokens: on the dashboard page, and on any other page that borrows its cards (.dh-tokens) */
+.dh-page,
+.dh-tokens {
   --dh-violet: #4100BC;
   --dh-violet-700: #32009A;
   --dh-violet-100: #E4D9FF;
@@ -21,7 +23,9 @@
   --dh-surface: #FFFFFF;
   --dh-bg: #F8F7FA;
   --dh-shadow: 0 1px 2px rgba(23, 19, 33, 0.04), 0 10px 30px -14px rgba(65, 0, 188, 0.18);
+}
 
+.dh-page {
   min-height: calc(100dvh - 76px);
   padding: 32px 16px 80px;
   background: var(--dh-bg);

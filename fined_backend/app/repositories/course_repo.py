@@ -1,6 +1,6 @@
 # Database queries for courses, modules, and cards
 from app.integrations.supabase_client import supabase
-from app.services.course_visibility import is_listed
+from app.services.course_visibility import is_listed, is_released
 
 
 class CourseRepository:
@@ -12,7 +12,23 @@ class CourseRepository:
 
     def get_listed(self) -> list:
         """Courses shown on public lists (published only), newest first."""
-        return [c for c in self.get_all() if is_listed(c)]
+        return self.with_released_counts([c for c in self.get_all() if is_listed(c)])
+
+    def with_released_counts(self, courses: list) -> list:
+        """Learners' view: `modules_count` = released modules only. The column
+        itself (kept by a DB trigger) counts every module, hidden ones too."""
+        ids = [c["id"] for c in courses if c.get("id")]
+        if not ids:
+            return courses
+        rows = supabase.from_("modules").select("*").in_("course_id", ids).execute().data or []
+        counts = {}
+        for m in rows:
+            if is_released(m):
+                counts[m["course_id"]] = counts.get(m["course_id"], 0) + 1
+        for c in courses:
+            if c.get("id"):
+                c["modules_count"] = counts.get(c["id"], 0)
+        return courses
 
     def get_by_id(self, course_id: str) -> dict | None:
         res = supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute()

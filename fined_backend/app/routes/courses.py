@@ -178,7 +178,9 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
         # an archived course that was replaced (it still opens by old links).
         if course_res and course_res.data and not is_listed(course_res.data[0]):
             return {"error": "No ongoing course found for this user."}
-        return course_res.data[0] if course_res and course_res.data else {}
+        if not (course_res and course_res.data):
+            return {}
+        return (await asyncio.to_thread(course_repo.with_released_counts, [course_res.data[0]]))[0]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
