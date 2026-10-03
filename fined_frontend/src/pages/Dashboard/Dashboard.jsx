@@ -4,7 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
 import './DashboardHome.css';
-import { getCourses, fetchArticles } from '../../services/api';
+import { fetchArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
 import { getUserLevel } from "../../utils/level";
 import { useUserProfile } from "../../context/UserProfileContext";
@@ -138,31 +138,24 @@ const Dashboard = () => {
   async function fetchData(userEmail, userId) {
     setLoadingData(true);
     try {
-      const res = await instance.post("/home/getdata", { email: userEmail, userId });
-      if (res.data?.userData) {
-        setUserData(res.data.userData);
-        setOngoingCourse(res.data.ongoingCourseData || {});
+      // 1. Fire /home/getdata and recommended articles in parallel!
+      const [homeRes, articlesRes] = await Promise.all([
+        instance.post("/home/getdata", { email: userEmail, userId }),
+        fetchArticles({ limit: 6, offset: 0 }).catch(() => ({ articles: [] }))
+      ]);
+
+      if (homeRes.data?.userData) {
+        setUserData(homeRes.data.userData);
+        setOngoingCourse(homeRes.data.ongoingCourseData || {});
+        // Use recommendedCourses already provided by /home/getdata (no separate call needed!)
+        const courses = homeRes.data.recommendedCourses || [];
+        setRecommendedCourses(courses.slice(0, 1));
       }
 
-      // Fetch recommendations concurrently
-      try {
-        const [coursesRes, articlesRes] = await Promise.all([
-          getCourses(),
-          fetchArticles({ limit: 10, offset: 0 })
-        ]);
-
-        const allCourses = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
-        const sortedCourses = allCourses
-          .sort((a, b) => new Date(b.created_at || b.published_at || 0) - new Date(a.created_at || a.published_at || 0));
-        setRecommendedCourses(sortedCourses.slice(0, 1)); // only one course for now
-
-        const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
-        const sortedArticles = allArticles
-          .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
-        setRecommendedArticles(sortedArticles);
-      } catch (recError) {
-        console.error("Failed to fetch recommendations:", recError);
-      }
+      const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
+      const sortedArticles = allArticles
+        .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
+      setRecommendedArticles(sortedArticles);
 
     } catch {
       setError("Failed to fetch your data.");

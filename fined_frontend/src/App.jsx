@@ -15,7 +15,7 @@ const ArticlesPage = lazy(() => import("./pages/Articles/ArticlesPage"));
 const SingleArticlePage = lazy(() => import("./pages/Articles/SingleArticlePage"));
 const TagArticlesPage = lazy(() => import("./pages/Articles/TagArticlesPage"));
 const AuthorPage = lazy(() => import("./pages/Articles/AuthorPage"));
-import Courses from "./pages/CoursesPage/Courses";
+const Courses = lazy(() => import("./pages/CoursesPage/Courses"));
 const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
 const FeedbackPage = lazy(() => import("./pages/FeedbackPage/FeedbackPage"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));

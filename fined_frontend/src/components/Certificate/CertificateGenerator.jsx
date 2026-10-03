@@ -1,6 +1,4 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import './CertificateGenerator.css';
 import footerLogo from '../../assets/fined-footer-logo.webp';
 
@@ -13,6 +11,14 @@ const CertificateGenerator = forwardRef(({ userName, courseName }, ref) => {
       if (!element) return;
       
       try {
+        // Load heavy PDF & canvas libraries on-demand only when downloading
+        const [html2canvasModule, jspdfModule] = await Promise.all([
+          import('html2canvas'),
+          import('jspdf')
+        ]);
+        const html2canvas = html2canvasModule.default || html2canvasModule;
+        const jsPDF = jspdfModule.jsPDF || jspdfModule.default || jspdfModule;
+
         const canvas = await html2canvas(element, {
           scale: 2, 
           useCORS: true,

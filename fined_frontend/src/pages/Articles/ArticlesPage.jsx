@@ -64,7 +64,7 @@ function ArticlesPage() {
     try {
       let incoming = [];
       try {
-        const data = await fetchArticles({ limit: 100, offset: 0 });
+        const data = await fetchArticles({ limit: 18, offset: 0 });
         incoming = Array.isArray(data) ? data : data.articles || [];
       } catch (err) {
         console.warn("Could not fetch articles from server, using local fallback", err);
@@ -279,6 +279,7 @@ function ArticlesPage() {
                           alt={leadArticle.title}
                           className="ap-lead-img"
                           loading="eager"
+                          decoding="async"
                         />
                       ) : (
                         <div className="ap-lead-img-placeholder" />
@@ -381,6 +382,7 @@ function ArticlesPage() {
                               alt={article.title}
                               className="ap-row-img"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             <div className="ap-row-img-placeholder" />
@@ -503,6 +505,7 @@ function ArticlesPage() {
                             alt={article.title}
                             className="ap-grid-img"
                             loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="ap-grid-img-placeholder" />
