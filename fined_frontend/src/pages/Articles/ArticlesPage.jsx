@@ -64,7 +64,7 @@ function ArticlesPage() {
     try {
       let incoming = [];
       try {
-        const data = await fetchArticles({ limit: 18, offset: 0 });
+        const data = await fetchArticles({ limit: 100, offset: 0 });
         incoming = Array.isArray(data) ? data : data.articles || [];
       } catch (err) {
         console.warn("Could not fetch articles from server, using local fallback", err);
