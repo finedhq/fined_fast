@@ -1327,3 +1327,130 @@
     margin: 0 0 1.5rem;
   }
 }
+
+/* ───── Course header, in the dashboard's style ───── */
+.co-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  padding: 24px 28px 28px;
+  color: var(--dh-ink);
+}
+
+.co-hero-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 18px -8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dh-violet);
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.co-hero-back:hover { background: var(--dh-violet-50); }
+
+.co-hero-main { display: block; }
+
+.co-hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.co-hero-thumb {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.co-hero-title {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.co-hero-desc {
+  margin: 10px 0 0;
+  max-width: 46rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--dh-muted);
+}
+
+.co-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.co-hero-tags .dh-tag { text-transform: none; }
+
+.co-hero-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--dh-amber-50);
+  color: var(--dh-amber-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.co-hero-progress {
+  width: 100%;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dh-line);
+}
+
+.co-hero-progress-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.co-hero-progress-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--dh-ink);
+}
+
+.co-hero-progress-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--dh-muted);
+  white-space: nowrap;
+}
+
+.co-hero-bar { height: 10px; }
+
+@media (max-width: 640px) {
+  .co-hero { padding: 18px 20px 22px; }
+}
+
+/* Phones/tablets: the certificate goes to the bottom, after the module path */
+@media (max-width: 1023px) {
+  .course-sidebar {
+    order: 4;
+    margin-top: 0.5rem;
+  }
+}

@@ -10,6 +10,7 @@ import "../Dashboard/Dashboard.css";
 import "../Dashboard/DashboardHome.css";
 import { getUserLevel } from "../../utils/level";
 import {
+  PiArrowLeftBold,
   PiCaretRightBold,
   PiCertificateBold,
   PiDesktopBold,
@@ -17,6 +18,7 @@ import {
   PiFireFill,
   PiInfoBold,
   PiLockSimpleBold,
+  PiSparkleFill,
   PiStarFill,
   PiTrophyFill,
 } from "react-icons/pi";
@@ -172,7 +174,8 @@ export default function CourseOverview() {
   // its certificate needs every planned module done, not just the ones out so far.
   const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
   const levelInfo = getUserLevel(userData);
-  const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
+  // Header ring: progress through the whole planned course (not just the modules out so far)
+  const coursePercent = certificateModulesCount > 0 ? Math.round((completedModulesCount / certificateModulesCount) * 100) : 0;
 
   const handleDownloadCertificate = async () => {
     if (certificateRef.current) {
@@ -241,51 +244,49 @@ export default function CourseOverview() {
           <div className="course-main-content">
             {/* Hero Section */}
             <RevealOnScroll>
-              <div id="course-hero-banner-id" className="course-hero-clean">
-                <button onClick={() => navigate('/courses')} className="hero-back-btn-clean mt-2">
-                  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '20px', height: '20px', transform: 'translateX(-1px)' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                  </svg>
-                  Back to Courses
+              <section id="course-hero-banner-id" className="dh-tokens dh-panel co-hero" aria-labelledby="co-hero-title">
+                <button type="button" onClick={() => navigate('/courses')} className="co-hero-back">
+                  <PiArrowLeftBold aria-hidden="true" /> All courses
                 </button>
-                
-                <div className="hero-content-wrapper">
-                  {thumbnailUrl && (
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div className="hero-thumbnail-container">
-                        <img src={thumbnailUrl} alt={courseTitle} className="hero-thumbnail-img" />
+
+                <div className="co-hero-main">
+                  <div className="co-hero-text">
+                    {thumbnailUrl && (
+                      <img src={thumbnailUrl} alt="" className="co-hero-thumb" />
+                    )}
+                    <h1 id="co-hero-title" className="co-hero-title">{courseTitle}</h1>
+                    {courseDescription && (
+                      <p className="co-hero-desc">{courseDescription}</p>
+                    )}
+                    <div className="co-hero-tags">
+                      <span className="dh-tag">{certificateModulesCount} modules</span>
+                      {plannedModules > totalModulesCount && (
+                        <span className="dh-tag dh-tag--ai"><PiSparkleFill aria-hidden="true" /> New module every Monday</span>
+                      )}
+                      <span className="dh-tag">By FinEd</span>
+                    </div>
+
+                    <div className="co-hero-progress">
+                      <div className="co-hero-progress-row">
+                        <span className="co-hero-progress-label">Course progress</span>
+                        <span className="co-hero-progress-text">
+                          {completedModulesCount} of {certificateModulesCount} modules · {coursePercent}%
+                        </span>
                       </div>
-                      <div className="hero-meta-clean" style={{ marginTop: '16px' }}>
-                        <span className="bestseller-badge">Bestseller</span>
-                        <span className="hero-author">Created by <span className="author-name">FinEd</span></span>
+                      <div className="co-cert-bar co-hero-bar" aria-hidden="true">
+                        <span style={{ width: `${coursePercent}%` }}></span>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="hero-text-content">
-                    <h1 className="hero-title-clean">{courseTitle}</h1>
-                    {courseDescription && (
-                      <p className="hero-desc-clean">
-                        {courseDescription}
-                      </p>
-                    )}
 
                     {email === 'guest@fined.com' && (
-                      <div className="hero-signin-alert">
-                        <span>🔒</span> Sign in is necessary to access the content of the course
+                      <div className="co-hero-alert">
+                        <PiLockSimpleBold aria-hidden="true" /> Sign in to start the course
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className="hero-progress-section-clean" style={{ width: '100%' }}>
-                  <span className="hero-progress-label">Module Progress</span>
-                  <div className="hero-progress-bar-container">
-                    <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
-                  </div>
-                  <span className="hero-progress-text">{completedModulesCount} / {totalModulesCount} Modules</span>
                 </div>
-              </div>
+              </section>
             </RevealOnScroll>
 
             {/* Phones and tablets only (hidden on desktop by CSS) */}
