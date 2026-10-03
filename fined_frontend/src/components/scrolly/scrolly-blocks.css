@@ -251,6 +251,13 @@
 
 .nc-root .nb-bar--0 { background: var(--purple); }
 .nc-root .nb-bar--1 { background: var(--gold); }
+.nc-root .nb-bar--2 { background: var(--success-dark); }
+.nc-root .nb-bar--3 { background: var(--muted); }
+/* Before the numbers are revealed: even, pale bars with a "?" */
+.nc-root .nb-bar.nb-bar--unknown { background: var(--purple-border); }
+.nc-root .nb-bar--unknown .nb-value { color: var(--ink-3); }
+.nc-root .nb-col { transition: opacity 0.4s var(--ease); }
+.nc-root .nb-col--hidden { opacity: 0; }
 .nc-root .nb-bar--split { background: none; }
 .nc-root .nb-bar--split.nb-bar--0 .nb-piece { background: var(--purple); }
 .nc-root .nb-bar--split.nb-bar--1 .nb-piece { background: var(--gold); }
@@ -481,6 +488,389 @@
   min-height: 0;
 }
 
+/* ── Rulebook switch (Module 3 §2) — ported from the prototype's module1.css
+   "Section 4 Figure" (rules copied as they are, except the crowd grid: 16 columns, 6px gap). */
+.nc-root .rulebook-figure {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+}
+
+.nc-root .timeline-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
+.nc-root .timeline-stop {
+  flex: 1;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nc-root .timeline-stop.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nc-root .timeline-year {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--purple);
+}
+
+.nc-root .timeline-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--purple);
+  border-radius: 50%;
+  margin: 6px auto;
+  box-shadow: 0 0 0 3px var(--purple-surface);
+}
+
+.nc-root .timeline-label {
+  font-size: 0.7rem;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.nc-root .switch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.nc-root .scenario-card {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink);
+}
+
+.nc-root .rulebook-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: var(--font-action);
+  font-weight: 700;
+}
+
+.nc-root .rulebook-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nc-root .toggle-track {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--muted);
+  position: relative;
+  transition: background 0.25s ease;
+}
+
+.nc-root .rulebook-toggle.is-on .toggle-track {
+  background: var(--success);
+}
+
+.nc-root .toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nc-root .rulebook-toggle.is-on .toggle-thumb {
+  left: 24px;
+}
+
+.nc-root .toggle-state-label {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.nc-root .dots-stage {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.nc-root .switch-dot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: all 0.35s ease;
+}
+
+.nc-root .switch-dot.insider {
+  background: var(--gold);
+}
+
+.nc-root .switch-dot.sold-early {
+  background: var(--gold);
+  opacity: 0.3;
+}
+
+.nc-root .switch-dot.sold-late, .nc-root .switch-dot.sold-together {
+  background: var(--warn);
+}
+
+.nc-root .switch-price-tag {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font-action);
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.nc-root .switch-feedback {
+  font-size: 0.84rem;
+  color: var(--ink-2);
+  text-align: center;
+  min-height: 1.5em;
+  font-style: italic;
+}
+
+.nc-root .crowd-grid-wrap {
+  text-align: center;
+}
+
+.nc-root .crowd-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.nc-root .crowd-grid-dot {
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.nc-root .crowd-grid-dot.active {
+  background: var(--gold);
+}
+
+.nc-root .crowd-grid-caption {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+/* Module 3 additions to the ported rulebook rules. */
+.nc-root .rulebook-figure .timeline-strip { align-items: center; }
+.nc-root .switch-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.76rem;
+  color: var(--ink-3);
+}
+.nc-root .switch-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.nc-root .switch-legend .switch-dot { position: static; display: inline-block; }
+
+/* ── Vault preview (Module 3 §3) ──────────────────────────────────── */
+.nc-root .vp-figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-height: 0;
+}
+
+.nc-root .vp-label {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink-3);
+  transition: color 0.3s var(--ease);
+}
+.nc-root .vp-label.is-named { color: var(--purple); }
+
+.nc-root .vp-scene {
+  position: relative;
+  width: min(220px, 60%);
+  aspect-ratio: 1;
+}
+
+.nc-root .vp-vault {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: var(--surface-alt);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 700px;
+}
+
+/* The corridor is the doorway behind the door; it shows when the door opens. */
+.nc-root .vp-corridor {
+  position: absolute;
+  width: 76%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 50%, var(--amber-surface), var(--purple-subtle) 70%);
+  box-shadow: inset 0 0 0 6px var(--border);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.nc-root .vp-vault.is-open .vp-corridor { opacity: 1; }
+
+.nc-root .vp-door {
+  width: 76%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--purple);
+  border: 6px solid var(--purple-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: left center;
+  transition: transform 0.8s var(--ease);
+}
+.nc-root .vp-door { position: relative; z-index: 1; }
+.nc-root .vp-vault.is-open .vp-door { transform: rotateY(-70deg); }
+
+.nc-root .vp-next {
+  font-family: var(--font-action);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--purple);
+}
+
+.nc-root .vp-wheel {
+  position: relative;
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px solid var(--purple-border);
+}
+.nc-root .vp-wheel span {
+  position: absolute;
+  left: 50%;
+  top: -18%;
+  width: 4px;
+  height: 136%;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--purple-border);
+}
+.nc-root .vp-wheel span:nth-child(2) { transform: rotate(60deg); }
+.nc-root .vp-wheel span:nth-child(3) { transform: rotate(-60deg); }
+
+.nc-root .vp-question {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.nc-root .vp-holding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-height: 84px;
+}
+
+.nc-root .vp-record {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  transition: all 0.4s var(--ease);
+}
+/* Paper: cream, serif-ish heading, dashed edge. */
+.nc-root .vp-record:not(.is-electronic) {
+  flex-direction: column;
+  gap: 2px;
+  background: var(--amber-surface);
+  border: 2px dashed var(--amber-border);
+  color: var(--amber-dark);
+}
+.nc-root .vp-cert-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+/* Electronic: a row in a record, like a line on a bank statement. */
+.nc-root .vp-record.is-electronic {
+  background: var(--surface);
+  border: 1px solid var(--purple-border);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-action);
+}
+.nc-root .vp-record-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+.nc-root .vp-record-who { font-weight: 800; color: var(--ink); }
+.nc-root .vp-record-what { color: var(--ink-3); }
+
+.nc-root .vp-depositories { display: flex; gap: 8px; }
+.nc-root .vp-depository {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--purple-subtle);
+  color: var(--purple);
+  font-family: var(--font-action);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 /* ── "Your Slice" tool (layout and controls shared with the Leak Lab) ── */
 .nc-root .sc-companies { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
@@ -558,4 +948,10 @@
   .nc-root .lq-row { padding: 7px 10px; }
   .nc-root .lq-row-head { font-size: 0.8rem; }
   .nc-root .sc-companies { grid-template-columns: 1fr; }
+  .nc-root .nb-label { overflow-wrap: anywhere; }
+  .nc-root .timeline-label { font-size: 0.66rem; }
+  .nc-root .dots-stage { min-height: 96px; }
+  .nc-root .switch-feedback { font-size: 0.8rem; }
+  .nc-root .vp-scene { width: min(170px, 50%); }
+  .nc-root .vp-holding { min-height: 72px; }
 }
