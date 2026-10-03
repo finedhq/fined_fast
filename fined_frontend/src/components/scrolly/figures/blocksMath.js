@@ -76,12 +76,21 @@ export function barHeights(values, scale = "linear") {
   return values.map((v) => (max > 0 ? f(v) / max : 0));
 }
 
+/**
+ * The bars a view draws: `show` (series ids) limits it, otherwise all of them.
+ * Each entry is the series' position in the config, so colours stay put.
+ */
+export function shownBars(series, view) {
+  return series.map((x, i) => ({ ...x, slot: i })).filter((x) => !view.show || view.show.includes(x.id));
+}
+
 /** A series as it looks after its shares are divided `factor` ways: same size. */
 export function splitSeries(series, factor) {
   return { ...series, price: series.price / factor, shares: series.shares * factor };
 }
 
 export function formatMeasure(value, measure) {
+  if (measure === "percent") return `${Math.round(value)}%`;
   if (measure === "shares") return `${indianWords(value)} shares`;
   if (measure === "price") return `${inrFull(value)} a share`;
   return inrWords(value);
@@ -128,3 +137,28 @@ export const fmtChange = (n) => (n > 0 ? `+${n}%` : n < 0 ? `−${Math.abs(n)}%`
 
 /** "+₹500", "−₹2,500", "₹0". */
 export const fmtGain = (n) => (Math.round(n) > 0 ? `+${inrFull(n)}` : Math.round(n) < 0 ? `−${inrFull(Math.abs(n))}` : "₹0");
+
+// ── Rulebook switch (Module 3) ─────────────────────────────────────────────
+const INSIDERS = 3;
+
+// What the stage shows at each moment of a play-through.
+// phase 0 = before anything happens; OFF: 1 insiders sell early, 2 everyone else sells late; ON: 1 everyone together.
+export function rulebookScene(rule, phase, { priceBefore, priceAfter }) {
+  const before = inrFull(priceBefore);
+  const after = inrFull(priceAfter);
+  if (rule === "off") {
+    if (phase === 0) return { tag: before, feedback: "", dot: (i) => (i < INSIDERS ? "insider" : "") };
+    if (phase === 1) return { tag: `insiders sell at ${before}`, feedback: "", dot: (i) => (i < INSIDERS ? "insider sold-early" : "") };
+    return {
+      tag: after,
+      feedback: `News breaks. Everyone left sells at ${after} — after the insiders already got out at ${before}.`,
+      dot: (i) => (i < INSIDERS ? "insider sold-early" : "sold-late"),
+    };
+  }
+  if (phase === 0) return { tag: before, feedback: "", dot: () => "" };
+  return {
+    tag: `${after} — published to everyone at once`,
+    feedback: "With the rulebook on, the fall still happened. What changed is who got to act on it first.",
+    dot: () => "sold-together",
+  };
+}
