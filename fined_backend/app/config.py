@@ -1,5 +1,6 @@
 # Configuration manager using pydantic-settings
 from pydantic_settings import BaseSettings,SettingsConfigDict
+from typing import Optional
 
 class Settings(BaseSettings):
     SUPABASE_URL: str
@@ -8,6 +9,10 @@ class Settings(BaseSettings):
 
     AUTH0_DOMAIN: str
     AUTH0_AUDIENCE: str
+    # Transitional: the previous audience, still accepted while already-issued
+    # tokens expire. Unset it (and delete the fallback in dependencies.py)
+    # once the migration window closes - after 2026-10-18.
+    AUTH0_LEGACY_AUDIENCE: Optional[str] = None
  
 
 
