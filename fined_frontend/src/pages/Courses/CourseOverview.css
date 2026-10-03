@@ -1366,14 +1366,6 @@
   min-width: 0;
 }
 
-.co-hero-thumb {
-  width: 100%;
-  max-width: 320px;
-  margin-bottom: 16px;
-  border-radius: 14px;
-  object-fit: cover;
-}
-
 .co-hero-title {
   margin: 0;
   font-size: clamp(26px, 3vw, 34px);

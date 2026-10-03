@@ -67,7 +67,6 @@ export default function CourseOverview() {
   const [courseDescription, setCourseDescription] = useState("");
 
   useDocumentTitle(courseTitle ? `${courseTitle} | FinEd` : "Course Overview | FinEd");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [course, setCourse] = useState([]);
   const [plannedModules, setPlannedModules] = useState(null);
   const [userData, setUserData] = useState({});
@@ -145,7 +144,6 @@ export default function CourseOverview() {
 
       setCourseTitle(courseRes.data.title);
       setCourseDescription(courseRes.data.description || "");
-      setThumbnailUrl(courseRes.data.thumbnail_url || "");
       setCourse(courseRes.data.data || []);
       setPlannedModules(courseRes.data.planned_modules || null);
 
@@ -251,9 +249,6 @@ export default function CourseOverview() {
 
                 <div className="co-hero-main">
                   <div className="co-hero-text">
-                    {thumbnailUrl && (
-                      <img src={thumbnailUrl} alt="" className="co-hero-thumb" />
-                    )}
                     <h1 id="co-hero-title" className="co-hero-title">{courseTitle}</h1>
                     {courseDescription && (
                       <p className="co-hero-desc">{courseDescription}</p>
