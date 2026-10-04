@@ -9,7 +9,8 @@ from app.services.home_service import home_service
 from app.services.notification_service import notification_service
 from app.repositories.article_repo import article_repo
 from app.repositories.course_repo import course_repo
-from app.services.course_visibility import can_view_course, is_listed
+from app.integrations.supabase_client import supabase
+from app.services.course_visibility import can_view_course, is_listed, is_released
 from app.repositories.user_repo import user_repo
 from app.dependencies import get_current_user, get_optional_current_user, AuthUser
 from app.services.article_service import article_service
@@ -94,7 +95,22 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
                     lesson_number = mod.get("order_index", 1)
             
             course["current_lesson"] = lesson_number
-            return (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
+            course = (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
+
+            # Progress = modules actually completed (released ones only), out of the
+            # whole planned course, as on the course page. "Lesson N" is just where
+            # the learner is, so it must not drive the percentage.
+            def count_completed() -> int:
+                mods = supabase.from_("modules").select("id, status").eq("course_id", course["id"]).execute().data or []
+                released_ids = {m["id"] for m in mods if is_released(m)}
+                done = supabase.from_("userCourses").select("module_id").eq("email", body.email).eq("course_id", course["id"]).eq("status", "completed").execute().data or []
+                return len({d["module_id"] for d in done if d.get("module_id") in released_ids})
+
+            try:
+                course["completed_modules"] = await asyncio.to_thread(count_completed)
+            except Exception:
+                course["completed_modules"] = 0
+            return course
 
         # 3. Run all independent DB queries concurrently (Thread-safe)
         articles, courses, ongoing_course_data, log_data = await asyncio.gather(

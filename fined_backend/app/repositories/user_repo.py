@@ -349,7 +349,9 @@ class UserRepository:
                         print(f"Notice: counting completed course modules: {e}")
 
                     current_lesson = min(completed_modules_count + 1, total_modules) if total_modules > 0 else 0
-                    progress_pct = int((completed_modules_count / max(1, total_modules)) * 100) if total_modules > 0 else 0
+                    # measured against the whole planned course, not just the modules released so far
+                    whole_course = max(total_modules, int(course_row.get("planned_modules") or 0))
+                    progress_pct = min(100, int((completed_modules_count / max(1, whole_course)) * 100)) if total_modules > 0 else 0
 
                     ongoing_course = {
                         "id": course_row.get("id"),
