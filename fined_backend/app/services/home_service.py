@@ -87,7 +87,6 @@ class HomeService:
             "streak_count":      user.get("streak_count"),
             "fin_stars":         user.get("fin_stars") or 0,
             "article_score":     user.get("article_score") or 0,
-            "expense_score":     user.get("expense_score") or 0,
             "course_score":      user.get("course_score") or 0,
             "consistency_score": user.get("consistency_score") or 0,
             "fin_score":         fin_score,

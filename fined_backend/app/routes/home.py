@@ -225,7 +225,6 @@ async def fetch_leaderboard(timeframe: Optional[str] = "all_time", user: Optiona
                 "email": u.get("email"),
                 "name": (u.get("email") or "").split("@")[0].capitalize(),
                 "article_score": u.get("article_score") or 0,
-                "expense_score": u.get("expense_score") or 0,
                 "course_score": u.get("course_score") or 0,
                 "consistency_score": u.get("consistency_score") or 0,
                 "finScore": fin_score,

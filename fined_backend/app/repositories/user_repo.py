@@ -40,7 +40,7 @@ class UserRepository:
 
     def get_all_for_leaderboard(self) -> list:
         res = supabase.from_("users").select(
-            "user_sub, email, article_score, expense_score, course_score, consistency_score, fin_stars"
+            "user_sub, email, article_score, course_score, consistency_score, fin_stars"
         ).execute()
         return res.data or []
     
@@ -142,7 +142,6 @@ class UserRepository:
         for u in users:
             all_time_score = (
                 (u.get("article_score") or 0) +
-                (u.get("expense_score") or 0) +
                 (u.get("course_score") or 0) +
                 (u.get("consistency_score") or 0)
             )
@@ -177,7 +176,6 @@ class UserRepository:
         
         my_score = (
             (user.get("article_score") or 0) +
-            (user.get("expense_score") or 0) +
             (user.get("course_score") or 0) +
             (user.get("consistency_score") or 0)
         )
@@ -223,7 +221,6 @@ class UserRepository:
         # Compute fin_score directly using the 4 columns from the user dict
         fin_score = int(
             (user.get("article_score") or 0) +
-            (user.get("expense_score") or 0) +
             (user.get("course_score") or 0) +
             (user.get("consistency_score") or 0)
         )

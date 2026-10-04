@@ -5,14 +5,13 @@ from app.repositories.user_repo import user_repo
 class ScoreService:
     """
     Single source of truth for ALL FinScore calculations.
-    Total FinScore = article_score + expense_score + course_score + consistency_score
-    Max:                  150      +      150      +      500     +       200        = 1000
+    Total FinScore = article_score + course_score + consistency_score
+    Max:                  150      +      500     +       200        = 850
     """
 
     def compute_total(self,user:dict)->int:
         return (
             (user.get("article_score") or 0) +
-            (user.get("expense_score") or 0) +
             (user.get("course_score") or 0) +
             (user.get("consistency_score") or 0)
         )
@@ -146,55 +145,6 @@ class ScoreService:
             "bonus":        bonus,
             "penalty":      penalty,
         }
-
-    #Expense Score (max 150)
-    #Triggered when user logs an expense
-
-    def update_expense_transaction(self,user:dict,today:date)->dict:
-        """
-        Rules (triggered once per day when user logs any transaction):
-        - +3 base for logging today
-        - 7-day streak → +10 bonus
-        - gap > 1 day  → -1 per missed day (max -7)
-        - gap >= 7     → extra -10
-        """
-
-        today_str = today.isoformat()
-        last_date_raw = user.get("last_transaction_score_date")
-        last_date_str = (last_date_raw or "")[:10]
-        # Already scored today — skip
-        if last_date_str == today_str:
-            return {"updated": False}
-        score   = user.get("expense_score") or 0
-        streak  = user.get("transaction_streak_count") or 0
-        points  = 3
-        reasons = []
-        if last_date_str:
-            last_date = date.fromisoformat(last_date_str)
-            gap = (today - last_date).days
-            if gap == 1:
-                streak += 1
-                if streak == 7:
-                    points += 10
-                    streak = 0
-                    reasons.append("+10 for 7-day logging streak")
-            else:
-                missed_penalty = min(gap - 1, 7)
-                points -= missed_penalty
-                if gap >= 7:
-                    points -= 10
-                    reasons.append(f"-10 + -{missed_penalty} for long gap")
-                streak = 0
-        else:
-            streak = 1
-        new_score = max(0, min(score + points, 150))
-        updates = {
-            "expense_score":               new_score,
-            "last_transaction_score_date": today_str,
-            "transaction_streak_count":          streak,
-        }
-        return {"updated": True, "updates": updates, "reasons": reasons}
-    
 
     # Course Score (max 500)
     def update_course_module(self, user: dict) -> dict:
