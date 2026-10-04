@@ -8,7 +8,6 @@ export const STATIC_ROUTE_TITLES = {
   "/contact": "Contact Us | FinEd",
   "/feedback": "Feedback | FinEd",
   "/dashboard": "Dashboard | FinEd",
-  "/policies": "Policies & Schemes | FinEd",
   "/notifications": "Notifications | FinEd",
   "/leaderboard": "Leaderboard | FinEd",
   "/help": "Help & Support | FinEd",

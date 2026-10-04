@@ -98,7 +98,7 @@ def test_new_user_profile_autocreation():
         app.dependency_overrides.clear()
 
 
-def test_fin_score_four_column_sum_calculation(monkeypatch):
+def test_fin_score_ignores_retired_expense_score(monkeypatch):
     from app.repositories.user_repo import user_repo
 
     mock_user = {
@@ -116,8 +116,8 @@ def test_fin_score_four_column_sum_calculation(monkeypatch):
     monkeypatch.setattr(user_repo, "get_by_email", lambda em: mock_user if em == "math_test@fined.org" else None)
 
     profile = user_repo.get_profile("math_test@fined.org", user_sub="auth0|mockmath123")
-    assert profile["fin_score"] == 400
-    assert profile["finscore"] == 400
+    assert profile["fin_score"] == 320
+    assert profile["finscore"] == 320
     assert profile["fin_stars"] == 25
     assert profile["finstars"] == 25
     assert profile["streak_count"] == 9

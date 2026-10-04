@@ -34,8 +34,6 @@ const AdminModuleList = lazy(() => import("./pages/Admin/AdminModuleList"));
 const AddModuleForm = lazy(() => import("./pages/Admin/AddModuleForm"));
 const AdminModuleCards = lazy(() => import("./pages/Admin/AdminModuleCards"));
 const EditCardForm = lazy(() => import("./pages/Admin/EditCardForm"));
-const PoliciesPage = lazy(() => import("./pages/Policies/PoliciesPage"));
-const ProductRoute = lazy(() => import("./pages/Policies/ProductRoute"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const StaticPage = lazy(() => import("./pages/StaticPages/StaticPage"));
 const PrivacyPolicy = lazy(() => import("./pages/StaticPages/PrivacyPolicy"));
@@ -101,10 +99,8 @@ function App() {
                   <Route path="admin/sources" element={<AdminGuard><AdminSources /></AdminGuard>} />
                   <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                   <Route path="courses/:courseSlug" element={<CourseOverview />} />
-                  <Route path="policies" element={<AuthenticationGuard component={PoliciesPage} />} />
                   <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
                   <Route path="leaderboard" element={<AuthenticationGuard component={Leaderboard} />} />
-                  <Route path=":productType" element={<ProductRoute />} />
                   <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
                   <Route path="admin/articles" element={<AdminGuard><AdminArticleList /></AdminGuard>} />
                   <Route path="admin/articles/add" element={<AdminGuard><AdminArticleForm /></AdminGuard>} />

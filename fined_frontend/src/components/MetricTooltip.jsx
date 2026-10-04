@@ -5,7 +5,7 @@ export const METRIC_TOOLTIP_DATA = {
   finscore: {
     title: "FinScore Metric",
     tag: "Consistency & Skill",
-    body: "Your overall financial discipline score (0–1000). Increases as you read articles, finish course modules, and maintain daily learning streaks.",
+    body: "Your overall financial discipline score (0–850). Increases as you read articles, finish course modules, and maintain daily learning streaks.",
   },
   finstars: {
     title: "FinStars Balance",
