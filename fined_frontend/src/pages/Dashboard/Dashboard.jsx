@@ -209,10 +209,13 @@ const Dashboard = () => {
   const levelInfo = getUserLevel(userData);
 
   const hasCourse = Boolean(ongoingCourse?.title);
-  const totalLessons = ongoingCourse?.modules_count || 0;
+  const releasedLessons = ongoingCourse?.modules_count || 0;
+  // A weekly-release course: measure against the whole planned course, not just what's out so far
+  const totalLessons = Math.max(releasedLessons, ongoingCourse?.planned_modules || 0);
   const currentLesson = ongoingCourse?.current_lesson || 1;
+  const completedLessons = ongoingCourse?.completed_modules || 0;
   const progressPercent = totalLessons
-    ? Math.min(100, Math.floor((currentLesson / totalLessons) * 100))
+    ? Math.min(100, Math.floor((completedLessons / totalLessons) * 100))
     : 0;
   const courseLink = ongoingCourse?.id ? `/courses/${ongoingCourse.slug || ongoingCourse.id}` : '/courses';
 
