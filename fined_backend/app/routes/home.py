@@ -9,7 +9,8 @@ from app.services.home_service import home_service
 from app.services.notification_service import notification_service
 from app.repositories.article_repo import article_repo
 from app.repositories.course_repo import course_repo
-from app.services.course_visibility import can_view_course, is_listed
+from app.integrations.supabase_client import supabase
+from app.services.course_visibility import can_view_course, is_listed, is_released
 from app.repositories.user_repo import user_repo
 from app.dependencies import get_current_user, get_optional_current_user, AuthUser
 from app.services.article_service import article_service
@@ -27,10 +28,6 @@ class NotificationsRequest(BaseModel):
 
 class FeedbackRequest(BaseModel):
     form: Dict[str, Any]
-
-class RecommendationsRequest(BaseModel):
-    email: str
-    course_id: Optional[str] = None
 
 class WaitlistRequest(BaseModel):
     email: str
@@ -94,13 +91,30 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
                     lesson_number = mod.get("order_index", 1)
             
             course["current_lesson"] = lesson_number
+            course = (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
+
+            # Progress = modules actually completed (released ones only), out of the
+            # whole planned course, as on the course page. "Lesson N" is just where
+            # the learner is, so it must not drive the percentage.
+            def count_completed() -> int:
+                mods = supabase.from_("modules").select("id, status").eq("course_id", course["id"]).execute().data or []
+                released_ids = {m["id"] for m in mods if is_released(m)}
+                done = supabase.from_("userCourses").select("module_id").eq("email", body.email).eq("course_id", course["id"]).eq("status", "completed").execute().data or []
+                return len({d["module_id"] for d in done if d.get("module_id") in released_ids})
+
+            try:
+                course["completed_modules"] = await asyncio.to_thread(count_completed)
+            except Exception:
+                course["completed_modules"] = 0
             return course
 
-        # 3. Run all independent DB queries sequentially (Thread-safe)
-        articles = await asyncio.to_thread(article_repo.get_all, 1)
-        courses = await asyncio.to_thread(course_repo.get_listed)
-        ongoing_course_data = await fetch_ongoing_course()
-        log_data = await asyncio.to_thread(user_repo.get_score_logs, body.email)
+        # 3. Run all independent DB queries concurrently (Thread-safe)
+        articles, courses, ongoing_course_data, log_data = await asyncio.gather(
+            asyncio.to_thread(article_repo.get_all, 1),
+            asyncio.to_thread(course_repo.get_listed),
+            fetch_ongoing_course(),
+            asyncio.to_thread(user_repo.get_score_logs, body.email),
+        )
         
         current_fin_score = stats.get("fin_score", 0)
         score_delta = 0
@@ -135,8 +149,7 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
             "featuredArticle": articles[0] if articles else None,
             "recommendedCourses": courses[:8],
             "userData": user_data,
-            "ongoingCourseData": ongoing_course_data,
-            "logData": log_data
+            "ongoingCourseData": ongoing_course_data
         }
     except Exception as e:
         traceback.print_exc()
@@ -212,7 +225,6 @@ async def fetch_leaderboard(timeframe: Optional[str] = "all_time", user: Optiona
                 "email": u.get("email"),
                 "name": (u.get("email") or "").split("@")[0].capitalize(),
                 "article_score": u.get("article_score") or 0,
-                "expense_score": u.get("expense_score") or 0,
                 "course_score": u.get("course_score") or 0,
                 "consistency_score": u.get("consistency_score") or 0,
                 "finScore": fin_score,
@@ -283,65 +295,4 @@ async def send_feedback(body: FeedbackRequest, user: AuthUser = Depends(get_curr
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to save feedback: {str(e)}"
-        )
-
-
-@router.post("/recommendations")
-async def get_recommendations(body: RecommendationsRequest, user: AuthUser = Depends(get_current_user)):
-    """Tag-based product recommendations matching current course tags"""
-    try:
-        recommendations = []
-        
-        # Sanitize course_id to check if it's a valid UUID format
-        is_valid_uuid = False
-        if body.course_id:
-            try:
-                import uuid
-                uuid.UUID(body.course_id)
-                is_valid_uuid = True
-            except ValueError:
-                pass
-
-        if body.course_id and is_valid_uuid:
-            try:
-                recommendations = home_service.get_recommendations(body.email, body.course_id)
-            except Exception as e:
-                print(f"Failed to fetch course recommendations: {e}")
-                pass
-        else:
-            try:
-                # Check if there are stored recommended schemes in user profile
-                user = user_repo.get_by_email(body.email)
-                if user and user.get("recommended_schemes"):
-                    from app.repositories.product_repo import product_repo
-                    recommendations = product_repo.get_all_latest()[:3]
-            except Exception as inner_e:
-                print(f"Failed to fetch schemes from DB, using placeholders: {inner_e}")
-                pass
-                
-        # Fallback placeholders if DB is empty, table doesn't exist, or no matching tags
-        if not recommendations:
-            recommendations = [
-                {"id": "1", "bank_name": "HDFC Bank", "product_name": "MoneyBack+ Credit Card", "description": "Earn 10X CashPoints on Amazon, BigBasket, Flipkart, Reliance Smart SuperStore & Swiggy.", "tags": ["credit", "rewards"]},
-                {"id": "2", "bank_name": "SBI Bank", "product_name": "SBI SimplySAVE", "description": "10 Reward Points per Rs.150 spent on Dining, Movies, Departmental Stores and Grocery.", "tags": ["credit", "shopping"]},
-                {"id": "3", "bank_name": "ICICI Bank", "product_name": "iMobile Pay Savings", "description": "Zero balance account with exciting cashback offers on bill payments.", "tags": ["savings", "digital"]}
-            ]
-                
-        # Format the scheme recommendations to match what HomePage.jsx maps:
-        # e.g., bank_name, scheme_name, description
-        formatted_recs = []
-        for rec in recommendations:
-            formatted_recs.append({
-                "id": rec.get("id"),
-                "bank_name": rec.get("bank_name", "FinEd"),
-                "scheme_name": rec.get("product_name", rec.get("title", "Scheme")),
-                "description": rec.get("description", rec.get("details", "")),
-                "tags": rec.get("tags", [])
-            })
-            
-        return {"recommendations": formatted_recs}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch recommendations: {str(e)}"
         )

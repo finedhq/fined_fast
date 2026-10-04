@@ -11,7 +11,6 @@ class UserDashboard(BaseModel):
     streak_count: int = 0
     fin_stars: int = 0
     article_score: int = 0
-    expense_score: int = 0
     course_score: int = 0
     consistency_score: int = 0
     fin_score: int = 0           

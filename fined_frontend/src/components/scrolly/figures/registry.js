@@ -24,6 +24,7 @@
 import { lazy } from "react";
 import { revealNote } from "./figureMath";
 import { M2_CH1_GRID, M2_CH2_BARS, M2_CH3_GRID, M2_CH3_QUEUE } from "./module2Figures";
+import { M3_CH1_BARS, M3_CH2_RULEBOOK, M3_CH3_VAULT } from "./module3Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -63,5 +64,23 @@ export const FIGURES = {
       before: { figure: "ownership_grid", config: M2_CH3_GRID },
       after: { figure: "liquidation_queue", config: M2_CH3_QUEUE },
     },
+  },
+  bars_who_trades: {
+    label: "Bars: who trades on the market — Module 3 §1",
+    steps: 4,
+    component: lazy(() => import("./Bars")),
+    config: M3_CH1_BARS,
+  },
+  rulebook_switch: {
+    label: "Rulebook switch (OFF / ON) — Module 3 §2",
+    steps: 3,
+    component: lazy(() => import("./RulebookSwitch")),
+    config: M3_CH2_RULEBOOK,
+  },
+  vault_preview: {
+    label: "Vault preview (where shares live) — Module 3 §3",
+    steps: 4,
+    component: lazy(() => import("./VaultPreview")),
+    config: M3_CH3_VAULT,
   },
 };

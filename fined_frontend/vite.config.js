@@ -7,6 +7,25 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
+  build: {
+    target: 'esnext', // Targets modern browsers for smaller, faster code
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@auth0')) {
+              return 'vendor-auth';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    }
+  },
 })
 
 

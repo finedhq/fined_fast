@@ -6,6 +6,7 @@ import { getUserProfile, updateUserProfile } from "../services/api";
 import { useUserProfile } from "../context/UserProfileContext";
 import EditProfileModal from "../components/EditProfileModal";
 import MetricTooltip from "../components/MetricTooltip";
+import { getUserLevel } from "../utils/level";
 
 const COLOR_LEVELS = {
   0: "bg-slate-100",
@@ -330,12 +331,9 @@ export default function ProfilePage() {
   // Real ongoing course (or null if none active)
   const ongoingCourse = profile?.ongoing_course || null;
 
-  // Format financial level badge text
-  const shortLevelDisplay = financialLevel.includes("Beginner")
-    ? "Level 1 (Beginner)"
-    : financialLevel.includes("Intermediate")
-    ? "Level 2 (Intermediate)"
-    : "Level 3 (Advanced)";
+  // Level follows FinScore; the self-chosen financial level is shown as experience
+  const levelInfo = getUserLevel(profile);
+  const experience = financialLevel.split(" (")[0];
 
   return (
     <div className="min-h-screen bg-[#fafbff] py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-['Nunito',sans-serif]">
@@ -384,7 +382,11 @@ export default function ProfilePage() {
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="text-[#0047AB]">
-                    {shortLevelDisplay}
+                    {levelInfo.label}
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-700">
+                    {experience} experience
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="text-slate-500">

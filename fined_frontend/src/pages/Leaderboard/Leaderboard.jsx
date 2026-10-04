@@ -27,7 +27,7 @@ function Leaderboard() {
       <header className="leaderboard-header">
         <div className="header-content">
           <h1>Top Learners</h1>
-          <p>Compete with friends, earn points from courses and expenses, and secure a spot on the leaderboard!</p>
+          <p>Compete with friends, earn points from courses, articles and daily streaks, and secure a spot on the leaderboard!</p>
         </div>
       </header>
 
@@ -52,7 +52,7 @@ function Leaderboard() {
                   <th>FinScore</th>
                   <th>Course Score</th>
                   <th>Article Score</th>
-                  <th>Expense Score</th>
+                  <th>Consistency Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -84,7 +84,7 @@ function Leaderboard() {
                       <td className="cell-score cell-bold">{entry.finScore || entry.fin_score || 0}</td>
                       <td className="cell-score">{entry.course_score || 0}</td>
                       <td className="cell-score">{entry.article_score || 0}</td>
-                      <td className="cell-score">{entry.expense_score || 0}</td>
+                      <td className="cell-score">{entry.consistency_score || 0}</td>
                     </tr>
                   );
                 })}

@@ -55,6 +55,16 @@ export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSe
           <div className="hero-reward">
             Earn up to <strong>{maxStars} FinStars</strong> along the way
           </div>
+          {/* Owner's request (2026-10-03): phones and tablets only, hidden on desktop by CSS */}
+          <p className="hero-device-tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="12" rx="2" />
+              <path strokeLinecap="round" d="M8 20h8M12 16v4" />
+            </svg>
+            <span>
+              <strong>Best on a laptop or desktop:</strong> the charts and tools are easier to use on a bigger screen.
+            </span>
+          </p>
         </div>
 
         <div className="hero-warmup">

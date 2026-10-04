@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./Footer.css";
-import footerLogo from "../assets/fined-footer-logo.png";
+import footerLogo from "../assets/fined-footer-logo.webp";
 import { Link } from "react-router-dom";
 function RevealOnScroll({ children, delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -89,6 +89,8 @@ export default function Footer() {
                     <ul>
                         <li><Link to="/contact">Contact Us</Link></li>
                         <li><Link to="/feedback">Feedback</Link></li>
+                        <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+                        <li><Link to="/termsofservice">Terms of Service</Link></li>
                     </ul>
                 </div>
 

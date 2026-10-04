@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { PiArrowRightBold, PiGiftFill, PiWarningCircleBold } from 'react-icons/pi';
 import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import { getLeaderboard } from '../../services/api';
@@ -130,33 +131,35 @@ const RewardsPage = () => {
   // 1. Loading State
   if (isLoading || loadingData) {
     return (
-      <div className="rewards-page-wrapper">
-        <div className="rewards-loading-container">
-          <div className="rewards-spinner"></div>
-          <p className="rewards-loading-text">Loading your rewards and rankings...</p>
+      <div className="rw-page" aria-busy="true" aria-label="Loading your rewards and rankings">
+        <div className="rw-container">
+          <div className="rw-skel rw-skel--title" />
+          <div className="rw-stats">
+            <div className="rw-skel rw-skel--wallet" />
+            <div className="rw-skel rw-skel--tiles" />
+          </div>
+          <div className="rw-skel rw-skel--block" />
         </div>
       </div>
     );
   }
 
-  // 2. Unauthenticated State — Show Login Prompt
+  // 2. Unauthenticated State: Show Login Prompt
   if (!isAuthenticated || !user) {
     return (
-      <div className="rewards-page-wrapper">
-        <div className="rewards-auth-prompt-card">
-          <div className="auth-prompt-icon-wrapper">
-            <GiftBoxIllustration size={140} />
-          </div>
-          <h2 className="auth-prompt-title">Sign In to Access Rewards & Leaderboard</h2>
-          <p className="auth-prompt-desc">
+      <div className="rw-page rw-page--center">
+        <div className="rw-panel rw-message">
+          <span className="rw-message-icon" aria-hidden="true"><PiGiftFill /></span>
+          <h2>Sign In to Access Rewards &amp; Leaderboard</h2>
+          <p>
             Earn FinStars by taking courses, building streaks, and competing on the global leaderboard. Log in to track your score and unlock exclusive rewards.
           </p>
-          <button 
-            className="auth-prompt-login-btn"
+          <button
+            className="rw-btn"
             onClick={() => loginWithRedirect({ appState: { returnTo: '/rewards' } })}
             type="button"
           >
-            Log In / Sign Up &rarr;
+            Log In / Sign Up <PiArrowRightBold aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -166,16 +169,12 @@ const RewardsPage = () => {
   // 3. Error State
   if (error) {
     return (
-      <div className="rewards-page-wrapper">
-        <div className="rewards-error-container">
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-          <h2 style={{ fontSize: '1.4rem', color: '#dc2626', marginBottom: '0.5rem' }}>Failed to Load Rewards</h2>
-          <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>{error}</p>
-          <button
-            className="auth-prompt-login-btn"
-            onClick={() => window.location.reload()}
-            type="button"
-          >
+      <div className="rw-page rw-page--center">
+        <div className="rw-panel rw-message" role="alert">
+          <span className="rw-message-icon" aria-hidden="true"><PiWarningCircleBold /></span>
+          <h2>Failed to Load Rewards</h2>
+          <p>{error}</p>
+          <button className="rw-btn" onClick={() => window.location.reload()} type="button">
             Retry Loading
           </button>
         </div>
@@ -185,52 +184,37 @@ const RewardsPage = () => {
 
   // 4. Authenticated Main View with Live Data
   return (
-    <div className="rewards-page-wrapper">
-      <div className="rewards-container">
-        
-        {/* Page Header */}
-        <header className="rewards-header">
-          <div className="rewards-header-content">
-            <h1 className="rewards-title">Rewards</h1>
-            <p className="rewards-subtitle">
-              Learn, earn and grow. Redeem FinStars for exciting rewards and offers.
-            </p>
-          </div>
-          
-          <div className="rewards-header-visual">
-            <img 
-              src="/rewards-gift-box.png" 
-              alt="FinEd Rewards Gift Box" 
-              className="rewards-gift-box-img" 
-            />
-          </div>
+    <div className="rw-page">
+      <div className="rw-container">
+        <header className="rw-header">
+          <h1 className="rw-title">Rewards</h1>
+          <p className="rw-subtitle">Learn, earn and grow. Redeem FinStars for exciting rewards and offers.</p>
         </header>
 
-        {/* 1. Hero Stats Banner (Live FinScore, FinStars, Rank, Streak) */}
-        <StatsBanner 
+        {/* 1. FinStars wallet + FinScore, rank and streak */}
+        <StatsBanner
           userData={userData}
           onRedeemClick={scrollToRedeem}
           onLeaderboardClick={scrollToLeaderboard}
         />
 
-        {/* 2. Earn FinStars Action Cards (Referral, Share, Streak, Lesson) */}
-        <EarnFinStars userEmail={user?.email} />
+        {/* 2 + 3. Ways to earn beside redeeming */}
+        <div className="rw-split">
+          <EarnFinStars userEmail={user?.email} />
+          <RedeemSection
+            userStars={userData?.fin_stars ?? 0}
+            userEmail={user?.email}
+          />
+        </div>
 
-        {/* 3. Redeem Rewards Section (Single Coming Soon Teaser + How it works) */}
-        <RedeemSection 
-          userStars={userData?.fin_stars ?? 0}
-          userEmail={user?.email}
-        />
-
-        {/* 4. Leaderboard Section (Time filters, Top ranks, Highlighted user) */}
-        <LeaderboardSection 
+        {/* 4. Leaderboard (time filters, podium, highlighted user) */}
+        <LeaderboardSection
           userData={userData}
           apiLeaderboard={leaderboardData}
           timeframe={timeframe}
           onTimeframeChange={handleTimeframeChange}
           loadingLeaderboard={loadingLeaderboard}
         />
-
       </div>
     </div>
   );

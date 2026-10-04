@@ -219,7 +219,6 @@ export default function FeedbackPage() {
               <option value="" disabled>Select...</option>
               <option value="Courses">Courses</option>
               <option value="Articles">Articles</option>
-              <option value="FinTools (Expense Tracker)">FinTools (Expense Tracker)</option>
               <option value="Rewards (Finstars and Finscore)">Rewards (Finstars and Finscore)</option>
               <option value="Scheme Recommendations">Scheme Recommendations</option>
               <option value="Haven't used any yet">Haven't used any yet</option>

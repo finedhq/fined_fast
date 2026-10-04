@@ -13,20 +13,26 @@ const instance = axios.create({
 });
 
 let tokenFetcher = null;
+let cachedTokenPromise = null;
 
 export const setTokenFetcher = (fetcher) => {
   tokenFetcher = fetcher;
 };
 
 export const getAuthToken = async () => {
-  if (tokenFetcher) {
-    try {
-      return await tokenFetcher();
-    } catch (err) {
-      console.error("Failed to fetch Auth0 token", err);
-    }
+  if (!tokenFetcher) return null;
+  // Reuse any in-flight token request instead of calling Auth0 twice
+  if (!cachedTokenPromise) {
+    cachedTokenPromise = tokenFetcher().finally(() => {
+      cachedTokenPromise = null; // Clear after resolved
+    });
   }
-  return null;
+  try {
+    return await cachedTokenPromise;
+  } catch (err) {
+    console.error("Failed to fetch Auth0 token", err);
+    return null;
+  }
 };
 
 instance.interceptors.request.use(

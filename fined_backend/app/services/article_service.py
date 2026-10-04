@@ -299,7 +299,6 @@ class ArticleService:
             ("https://myfined.com/about", "monthly", "0.7"),
             ("https://myfined.com/contact", "monthly", "0.5"),
             ("https://myfined.com/feedback", "monthly", "0.5"),
-            ("https://myfined.com/policies", "monthly", "0.5"),
             ("https://myfined.com/courses", "weekly", "0.9"),
             ("https://myfined.com/help", "monthly", "0.5"),
             ("https://myfined.com/privacy-policy", "monthly", "0.5"),

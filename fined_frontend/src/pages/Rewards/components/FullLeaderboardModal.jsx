@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FiX, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { PiCaretLeftBold, PiCaretRightBold, PiMagnifyingGlassBold, PiXBold } from 'react-icons/pi';
 
 const PAGE_SIZE = 15;
 
@@ -45,12 +46,6 @@ const FullLeaderboardModal = ({
   const endIndex = Math.min(startIndex + PAGE_SIZE, totalItems);
   const paginatedList = filteredList.slice(startIndex, endIndex);
 
-  // Compute highest score in list for progress bar normalization
-  const highestScore = Math.max(
-    100,
-    ...leaderboard.map(e => e.fin_score ?? e.finScore ?? 0)
-  );
-
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -80,143 +75,108 @@ const FullLeaderboardModal = ({
     all_time: 'All Time'
   }[timeframe] || 'Leaderboard';
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3 className="modal-title">
-            🏆 Full Leaderboard Rankings
-            <span className="modal-subtitle-tag">{timeframeLabel}</span>
+  // Portal to <body> so the overlay covers the page and the fixed navbar
+  return createPortal(
+    <div className="rw-modal-overlay" onClick={onClose}>
+      <div className="rw-modal" role="dialog" aria-modal="true" aria-labelledby="rw-modal-title" onClick={(e) => e.stopPropagation()}>
+        <div className="rw-modal-head">
+          <h3 id="rw-modal-title">
+            Full Leaderboard Rankings
+            <span className="rw-modal-tag">{timeframeLabel}</span>
           </h3>
-          <button className="modal-close-btn" onClick={onClose} type="button" aria-label="Close modal">
-            <FiX />
+          <button className="rw-modal-close" onClick={onClose} type="button" aria-label="Close modal">
+            <PiXBold aria-hidden="true" />
           </button>
         </div>
 
-        <div className="modal-body" ref={modalBodyRef}>
-          <div className="modal-search-wrapper">
-            <FiSearch className="modal-search-icon" />
+        <div className="rw-modal-body" ref={modalBodyRef}>
+          <label className="rw-search">
+            <PiMagnifyingGlassBold aria-hidden="true" />
+            <span className="rw-sr-only">Search learners</span>
             <input
               type="text"
-              className="modal-search-input-field"
               placeholder="Search learners by name or email..."
               value={searchTerm}
               onChange={handleSearchChange}
               autoFocus
             />
-          </div>
+          </label>
 
-          <div className="leaderboard-rows-list">
-            {paginatedList.length === 0 ? (
-              <div className="modal-empty-state">
-                <p>No learners found matching "{searchTerm}"</p>
-              </div>
-            ) : (
-              paginatedList.map((entry, idx) => {
+          {paginatedList.length === 0 ? (
+            <p className="rw-modal-empty">No learners found matching "{searchTerm}"</p>
+          ) : (
+            <ol className="rw-rows">
+              {paginatedList.map((entry, idx) => {
                 const rank = entry.rank || (startIndex + idx + 1);
                 const isUser = userEntry && (
-                  (entry.email && entry.email === userEntry.email) || 
+                  (entry.email && entry.email === userEntry.email) ||
                   entry.isCurrentUser
                 );
                 const displayName = entry.name || entry.email?.split('@')[0] || `Learner #${rank}`;
                 const finScore = entry.fin_score ?? entry.finScore ?? 0;
-                const progressPercent = Math.min(100, Math.max(15, (finScore / highestScore) * 100));
-
-                let rankBadge = <span className="rank-numeric-badge">{rank}</span>;
-                if (rank === 1) rankBadge = <span role="img" aria-label="1st">🥇</span>;
-                else if (rank === 2) rankBadge = <span role="img" aria-label="2nd">🥈</span>;
-                else if (rank === 3) rankBadge = <span role="img" aria-label="3rd">🥉</span>;
 
                 return (
-                  <div 
-                    key={entry.email || `${validCurrentPage}-${idx}`} 
-                    className={`leader-row ${isUser ? 'user-highlight-row' : ''}`}
+                  <li
+                    key={entry.email || `${validCurrentPage}-${idx}`}
+                    className={`rw-row${isUser ? ' rw-row--you' : ''}${rank <= 3 ? ` rw-row--top rw-row--top${rank}` : ''}`}
                   >
-                    <div className="leader-rank-col">
-                      {isUser ? (
-                        <span className="user-rank-badge">#{rank}</span>
-                      ) : (
-                        rankBadge
-                      )}
-                    </div>
-
-                    <div className="leader-user-col">
-                      <div className={`leader-avatar ${isUser ? 'user-avatar-highlight' : ''}`}>
-                        {displayName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="leader-name-group">
-                        <span className="leader-name">{isUser ? 'You' : displayName}</span>
-                      </div>
-                    </div>
-
-                    <div className="leader-progress-col">
-                      <div className="leader-progress-bar-track">
-                        <div 
-                          className="leader-progress-bar-fill" 
-                          style={{ width: `${progressPercent}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="leader-points-col">
-                      <span className="leader-score-val">{finScore}</span>
-                      <span className="leader-score-pts">pts</span>
-                    </div>
-                  </div>
+                    <span className="rw-row-rank">{isUser ? `#${rank}` : rank}</span>
+                    <span className="rw-row-avatar" aria-hidden="true">{displayName.charAt(0).toUpperCase()}</span>
+                    <span className="rw-row-name">{isUser ? 'You' : displayName}</span>
+                    <span className="rw-row-score">{finScore} <small>pts</small></span>
+                  </li>
                 );
-              })
-            )}
-          </div>
+              })}
+            </ol>
+          )}
 
           {/* Pagination Controls */}
           {totalItems > PAGE_SIZE && (
-            <div className="modal-pagination-bar">
-              <div className="modal-pagination-info">
-                Showing {startIndex + 1}–{endIndex} of {totalItems} learners
-              </div>
-
-              <div className="modal-pagination-controls">
-                <button 
-                  className="modal-page-btn nav-btn"
+            <div className="rw-pages">
+              <span className="rw-pages-info">
+                Showing {startIndex + 1}-{endIndex} of {totalItems} learners
+              </span>
+              <div className="rw-pages-controls">
+                <button
+                  className="rw-pg"
                   disabled={validCurrentPage === 1}
                   onClick={() => handlePageChange(validCurrentPage - 1)}
                   type="button"
                   aria-label="Previous page"
                 >
-                  <FiChevronLeft /> Prev
+                  <PiCaretLeftBold aria-hidden="true" />
                 </button>
-
-                {getPageNumbers().map((p, pIdx) => {
-                  if (p === '...') {
-                    return <span key={`ellipsis-${pIdx}`} className="modal-page-ellipsis">...</span>;
-                  }
-                  return (
-                    <button
-                      key={`page-${p}`}
-                      className={`modal-page-btn ${p === validCurrentPage ? 'active' : ''}`}
-                      onClick={() => handlePageChange(p)}
-                      type="button"
-                    >
-                      {p}
-                    </button>
-                  );
-                })}
-
-                <button 
-                  className="modal-page-btn nav-btn"
+                {getPageNumbers().map((p, pIdx) => (
+                  p === '...'
+                    ? <span key={`ellipsis-${pIdx}`} className="rw-pg-gap">...</span>
+                    : (
+                      <button
+                        key={`page-${p}`}
+                        className={`rw-pg${p === validCurrentPage ? ' is-active' : ''}`}
+                        onClick={() => handlePageChange(p)}
+                        type="button"
+                        aria-current={p === validCurrentPage ? 'page' : undefined}
+                      >
+                        {p}
+                      </button>
+                    )
+                ))}
+                <button
+                  className="rw-pg"
                   disabled={validCurrentPage === totalPages}
                   onClick={() => handlePageChange(validCurrentPage + 1)}
                   type="button"
                   aria-label="Next page"
                 >
-                  Next <FiChevronRight />
+                  <PiCaretRightBold aria-hidden="true" />
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

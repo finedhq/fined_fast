@@ -307,6 +307,7 @@ class CompletionCardData(BaseModel):
 FigureKind = Literal[
     "shrinking_basket_predict", "two_ledgers_payoff_drag", "two_rooms_money_flow",   # Module 1
     "ownership_grid_one_share", "bars_price_vs_size", "ownership_grid_rights_queue",  # Module 2
+    "bars_who_trades", "rulebook_switch", "vault_preview",                             # Module 3
 ]
 ModelKind = Literal["leak_lab", "slice_calculator"]
 
@@ -319,6 +320,9 @@ FIGURE_STEP_COUNTS = {
     "ownership_grid_one_share": 4,
     "bars_price_vs_size": 4,
     "ownership_grid_rights_queue": 4,
+    "bars_who_trades": 4,
+    "rulebook_switch": 3,
+    "vault_preview": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")
