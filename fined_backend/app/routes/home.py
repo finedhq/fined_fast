@@ -29,10 +29,6 @@ class NotificationsRequest(BaseModel):
 class FeedbackRequest(BaseModel):
     form: Dict[str, Any]
 
-class RecommendationsRequest(BaseModel):
-    email: str
-    course_id: Optional[str] = None
-
 class WaitlistRequest(BaseModel):
     email: str
 
@@ -300,65 +296,4 @@ async def send_feedback(body: FeedbackRequest, user: AuthUser = Depends(get_curr
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to save feedback: {str(e)}"
-        )
-
-
-@router.post("/recommendations")
-async def get_recommendations(body: RecommendationsRequest, user: AuthUser = Depends(get_current_user)):
-    """Tag-based product recommendations matching current course tags"""
-    try:
-        recommendations = []
-        
-        # Sanitize course_id to check if it's a valid UUID format
-        is_valid_uuid = False
-        if body.course_id:
-            try:
-                import uuid
-                uuid.UUID(body.course_id)
-                is_valid_uuid = True
-            except ValueError:
-                pass
-
-        if body.course_id and is_valid_uuid:
-            try:
-                recommendations = home_service.get_recommendations(body.email, body.course_id)
-            except Exception as e:
-                print(f"Failed to fetch course recommendations: {e}")
-                pass
-        else:
-            try:
-                # Check if there are stored recommended schemes in user profile
-                user = user_repo.get_by_email(body.email)
-                if user and user.get("recommended_schemes"):
-                    from app.repositories.product_repo import product_repo
-                    recommendations = product_repo.get_all_latest()[:3]
-            except Exception as inner_e:
-                print(f"Failed to fetch schemes from DB, using placeholders: {inner_e}")
-                pass
-                
-        # Fallback placeholders if DB is empty, table doesn't exist, or no matching tags
-        if not recommendations:
-            recommendations = [
-                {"id": "1", "bank_name": "HDFC Bank", "product_name": "MoneyBack+ Credit Card", "description": "Earn 10X CashPoints on Amazon, BigBasket, Flipkart, Reliance Smart SuperStore & Swiggy.", "tags": ["credit", "rewards"]},
-                {"id": "2", "bank_name": "SBI Bank", "product_name": "SBI SimplySAVE", "description": "10 Reward Points per Rs.150 spent on Dining, Movies, Departmental Stores and Grocery.", "tags": ["credit", "shopping"]},
-                {"id": "3", "bank_name": "ICICI Bank", "product_name": "iMobile Pay Savings", "description": "Zero balance account with exciting cashback offers on bill payments.", "tags": ["savings", "digital"]}
-            ]
-                
-        # Format the scheme recommendations to match what HomePage.jsx maps:
-        # e.g., bank_name, scheme_name, description
-        formatted_recs = []
-        for rec in recommendations:
-            formatted_recs.append({
-                "id": rec.get("id"),
-                "bank_name": rec.get("bank_name", "FinEd"),
-                "scheme_name": rec.get("product_name", rec.get("title", "Scheme")),
-                "description": rec.get("description", rec.get("details", "")),
-                "tags": rec.get("tags", [])
-            })
-            
-        return {"recommendations": formatted_recs}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch recommendations: {str(e)}"
         )
