@@ -13,6 +13,8 @@
 // savedAnswers.js for what and when); on return, saved answers are shown as
 // answered (decision 7f). `preview` (admin): starts empty, saves nothing;
 // `embedded` (admin card preview): no top bar, and the window isn't scrolled.
+// `onSignup` (visitor trying a module, used with `preview`): the completion's
+// "Up next" box asks them to sign up.
 import { useEffect, useMemo, useRef, useState } from "react";
 import Topbar from "./Topbar";
 import Hero from "./Hero";
@@ -31,7 +33,7 @@ import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
 
-export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride }) {
+export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride, onSignup }) {
   const rootRef = useRef(null);
   const moduleId = bundle.module_id;
 
@@ -160,6 +162,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             open={open}
             nextHref={nextSlug && !preview ? `/cards/${nextSlug}` : null}
             comingSoon={!nextSlug && !preview}
+            onSignup={onSignup}
             onReached={() => markReached(card.slug)}
             onGoTo={goToPart}
             onReviewTop={() => scrollToElement(rootRef.current?.querySelector(".nc-hero"))}

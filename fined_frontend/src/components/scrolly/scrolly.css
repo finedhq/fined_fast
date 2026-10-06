@@ -2565,6 +2565,35 @@
   color: #CBC6D6;
 }
 
+/* Visitor trying a module without an account: the "Up next" box is a sign-up button. */
+.nc-root .nc-signup-card {
+  display: block;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.nc-root .nc-signup-pill {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: 18px;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--amber);
+  font-family: var(--font-action);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink);
+  transition: transform 0.2s ease;
+}
+
+.nc-root .nc-signup-card:hover .nc-signup-pill {
+  transform: translateX(4px);
+}
+
 .nc-root .btn-secondary {
   display: inline-flex;
   align-items: center;
