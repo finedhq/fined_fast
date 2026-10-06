@@ -302,6 +302,11 @@ export function getBundleByCardSlug(cardSlug, email) {
   });
 }
 
+// Public: Module 1 of the stock-market course, for visitors who aren't signed in.
+export function getSampleModule() {
+  return request("/courses/sample-module", { method: "GET" });
+}
+
 export function updateCardBySlug(cardSlug, body) {
   return request(`/courses/card/${cardSlug}/updateCard`, {
     method: "POST",

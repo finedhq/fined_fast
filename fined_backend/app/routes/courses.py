@@ -133,6 +133,42 @@ async def get_all_courses():
         )
 
 
+@router.get("/sample-module")
+async def get_sample_module():
+    """Public, no login: Module 1 of the published stock-market course, so
+    landing-page visitors can try a module. No progress is read or written."""
+    try:
+        courses = await asyncio.to_thread(course_repo.get_listed)
+        course = next((c for c in courses if "stock market" in (c.get("title") or "").lower()), None)
+        if not course:
+            raise HTTPException(status_code=404, detail="Sample module not found")
+        modules_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course["id"]).order("order_index").execute())
+        module = next((m for m in (modules_res.data or []) if is_released(m)), None)
+        if not module:
+            raise HTTPException(status_code=404, detail="Sample module not found")
+        cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module["id"]).order("order_index").execute())
+        cards = [{**c, "status": "incompleted", "userAnswer": None} for c in (cards_res.data or [])]
+        return {
+            "course_id": course["id"],
+            "course_title": course.get("title"),
+            "course_slug": course.get("slug"),
+            "module_id": module["id"],
+            "module_title": module.get("title"),
+            "module_order_index": module.get("order_index", 0),
+            "module_total_cards": len(cards),
+            "cards": cards,
+            "prevModuleFirstCard": None,
+            "nextModuleFirstCard": None,
+        }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch sample module: {str(e)}"
+        )
+
+
 @router.get("/admin/all")
 async def get_all_courses_admin(user: AuthUser = Depends(require_admin)):
     """Admin: every course, any status, newest first"""

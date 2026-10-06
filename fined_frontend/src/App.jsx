@@ -24,6 +24,7 @@ const AdminArticleForm = lazy(() => import("./pages/Admin/AdminArticleForm"));
 const AdminNewsletter = lazy(() => import("./pages/Admin/AdminNewsletter"));
 const CardViewer = lazy(() => import("./pages/CoursesPage/CardViewer/CardViewer"));
 const ModulePagePreview = lazy(() => import("./pages/Admin/ModulePagePreview"));
+const TryModule = lazy(() => import("./pages/TryModule/TryModule"));
 const AdminSources = lazy(() => import("./pages/Admin/AdminSources"));
 const AddCardForm = lazy(() => import("./pages/Admin/AddCardForm"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
@@ -64,6 +65,7 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
+                  <Route path="/try" element={<TryModule />} />
                   {/* Admin preview of a new-course module page: full window, like /cards (no site navbar) */}
                   <Route path="/admin/courses/:courseId/modules/:moduleId/preview" element={<AdminGuard><ModulePagePreview /></AdminGuard>} />
                   <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
