@@ -668,7 +668,13 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
 
         # 1. Fetch card details and user scoring metrics concurrently
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("card_id", card_id).single().execute())
-        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute())
+        def _fetch_user_scoring():
+            try:
+                return supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute()
+            except Exception:
+                return supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score").eq("email", user.email).limit(1).execute()
+
+        user_res = await asyncio.to_thread(_fetch_user_scoring)
         # "status" is needed so a card completed before never pays stars/bonuses again
         existing_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id, status").match({
             "email": user.email,

@@ -377,6 +377,29 @@ export function updateUserProfile(payload, token) {
   });
 }
 
+export async function saveUserProfile(payload, token) {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  try {
+    return await request("/users/profile", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Fallback to /v1/users/me PATCH
+    return await request("/v1/users/me", {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(payload),
+    });
+  }
+}
+
 export const fetchUserProfile = getUserProfile;
 
 export { API_BASE_URL };

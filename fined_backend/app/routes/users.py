@@ -46,3 +46,24 @@ async def update_my_profile(payload: UserProfileUpdate, current_user: AuthUser =
         user_repo.update_profile, current_user.email, update_data, current_user.sub
     )
     return updated_profile
+
+@router.put("/profile", response_model=UserProfileResponse)
+@router.post("/profile", response_model=UserProfileResponse)
+@router.get("/profile", response_model=UserProfileResponse)
+async def v1_profile_alias(payload: UserProfileUpdate = None, current_user: AuthUser = Depends(get_current_user)):
+    if payload:
+        return await update_my_profile(payload, current_user)
+    return await get_my_profile(current_user)
+
+profile_router = APIRouter(prefix="/users", tags=["Users"])
+
+@profile_router.get("/profile", response_model=UserProfileResponse)
+async def get_profile_direct(current_user: AuthUser = Depends(get_current_user)):
+    return await get_my_profile(current_user)
+
+@profile_router.put("/profile", response_model=UserProfileResponse)
+@profile_router.post("/profile", response_model=UserProfileResponse)
+@profile_router.patch("/profile", response_model=UserProfileResponse)
+async def update_profile_direct(payload: UserProfileUpdate, current_user: AuthUser = Depends(get_current_user)):
+    return await update_my_profile(payload, current_user)
+

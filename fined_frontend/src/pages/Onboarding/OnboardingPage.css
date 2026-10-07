@@ -1,0 +1,1101 @@
+/* Onboarding Page — Unified "Evolving Wealth Plant + Editorial Philosophy" Flow */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.onboard-page-wrapper {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 10% 10%, rgba(254, 215, 170, 0.25) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, rgba(209, 250, 229, 0.35) 0px, transparent 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .onboard-page-wrapper {
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+/* ── Main Stage Floating Container ── */
+.onboard-card-container {
+  background: #ffffff;
+  border-radius: 2rem;
+  border: 1px solid #f1f5f9;
+  box-shadow: 
+    0 20px 45px -10px rgba(15, 23, 42, 0.07),
+    0 4px 16px -2px rgba(15, 23, 42, 0.03);
+  width: 100%;
+  max-width: 1120px;
+  min-height: 590px;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 960px) {
+  .onboard-card-container {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+/* ── LEFT PANEL: Form & Step Flow ── */
+.onboard-left-panel {
+  padding: 2.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  z-index: 2;
+}
+
+@media (min-width: 640px) {
+  .onboard-left-panel {
+    padding: 2.75rem 2.5rem;
+  }
+}
+
+/* Header & Progress Bar */
+.onboard-left-header {
+  margin-bottom: 1.5rem;
+}
+
+.onboard-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  margin-bottom: 1.15rem;
+  width: fit-content;
+}
+
+.onboard-logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.onboard-brand-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #0f172a;
+}
+
+.onboard-brand-accent {
+  color: #fa7516;
+}
+
+/* Progress Bar (5 Segments) */
+.onboard-progress-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.onboard-dashes-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.onboard-dash {
+  width: 38px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboard-dash--active {
+  background-color: #fa7516 !important;
+  width: 48px;
+  box-shadow: 0 0 10px rgba(250, 117, 22, 0.35);
+}
+
+.onboard-dash--completed {
+  background-color: #fa7516 !important;
+}
+
+.onboard-step-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+/* Step transition */
+.onboard-step-fade {
+  animation: fadeInStep 0.25s ease-out;
+}
+
+@keyframes fadeInStep {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Headings & Subtitles */
+.onboard-heading {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .onboard-heading {
+    font-size: 1.95rem;
+  }
+}
+
+.onboard-subcopy {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  max-width: 460px;
+}
+
+/* Premium Inputs */
+.onboard-field-group {
+  margin-bottom: 1.25rem;
+}
+
+.onboard-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin-bottom: 0.45rem;
+}
+
+.onboard-input-box {
+  width: 100%;
+  max-width: 440px;
+  padding: 0.9rem 1.2rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1.15rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.onboard-input-box:focus {
+  background: #ffffff;
+  border-color: #fa7516;
+  box-shadow: 0 0 0 4px rgba(250, 117, 22, 0.12);
+}
+
+.onboard-input-box::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.onboard-input-prefix-wrap {
+  position: relative;
+  max-width: 440px;
+}
+
+.onboard-input-prefix-wrap input {
+  padding-left: 2.3rem;
+}
+
+.onboard-prefix-icon {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+/* Option Cards (Step 2 & 3) */
+.onboard-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 460px;
+  margin-bottom: 1.5rem;
+}
+
+.onboard-option-pill {
+  width: 100%;
+  text-align: left;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1.15rem;
+  padding: 0.9rem 1.15rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: inherit;
+  user-select: none;
+}
+
+.onboard-option-pill:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+}
+
+.onboard-option-pill--selected {
+  border-color: #fa7516 !important;
+  background: #fffaf5 !important;
+  box-shadow: 0 0 0 2px #fa7516, 0 4px 14px -2px rgba(250, 117, 22, 0.15) !important;
+}
+
+.onboard-opt-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.onboard-opt-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.onboard-opt-desc {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.onboard-opt-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  margin-left: 0.75rem;
+}
+
+.onboard-option-pill--selected .onboard-opt-check {
+  background: #fa7516;
+  border-color: #fa7516;
+  color: #ffffff;
+}
+
+/* ── STEP 4: Multi-Select Pill Tags ── */
+.onboard-pill-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  max-width: 460px;
+  margin-bottom: 0.75rem;
+}
+
+.onboard-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 9999px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  font-family: inherit;
+}
+
+.onboard-tag-pill:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.onboard-tag-pill--selected {
+  background: #fff7ed !important;
+  border-color: #fa7516 !important;
+  color: #9a3412 !important;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px #fa7516, 0 4px 10px rgba(250, 117, 22, 0.15) !important;
+}
+
+.onboard-tag-icon {
+  font-size: 1rem;
+}
+
+.onboard-tag-label {
+  letter-spacing: -0.01em;
+}
+
+.onboard-tag-check {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ea580c;
+  margin-left: 0.15rem;
+}
+
+.onboard-pill-hint {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  max-width: 440px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   1. CLEAN MODERN EDITORIAL LOADING / TRANSITION SCREEN
+   ══════════════════════════════════════════════════════════════════ */
+.onboard-editorial-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  animation: fadeInStep 0.3s ease-out;
+  max-width: 460px;
+  width: 100%;
+  padding-top: 1.25rem;
+}
+
+.onboard-loading-heading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .onboard-loading-heading {
+    font-size: 2rem;
+  }
+}
+
+.onboard-loading-subtext {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+/* Smooth Minimal Animated Gradient Progress Bar */
+.onboard-progress-track {
+  width: 100%;
+  max-width: 28rem;
+  height: 0.5rem;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 1.5rem;
+  position: relative;
+}
+
+.onboard-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #fb923c 0%, #fa7516 100%);
+  width: 0%;
+  animation: travelProgress 2.1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes travelProgress {
+  0% { width: 0%; }
+  35% { width: 45%; }
+  75% { width: 85%; }
+  100% { width: 100%; }
+}
+
+/* Pulsating Status Micro-Copy */
+.onboard-loading-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: pulseStatus 1.6s ease-in-out infinite;
+}
+
+@keyframes pulseStatus {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.onboard-loading-spinner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #fa7516;
+  box-shadow: 0 0 8px rgba(250, 117, 22, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   2. FIX STEP 5: PROPER 16:9 RECOMMENDED COURSE CARD
+   ══════════════════════════════════════════════════════════════════ */
+.onboard-step5-container {
+  max-width: 480px;
+  width: 100%;
+}
+
+.onboard-step5-header {
+  margin-bottom: 0.85rem;
+}
+
+.onboard-recom-kicker {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ea580c;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+/* Standalone High-Fidelity Course Card with Responsive 16:9 Banner */
+.onboard-course-card-standalone {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+  margin-bottom: 0.95rem;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.onboard-course-card-standalone:hover {
+  border-color: #fed7aa;
+  box-shadow: 0 8px 24px rgba(250, 117, 22, 0.12);
+}
+
+/* Responsive 16:9 Image Wrapper with Zero Clipping */
+.onboard-course-banner-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #f8fafc;
+  border-radius: 1rem 1rem 0 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.onboard-course-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.onboard-course-card-standalone:hover .onboard-course-banner-img {
+  transform: scale(1.02);
+}
+
+.onboard-course-body {
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.onboard-course-badges-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.onboard-badge-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.onboard-badge--orange {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+.onboard-badge--slate {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.onboard-badge--emerald {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #d1fae5;
+}
+
+.onboard-course-main-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
+}
+
+.onboard-course-main-desc {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.45;
+  margin-bottom: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.onboard-course-main-btn {
+  width: 100%;
+  background: #fa7516;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.92rem;
+  padding: 0.78rem 1.25rem;
+  border-radius: 0.85rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(250, 117, 22, 0.32);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.onboard-course-main-btn:hover {
+  background: #e0640d;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px rgba(250, 117, 22, 0.42);
+}
+
+.onboard-course-main-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Summary Strip (Below Course Card) ── */
+.onboard-summary-strip {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 1.15rem;
+  padding: 0.75rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 520px) {
+  .onboard-summary-strip {
+    grid-template-columns: repeat(4, 1fr);
+    padding: 0.75rem 1.15rem;
+  }
+}
+
+.onboard-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.onboard-summary-lbl {
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.onboard-summary-val {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Secondary Links in Step 5 */
+.onboard-step5-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.25rem;
+}
+
+.onboard-link-dashboard {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.onboard-link-dashboard:hover {
+  color: #fa7516;
+  text-decoration: underline;
+}
+
+.onboard-link-back-subtle {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+  font-family: inherit;
+}
+
+.onboard-link-back-subtle:hover {
+  color: #475569;
+}
+
+/* Error Banner */
+.onboard-error-msg {
+  padding: 0.65rem 0.95rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
+  max-width: 440px;
+}
+
+/* Navigation Buttons for Steps 1-4 */
+.onboard-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 1.75rem;
+}
+
+.onboard-btn-back {
+  padding: 0.75rem 1.65rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  background-color: #f1f5f9;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.onboard-btn-back:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.onboard-btn-back:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.onboard-btn-continue {
+  padding: 0.78rem 2rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #fa7516 0%, #ff8c37 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px -1px rgba(250, 117, 22, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.onboard-btn-continue:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px -2px rgba(250, 117, 22, 0.45);
+}
+
+.onboard-btn-continue:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── RIGHT PANEL: THE LIVING WEALTH GARDEN + EDITORIAL QUOTE ── */
+.onboard-right-panel {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.7) 0%, rgba(255, 247, 237, 0.3) 50%, rgba(254, 243, 199, 0.5) 100%);
+  border-left: 1px solid #f1f5f9;
+  border-top-right-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  min-height: 520px;
+}
+
+@media (min-width: 640px) {
+  .onboard-right-panel {
+    padding: 2.75rem 2.5rem;
+  }
+}
+
+/* Subtle Ambient Glow Orbs */
+.garden-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.garden-orb--emerald {
+  width: 220px;
+  height: 220px;
+  background: rgba(16, 185, 129, 0.15);
+  top: -40px;
+  right: -40px;
+}
+
+.garden-orb--amber {
+  width: 240px;
+  height: 240px;
+  background: rgba(245, 158, 11, 0.12);
+  bottom: -40px;
+  left: -40px;
+}
+
+/* A. Top Status Header */
+.garden-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+  z-index: 5;
+  margin-bottom: 1.25rem;
+}
+
+.garden-stage-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #065f46;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(167, 243, 208, 0.8);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.garden-streak-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #92400e;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(253, 230, 138, 0.8);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* B. Center: Dynamic Animated Plant Canvas (Polished & Organic SVG) */
+.garden-canvas-wrap {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.garden-plant-svg {
+  width: 100%;
+  max-width: 250px;
+  height: 220px;
+  overflow: visible;
+  transition: all 0.4s ease;
+}
+
+/* Floating micro-chips beside plant */
+.garden-chip-float {
+  position: absolute;
+  z-index: 6;
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  user-select: none;
+  animation: float-chip 3.5s ease-in-out infinite;
+}
+
+.garden-chip-float--left {
+  left: 6%;
+  top: 36%;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.garden-chip-float--right {
+  right: 6%;
+  top: 24%;
+  color: #0369a1;
+  border-color: #bae6fd;
+  animation-delay: 1.5s;
+}
+
+@keyframes float-chip {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Floating interest tags beside flower in Step 4/5 */
+.garden-floating-interests {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.garden-chip-interest {
+  position: absolute;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255, 247, 237, 0.92);
+  backdrop-filter: blur(6px);
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  box-shadow: 0 4px 12px rgba(250, 117, 22, 0.15);
+  animation: float-chip 3.2s ease-in-out infinite;
+}
+
+.garden-chip-interest--0 {
+  top: 8%;
+  left: 12%;
+  animation-delay: 0.2s;
+}
+
+.garden-chip-interest--1 {
+  top: 14%;
+  right: 10%;
+  animation-delay: 1.2s;
+}
+
+.garden-chip-interest--2 {
+  top: 55%;
+  right: 8%;
+  animation-delay: 2.1s;
+}
+
+/* Plant Animations */
+@keyframes plant-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+.sway-animation {
+  transform-origin: bottom center;
+  animation: plant-sway 4s ease-in-out infinite;
+}
+
+@keyframes bloom-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(250, 117, 22, 0.4)); }
+  50% { filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.85)); }
+}
+
+.bloom-glow-animation {
+  animation: bloom-glow 2.5s ease-in-out infinite;
+}
+
+/* C. Editorial Wisdom Card */
+.garden-editorial-card {
+  position: relative;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1.15rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(209, 250, 229, 0.7);
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  margin-bottom: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.garden-quote-mark {
+  color: #10b981;
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.garden-quote-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.5;
+  font-style: italic;
+  margin-bottom: 0.4rem;
+}
+
+.garden-quote-author {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #059669;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: block;
+}
+
+/* D. Bottom Social Proof Strip */
+.garden-social-strip {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.75);
+}
+
+.garden-avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.garden-avatar-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  margin-left: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.garden-avatar-circle:first-child {
+  margin-left: 0;
+}
+
+.garden-avatar-circle--orange { background: #fa7516; }
+.garden-avatar-circle--blue { background: #2563eb; }
+.garden-avatar-circle--emerald { background: #10b981; }
+
+.garden-social-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.35;
+}
+
+/* Mobile & Tablet Stacking */
+@media (max-width: 959px) {
+  .onboard-card-container {
+    border-radius: 1.5rem;
+  }
+
+  .onboard-right-panel {
+    border-left: none;
+    border-top: 1px solid #f1f5f9;
+    border-top-right-radius: 1.5rem;
+    border-top-left-radius: 1.5rem;
+    border-bottom-right-radius: 0;
+    padding: 2rem 1.5rem;
+    order: -1;
+    min-height: 400px;
+  }
+
+  .garden-plant-svg {
+    max-width: 200px;
+    height: 170px;
+  }
+}

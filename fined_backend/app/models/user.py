@@ -62,6 +62,8 @@ class UserProfileUpdate(BaseModel):
     knowledge_level: Optional[str] = None
     bio: Optional[str] = None
     location: Optional[str] = "Nagpur, IN"
+    macro_profile: Optional[dict] = None
+    onboarding_completed: Optional[bool] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -94,6 +96,8 @@ class UserProfileResponse(BaseModel):
     ongoing_course: Optional[OngoingCourseProgress] = None
     consistency_grid: list[int] = []
     activity_map: dict[str, int] = {}
+    macro_profile: Optional[dict] = {}
+    onboarding_completed: Optional[bool] = False
 
     @model_validator(mode="before")
     @classmethod

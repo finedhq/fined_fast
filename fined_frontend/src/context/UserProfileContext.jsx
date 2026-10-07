@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { fetchUserProfile, updateUserProfile } from "../services/api";
+import { fetchUserProfile, updateUserProfile, saveUserProfile } from "../services/api";
 
 const UserProfileContext = createContext(null);
 
@@ -87,12 +87,20 @@ export const UserProfileProvider = ({ children }) => {
           console.warn("Could not get access token silently for save:", tokErr);
         }
       }
-      const updated = await updateUserProfile(payload, token);
+      const updated = await saveUserProfile(payload, token);
+      if (payload?.onboarding_completed) {
+        try {
+          localStorage.setItem("fined_onboarding_completed", "true");
+        } catch (e) {
+          console.warn("Could not write to localStorage:", e);
+        }
+      }
       if (updated) {
         setProfile((prev) => ({
           ...prev,
           ...updated,
           ...payload,
+          display_name: payload.display_name || updated.full_name || updated.display_name || prev.display_name,
         }));
       } else {
         setProfile((prev) => ({
@@ -103,6 +111,11 @@ export const UserProfileProvider = ({ children }) => {
       return true;
     } catch (err) {
       console.error("Failed to update profile:", err);
+      if (payload?.onboarding_completed) {
+        try {
+          localStorage.setItem("fined_onboarding_completed", "true");
+        } catch {}
+      }
       // Still update locally for smooth UI experience
       setProfile((prev) => ({
         ...prev,

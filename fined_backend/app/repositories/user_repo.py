@@ -39,10 +39,24 @@ class UserRepository:
         supabase.from_("users").update(fields).eq("email", email).execute()
 
     def get_all_for_leaderboard(self) -> list:
-        res = supabase.from_("users").select(
-            "user_sub, email, article_score, expense_score, course_score, consistency_score, fin_stars"
-        ).execute()
-        return res.data or []
+        try:
+            res = supabase.from_("users").select(
+                "user_sub, email, article_score, expense_score, course_score, consistency_score, fin_stars"
+            ).execute()
+            return res.data or []
+        except Exception:
+            try:
+                res = supabase.from_("users").select(
+                    "user_sub, email, article_score, course_score, consistency_score, fin_stars"
+                ).execute()
+                data = res.data or []
+                for row in data:
+                    row.setdefault("expense_score", 0)
+                return data
+            except Exception as e:
+                print(f"Error fetching leaderboard users: {e}")
+                return []
+
     
 
     def has_feedback(self, email: str) -> bool:
@@ -380,11 +394,13 @@ class UserRepository:
             "ongoing_course": ongoing_course,
             "consistency_grid": consistency_grid,
             "activity_map": activity_map,
+            "macro_profile": user.get("macro_profile") or {},
+            "onboarding_completed": (user.get("macro_profile") or {}).get("onboarding_completed", False) if isinstance(user.get("macro_profile"), dict) else False,
         }
 
     def update_profile(self, email: str, fields: dict, user_sub: str = None) -> dict:
         """Update profile fields with database persistence and memory sync"""
-        allowed_fields = ['username', 'location', 'bio', 'career_stage', 'financial_level']
+        allowed_fields = ['username', 'location', 'bio', 'career_stage', 'financial_level', 'macro_profile']
 
         payload = {}
         for col in allowed_fields:
@@ -401,6 +417,20 @@ class UserRepository:
             user = self.get_by_sub(user_sub)
 
         user_id = user.get("id") if user else None
+
+        # Handle onboarding_completed and learning_interests in macro_profile
+        existing_macro = (user.get("macro_profile") if user else {}) or {}
+        if not isinstance(existing_macro, dict):
+            existing_macro = {}
+        merged_macro = {**existing_macro, **(payload.get("macro_profile") or {})}
+
+        if "onboarding_completed" in fields and fields["onboarding_completed"] is not None:
+            merged_macro["onboarding_completed"] = bool(fields["onboarding_completed"])
+        if "learning_interests" in fields and fields["learning_interests"] is not None:
+            merged_macro["learning_interests"] = fields["learning_interests"]
+
+        if merged_macro != existing_macro or "macro_profile" in payload:
+            payload["macro_profile"] = merged_macro
 
         # Directly update Supabase users table
         try:

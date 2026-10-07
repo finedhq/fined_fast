@@ -4,7 +4,10 @@ import { useUserProfile } from "../context/UserProfileContext";
 
 const CAREER_STAGES = [
   "Student",
+  "Early Career",
+  "Professional",
   "Working Professional",
+  "Freelancer",
   "Freelancer / Self-Employed",
   "Other",
 ];

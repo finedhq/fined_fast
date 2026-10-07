@@ -113,7 +113,7 @@ function DashboardSkeleton() {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-  const { refreshProfile } = useUserProfile();
+  const { profile, refreshProfile } = useUserProfile();
 
   const [userData, setUserData] = useState({});
   const [ongoingCourse, setOngoingCourse] = useState({});
@@ -185,6 +185,19 @@ const Dashboard = () => {
       setLoadingData(false);
     });
   }, [isLoading, isAuthenticated, user, getAccessTokenSilently, refreshProfile]);
+
+  useEffect(() => {
+    if (isLoading || !isAuthenticated || loadingData || !profile) return;
+    const onboardingDone =
+      profile.onboarding_completed === true ||
+      profile.macro_profile?.onboarding_completed === true ||
+      localStorage.getItem("fined_onboarding_completed") === "true";
+
+    if (!onboardingDone && (profile.onboarding_completed === false || !profile.username || profile.username === "user")) {
+      navigate("/onboarding");
+    }
+  }, [isLoading, isAuthenticated, loadingData, profile, navigate]);
+
 
   if (isLoading || loadingData) {
     return <DashboardSkeleton />;

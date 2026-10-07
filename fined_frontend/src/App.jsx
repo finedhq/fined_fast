@@ -45,6 +45,7 @@ const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
+const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -65,12 +66,14 @@ function App() {
               <EditProfileModal />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  <Route path="/onboarding" element={<OnboardingPage />} />
                   <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                   {/* Admin preview of a new-course module page: full window, like /cards (no site navbar) */}
                   <Route path="/admin/courses/:courseId/modules/:moduleId/preview" element={<AdminGuard><ModulePagePreview /></AdminGuard>} />
                   <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
                   <Route path="/lens" element={<Navigate to="/articles" replace />} />
                   <Route path="/" element={<MainLayout />}>
+                    <Route path="onboarding" element={<Navigate to="/onboarding" replace />} />
                     <Route index element={<Hero />} />
                     <Route path="articles" element={<ArticlesPage />} />
                     <Route path="articles/:slug" element={<SingleArticlePage />} />
