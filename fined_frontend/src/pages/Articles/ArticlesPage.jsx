@@ -279,6 +279,7 @@ function ArticlesPage() {
                           alt={leadArticle.title}
                           className="ap-lead-img"
                           loading="eager"
+                          decoding="async"
                         />
                       ) : (
                         <div className="ap-lead-img-placeholder" />
@@ -381,6 +382,7 @@ function ArticlesPage() {
                               alt={article.title}
                               className="ap-row-img"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
                             <div className="ap-row-img-placeholder" />
@@ -503,6 +505,7 @@ function ArticlesPage() {
                             alt={article.title}
                             className="ap-grid-img"
                             loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="ap-grid-img-placeholder" />

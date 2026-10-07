@@ -238,7 +238,7 @@ export default function Navbar() {
                 <button className="btn-signin cube-link" onClick={() => loginWithRedirect()}>
                   <span className="cube-wrapper" data-text="Log In">Log In</span>
                 </button>
-                <button className="btn-nav-register" onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: "signup" } })}>
+                <button className="btn-nav-register" onClick={() => loginWithRedirect()}>
                   Sign Up
                 </button>
               </>
@@ -278,7 +278,7 @@ export default function Navbar() {
           ) : (
               <li className="mobile-nav-auth-wrapper">
                 <div className="mobile-nav-auth-footer">
-                  <button className="mobile-btn-primary" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect({ authorizationParams: { screen_hint: "signup" } }); }}>Sign Up</button>
+                  <button className="mobile-btn-primary" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect(); }}>Sign Up</button>
                   <button className="mobile-btn-outline" onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); loginWithRedirect(); }}>Log In</button>
                 </div>
               </li>

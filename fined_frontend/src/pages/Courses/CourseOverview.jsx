@@ -7,14 +7,34 @@ import CertificateGenerator from "../../components/Certificate/CertificateGenera
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import "./CourseOverview.css";
 import "../Dashboard/Dashboard.css";
-import completedModuleLogo from '../../assets/completed_module_logo.png';
-import currentModuleLogo from '../../assets/current_module_logo.png';
-import lockedModuleLogo from '../../assets/locked_module_logo.png';
+import "../Dashboard/DashboardHome.css";
+import { getUserLevel } from "../../utils/level";
+import {
+  PiArrowLeftBold,
+  PiCaretRightBold,
+  PiCertificateBold,
+  PiDesktopBold,
+  PiDownloadSimpleBold,
+  PiFireFill,
+  PiInfoBold,
+  PiLockSimpleBold,
+  PiSparkleFill,
+  PiStarFill,
+  PiTrophyFill,
+} from "react-icons/pi";
+import completedModuleLogo from '../../assets/completed_module_logo.webp';
+import currentModuleLogo from '../../assets/current_module_logo.webp';
+import lockedModuleLogo from '../../assets/locked_module_logo.webp';
 import NotFoundPage from '../NotFound/NotFoundPage';
 // SVG Icons for statuses
 const CheckIcon = () => (
   <svg fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+  </svg>
+);
+const CalendarIcon = () => (
+  <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
   </svg>
 );
 const LockIcon = () => (
@@ -37,12 +57,6 @@ const PlantIcon = () => (
     <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18s-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18s.41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9M12 4.15L5.46 7.82 12 11.5l6.54-3.68L12 4.15Z" />
   </svg>
 );
-const InfoIcon = () => (
-  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="dash-info-icon-svg">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
 export default function CourseOverview() {
   const navigate = useNavigate();
   const { courseSlug } = useParams();
@@ -53,7 +67,6 @@ export default function CourseOverview() {
   const [courseDescription, setCourseDescription] = useState("");
 
   useDocumentTitle(courseTitle ? `${courseTitle} | FinEd` : "Course Overview | FinEd");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [course, setCourse] = useState([]);
   const [plannedModules, setPlannedModules] = useState(null);
   const [userData, setUserData] = useState({});
@@ -66,15 +79,25 @@ export default function CourseOverview() {
   const [heroHeight, setHeroHeight] = useState('auto');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isMobileWidgetExpanded, setIsMobileWidgetExpanded] = useState(false);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
   const [activeMobileModule, setActiveMobileModule] = useState(null);
   const [expandedDescModules, setExpandedDescModules] = useState({});
   const [widgetPos, setWidgetPos] = useState({ x: 20, y: 80 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, offsetX: 0, offsetY: 0, hasMoved: false });
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    let timeoutId;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(window.innerWidth < 1024);
+      }, 150); // 150ms debounce ensures it only fires after the user stops resizing
+    };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
@@ -130,7 +153,6 @@ export default function CourseOverview() {
 
       setCourseTitle(courseRes.data.title);
       setCourseDescription(courseRes.data.description || "");
-      setThumbnailUrl(courseRes.data.thumbnail_url || "");
       setCourse(courseRes.data.data || []);
       setPlannedModules(courseRes.data.planned_modules || null);
 
@@ -158,7 +180,9 @@ export default function CourseOverview() {
   // A course released module by module (plan §0.2) lists only released modules;
   // its certificate needs every planned module done, not just the ones out so far.
   const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
-  const progressPercentage = totalModulesCount > 0 ? (completedModulesCount / totalModulesCount) * 100 : 0;
+  const levelInfo = getUserLevel(userData);
+  // Header ring: progress through the whole planned course (not just the modules out so far)
+  const coursePercent = certificateModulesCount > 0 ? Math.round((completedModulesCount / certificateModulesCount) * 100) : 0;
 
   const handleDownloadCertificate = async () => {
     if (certificateRef.current) {
@@ -227,52 +251,58 @@ export default function CourseOverview() {
           <div className="course-main-content">
             {/* Hero Section */}
             <RevealOnScroll>
-              <div id="course-hero-banner-id" className="course-hero-clean">
-                <button onClick={() => navigate('/courses')} className="hero-back-btn-clean mt-2">
-                  <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '20px', height: '20px', transform: 'translateX(-1px)' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                  </svg>
-                  Back to Courses
+              <section id="course-hero-banner-id" className="dh-tokens dh-panel co-hero" aria-labelledby="co-hero-title">
+                <button type="button" onClick={() => navigate('/courses')} className="co-hero-back">
+                  <PiArrowLeftBold aria-hidden="true" /> All courses
                 </button>
-                
-                <div className="hero-content-wrapper">
-                  {thumbnailUrl && (
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div className="hero-thumbnail-container">
-                        <img src={thumbnailUrl} alt={courseTitle} className="hero-thumbnail-img" />
+
+                <div className="co-hero-main">
+                  <div className="co-hero-text">
+                    <h1 id="co-hero-title" className="co-hero-title">{courseTitle}</h1>
+                    {courseDescription && (
+                      <p className="co-hero-desc">{courseDescription}</p>
+                    )}
+                    <div className="co-hero-tags">
+                      <span className="dh-tag">{certificateModulesCount} modules</span>
+                      {plannedModules > totalModulesCount && (
+                        <span className="dh-tag dh-tag--ai"><PiSparkleFill aria-hidden="true" /> New module every Monday</span>
+                      )}
+                      <span className="dh-tag">By FinEd</span>
+                    </div>
+
+                    <div className="co-hero-progress">
+                      <div className="co-hero-progress-row">
+                        <span className="co-hero-progress-label">Course progress</span>
+                        <span className="co-hero-progress-text">
+                          {completedModulesCount} of {certificateModulesCount} modules · {coursePercent}%
+                        </span>
                       </div>
-                      <div className="hero-meta-clean" style={{ marginTop: '16px' }}>
-                        <span className="bestseller-badge">Bestseller</span>
-                        <span className="hero-author">Created by <span className="author-name">FinEd</span></span>
+                      <div className="co-cert-bar co-hero-bar" aria-hidden="true">
+                        <span style={{ width: `${coursePercent}%` }}></span>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="hero-text-content">
-                    <h1 className="hero-title-clean">{courseTitle}</h1>
-                    {courseDescription && (
-                      <p className="hero-desc-clean">
-                        {courseDescription}
-                      </p>
-                    )}
 
                     {email === 'guest@fined.com' && (
-                      <div className="hero-signin-alert">
-                        <span>🔒</span> Sign in is necessary to access the content of the course
+                      <div className="co-hero-alert">
+                        <PiLockSimpleBold aria-hidden="true" /> Sign in to start the course
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className="hero-progress-section-clean" style={{ width: '100%' }}>
-                  <span className="hero-progress-label">Module Progress</span>
-                  <div className="hero-progress-bar-container">
-                    <div className="hero-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
-                  </div>
-                  <span className="hero-progress-text">{completedModulesCount} / {totalModulesCount} Modules</span>
                 </div>
-              </div>
+              </section>
             </RevealOnScroll>
+
+            {/* Phones and tablets only (hidden on desktop by CSS) */}
+            <div className="dh-tokens co-desktop-tip">
+              <span className="co-desktop-tip-icon" aria-hidden="true"><PiDesktopBold /></span>
+              <div>
+                <div className="co-desktop-tip-title">Best on a laptop or desktop</div>
+                <p className="co-desktop-tip-text">
+                  The course works on your phone, but its interactive charts and tools are easier to use on a bigger screen.
+                </p>
+              </div>
+            </div>
 
             {/* Modules Path */}
             <div className="course-path-container">
@@ -484,6 +514,29 @@ export default function CourseOverview() {
                 );
               })()}
 
+              {/* Weekly releases: shown until every planned module is out */}
+              {plannedModules > course.length && course.length > 0 && (
+                <div className="course-upcoming">
+                  <div className="course-upcoming-icon">
+                    <CalendarIcon />
+                  </div>
+                  <div className="course-upcoming-body">
+                    <div className="course-upcoming-label">Module {course.length + 1} · Coming soon</div>
+                    <div className="course-upcoming-title">A new module every Monday</div>
+                    <div className="course-upcoming-meter" aria-label={`${course.length} of ${plannedModules} modules released`}>
+                      <div className="course-upcoming-segments" aria-hidden="true">
+                        {Array.from({ length: plannedModules }, (_, k) => (
+                          <span key={k} className={k < course.length ? 'is-out' : ''}></span>
+                        ))}
+                      </div>
+                      <span className="course-upcoming-count">
+                        {course.length} of {plannedModules} released
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {course.length === 0 && (
                 <div className="no-modules">
                   <span className="text-4xl mb-4 block">🚧</span>
@@ -495,7 +548,7 @@ export default function CourseOverview() {
           </div>
 
           {/* Sidebar */}
-          <div className="course-sidebar">
+          <div className="course-sidebar dh-tokens">
             {/* Dashboard Stats & FinScore */}
             {email !== 'guest@fined.com' && (
               <div style={{ position: 'relative', zIndex: 10 }}>
@@ -512,95 +565,74 @@ export default function CourseOverview() {
                       <img src="/dash-finscore.svg" alt="FinScore" className="widget-icon" style={{ pointerEvents: 'none' }} />
                     </div>
                   ) : (
-                    <div className="dash-stats-card">
+                    <div className={`co-stats${isMobile ? " dash-stats-card" : ""}`}>
                       {isMobile && (
-                        <button 
-                          className="widget-close-btn" 
+                        <button
+                          className="widget-close-btn"
                           onClick={() => setIsMobileWidgetExpanded(false)}
                           aria-label="Close widget"
                         >✕</button>
                       )}
-                      <div className="dash-stats-list">
-                        <div 
-                          className="dash-stat-item"
-                          onClick={() => navigate('/rewards')}
-                          role="button"
-                          tabIndex={0}
-                          title="View Rewards & Streaks"
-                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                        >
-                          <div className="dash-stat-icon-wrapper icon-streak">
-                            <img src="/dash-fire.png" alt="Streak Fire" className="dash-stat-img" />
-                          </div>
-                          <div className="dash-stat-main">
-                            <strong>{userData?.streak_count || 0}</strong> Days
-                          </div>
-                          <div className="dash-stat-label">STREAK</div>
-                        </div>
 
-                        <div 
-                          className="dash-stat-item"
-                          onClick={() => navigate('/rewards')}
-                          role="button"
-                          tabIndex={0}
-                          title="View Rewards & FinStars"
-                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                        >
-                          <div className="dash-stat-icon-wrapper icon-finstars">
-                            <img src="/dash-finstar.svg" alt="FinStars" className="dash-stat-img" />
-                          </div>
-                          <div className="dash-stat-main">
-                            <strong>{userData?.fin_stars || 0}</strong>
-                          </div>
-                          <div className="dash-stat-label">FINSTARS</div>
+                      {/* Same FinEd card as the dashboard */}
+                      <section className="dh-card co-card" aria-label="Your FinEd card">
+                        <button type="button" className="dh-card-link co-card-link" onClick={() => navigate('/rewards')} title="View FinScore details & Rewards">
+                          <span className="dh-sr-only">View FinScore details and rewards</span>
+                        </button>
+                        <div className="dh-card-top">
+                          <span className="dh-card-logo"><img src="/logo.ico" alt="FinEd" /></span>
+                          <span className="dh-card-level">{levelInfo.label}</span>
                         </div>
+                        <div className="dh-card-score">
+                          <span className="dh-card-score-label">
+                            FinScore
+                            <button
+                              type="button"
+                              className="dh-info-btn"
+                              aria-expanded={showScoreInfo}
+                              aria-controls="co-score-info"
+                              onClick={() => setShowScoreInfo((v) => !v)}
+                              onBlur={() => setShowScoreInfo(false)}
+                            >
+                              <PiInfoBold aria-hidden="true" />
+                              <span className="dh-sr-only">What is FinScore?</span>
+                            </button>
+                          </span>
+                          <span className="dh-card-score-value">{userData?.fin_score || 0}</span>
+                          <span className="dh-card-next">
+                            {levelInfo.pointsToNext === null
+                              ? "Top level reached"
+                              : `${levelInfo.pointsToNext} points to ${levelInfo.nextName}`}
+                          </span>
+                        </div>
+                        <div className="dh-card-holder">
+                          {user?.picture
+                            ? <img src={user.picture} alt="" className="dh-avatar" />
+                            : <span className="dh-avatar dh-avatar--initial" aria-hidden="true">{(user?.name || "U").charAt(0).toUpperCase()}</span>}
+                          <span className="dh-card-name">{user?.name || userData?.name || "Learner"}</span>
+                        </div>
+                        <p id="co-score-info" role="tooltip" className={`dh-info-body${showScoreInfo ? " is-open" : ""}`}>
+                          FinScore is your overall engagement score! It grows as you complete Courses, read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
+                        </p>
+                      </section>
 
-                        <div 
-                          className="dash-stat-item"
-                          onClick={() => navigate('/rewards')}
-                          role="button"
-                          tabIndex={0}
-                          title="View Leaderboard & Rankings"
-                          onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                        >
-                          <div className="dash-stat-icon-wrapper icon-modules">
-                            <img src="/dash-rank.png" alt="Rank" className="dash-stat-img dash-rank-img" />
-                          </div>
-                          <div className="dash-stat-main">
-                            <strong>#{userData?.rank || '-'}</strong>
-                          </div>
-                          <div className="dash-stat-label">RANK</div>
-                        </div>
-                      </div>
-
-                      <div 
-                        className="dash-finscore-section"
-                        onClick={() => navigate('/rewards')}
-                        role="button"
-                        tabIndex={0}
-                        title="View FinScore details & Rewards"
-                        onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
-                      >
-                        <div className="dash-finscore-header">
-                          <span className="dash-finscore-label">FinScore</span>
-                          <div className="info-icon-container" onClick={(e) => e.stopPropagation()}>
-                            <span className="dash-finscore-info" style={{ marginLeft: 0 }}>
-                              <InfoIcon />
-                            </span>
-                            <div className="info-tooltip">
-                              FinScore is your overall engagement score! It grows as you complete Courses , read Articles and maintain your daily Consistency. Keep your daily streaks alive to earn bonuses and avoid inactivity penalties!
-                            </div>
-                          </div>
-                        </div>
-                        <div className="dash-finscore-display">
-                          <div className="dash-finscore-value-group">
-                            <span className="dash-finscore-value">{userData?.fin_score || 0}</span>
-                          </div>
-                          <div className="dash-finscore-chart-img-wrapper">
-                            <img src="/dash-finscore.svg" alt="FinScore Speedometer" className="dash-speedometer-img" />
-                          </div>
-                        </div>
-                      </div>
+                      {/* Same progress list as the dashboard */}
+                      <ul className="dh-panel dh-stats">
+                        {[
+                          { icon: <PiFireFill />, tone: "streak", label: "Streak", value: `${userData?.streak_count || 0} ${(userData?.streak_count || 0) === 1 ? "day" : "days"}`, title: "View Rewards & Streaks" },
+                          { icon: <PiStarFill />, tone: "stars", label: "FinStars", value: userData?.fin_stars || 0, title: "View Rewards & FinStars" },
+                          { icon: <PiTrophyFill />, tone: "rank", label: "Rank", value: `#${userData?.rank || '-'}`, title: "View Leaderboard & Rankings" },
+                        ].map((row) => (
+                          <li key={row.tone}>
+                            <button type="button" className="dh-stat" onClick={() => navigate('/rewards')} title={row.title}>
+                              <span className={`dh-stat-icon dh-stat-icon--${row.tone}`} aria-hidden="true">{row.icon}</span>
+                              <span className="dh-stat-label">{row.label}</span>
+                              <span className="dh-stat-value">{row.value}</span>
+                              <PiCaretRightBold className="dh-stat-caret" aria-hidden="true" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </RevealOnScroll>
@@ -610,57 +642,34 @@ export default function CourseOverview() {
             {/* Certificate Card */}
             <RevealOnScroll delay={50}>
               {(completedModulesCount > 0 && completedModulesCount === certificateModulesCount && email !== 'guest@fined.com') ? (
-                <div className="sidebar-card certificate-card" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: 'white', border: 'none' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '2.5rem' }}>🏆</span>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Course Completed!</h3>
-                    <p style={{ color: '#e0e7ff', fontSize: '0.875rem', marginBottom: '0.5rem' }}>You've mastered all modules in this course.</p>
-                    <button 
-                      onClick={handleDownloadCertificate}
-                      disabled={isDownloading}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem 1rem',
-                        backgroundColor: 'white',
-                        color: '#4338ca',
-                        fontWeight: 'bold',
-                        borderRadius: '0.75rem',
-                        border: 'none',
-                        cursor: isDownloading ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      {isDownloading ? (
-                        <>
-                          <div style={{ width: '1.25rem', height: '1.25rem', border: '2px solid #4338ca', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '1.25rem', height: '1.25rem' }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                          </svg>
-                          Download Certificate
-                        </>
-                      )}
-                    </button>
+                <div className="co-cert co-cert--done">
+                  <div className="co-cert-head">
+                    <span className="co-cert-icon" aria-hidden="true"><PiCertificateBold /></span>
+                    <span className="co-cert-pill co-cert-pill--done">Unlocked</span>
                   </div>
+                  <h3 className="co-cert-title">Course completed</h3>
+                  <p className="co-cert-text">You've finished every module in this course. Your certificate is ready.</p>
+                  <button type="button" className="dh-btn co-cert-btn" onClick={handleDownloadCertificate} disabled={isDownloading}>
+                    {isDownloading ? "Generating..." : <>Download certificate <PiDownloadSimpleBold aria-hidden="true" /></>}
+                  </button>
                 </div>
               ) : (
-                <div className="sidebar-card certificate-card" style={{ background: '#f8fafc', color: '#64748b', border: '2px dashed #cbd5e1' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '2.5rem', opacity: 0.8 }}>🔒</span>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0, color: '#334155' }}>Course Certificate</h3>
-                    <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                      {certificateModulesCount > totalModulesCount
-                        ? `Complete all ${certificateModulesCount} modules of this course to unlock your certificate — new modules are being added.`
-                        : 'Complete all modules in this course to unlock your certificate.'}
-                    </p>
+                <div className="dh-panel co-cert">
+                  <div className="co-cert-head">
+                    <span className="co-cert-icon" aria-hidden="true"><PiCertificateBold /></span>
+                    <span className="co-cert-pill"><PiLockSimpleBold aria-hidden="true" /> Locked</span>
+                  </div>
+                  <h3 className="co-cert-title">Course certificate</h3>
+                  <p className="co-cert-text">
+                    {certificateModulesCount > totalModulesCount
+                      ? `Finish all ${certificateModulesCount} modules to unlock it. A new module arrives every Monday.`
+                      : 'Finish every module in this course to unlock it.'}
+                  </p>
+                  <div className="co-cert-meter">
+                    <div className="co-cert-bar" aria-hidden="true">
+                      <span style={{ width: `${certificateModulesCount ? (completedModulesCount / certificateModulesCount) * 100 : 0}%` }}></span>
+                    </div>
+                    <span className="co-cert-count">{completedModulesCount} of {certificateModulesCount} done</span>
                   </div>
                 </div>
               )}

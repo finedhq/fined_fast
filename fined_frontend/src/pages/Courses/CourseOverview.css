@@ -1039,3 +1039,410 @@
     height: 24px;
   }
 }
+
+/* Weekly release card at the end of the module path */
+.course-upcoming {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  /* the last module row keeps the 186px gap meant for the next module; take it back */
+  margin: calc(2.5rem - 186px) auto 0;
+  max-width: 30rem;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.course-upcoming-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.course-upcoming-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.course-upcoming-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.course-upcoming-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.course-upcoming-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.25;
+  margin-top: 0.125rem;
+}
+
+.course-upcoming-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.course-upcoming-segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.course-upcoming-segments span {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+}
+
+.course-upcoming-segments span.is-out {
+  background: #4f46e5;
+}
+
+.course-upcoming-count {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+@media (max-width: 480px) {
+  .course-upcoming {
+    padding: 1rem 1.125rem;
+    gap: 0.875rem;
+  }
+  .course-upcoming-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .course-upcoming-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  .course-upcoming-title {
+    font-size: 1.05rem;
+  }
+}
+
+/* ───── Sidebar: FinEd card, progress list and certificate, in the dashboard's style ───── */
+.co-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: var(--dh-ink);
+}
+
+.co-card { min-height: 220px; }
+
+/* the dashboard's card link is a link; here it's a button, so reset it */
+.co-card-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.co-cert {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 22px 24px;
+  color: var(--dh-ink);
+}
+
+.co-cert-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.co-cert-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--dh-violet-50);
+  color: var(--dh-violet);
+  font-size: 22px;
+}
+
+.co-cert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--dh-bg);
+  border: 1px solid var(--dh-line);
+  color: var(--dh-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.co-cert-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.co-cert-text {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--dh-muted);
+}
+
+.co-cert-meter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.co-cert-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dh-violet-50);
+  overflow: hidden;
+}
+
+.co-cert-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--dh-violet);
+  transition: width 0.5s ease-out;
+}
+
+.co-cert-count {
+  flex: none;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--dh-muted);
+}
+
+/* Unlocked: the violet FinEd card look, with the amber curve and button */
+.co-cert--done {
+  border-radius: 20px;
+  background: var(--dh-violet);
+  color: #fff;
+  box-shadow: 0 20px 40px -20px rgba(65, 0, 188, 0.6);
+}
+
+.co-cert--done::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -110px;
+  bottom: -150px;
+  width: 260px;
+  height: 260px;
+  border: 26px solid var(--dh-amber);
+  border-radius: 50%;
+}
+
+.co-cert--done .co-cert-icon { background: #fff; }
+.co-cert--done .co-cert-pill--done {
+  background: var(--dh-amber);
+  border-color: var(--dh-amber);
+  color: var(--dh-ink);
+}
+.co-cert--done .co-cert-text { color: rgba(255, 255, 255, 0.82); }
+.co-cert-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* "Best on a laptop or desktop" — phones and tablets only */
+.co-desktop-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 1.25rem;
+  padding: 16px 18px;
+  border: 1px solid var(--dh-line);
+  border-radius: 20px;
+  background: var(--dh-surface);
+  box-shadow: var(--dh-shadow);
+  color: var(--dh-ink);
+}
+
+.co-desktop-tip-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--dh-violet-50);
+  color: var(--dh-violet);
+  font-size: 22px;
+}
+
+.co-desktop-tip-title {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.co-desktop-tip-text {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--dh-muted);
+}
+
+@media (min-width: 1024px) {
+  .co-desktop-tip { display: none; }
+}
+
+/* Phones/tablets reorder the page (hero 1, sidebar 2, path 3): sit right under the hero */
+@media (max-width: 1023px) {
+  .co-desktop-tip {
+    order: 1;
+    margin: 0 0 1.5rem;
+  }
+}
+
+/* ───── Course header, in the dashboard's style ───── */
+.co-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  padding: 24px 28px 28px;
+  color: var(--dh-ink);
+}
+
+.co-hero-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 18px -8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dh-violet);
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.co-hero-back:hover { background: var(--dh-violet-50); }
+
+.co-hero-main { display: block; }
+
+.co-hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.co-hero-title {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.co-hero-desc {
+  margin: 10px 0 0;
+  max-width: 46rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--dh-muted);
+}
+
+.co-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.co-hero-tags .dh-tag { text-transform: none; }
+
+.co-hero-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--dh-amber-50);
+  color: var(--dh-amber-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.co-hero-progress {
+  width: 100%;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dh-line);
+}
+
+.co-hero-progress-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.co-hero-progress-label {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--dh-ink);
+}
+
+.co-hero-progress-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--dh-muted);
+  white-space: nowrap;
+}
+
+.co-hero-bar { height: 10px; }
+
+@media (max-width: 640px) {
+  .co-hero { padding: 18px 20px 22px; }
+}
+
+/* Phones/tablets: the certificate goes to the bottom, after the module path */
+@media (max-width: 1023px) {
+  .course-sidebar {
+    order: 4;
+    margin-top: 0.5rem;
+  }
+}

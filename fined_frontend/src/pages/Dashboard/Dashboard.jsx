@@ -4,7 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
 import './DashboardHome.css';
-import { getCourses, fetchArticles } from '../../services/api';
+import { fetchArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
 import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
 import { getUserLevel } from "../../utils/level";
@@ -139,31 +139,24 @@ const Dashboard = () => {
   async function fetchData(userEmail, userId) {
     setLoadingData(true);
     try {
-      const res = await instance.post("/home/getdata", { email: userEmail, userId });
-      if (res.data?.userData) {
-        setUserData(res.data.userData);
-        setOngoingCourse(res.data.ongoingCourseData || {});
+      // 1. Fire /home/getdata and recommended articles in parallel!
+      const [homeRes, articlesRes] = await Promise.all([
+        instance.post("/home/getdata", { email: userEmail, userId }),
+        fetchArticles({ limit: 6, offset: 0 }).catch(() => ({ articles: [] }))
+      ]);
+
+      if (homeRes.data?.userData) {
+        setUserData(homeRes.data.userData);
+        setOngoingCourse(homeRes.data.ongoingCourseData || {});
+        // Use recommendedCourses already provided by /home/getdata (no separate call needed!)
+        const courses = homeRes.data.recommendedCourses || [];
+        setRecommendedCourses(courses.slice(0, 1));
       }
 
-      // Fetch recommendations concurrently
-      try {
-        const [coursesRes, articlesRes] = await Promise.all([
-          getCourses(),
-          fetchArticles({ limit: 10, offset: 0 })
-        ]);
-
-        const allCourses = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
-        const sortedCourses = allCourses
-          .sort((a, b) => new Date(b.created_at || b.published_at || 0) - new Date(a.created_at || a.published_at || 0));
-        setRecommendedCourses(sortedCourses.slice(0, 1)); // only one course for now
-
-        const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
-        const sortedArticles = allArticles
-          .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
-        setRecommendedArticles(sortedArticles);
-      } catch (recError) {
-        console.error("Failed to fetch recommendations:", recError);
-      }
+      const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
+      const sortedArticles = allArticles
+        .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
+      setRecommendedArticles(sortedArticles);
 
     } catch {
       setError("Failed to fetch your data.");
@@ -177,8 +170,9 @@ const Dashboard = () => {
 
     getAccessTokenSilently().then(token => {
       setAuthToken(token);
-      // getdata can change FinScore (e.g. inactivity penalty), so let the navbar catch up after it
-      return fetchData(user.email, user.sub).then(() => refreshProfile());
+      // Fire and forget - don't block the UI rendering on refreshProfile()
+      fetchData(user.email, user.sub);
+      refreshProfile();
     }).catch(err => {
       console.error("Error fetching access token", err);
       setError("Authentication error. Please log in again.");
@@ -223,10 +217,13 @@ const Dashboard = () => {
   const levelInfo = getUserLevel(userData);
 
   const hasCourse = Boolean(ongoingCourse?.title);
-  const totalLessons = ongoingCourse?.modules_count || 0;
+  const releasedLessons = ongoingCourse?.modules_count || 0;
+  // A weekly-release course: measure against the whole planned course, not just what's out so far
+  const totalLessons = Math.max(releasedLessons, ongoingCourse?.planned_modules || 0);
   const currentLesson = ongoingCourse?.current_lesson || 1;
+  const completedLessons = ongoingCourse?.completed_modules || 0;
   const progressPercent = totalLessons
-    ? Math.min(100, Math.floor((currentLesson / totalLessons) * 100))
+    ? Math.min(100, Math.floor((completedLessons / totalLessons) * 100))
     : 0;
   const courseLink = ongoingCourse?.id ? `/courses/${ongoingCourse.slug || ongoingCourse.id}` : '/courses';
 

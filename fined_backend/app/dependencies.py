@@ -30,6 +30,36 @@ async def get_jwks() -> dict:
             _jwks = response.json()
     return _jwks
 
+def _accepted_audiences()->list[str]:
+    """Audiences this API will accept, most current first."""
+    audiences=[settings.AUTH0_AUDIENCE]
+    if settings.AUTH0_LEGACY_AUDIENCE and settings.AUTH0_LEGACY_AUDIENCE not in audiences:
+        audiences.append(settings.AUTH0_LEGACY_AUDIENCE)
+    return audiences
+
+def _decode_token(token:str,jwks:dict)->dict:
+    """
+    Verify a token against each accepted audience in turn.
+
+    During the migration to the FinEd API audience, tokens issued before the
+    switch still carry the old one. Everything else (signature, issuer,
+    expiry) is verified normally for each attempt - only the expected
+    audience varies. Remove the legacy entry after 2026-10-18.
+    """
+    last_error:Optional[JWTError]=None
+    for audience in _accepted_audiences():
+        try:
+            return jwt.decode(
+                token,
+                jwks,
+                algorithms=["RS256"],
+                audience=audience,
+                issuer=f"https://{settings.AUTH0_DOMAIN}/",
+            )
+        except JWTError as exc:
+            last_error=exc
+    raise last_error or JWTError("No accepted audience is configured")
+
 async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bearer_scheme))->AuthUser:
     if not credentials:
         if settings.ENVIRONMENT == "development":
@@ -48,13 +78,7 @@ async def get_current_user(credentials:HTTPAuthorizationCredentials=Depends(bear
 
     try:
         jwks=await get_jwks()
-        payload=jwt.decode(
-            token,
-            jwks,
-            algorithms=["RS256"],
-            audience=settings.AUTH0_AUDIENCE,
-            issuer=f"https://{settings.AUTH0_DOMAIN}/",
-        )
+        payload=_decode_token(token,jwks)
 
         sub:str=payload.get("sub")
         email:str=payload.get(

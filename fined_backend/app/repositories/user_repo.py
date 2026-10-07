@@ -56,7 +56,6 @@ class UserRepository:
             except Exception as e:
                 print(f"Error fetching leaderboard users: {e}")
                 return []
-
     
 
     def has_feedback(self, email: str) -> bool:
@@ -156,7 +155,6 @@ class UserRepository:
         for u in users:
             all_time_score = (
                 (u.get("article_score") or 0) +
-                (u.get("expense_score") or 0) +
                 (u.get("course_score") or 0) +
                 (u.get("consistency_score") or 0)
             )
@@ -184,12 +182,24 @@ class UserRepository:
         return ranked
 
     def get_rank(self, email: str) -> int:
-        """Get a specific user's rank position"""
-        leaderboard = self.get_leaderboard(limit=None, timeframe="all_time")
-        for entry in leaderboard:
-            if entry.get("email") == email:
-                return entry["rank"]
-        return 1
+        """Get rank via a single COUNT query instead of fetching all users."""
+        user = self.get_by_email(email)
+        if not user:
+            return 1
+        
+        my_score = (
+            (user.get("article_score") or 0) +
+            (user.get("course_score") or 0) +
+            (user.get("consistency_score") or 0)
+        )
+        
+        try:
+            res = supabase.rpc("count_users_above_score", {"score_threshold": my_score}).execute()
+            count = res.data if isinstance(res.data, int) else 0
+            return count + 1
+        except Exception as e:
+            print(f"Notice: Failed to fetch rank via RPC, defaulting to 1: {e}")
+            return 1
 
     # In-memory store for profile fields (ensures instant persistence even if DB migration is pending)
     _PROFILE_STORE = {}
@@ -225,7 +235,6 @@ class UserRepository:
         # Compute fin_score directly using the 4 columns from the user dict
         fin_score = int(
             (user.get("article_score") or 0) +
-            (user.get("expense_score") or 0) +
             (user.get("course_score") or 0) +
             (user.get("consistency_score") or 0)
         )
@@ -351,7 +360,9 @@ class UserRepository:
                         print(f"Notice: counting completed course modules: {e}")
 
                     current_lesson = min(completed_modules_count + 1, total_modules) if total_modules > 0 else 0
-                    progress_pct = int((completed_modules_count / max(1, total_modules)) * 100) if total_modules > 0 else 0
+                    # measured against the whole planned course, not just the modules released so far
+                    whole_course = max(total_modules, int(course_row.get("planned_modules") or 0))
+                    progress_pct = min(100, int((completed_modules_count / max(1, whole_course)) * 100)) if total_modules > 0 else 0
 
                     ongoing_course = {
                         "id": course_row.get("id"),

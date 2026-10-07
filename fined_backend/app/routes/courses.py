@@ -178,7 +178,9 @@ async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Dep
         # an archived course that was replaced (it still opens by old links).
         if course_res and course_res.data and not is_listed(course_res.data[0]):
             return {"error": "No ongoing course found for this user."}
-        return course_res.data[0] if course_res and course_res.data else {}
+        if not (course_res and course_res.data):
+            return {}
+        return (await asyncio.to_thread(course_repo.with_released_counts, [course_res.data[0]]))[0]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -668,13 +670,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
 
         # 1. Fetch card details and user scoring metrics concurrently
         card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("card_id", card_id).single().execute())
-        def _fetch_user_scoring():
-            try:
-                return supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score, expense_score").eq("email", user.email).limit(1).execute()
-            except Exception:
-                return supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score").eq("email", user.email).limit(1).execute()
-
-        user_res = await asyncio.to_thread(_fetch_user_scoring)
+        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("fin_stars, course_count, course_score, consistency_score, article_score").eq("email", user.email).limit(1).execute())
         # "status" is needed so a card completed before never pays stars/bonuses again
         existing_res = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id, status").match({
             "email": user.email,
@@ -756,15 +752,14 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         course_score = db_user.get("course_score") or 0
         consistency_score = db_user.get("consistency_score") or 0
         article_score = db_user.get("article_score") or 0
-        expense_score = db_user.get("expense_score") or 0
         
         # Only award bonus if this is the first time they completed this specific card to reach 100%
         was_already_completed = existing_progress and existing_progress.get("status") == "completed"
         
         if module_progress == module_total_cards and not was_already_completed and course_count < 5:
-            old_score = course_score + consistency_score + article_score + expense_score
+            old_score = course_score + consistency_score + article_score
             new_course_score = min(course_score + 20, 500)
-            new_total = new_course_score + consistency_score + article_score + expense_score
+            new_total = new_course_score + consistency_score + article_score
             delta = new_total - old_score
             
             await asyncio.to_thread(lambda: supabase.from_("users").update({"course_score": new_course_score}).eq("email", user.email).execute())
@@ -833,9 +828,9 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
                 quiz_bonus = -5
                 reason = "-5 for <60% in course quiz"
                 
-            old_score = course_score + consistency_score + article_score + expense_score
+            old_score = course_score + consistency_score + article_score
             new_course_score = max(0, min(course_score + quiz_bonus, 500))
-            new_total = new_course_score + consistency_score + article_score + expense_score
+            new_total = new_course_score + consistency_score + article_score
             delta = new_total - old_score
             
             await asyncio.to_thread(lambda: supabase.from_("users").update({

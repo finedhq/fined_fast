@@ -87,7 +87,6 @@ class HomeService:
             "streak_count":      user.get("streak_count"),
             "fin_stars":         user.get("fin_stars") or 0,
             "article_score":     user.get("article_score") or 0,
-            "expense_score":     user.get("expense_score") or 0,
             "course_score":      user.get("course_score") or 0,
             "consistency_score": user.get("consistency_score") or 0,
             "fin_score":         fin_score,
@@ -148,32 +147,7 @@ class HomeService:
         """Save feedback form"""
         user_repo.save_feedback(email, form)
 
-    def get_recommendations(self,email:str,course_id:str)->list:
-        """
-        Tag-based scheme recommendations.
-        Matches user's current course tags against product tags.
-        """
 
-        from app.repositories.product_repo import product_repo
-        from app.repositories.course_repo import course_repo
-        course = course_repo.get_by_id(course_id)
-        if not course:
-            return []
-        all_products = product_repo.get_all_latest()
-
-        course_title = (course.get("title") or "").lower()
-        recommendations = []
-        for product in all_products:
-            goal     = (product.get("goal") or "").lower()
-            category = (product.get("category") or "").lower()
-            risk     = (product.get("risk_profile") or "").lower()
-            if any(word in course_title for word in [goal, category, risk]):
-                recommendations.append(product)
-            if len(recommendations) >= 3:
-                break
-        return recommendations
-
-        
 home_service=HomeService()
 
 
