@@ -32,9 +32,31 @@ async function request(path, options = {}) {
 
 const articleCache = new Map();
 const singleArticleCache = new Map();
+const adjacentArticlesCache = new Map();
 const authorProfileCache = new Map();
-const CACHE_TTL_MS = 1000 * 30; // 30 seconds for quick sync with database changes
+const CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutes cache for instant navigation & reading
 
+export function getCachedArticle(slug) {
+  if (!slug) return null;
+  const entry = singleArticleCache.get(slug);
+  return entry ? entry.data : null;
+}
+
+export function clearArticleCache() {
+  articleCache.clear();
+  singleArticleCache.clear();
+  adjacentArticlesCache.clear();
+}
+
+export async function prefetchArticle(slug) {
+  if (!slug || singleArticleCache.has(slug)) return;
+  try {
+    const data = await request(`/articles/slug/${slug}`, { method: "GET" });
+    singleArticleCache.set(slug, { data, timestamp: Date.now() });
+  } catch {
+    // Ignore prefetch errors silently
+  }
+}
 
 export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {}) {
   const cacheKey = `articles-${limit}-${offset}-${tag || "all"}`;
@@ -67,8 +89,8 @@ export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {})
   return data;
 }
 
-export async function fetchArticleBySlug(slug) {
-  if (singleArticleCache.has(slug)) {
+export async function fetchArticleBySlug(slug, { force = false } = {}) {
+  if (!force && singleArticleCache.has(slug)) {
     const { data, timestamp } = singleArticleCache.get(slug);
     if (Date.now() - timestamp < CACHE_TTL_MS) {
       return data;
@@ -83,10 +105,19 @@ export async function fetchArticleBySlug(slug) {
   return data;
 }
 
-export function fetchAdjacentArticles(slug) {
-  return request(`/articles/adjacent/${slug}`, {
+export async function fetchAdjacentArticles(slug) {
+  if (adjacentArticlesCache.has(slug)) {
+    const { data, timestamp } = adjacentArticlesCache.get(slug);
+    if (Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
+  const data = await request(`/articles/adjacent/${slug}`, {
     method: "GET",
   });
+  adjacentArticlesCache.set(slug, { data, timestamp: Date.now() });
+  return data;
 }
 
 export async function fetchRelatedArticles(slug, limit = 3) {
@@ -106,11 +137,13 @@ export async function fetchRelatedArticles(slug, limit = 3) {
   }
 }
 
-export function postArticle(formData) {
-  return request("/articles/add", {
+export async function postArticle(formData) {
+  const result = await request("/articles/add", {
     method: "POST",
     body: formData,
   });
+  clearArticleCache();
+  return result;
 }
 
 export function fetchAdminArticles({ limit = 50, offset = 0, status = "all" } = {}) {
@@ -130,10 +163,12 @@ export function uploadArticleImage(formData) {
   });
 }
 
-export function deleteArticle(id) {
-  return request(`/articles/${id}`, {
+export async function deleteArticle(id) {
+  const result = await request(`/articles/${id}`, {
     method: "DELETE",
   });
+  clearArticleCache();
+  return result;
 }
 
 export function sendNewsletter(data) {
@@ -265,6 +300,11 @@ export function getBundleByCardSlug(cardSlug, email) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email || "" }),
   });
+}
+
+// Public: Module 1 of the stock-market course, for visitors who aren't signed in.
+export function getSampleModule() {
+  return request("/courses/sample-module", { method: "GET" });
 }
 
 export function updateCardBySlug(cardSlug, body) {

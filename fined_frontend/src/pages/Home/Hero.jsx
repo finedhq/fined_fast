@@ -23,7 +23,7 @@ import wfInteractiveLearning from "../../assets/wf-interactivelearning.webp";
 import wfPersonalRecommend from "../../assets/wf-personalrecommend.webp";
 import wfRewardnLeaderBoard from "../../assets/wf-rewards&LeaderBoard.webp";
 import satvikImg from "../../assets/satvik-img.webp"
-import { fetchArticles, joinWaitlist, fetchAuthors } from "../../services/api";
+import { fetchArticles, fetchAuthors } from "../../services/api";
 import instance from "../../lib/axios";
 import newLandingpagebgm from "../../assets/newlandingpagebg.webp";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -422,30 +422,6 @@ function Hero() {
     getHeroCourse();
   }, []);
 
-  // Waitlist state
-  const [waitlistEmail, setWaitlistEmail] = useState("");
-  const [waitlistLoading, setWaitlistLoading] = useState(false);
-  const [waitlistMessage, setWaitlistMessage] = useState({ text: "", type: "" });
-
-  const [showWaitlistForm, setShowWaitlistForm] = useState(false);
-
-  const handleWaitlistSubmit = async (e) => {
-    e.preventDefault();
-    if (!waitlistEmail) return;
-    setWaitlistLoading(true);
-    setWaitlistMessage({ text: "", type: "" });
-    try {
-      await joinWaitlist(waitlistEmail);
-      setWaitlistMessage({ text: "Thanks for joining the waitlist!", type: "success" });
-      setWaitlistEmail("");
-      setShowWaitlistForm(false); // Hide the input form immediately to show the success button
-    } catch (error) {
-      setWaitlistMessage({ text: "Something went wrong. Please try again.", type: "error" });
-    } finally {
-      setWaitlistLoading(false);
-    }
-  };
-
   useEffect(() => {
     async function getHeroArticles() {
       try {
@@ -677,47 +653,14 @@ function Hero() {
           <RevealOnScroll delay={200}>
             <div className="hero-buttons" style={{ flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', justifyContent: 'center' }}>
-                {!showWaitlistForm ? (
-                  <button
-                    className="btn-hero-primary"
-                    onClick={() => {
-                      // Only allow clicking if not already joined
-                      if (waitlistMessage.type !== 'success') {
-                        setShowWaitlistForm(true);
-                      }
-                    }}
-                    style={{
-                      backgroundColor: waitlistMessage.type === 'success' ? '#10b981' : undefined,
-                      cursor: waitlistMessage.type === 'success' ? 'default' : 'pointer',
-                    }}
-                  >
-                    {waitlistMessage.type === 'success' ? "Joined the waitlist! 🎉" : "Join WaitList"}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+                  <button className="btn-hero-primary" onClick={() => navigate("/try")}>
+                    Try Module 1
                   </button>
-                ) : (
-                  <form onSubmit={handleWaitlistSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', animation: 'fadeIn 0.3s ease-in-out' }}>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={waitlistEmail}
-                      onChange={(e) => setWaitlistEmail(e.target.value)}
-                      className="waitlist-email-input"
-                      style={{ padding: '0 12px', borderRadius: '999px', border: '1px solid #ddd', outline: 'none', fontSize: '18px', textAlign: 'center' }}
-                      disabled={waitlistLoading}
-                      required
-                      autoFocus
-                    />
-                    <button type="submit" className="btn-hero-primary" disabled={waitlistLoading}>
-                      {waitlistLoading ? "Joining..." : "Submit"}
-                    </button>
-                  </form>
-                )}
+                  <span style={{ fontSize: '13px', color: '#6B7280' }}>No sign-up needed</span>
+                </div>
                 <button className="btn-hero-secondary-blue" onClick={() => navigate("/articles")}>Explore Articles</button>
               </div>
-              {waitlistMessage.type === 'error' && (
-                <p style={{ marginTop: '12px', fontSize: '14px', color: '#ef4444' }}>
-                  {waitlistMessage.text}
-                </p>
-              )}
             </div>
           </RevealOnScroll>
 

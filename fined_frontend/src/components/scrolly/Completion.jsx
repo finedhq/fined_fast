@@ -56,7 +56,9 @@ function SkippedLine({ open, onGoTo }) {
 
 // `comingSoon`: the next module exists in the plan but isn't released yet (weekly
 // releases, plan §0.2) — the "Up next" box says so instead of opening anything.
-export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, onGoTo, onReviewTop, onReached }) {
+// `onSignup`: a visitor trying the module without an account — the "Up next"
+// box asks them to sign up instead.
+export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, onSignup, onGoTo, onReviewTop, onReached }) {
   const d = card.card_data || {};
   const sectionRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
@@ -147,7 +149,12 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
             </div>
           )}
 
-          {teaser &&
+          {onSignup ? (
+            <button type="button" className="next-module-card nc-signup-card" onClick={onSignup}>
+              {teaserBody}
+              <span className="nc-signup-pill">Sign up free to keep going →</span>
+            </button>
+          ) : teaser &&
             (nextHref ? (
               <Link to={nextHref} className="next-module-card">
                 {teaserBody}

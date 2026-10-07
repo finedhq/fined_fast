@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
-import { fetchArticleBySlug, fetchAdjacentArticles } from "../../services/api";
+import { fetchArticleBySlug, fetchAdjacentArticles, getCachedArticle, prefetchArticle } from "../../services/api";
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
 import NotFoundPage from "../NotFound/NotFoundPage";
+
+function isEtfDemo(slug) {
+  return slug === "understanding-etfs-exchange-traded-funds" || slug === "etf-101-guide";
+}
 
 function SingleArticlePage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [article, setArticle] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  // Instant synchronous cache resolution to prevent flicker on back/forward
+  const initialArticle = isEtfDemo(slug) ? ETF_DEMO_ARTICLE : getCachedArticle(slug);
+  const [article, setArticle] = useState(initialArticle);
+  const [loading, setLoading] = useState(!initialArticle);
   const [error, setError] = useState("");
   const [adjacent, setAdjacent] = useState({ previous: null, next: null });
 
@@ -27,38 +34,62 @@ function SingleArticlePage() {
   }, [notFound]);
 
   useEffect(() => {
+    let isCurrent = true;
+
     async function loadArticle() {
-      if (slug === "understanding-etfs-exchange-traded-funds" || slug === "etf-101-guide") {
+      if (isEtfDemo(slug)) {
         setArticle(ETF_DEMO_ARTICLE);
         setLoading(false);
+        setError("");
         return;
       }
 
-      try {
+      // 1. Check synchronous cache first: if already loaded, show instantly (0ms)
+      const cached = getCachedArticle(slug);
+      if (cached) {
+        setArticle(cached);
+        setLoading(false);
         setError("");
+      } else {
+        // Only show skeleton if we have NO cached version at all
         setLoading(true);
+        setError("");
+      }
+
+      try {
         const data = await fetchArticleBySlug(slug);
+        if (!isCurrent) return;
         setArticle(data);
-        setLoading(false); // Stop loading immediately for the main article
+        setLoading(false);
         
-        // Fetch adjacent silently in the background
+        // Silently fetch and prefetch adjacent articles for instant next/prev transitions
         fetchAdjacentArticles(slug).then(adjData => {
-          setAdjacent(adjData);
+          if (!isCurrent) return;
+          setAdjacent(adjData || { previous: null, next: null });
+          if (adjData?.previous?.slug) prefetchArticle(adjData.previous.slug);
+          if (adjData?.next?.slug) prefetchArticle(adjData.next.slug);
         }).catch(console.error);
       } catch (err) {
-        // If article not found in DB, check if it's the demo article before redirecting
-        if (slug.includes("etf")) {
-          setArticle(ETF_DEMO_ARTICLE);
-          setLoading(false);
-        } else {
-          setError("Article not found.");
-          setLoading(false);
+        if (!isCurrent) return;
+        if (!cached) {
+          if (slug && slug.includes("etf")) {
+            setArticle(ETF_DEMO_ARTICLE);
+            setLoading(false);
+          } else {
+            setError("Article not found.");
+            setLoading(false);
+          }
         }
       }
     }
+
     if (slug) {
       loadArticle();
     }
+
+    return () => {
+      isCurrent = false;
+    };
   }, [slug]);
 
   const closeArticle = () => {

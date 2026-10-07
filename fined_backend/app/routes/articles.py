@@ -1,5 +1,5 @@
 # HTTP endpoints for reading and rating articles
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Response
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
 
@@ -70,7 +70,7 @@ async def get_all_articles(body: Optional[GetAllArticlesRequest] = None):
         )
 
 @router.get("/slug/{slug}")
-async def get_article_by_slug(slug: str):
+async def get_article_by_slug(slug: str, response: Response):
     """Fetch a specific article by its slug"""
     try:
         article = article_service.get_by_slug(slug)
@@ -79,6 +79,7 @@ async def get_article_by_slug(slug: str):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Article not found"
             )
+        response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=600"
         return article
     except HTTPException:
         raise
@@ -89,10 +90,12 @@ async def get_article_by_slug(slug: str):
         )
 
 @router.get("/adjacent/{slug}")
-async def get_adjacent_articles(slug: str):
+async def get_adjacent_articles(slug: str, response: Response):
     """Fetch previous and next articles relative to the given slug"""
     try:
-        return article_service.get_adjacent(slug)
+        data = article_service.get_adjacent(slug)
+        response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=600"
+        return data
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
