@@ -234,12 +234,14 @@
     font-size: clamp(1.9rem, 8.6vw, 2.3rem);
   }
 
+  /* Buttons keep their own width, side by side, rather than filling the screen */
   .lp-hero-ctas .lp-btn {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
   }
 
+  /* Shifted so the temple on the hilltop is fully in view (the image is mirrored) */
   .lp-hero-scene img {
-    object-position: 65% bottom;
+    object-position: 85% bottom;
   }
 
   .lp-learners-wrap {
@@ -269,10 +271,13 @@
 
   .lp-hero-ctas {
     margin-top: 24px;
+    gap: 10px;
   }
 
-  .lp-hero-ctas .lp-btn {
-    padding: 13px 20px;
+  /* .lp prefix: outranks the shared button padding in landing.css */
+  .lp .lp-hero-ctas .lp-btn {
+    padding: 13px 16px;
+    font-size: 0.95rem;
   }
 
   .lp-hero-side {
@@ -282,5 +287,29 @@
   .lp-hero-plane {
     width: 110px;
     top: -52px;
+  }
+}
+
+/* Phones: no Module 1 card. The copy and buttons sit on their own, with the
+   plane and the hills straight underneath. */
+@media (max-width: 640px) {
+  .lp-hero .lp-mp {
+    display: none;
+  }
+
+  .lp-hero-side {
+    min-height: 0;
+    padding-bottom: 0;
+    height: 64vw;
+  }
+
+  .lp-hero-plane {
+    top: 4px;
+    right: 8px;
+  }
+
+  /* The hills sit higher, so more of the scene shows under the buttons */
+  .lp-hero-scene {
+    bottom: 0;
   }
 }

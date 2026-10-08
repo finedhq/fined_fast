@@ -62,7 +62,9 @@ export default function ArticlesSection({ articles }) {
             }}
             initial={reduce ? false : { opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            // Starts as soon as any of it shows, so the card peeking in at the
+            // edge (the hint that the row scrolls) isn't left invisible.
+            viewport={{ once: true, amount: "some" }}
             transition={{ duration: 0.6, delay: Math.min(i, 4) * 0.08, ease: EASE }}
           >
             <div className="lp-art-img">

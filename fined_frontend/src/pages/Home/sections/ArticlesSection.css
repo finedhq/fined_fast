@@ -192,7 +192,7 @@
   }
 
   .lp-art-row {
-    grid-auto-columns: 82%;
+    grid-auto-columns: 76%; /* the next card peeks in, so it reads as swipeable */
     padding: 8px 16px 24px;
     scroll-padding-inline: 16px;
   }

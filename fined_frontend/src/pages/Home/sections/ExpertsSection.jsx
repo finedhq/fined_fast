@@ -46,7 +46,14 @@ export default function ExpertsSection({ authors }) {
           <p className="lp-exp-sub">Learn from industry experts with years of experience in finance.</p>
         </motion.div>
 
-        <ul className="lp-exp-grid">
+        {/* The row animates in as a whole: a card half off-screen (the one that
+            hints you can swipe) still appears with the others. */}
+        <motion.ul
+          className="lp-exp-grid"
+          initial={reduce ? false : "hidden"}
+          whileInView="shown"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           {experts.map((a, i) => {
             const title = TITLES[a.slug] || "Writer at FinEd";
             // Some bios just repeat the title; then the longer description reads better.
@@ -55,9 +62,6 @@ export default function ExpertsSection({ authors }) {
               <motion.li
                 key={a.id || a.slug}
                 className="lp-exp-card"
-                initial={reduce ? false : "hidden"}
-                whileInView="shown"
-                viewport={{ once: true, amount: 0.2 }}
                 variants={{ hidden: { opacity: 0, y: 40 }, shown: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.7, delay: reduce ? 0 : i * 0.1, ease: EASE }}
               >
@@ -86,7 +90,7 @@ export default function ExpertsSection({ authors }) {
               </motion.li>
             );
           })}
-        </ul>
+        </motion.ul>
       </div>
     </section>
   );

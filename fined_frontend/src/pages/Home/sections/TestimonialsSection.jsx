@@ -39,15 +39,24 @@ export default function TestimonialsSection() {
           </h2>
           <p className="lp-tst-sub">See what learners achieved after taking their first step.</p>
         </div>
-        <ul className="lp-tst-grid">
+        {/* The row animates in as a whole, so on phones the next note already
+            peeks in from the edge and shows there's more to swipe. */}
+        <motion.ul
+          className="lp-tst-grid"
+          initial={reduce ? false : "hidden"}
+          whileInView="shown"
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {QUOTES.map((q, i) => (
             <motion.li
               key={q.name}
               className={`lp-tst-card lp-tst-card--${i + 1}`}
-              initial={reduce ? false : { opacity: 0, y: 50, rotate: TILT[i] * 3 }}
-              whileInView={{ opacity: 1, y: 0, rotate: TILT[i] }}
+              custom={i}
+              variants={{
+                hidden: (n) => ({ opacity: 0, y: 50, rotate: TILT[n] * 3 }),
+                shown: (n) => ({ opacity: 1, y: 0, rotate: TILT[n] }),
+              }}
               whileHover={reduce ? undefined : { rotate: 0, y: -6 }}
-              viewport={{ once: true, amount: 0.4 }}
               transition={{ type: "spring", stiffness: 140, damping: 18, delay: reduce ? 0 : i * 0.08 }}
             >
               <span className="lp-tst-mark" aria-hidden="true">
@@ -64,7 +73,7 @@ export default function TestimonialsSection() {
               </div>
             </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       </div>
     </section>
   );
