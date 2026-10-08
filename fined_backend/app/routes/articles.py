@@ -55,13 +55,32 @@ class RateRequest(BaseModel):
 
 # --- Route Endpoints ---
 
+@router.get("")
+@router.get("/")
+async def get_all_articles_get(
+    response: Response,
+    limit: Optional[int] = 30,
+    offset: Optional[int] = 0,
+    tag: Optional[str] = None
+):
+    """Fetch all articles with HTTP caching — public GET endpoint"""
+    try:
+        response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=600"
+        return article_service.get_all(limit=limit or 30, offset=offset or 0, tag=tag)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch articles: {str(e)}"
+        )
+
 @router.post("/getall")
-async def get_all_articles(body: Optional[GetAllArticlesRequest] = None):
-    """Fetch all articles — public"""
+async def get_all_articles(response: Response, body: Optional[GetAllArticlesRequest] = None):
+    """Fetch all articles — public (kept for backwards compatibility)"""
     try:
         limit = body.limit if body and body.limit is not None else 30
         offset = body.offset if body and body.offset is not None else 0
         tag = body.tag if body else None
+        response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
         return article_service.get_all(limit=limit, offset=offset, tag=tag)
     except Exception as e:
         raise HTTPException(
