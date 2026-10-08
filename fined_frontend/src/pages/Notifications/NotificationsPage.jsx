@@ -58,7 +58,7 @@ const Notifications = () => {
 	};
 
 	return (
-		<div className="font-inter text-[#1e1e1e] bg-gray-100 min-h-screen">
+		<div className="text-[#1e1e1e] bg-gray-100 min-h-screen">
 			<main className="max-w-3xl mx-auto px-6 py-8">
 				<h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">🔔 Notifications</h2>
 

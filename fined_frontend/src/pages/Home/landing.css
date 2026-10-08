@@ -1,0 +1,158 @@
+/* Kept from the old landing stylesheet (Hero.css): these globals were set
+   whenever the landing page had loaded, and a few other pages lean on them
+   (e.g. the feedback page's --brand-* colours). */
+:root {
+  --brand-blue: #3D5AFE;
+  --brand-indigo: #4A3AFF;
+  --brand-yellow: #F5A623;
+  --brand-dark: #1a1a2e;
+  --brand-body: #444;
+  --radius-pill: 50px;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #fafbff;
+  color: var(--brand-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Landing page tokens: the same palette and type as the module pages
+   (components/scrolly/scrolly.css), so the site reads as one product.
+   Radius rule: buttons and chips are full pills, cards and frames are 20px. */
+.lp {
+  --lp-purple: #4100BC;
+  --lp-purple-hover: #2D007F;
+  --lp-electric: #4A3AFF;
+  --lp-purple-surface: #F7F4FF;
+  --lp-purple-border: #DCD3F7;
+  --lp-gold: #F5A623;
+  --lp-gold-hover: #E09518;
+  /* The site's button yellow (dashboard, About): bright amber, darker on hover */
+  --lp-amber-600: #E6A200;
+  --lp-amber: #FFB600;
+  --lp-ink: #171321;
+  --lp-ink-2: #3E3A4A;
+  --lp-ink-3: #625D6D;
+  --lp-border: #E6E1EC;
+  --lp-bg: #FAFBFF;
+  --lp-surface: #FFFFFF;
+  --lp-shadow: 0 24px 60px -24px rgba(65, 0, 188, 0.28), 0 2px 6px rgba(23, 19, 33, 0.06);
+
+  --lp-font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --lp-font-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --lp-font-action: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --lp-radius: 20px;
+  --lp-radius-pill: 9999px;
+
+  font-family: var(--lp-font-body);
+  color: var(--lp-ink);
+  /* Things that slide in from the side never widen the page
+     (clip, not hidden, so the pinned sections still stick) */
+  overflow-x: clip;
+}
+
+/* Buttons shared by every landing section */
+.lp .lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 28px;
+  border-radius: var(--lp-radius-pill);
+  font-family: var(--lp-font-action);
+  font-size: 1rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.lp .lp-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp .lp-btn:hover svg {
+  transform: translateX(4px);
+}
+
+.lp .lp-btn-primary {
+  background: var(--lp-amber);
+  color: var(--lp-ink);
+  box-shadow: 4px 4px 0 0 var(--lp-ink);
+}
+
+/* Same as the dashboard's primary button: lifts on hover, presses on click */
+.lp .lp-btn-primary:hover {
+  background: var(--lp-amber-600);
+  box-shadow: 6px 6px 0 0 var(--lp-ink);
+  transform: translate(-1px, -1px);
+}
+
+.lp .lp-btn-primary:active {
+  box-shadow: 1px 1px 0 0 var(--lp-ink);
+  transform: translate(3px, 3px);
+}
+
+.lp .lp-btn-ghost {
+  background: transparent;
+  color: var(--lp-purple);
+  border-color: var(--lp-purple-border);
+}
+
+.lp .lp-btn-ghost:hover {
+  border-color: var(--lp-purple);
+  background: var(--lp-purple-surface);
+}
+
+.lp .lp-btn:focus-visible {
+  outline: 3px solid var(--lp-electric);
+  outline-offset: 3px;
+}
+
+/* ── One spacing rhythm for the whole page ──────────────────────────────
+   Every section gets the same space above and below its content, so the
+   gap between any two sections is about 2 × --lp-gap (≈160px desktop,
+   ≈96px phone). Declared here, after the section stylesheets, so it wins. */
+.lp {
+  --lp-gap: 80px;
+}
+
+@media (max-width: 640px) {
+  .lp {
+    --lp-gap: 48px;
+  }
+}
+
+.lp .lp-story,
+.lp .lp-cs,
+.lp .lp-art,
+.lp .lp-exp,
+.lp .lp-tst {
+  padding-top: var(--lp-gap);
+  padding-bottom: var(--lp-gap);
+}
+
+/* The original four-row section keeps its own side padding and row
+   spacing; only its outer top/bottom space joins the rhythm, and the last
+   row no longer adds its own margin + padding underneath. */
+.lp .lp-wf.why-fined-section {
+  padding-top: var(--lp-gap);
+  padding-bottom: var(--lp-gap);
+}
+
+.lp .lp-wf #wf-row-4 {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* The closing screen's headline sits a little lower inside its picture;
+   trimmed so the gap above it matches the rest. */
+.lp .lp-end-inner {
+  padding-top: clamp(56px, 8vh, 88px);
+}

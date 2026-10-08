@@ -1,0 +1,213 @@
+/* ── Latest articles row (ArticlesSection.jsx) ────────────────────────── */
+.lp-art {
+  padding: clamp(80px, 10vw, 130px) 0;
+  background: var(--lp-bg);
+}
+
+.lp-art-head {
+  max-width: 1240px;
+  margin: 0 auto 32px;
+  padding: 0 32px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.lp-art-title {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--lp-ink);
+}
+
+.lp-art-sub {
+  margin: 12px 0 0;
+  font-size: 1.1rem;
+  color: var(--lp-ink-3);
+}
+
+.lp-art-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.lp-art-nav button {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--lp-purple-border);
+  border-radius: 50%;
+  background: var(--lp-surface);
+  color: var(--lp-purple);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.lp-art-nav button:hover {
+  background: var(--lp-purple-surface);
+  border-color: var(--lp-purple);
+}
+
+.lp-art-nav button:focus-visible {
+  outline: 3px solid var(--lp-electric);
+  outline-offset: 2px;
+}
+
+/* The row lines up with the page content and runs off the right edge */
+.lp-art-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(270px, 28vw, 360px);
+  gap: 20px;
+  overflow-x: auto;
+  /* Must be explicit: otherwise the row also scrolls a few pixels vertically
+     (cards lift on hover / rise in) and swallows the page's mouse wheel. */
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(32px, calc((100vw - 1240px) / 2 + 32px));
+  padding: 8px max(32px, calc((100vw - 1240px) / 2 + 32px)) 28px;
+  scrollbar-width: none;
+}
+
+.lp-art-row::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-art-card {
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius);
+  background: var(--lp-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp-art-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--lp-shadow);
+}
+
+.lp-art-card:focus-visible {
+  outline: 3px solid var(--lp-electric);
+  outline-offset: 3px;
+}
+
+.lp-art-img {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--lp-purple-surface);
+}
+
+.lp-art-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp-art-card:hover .lp-art-img img {
+  transform: scale(1.06);
+}
+
+.lp-art-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-family: var(--lp-font-action);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--lp-purple);
+}
+
+.lp-art-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 20px;
+}
+
+.lp-art-body h3 {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: var(--lp-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lp-art-body p {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--lp-ink-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lp-art-meta {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--lp-ink-3);
+}
+
+.lp-art-more {
+  max-width: 1240px;
+  margin: 8px auto 0;
+  padding: 0 32px;
+}
+
+@media (max-width: 640px) {
+  .lp-art-head {
+    padding: 0 16px;
+  }
+
+  .lp-art-nav {
+    display: none;
+  }
+
+  .lp-art-row {
+    grid-auto-columns: 76%; /* the next card peeks in, so it reads as swipeable */
+    padding: 8px 16px 24px;
+    scroll-padding-inline: 16px;
+  }
+
+  .lp-art-more {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-art {
+    padding: 64px 0;
+  }
+
+  .lp-art-head {
+    margin-bottom: 20px;
+  }
+}

@@ -1,0 +1,183 @@
+/* ── What learners say (TestimonialsSection.jsx) ─────────────────────── */
+.lp-tst {
+  padding: clamp(80px, 10vw, 130px) 0;
+  background: var(--lp-bg);
+  overflow: hidden;
+}
+
+.lp-tst-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.lp-tst-head {
+  position: sticky;
+  top: 120px;
+}
+
+.lp-tst-title {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--lp-ink);
+}
+
+.lp-tst-title span {
+  color: var(--lp-purple);
+}
+
+.lp-tst-sub {
+  margin: 14px 0 0;
+  max-width: 30ch;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: var(--lp-ink-3);
+}
+
+/* Two staggered columns of notes */
+.lp-tst-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.lp-tst-card--2,
+.lp-tst-card--4 {
+  margin-top: 56px;
+}
+
+.lp-tst-card {
+  position: relative;
+  padding: 30px 26px 24px;
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius);
+  background: var(--lp-surface);
+  box-shadow: 0 18px 40px -28px rgba(65, 0, 188, 0.35);
+}
+
+.lp-tst-card--1 { background: #FFF9E8; border-color: #FBE3A6; }
+.lp-tst-card--4 { background: var(--lp-purple-surface); border-color: var(--lp-purple-border); }
+
+.lp-tst-mark {
+  position: absolute;
+  top: -6px;
+  left: 20px;
+  font-family: var(--lp-font-display);
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--lp-gold);
+}
+
+.lp-tst-card blockquote {
+  margin: 14px 0 0;
+  font-size: 1.04rem;
+  line-height: 1.6;
+  color: var(--lp-ink-2);
+}
+
+.lp-tst-who {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--lp-font-action);
+  font-weight: 800;
+  color: var(--lp-ink);
+}
+
+.lp-tst-av {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--lp-purple);
+  font-size: 0.9rem;
+  color: #FFFFFF;
+}
+
+.lp-tst-card--1 .lp-tst-av { background: var(--lp-gold); color: var(--lp-ink); }
+.lp-tst-card--3 .lp-tst-av { background: var(--lp-electric); }
+
+@media (max-width: 960px) {
+  .lp-tst-inner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 0 20px;
+  }
+
+  .lp-tst-head {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-tst-inner {
+    padding: 0 16px;
+  }
+
+  .lp-tst-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .lp-tst-card--2,
+  .lp-tst-card--4 {
+    margin-top: 0;
+  }
+}
+
+/* Phones: one row of notes to swipe through, instead of a tall stack */
+@media (max-width: 640px) {
+  .lp-tst {
+    padding: 64px 0;
+  }
+
+  .lp-tst-inner {
+    gap: 20px;
+    padding: 0;
+  }
+
+  .lp-tst-head {
+    padding: 0 16px;
+  }
+
+  .lp-tst-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 76%; /* the next note peeks in, so it reads as swipeable */
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden; /* explicit, so the page's scrolling isn't swallowed */
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    padding: 18px 16px 20px;
+    scrollbar-width: none;
+  }
+
+  .lp-tst-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lp-tst-card {
+    scroll-snap-align: start;
+    padding: 24px 20px 18px;
+  }
+
+  .lp-tst-card blockquote {
+    font-size: 0.95rem;
+  }
+}

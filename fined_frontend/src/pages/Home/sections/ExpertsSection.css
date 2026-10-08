@@ -1,0 +1,243 @@
+/* ── Experts / authors (ExpertsSection.jsx) ───────────────────────────── */
+.lp-exp {
+  padding: clamp(80px, 10vw, 130px) 0;
+  background: var(--lp-bg);
+}
+
+.lp-exp-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.lp-exp-head {
+  max-width: 640px;
+  margin-bottom: 44px;
+}
+
+.lp-exp-title {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--lp-ink);
+}
+
+.lp-exp-title span {
+  color: var(--lp-purple);
+}
+
+.lp-exp-sub {
+  margin: 14px 0 0;
+  font-size: 1.1rem;
+  color: var(--lp-ink-3);
+}
+
+/* One row on every screen: four fit on desktop, more swipe sideways.
+   Every other portrait sits lower, like a staggered gallery. */
+.lp-exp-grid {
+  margin: 0;
+  padding: 6px 0 12px;
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 3 * 22px) / 4);
+  gap: 22px;
+  align-items: start;
+  overflow-x: auto;
+  overflow-y: hidden; /* explicit, so the page's mouse wheel isn't swallowed */
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.lp-exp-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-exp-card {
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.lp-exp-card:nth-child(even) {
+  margin-top: 48px;
+}
+
+.lp .lp-exp-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lp .lp-exp-open:focus-visible {
+  outline: 3px solid var(--lp-electric);
+  outline-offset: 4px;
+  border-radius: var(--lp-radius);
+}
+
+.lp-exp-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--lp-radius);
+  background: var(--lp-purple-surface);
+}
+
+.lp-exp-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp-exp-card:hover .lp-exp-photo img {
+  transform: scale(1.05);
+}
+
+.lp-exp-initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--lp-font-display);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--lp-purple);
+}
+
+.lp-exp-go {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--lp-gold);
+  color: var(--lp-ink);
+  font-size: 1.1rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp-exp-card:hover .lp-exp-go,
+.lp-exp-open:focus-visible .lp-exp-go {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lp-exp-body {
+  padding: 16px 2px 0;
+}
+
+.lp-exp-body h3 {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--lp-ink);
+}
+
+.lp-exp-role {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--lp-purple);
+  /* Long titles stop at two lines so every card is the same height */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.lp-exp-bio {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--lp-ink-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* LinkedIn sits on the photo's corner, outside the card's main link */
+.lp-exp-in {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--lp-purple);
+  font-size: 1.1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.lp-exp-in:hover {
+  background: var(--lp-purple);
+  color: #FFFFFF;
+}
+
+.lp-exp-in:focus-visible {
+  outline: 3px solid var(--lp-electric);
+  outline-offset: 2px;
+}
+
+@media (max-width: 960px) {
+  .lp-exp-inner {
+    padding: 0 20px;
+  }
+
+  .lp-exp-grid {
+    grid-auto-columns: 42%;
+    gap: 16px;
+  }
+
+  .lp-exp-card:nth-child(even) {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 520px) {
+  .lp-exp-inner {
+    padding: 0 16px;
+  }
+
+  .lp-exp-head {
+    margin-bottom: 24px;
+  }
+
+  .lp-exp-grid {
+    grid-auto-columns: 62%;
+    gap: 14px;
+  }
+
+  .lp-exp-card:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .lp-exp-body h3 {
+    font-size: 1.05rem;
+  }
+
+  .lp-exp-bio {
+    -webkit-line-clamp: 2;
+  }
+}
