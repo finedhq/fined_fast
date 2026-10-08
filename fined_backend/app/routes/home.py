@@ -72,14 +72,13 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
         )
 
         ongoing_course_id = stats.get("ongoing_course_id")
-
-        user_row = await asyncio.to_thread(user_repo.get_by_email, body.email)
+        user_row = stats.get("user") or {}
 
         # 2. Define a small helper for the ongoing course fetch
         async def fetch_ongoing_course():
             if not ongoing_course_id:
                 return None
-            course = await asyncio.to_thread(course_repo.get_by_id, ongoing_course_id)
+            course = await asyncio.to_thread(course_repo.get_by_id_cached, ongoing_course_id)
             # only a published course is "continue learning" (not a draft, not an archived one)
             if not course or not can_view_course(course, user) or not is_listed(course):
                 return None
@@ -91,7 +90,8 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
                     lesson_number = mod.get("order_index", 1)
             
             course["current_lesson"] = lesson_number
-            course = (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
+            if "modules_count" not in course:
+                course = (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
 
             # Progress = modules actually completed (released ones only), out of the
             # whole planned course, as on the course page. "Lesson N" is just where
@@ -108,12 +108,12 @@ async def fetch_data(body: FetchDataRequest, user: AuthUser = Depends(get_curren
                 course["completed_modules"] = 0
             return course
 
-        # 3. Run all independent DB queries concurrently (Thread-safe)
+        # 3. Run all independent queries concurrently using cached services
         articles, courses, ongoing_course_data, log_data = await asyncio.gather(
-            asyncio.to_thread(article_repo.get_all, 1),
+            asyncio.to_thread(article_service.get_all, 1),
             asyncio.to_thread(course_repo.get_listed),
             fetch_ongoing_course(),
-            asyncio.to_thread(user_repo.get_score_logs, body.email),
+            asyncio.to_thread(user_repo.get_score_logs, body.email, 10),
         )
         
         current_fin_score = stats.get("fin_score", 0)

@@ -67,20 +67,15 @@ class HomeService:
         score_service.apply_and_log(user, all_updates, consistency_result["reasons"])
 
 
-        user = user_repo.get_by_email(email)
-        if not user:
-            user = {"user_sub": user_sub, "email": email, "streak_count": streak, "fin_stars": 0}
-
-        #step 4
-        rank=user_repo.get_rank(email)
+        #step 4: Pass user in-memory so get_rank avoids a duplicate database query
+        rank = user_repo.get_rank(email, user=user)
 
         #step 5
-        show_feedback=not user_repo.has_feedback(email)
+        show_feedback = not user_repo.has_feedback(email)
 
         #step 6
         ongoing_course_id = user.get("ongoing_course_id")
         fin_score = score_service.compute_total(user)
-
 
         return {
             "email":             user.get("email"),
@@ -93,6 +88,7 @@ class HomeService:
             "rank":              rank,
             "show_feedback":     show_feedback,
             "ongoing_course_id": ongoing_course_id,
+            "user":              user
         }
 
     def get_leaderboard(self, timeframe: str = "all_time"):

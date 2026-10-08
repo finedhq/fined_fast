@@ -14,10 +14,24 @@ export default function Courses() {
   const navigate = useNavigate();
   const { user, isLoading, isAuthenticated } = useAuth0();
   const [email, setEmail] = useState("");
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem("fined_courses_cache_v1");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
   const [ongoingCourse, setOngoingCourse] = useState({});
   const [isFetchingOngoing, setIsFetchingOngoing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem("fined_courses_cache_v1");
+      return !raw || JSON.parse(raw).length === 0;
+    } catch {
+      return true;
+    }
+  });
   const [warning, setWarning] = useState("");
   const [error, setError] = useState("");
 
@@ -34,14 +48,23 @@ export default function Courses() {
   }, [isLoading, isAuthenticated, user]);
 
   async function fetchCourses() {
-    setLoading(true);
+    if (courses.length === 0) {
+      setLoading(true);
+    }
     try {
       const res = await instance.get("/courses/getall");
       if (res.data && res.data.length > 0) {
         setCourses(res.data);
+        try {
+          sessionStorage.setItem("fined_courses_cache_v1", JSON.stringify(res.data));
+        } catch {
+          // ignore
+        }
       }
     } catch (err) {
-      setError("Failed to load courses.");
+      if (courses.length === 0) {
+        setError("Failed to load courses.");
+      }
     } finally {
       setLoading(false);
     }

@@ -1,18 +1,33 @@
 # Database queries for courses, modules, and cards
+import time
 from app.integrations.supabase_client import supabase
 from app.services.course_visibility import is_listed, is_released
 
 
 class CourseRepository:
+    def __init__(self):
+        self._listed_cache = None
+        self._listed_cache_time = 0
+        self._listed_cache_ttl = 60  # 60s in-memory cache
 
+    def clear_cache(self):
+        self._listed_cache = None
+        self._listed_cache_time = 0
 
     def get_all(self) -> list:
         res = supabase.from_("courses").select("*").order("created_at", desc=True).execute()
         return res.data or []
 
     def get_listed(self) -> list:
-        """Courses shown on public lists (published only), newest first."""
-        return self.with_released_counts([c for c in self.get_all() if is_listed(c)])
+        """Courses shown on public lists (published only), newest first with 60s memory cache."""
+        now = time.time()
+        if self._listed_cache and (now - self._listed_cache_time < self._listed_cache_ttl):
+            return [dict(c) for c in self._listed_cache]
+
+        data = self.with_released_counts([c for c in self.get_all() if is_listed(c)])
+        self._listed_cache = data
+        self._listed_cache_time = now
+        return data
 
     def with_released_counts(self, courses: list) -> list:
         """Learners' view: `modules_count` = released modules only. The column
@@ -30,6 +45,13 @@ class CourseRepository:
                 c["modules_count"] = counts.get(c["id"], 0)
         return courses
 
+    def get_by_id_cached(self, course_id: str) -> dict | None:
+        if self._listed_cache:
+            for c in self._listed_cache:
+                if c.get("id") == course_id:
+                    return dict(c)
+        return self.get_by_id(course_id)
+
     def get_by_id(self, course_id: str) -> dict | None:
         res = supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute()
         return res.data[0] if res and res.data else None
@@ -39,6 +61,7 @@ class CourseRepository:
         return res.data[0] if res and res.data else None
 
     def insert(self, title: str, description: str, thumbnail_url: str = "", slug: str = "") -> dict:
+        self.clear_cache()
         res = supabase.from_("courses").insert([{
             "title": title,
             "description": description,
@@ -48,6 +71,7 @@ class CourseRepository:
         return res.data[0] if res.data else {}
 
     def delete(self, course_id: str):
+        self.clear_cache()
         supabase.from_("courses").delete().eq("id", course_id).execute()
 
 

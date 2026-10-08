@@ -192,18 +192,26 @@ class ScoreService:
 
     def apply_and_log(self, user: dict, updates: dict, reasons: list):
         """
-        1. Apply updates to the user row
+        1. Apply updates to the user row (only if values actually changed)
         2. Compute old vs new total score
         3. Write to finScoreLogs if score changed
         """
         if not updates:
             return
-        email     = user["email"]
+
+        has_changes = any(user.get(k) != v for k, v in updates.items())
+        email = user.get("email")
+        if not email:
+            return
+
         old_total = self.compute_total(user)
-        user_repo.update_fields(email, updates)
-        merged = {**user, **updates}
-        new_total = self.compute_total(merged)
-        delta     = new_total - old_total
+        user.update(updates)
+
+        if has_changes:
+            user_repo.update_fields(email, updates)
+
+        new_total = self.compute_total(user)
+        delta = new_total - old_total
         if delta != 0 and reasons:
             user_repo.log_score_change(
                 email=email,
