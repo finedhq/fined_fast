@@ -1,0 +1,286 @@
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: max(100dvh, 860px); /* room for the temple under the buttons */
+  background: #F9F7F9; /* the illustration's own sky, so the two meet without an edge */
+  isolation: isolate;
+}
+
+/* Soft hand-off from the hills into the next section */
+.lp-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 90px;
+  background: linear-gradient(to bottom, rgba(250, 251, 255, 0), var(--lp-bg));
+  pointer-events: none;
+}
+
+/* The illustrated scene sits at the bottom; the sky above it holds the copy. */
+.lp-hero-scene {
+  position: absolute;
+  inset: auto 0 -8vh 0; /* sinks the hills a little so the temple clears the buttons */
+  height: 82%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.lp-hero-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18%);
+  /* Mirrored so the temple sits under the copy and the card floats over open hills */
+  transform: scaleX(-1);
+}
+
+.lp-hero-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(112px, 15vh, 140px) 32px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 48px;
+  align-items: start;
+}
+
+.lp-hero-copy {
+  padding-top: 12px;
+}
+
+.lp-hero-title {
+  font-family: var(--lp-font-display);
+  font-size: clamp(2.4rem, 4.1vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  color: var(--lp-ink);
+  margin: 0;
+  max-width: 13ch;
+}
+
+.lp-hero-hl {
+  position: relative;
+  display: inline-block;
+  color: var(--lp-purple);
+  white-space: nowrap;
+}
+
+.lp-hero-underline {
+  position: absolute;
+  left: -2%;
+  bottom: -0.16em;
+  width: 104%;
+  height: 0.3em;
+  color: var(--lp-gold);
+  overflow: visible;
+  z-index: -1;
+}
+
+.lp-hero-sub {
+  margin: 28px 0 0;
+  max-width: 38ch;
+  font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--lp-ink-2);
+}
+
+.lp-hero-ctas {
+  margin-top: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* Right column: the plane and the warm-up card */
+.lp-hero-side {
+  position: relative;
+  padding-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.lp-hero-plane {
+  position: absolute;
+  top: -78px;
+  left: -40px;
+  width: 210px;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lp-hero-plane img {
+  display: block;
+  width: 100%;
+  will-change: transform;
+}
+
+/* ── Learner count, overlapping the bottom of the hero ───────────────── */
+.lp-learners-wrap {
+  position: relative;
+  z-index: 2;
+  max-width: 1240px;
+  margin: -44px auto 0;
+  padding: 0 32px;
+}
+
+.lp-learners {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px 12px 14px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius-pill);
+  box-shadow: var(--lp-shadow);
+}
+
+.lp-learners-avatars {
+  display: flex;
+}
+
+.lp-av {
+  width: 38px;
+  height: 38px;
+  margin-left: -10px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--lp-surface);
+  font-family: var(--lp-font-action);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #FFFFFF;
+}
+
+.lp-av:first-child {
+  margin-left: 0;
+}
+
+.lp-av-1 { background: var(--lp-purple); }
+.lp-av-2 { background: var(--lp-electric); }
+.lp-av-3 { background: var(--lp-gold); color: var(--lp-ink); }
+
+.lp-learners-text {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--lp-ink-2);
+}
+
+.lp-learners-text strong {
+  font-family: var(--lp-font-display);
+  font-weight: 800;
+  color: var(--lp-ink);
+}
+
+/* Short laptop screens: a little less type so the hills still show */
+@media (min-width: 961px) and (max-height: 820px) {
+  .lp-hero-inner {
+    padding-top: 104px;
+  }
+
+  .lp-hero-title {
+    font-size: clamp(2.6rem, 4vw, 3.4rem);
+  }
+
+  .lp-hero-sub {
+    margin-top: 20px;
+  }
+
+  .lp-hero-ctas {
+    margin-top: 28px;
+  }
+}
+
+/* ── Tablet and phone ─────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .lp-hero {
+    min-height: 0;
+  }
+
+  .lp-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 56px;
+    padding: 120px 20px 0;
+  }
+
+  .lp-hero-copy {
+    padding-top: 0;
+  }
+
+  .lp-hero-side {
+    justify-content: flex-start;
+    padding-bottom: 46vw; /* leaves the hills visible under the card */
+  }
+
+  .lp-hero-plane {
+    top: -64px;
+    left: auto;
+    right: 0;
+    width: 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-hero-inner {
+    padding: 108px 16px 0;
+  }
+
+  .lp-hero-title {
+    font-size: clamp(1.9rem, 8.6vw, 2.3rem);
+  }
+
+  .lp-hero-ctas .lp-btn {
+    flex: 1 1 auto;
+  }
+
+  .lp-hero-scene img {
+    object-position: 65% bottom;
+  }
+
+  .lp-learners-wrap {
+    padding: 0 16px;
+  }
+
+  .lp-learners {
+    padding: 10px 18px 10px 12px;
+  }
+
+  .lp-learners-text {
+    font-size: 0.92rem;
+  }
+}
+
+/* Phones: less air above and below */
+@media (max-width: 640px) {
+  .lp-hero-inner {
+    padding-top: 96px;
+    gap: 40px;
+  }
+
+  .lp-hero-sub {
+    margin-top: 16px;
+    font-size: 1rem;
+  }
+
+  .lp-hero-ctas {
+    margin-top: 24px;
+  }
+
+  .lp-hero-ctas .lp-btn {
+    padding: 13px 20px;
+  }
+
+  .lp-hero-side {
+    padding-bottom: 34vw;
+  }
+
+  .lp-hero-plane {
+    width: 110px;
+    top: -52px;
+  }
+}

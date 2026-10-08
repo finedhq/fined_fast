@@ -1,0 +1,117 @@
+/* ── "Nobody taught you this" + topics marquee (StorySection.jsx) ───── */
+.lp-story {
+  position: relative;
+  padding: clamp(64px, 10vw, 140px) 0 clamp(56px, 7vw, 100px);
+  background: var(--lp-bg);
+  overflow: hidden;
+}
+
+.lp-story-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  row-gap: 48px;
+}
+
+.lp-story-lead {
+  grid-column: 1 / span 10;
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.45rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+  color: var(--lp-ink);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.26em;
+}
+
+.lp-story-word.is-hl {
+  color: var(--lp-purple);
+}
+
+/* The answer sits lower and to the right: the page's first offset beat */
+.lp-story-follow {
+  grid-column: 7 / span 6;
+  margin: 0;
+  padding-left: 22px;
+  border-left: 3px solid var(--lp-gold);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--lp-ink-2);
+  max-width: 40ch;
+}
+
+/* The one marquee on the page */
+.lp-marquee {
+  margin-top: clamp(48px, 7vw, 96px);
+  padding: 16px 0;
+  border-top: 1px solid var(--lp-border);
+  border-bottom: 1px solid var(--lp-border);
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.lp-marquee-track {
+  display: inline-flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.lp-topic {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(20px, 2.6vw, 40px);
+  padding-right: clamp(20px, 2.6vw, 40px);
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.05rem, 2vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--lp-ink);
+}
+
+.lp-topic.is-alt {
+  color: var(--lp-purple);
+}
+
+.lp-topic-star {
+  font-size: 0.42em;
+  color: var(--lp-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-marquee {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .lp-story-inner {
+    padding: 0 20px;
+    row-gap: 32px;
+  }
+
+  .lp-story-lead,
+  .lp-story-follow {
+    grid-column: 1 / -1;
+  }
+
+  .lp-story-follow {
+    margin-left: 12%;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-story-inner {
+    padding: 0 16px;
+  }
+
+  .lp-story-follow {
+    margin-left: 0;
+  }
+}

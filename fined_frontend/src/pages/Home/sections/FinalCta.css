@@ -1,0 +1,86 @@
+/* ── Closing screen (FinalCta.jsx) ────────────────────────────────────── */
+.lp-end {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: min(100dvh, 860px);
+  display: flex;
+  align-items: flex-start;
+  background: #F8F6FA; /* the illustration's own sky */
+}
+
+.lp-end::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 120px;
+  background: linear-gradient(to bottom, var(--lp-bg), rgba(250, 251, 255, 0));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lp-end-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform-origin: center bottom;
+}
+
+.lp-end-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.lp-end-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(110px, 14vh, 160px) 32px 0;
+  text-align: center;
+}
+
+.lp-end-title {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.9rem, 4.2vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: var(--lp-ink);
+}
+
+.lp-end-sub {
+  margin: 18px 0 0;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  color: var(--lp-ink-2);
+}
+
+.lp-end-ctas {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+
+.lp .lp-end-ghost {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 640px) {
+  .lp-end {
+    min-height: 640px;
+  }
+
+  .lp-end-inner {
+    padding: 96px 16px 0;
+  }
+
+  .lp-end-scene img {
+    object-position: 70% bottom;
+  }
+}

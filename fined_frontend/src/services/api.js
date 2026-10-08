@@ -267,6 +267,15 @@ export function getBundleByCardSlug(cardSlug, email) {
   });
 }
 
+// Newsletter sign-up (signed-in users; saved against their account).
+export function saveNewsletterEmail(email, enteredEmail) {
+  return request("/articles/saveemail", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, enteredEmail }),
+  });
+}
+
 // Public: Module 1 of the stock-market course, for visitors who aren't signed in.
 export function getSampleModule() {
   return request("/courses/sample-module", { method: "GET" });

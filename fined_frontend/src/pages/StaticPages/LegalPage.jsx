@@ -14,8 +14,8 @@ export default function LegalPage({ title, lastUpdated, intro, children }) {
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-2xl border border-[#E6E1EC] p-6 sm:p-12">
           <h1
-            className="text-3xl sm:text-4xl font-bold text-[#171321]"
-            style={{ fontFamily: "'Manrope', sans-serif" }}
+            className="text-3xl sm:text-4xl font-extrabold text-[#171321]"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
             {title}
           </h1>
@@ -25,7 +25,7 @@ export default function LegalPage({ title, lastUpdated, intro, children }) {
           {intro && (
             <p
               className="mt-6 text-[#625D6D] leading-relaxed"
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              style={{ fontFamily: "'Nunito', sans-serif" }}
             >
               {intro}
             </p>
@@ -33,7 +33,7 @@ export default function LegalPage({ title, lastUpdated, intro, children }) {
 
           <div
             className="mt-8 space-y-8 text-[#625D6D] leading-relaxed"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "'Nunito', sans-serif" }}
           >
             {children}
           </div>
@@ -59,8 +59,8 @@ export function Section({ heading, children }) {
   return (
     <section>
       <h2
-        className="text-xl font-bold text-[#171321] mb-3"
-        style={{ fontFamily: "'Manrope', sans-serif" }}
+        className="text-xl font-extrabold text-[#171321] mb-3"
+        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         {heading}
       </h2>
