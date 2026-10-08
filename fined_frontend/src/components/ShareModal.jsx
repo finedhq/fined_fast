@@ -17,6 +17,7 @@ import {
 import { useAuth0 } from "@auth0/auth0-react";
 import toast from "react-hot-toast";
 import { claimEarnStars } from "../services/api";
+import { trackArticleShare } from "../utils/analytics";
 
 /**
  * ShareModal
@@ -166,6 +167,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
         },
       });
       awardShareStars();
+      trackArticleShare("copy_link", articleTitle);
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
       toast.error("Failed to copy link");
@@ -181,6 +183,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
           url: currentUrl,
         });
         awardShareStars();
+        trackArticleShare("native", articleTitle);
       } catch (err) {
         if (err.name !== "AbortError") {
           console.error("Error sharing:", err);
@@ -414,7 +417,10 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => awardShareStars()}
+                  onClick={() => {
+                    awardShareStars();
+                    trackArticleShare(item.name.toLowerCase(), articleTitle);
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",

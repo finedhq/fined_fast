@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { sendFeedback } from "../../services/api";
+import { trackFormSubmission } from "../../utils/analytics";
 import "./FeedbackPage.css";
 
 export default function FeedbackPage() {
@@ -42,6 +43,7 @@ export default function FeedbackPage() {
 
     try {
       const res = await sendFeedback(payload);
+      trackFormSubmission("feedback");
       setSubmitStatus({ type: "success", text: res.message || "Feedback submitted successfully. Thank you!" });
       // Reset form
       setName("");
