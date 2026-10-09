@@ -1,5 +1,6 @@
 /* Styles for the reusable v2 building blocks that the prototype doesn't have
    (Module 2 on): ownership grid (og-), bars (nb-), liquidation queue (lq-),
+   trade map (tm-, Module 4 on),
    "Your Slice" tool (sc-). Prototype tokens only, so they sit in the same
    visual language. scrolly.css stays a faithful copy of the prototype. */
 
@@ -481,6 +482,39 @@
   border-radius: var(--radius-md);
 }
 
+/* Timeline play-out (Module 4 §3.3): the right order, grouped by day. */
+.nc-root .lq-days {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nc-root .lq-day {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nc-root .lq-day-label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+
+.nc-root .lq-day .lq-result { gap: 6px; }
+.nc-root .lq-row--event .lq-row-name { font-size: 0.86rem; }
+.nc-root .lq-row--key { border-color: var(--purple-border); background: var(--purple-surface); }
+.nc-root .lq-figure--animate .lq-row--event { animation: nc-lqIn 0.45s var(--ease) var(--lq-delay, 0s) both; }
+
+@keyframes nc-lqIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 .nc-root .nc-handoff {
   flex: 1;
   display: flex;
@@ -871,6 +905,135 @@
   font-weight: 800;
 }
 
+/* ── Trade map (Module 4 on) ───────────────────────────────────────── */
+/* Box size must match BOX_W / BOX_H in TradeMap.jsx (lines stop at the edges). */
+.nc-root .tm-figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* The boxes are absolutely placed, so the map has no width of its own; on
+   phones the figure box sizes to its content, so stretch it instead. */
+.nc-root .scrolly-figure:has(.tm-figure) { align-self: stretch; }
+
+.nc-root .tm-tag-row { min-height: 24px; }
+
+.nc-root .tm-tag {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.nc-root .tm-stage {
+  position: relative;
+  flex: 1;
+  min-height: 230px;
+}
+
+.nc-root .tm-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.nc-root .tm-link { stroke: var(--border); stroke-width: 1.5; }
+.nc-root .tm-arrow {
+  stroke: var(--purple);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  animation: nc-tmFlow 1s linear infinite;
+}
+.nc-root .tm-back { stroke: var(--purple); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: 0.45; }
+.nc-root .tm-head { fill: var(--purple); }
+
+@keyframes nc-tmFlow { to { stroke-dashoffset: -10; } }
+
+.nc-root .tm-node {
+  position: absolute;
+  width: 20%;
+  height: 44px;
+  transform: translate(-50%, -50%) scale(0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  text-align: center;
+  line-height: 1.15;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink-3);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.nc-root .tm-node.is-shown { opacity: 1; transform: translate(-50%, -50%); }
+.nc-root .tm-node.is-lit {
+  background: var(--purple-surface);
+  border-color: var(--purple);
+  color: var(--ink);
+}
+.nc-root .tm-node.is-pulse { animation: nc-tmPulse 1.2s var(--ease) 3; }
+
+@keyframes nc-tmPulse {
+  0% { box-shadow: 0 0 0 0 rgba(65, 0, 188, 0.35); }
+  100% { box-shadow: 0 0 0 12px rgba(65, 0, 188, 0); }
+}
+
+.nc-root .tm-node-label {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.nc-root .tm-node-sub { font-size: 0.64rem; color: var(--ink-3); }
+
+.nc-root .tm-badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-dark);
+  font-family: var(--font-action);
+  font-size: 0.62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.nc-root .tm-token {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, calc(14px + var(--tm-nudge, 0) * 4px));
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-action);
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transition: left 0.9s var(--ease), top 0.9s var(--ease);
+}
+.nc-root .tm-token--money { background: var(--success-bg); color: var(--success-dark); border: 1px solid var(--success-border); }
+.nc-root .tm-token--shares { background: var(--purple); color: #fff; }
+.nc-root .tm-token--order { background: var(--amber-surface); color: var(--amber-dark); border: 1px solid var(--amber-border); }
+
+.nc-root .tm-caption {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
 /* ── "Your Slice" tool (layout and controls shared with the Leak Lab) ── */
 .nc-root .sc-companies { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
@@ -954,6 +1117,12 @@
   .nc-root .switch-feedback { font-size: 0.8rem; }
   .nc-root .vp-scene { width: min(170px, 50%); }
   .nc-root .vp-holding { min-height: 72px; }
+  .nc-root .tm-node { padding: 2px 3px; }
+  .nc-root .tm-node-label { font-size: 0.62rem; }
+  .nc-root .tm-node-sub { display: none; } /* the step text names what each door offers */
+  .nc-root .tm-badge { font-size: 0.56rem; right: -2px; }
+  .nc-root .tm-token { font-size: 0.62rem; padding: 1px 6px; }
+  .nc-root .tm-caption { display: none; } /* repeats the step text */
 }
 
 /* ── Opening screen: "best on a laptop or desktop" (phones and tablets only) ── */
