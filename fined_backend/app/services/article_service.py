@@ -135,8 +135,8 @@ class ArticleService:
         if slug and slug.strip():
             final_slug = self._sanitize_slug(slug.strip())
         else:
-            final_slug = self._generate_slug(title)
-        
+            final_slug = self._slug_for_new_article(title)
+
         self.clear_cache()
         
         return article_repo.insert(
@@ -304,6 +304,11 @@ class ArticleService:
         # Must exactly match generateSlug() in ArticlesPage.jsx
         return self._sanitize_slug(title)
 
+    def _slug_for_new_article(self, title: str) -> str:
+        # Drop apostrophes instead of turning them into dashes ("doesn't" -> "doesnt", not "doesn-t").
+        # Only for newly created articles: _generate_slug stays as is so older titles still resolve.
+        return self._sanitize_slug(re.sub(r"['‘’`]", "", title))
+
     def build_sitemap_xml(self) -> str:
         articles = article_repo.get_all_for_sitemap()
         authors = article_repo.get_all_authors()
@@ -332,9 +337,22 @@ class ArticleService:
             "https://myfined.com/tags/economy"
         ]
 
+        # The home page and article index change whenever a new article goes live
+        article_dates = [
+            (a.get("updated_at") or a.get("published_at") or a.get("created_at") or "")[:10]
+            for a in articles
+        ]
+        newest_article_date = max((d for d in article_dates if d), default="")
+        pages_following_articles = {"https://myfined.com/", "https://myfined.com/articles"}
+
         entries = []
         for loc, changefreq, priority in static_urls:
-            entries.append(f"<url><loc>{loc}</loc><changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>")
+            lastmod_tag = (
+                f"<lastmod>{newest_article_date}</lastmod>"
+                if newest_article_date and loc in pages_following_articles
+                else ""
+            )
+            entries.append(f"<url><loc>{loc}</loc>{lastmod_tag}<changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>")
 
         for tag_loc in tag_urls:
             entries.append(f"<url><loc>{tag_loc}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")

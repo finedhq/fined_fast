@@ -138,6 +138,7 @@ async def spa_fallback(fallback_path: str):
     # Check if request is for a single article (for social crawler preview generation)
     is_article_path = fallback_path.startswith("articles/")
     lookup_failed = False
+    article_missing = False
     if is_article_path:
         slug = fallback_path.split("articles/")[1].strip("/").split("?")[0]
         if slug:
@@ -156,7 +157,7 @@ async def spa_fallback(fallback_path: str):
                         or (article.get("content", "").split("\n")[0] if article.get("content") else "A clear, practical finance explainer from FinEd.")
                     )
                     description = html.escape(raw_desc[:160].strip())
-                    image_url = html.escape(article.get("image_url") or "https://www.myfined.com/assets/images/fined_card_banner.png")
+                    image_url = html.escape(article.get("image_url") or "https://myfined.com/fined_card_banner.png")
                     article_url = f"https://myfined.com/articles/{slug}"
                     tag = article.get("tag") or "Finance"
                     published_date = article.get("published_at") or article.get("created_at") or ""
@@ -275,12 +276,14 @@ async def spa_fallback(fallback_path: str):
                             f'<p><a href="{article_url}">{display_title}</a></p></body></html>'
                         )
                     return Response(content=page_html, media_type="text/html")
+                article_missing = True
             except Exception:
                 lookup_failed = True  # Fall back to standard index.html on any error
 
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
     if shell_html:
-        return Response(content=shell_html, media_type="text/html")
+        # Unknown article slug: keep the SPA's own "not found" page but tell crawlers it is a 404
+        return Response(content=shell_html, media_type="text/html", status_code=404 if article_missing else 200)
 
     # No shell available. Never redirect article URLs: the frontend host sends crawlers
     # for /articles/* straight back here, which makes a redirect loop.
