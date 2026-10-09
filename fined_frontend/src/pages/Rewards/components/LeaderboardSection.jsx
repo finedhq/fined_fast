@@ -124,7 +124,7 @@ const LeaderboardSection = ({
         {/* The current user's standing */}
         <div className="rw-row rw-row--you">
           <span className="rw-row-rank">#{activeUserRank}</span>
-          <span className="rw-row-avatar" aria-hidden="true">{youName.charAt(0).toUpperCase()}</span>
+          <span className="rw-row-avatar" aria-hidden="true">{(youName || 'Y').charAt(0).toUpperCase()}</span>
           <span className="rw-row-name">You <small>{levelInfo.label}</small></span>
           <span className="rw-row-score">{activeUserScore} <small>pts</small></span>
         </div>

@@ -5,13 +5,13 @@ import { fetchUserProfile, updateUserProfile } from "../services/api";
 const UserProfileContext = createContext(null);
 
 const DEFAULT_PROFILE = {
-  display_name: "Rashi Karule",
-  username: "rashi",
-  email: "karulerashi@gmail.com",
+  display_name: "",
+  username: "",
+  email: "",
   career_stage: "Student",
   financial_level: "Beginner (Level 1) - Starting with basics",
-  bio: "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd.",
-  location: "Nagpur, IN",
+  bio: "Building daily personal finance & investing discipline 10 minutes a day on FinEd.",
+  location: "",
   fin_score: 0,
   finscore: 0,
   fin_stars: 0,
@@ -19,29 +19,44 @@ const DEFAULT_PROFILE = {
   streak_count: 0,
   streak: 0,
   rank: 1,
-  ongoing_course: {
-    id: "2936ac1c-1c2f-4c91-8ead-476f9bad635b",
-    title: "Basics of Stock Market",
-    slug: "basics-of-stock-market",
-    current_lesson: 6,
-    total_lessons: 12,
-    progress_pct: 50,
-  },
-  consistency_grid: [
-    0, 0, 3, 2, 0, 3, 1,
-    3, 1, 0, 3, 3, 1, 0,
-    2, 3, 1, 0, 3, 2, 3,
-    3, 3, 3, 3, 3, 3, 3
-  ]
+  ongoing_course: null,
+  consistency_grid: Array(28).fill(0),
 };
+
+const USER_PROFILE_CACHE_KEY = "fined_user_profile_cache_v2";
+
+function getCachedProfile() {
+  try {
+    const raw = localStorage.getItem(USER_PROFILE_CACHE_KEY) || sessionStorage.getItem(USER_PROFILE_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedProfile(data) {
+  try {
+    if (data && (data.email || data.display_name)) {
+      const serialized = JSON.stringify(data);
+      localStorage.setItem(USER_PROFILE_CACHE_KEY, serialized);
+      sessionStorage.setItem(USER_PROFILE_CACHE_KEY, serialized);
+    }
+  } catch {
+    // ignore
+  }
+}
 
 export const UserProfileProvider = ({ children }) => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-  const [profile, setProfile] = useState(() => ({
-    ...DEFAULT_PROFILE,
-    display_name: user?.name || DEFAULT_PROFILE.display_name,
-    email: user?.email || DEFAULT_PROFILE.email,
-  }));
+  const [profile, setProfile] = useState(() => {
+    const cached = getCachedProfile();
+    return {
+      ...DEFAULT_PROFILE,
+      ...(cached || {}),
+      display_name: cached?.display_name || user?.name || DEFAULT_PROFILE.display_name,
+      email: cached?.email || user?.email || DEFAULT_PROFILE.email,
+    };
+  });
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -57,12 +72,16 @@ export const UserProfileProvider = ({ children }) => {
       }
       const data = await fetchUserProfile(token);
       if (data) {
-        setProfile((prev) => ({
-          ...prev,
-          ...data,
-          display_name: data.full_name || data.display_name || user?.name || prev.display_name,
-          email: data.email || user?.email || prev.email,
-        }));
+        setProfile((prev) => {
+          const next = {
+            ...prev,
+            ...data,
+            display_name: data.full_name || data.display_name || user?.name || prev.display_name,
+            email: data.email || user?.email || prev.email,
+          };
+          setCachedProfile(next);
+          return next;
+        });
       }
     } catch (err) {
       console.warn("Could not fetch remote user profile, using baseline data:", err);
@@ -89,25 +108,37 @@ export const UserProfileProvider = ({ children }) => {
       }
       const updated = await updateUserProfile(payload, token);
       if (updated) {
-        setProfile((prev) => ({
-          ...prev,
-          ...updated,
-          ...payload,
-        }));
+        setProfile((prev) => {
+          const next = {
+            ...prev,
+            ...updated,
+            ...payload,
+          };
+          setCachedProfile(next);
+          return next;
+        });
       } else {
-        setProfile((prev) => ({
-          ...prev,
-          ...payload,
-        }));
+        setProfile((prev) => {
+          const next = {
+            ...prev,
+            ...payload,
+          };
+          setCachedProfile(next);
+          return next;
+        });
       }
       return true;
     } catch (err) {
       console.error("Failed to update profile:", err);
       // Still update locally for smooth UI experience
-      setProfile((prev) => ({
-        ...prev,
-        ...payload,
-      }));
+      setProfile((prev) => {
+        const next = {
+          ...prev,
+          ...payload,
+        };
+        setCachedProfile(next);
+        return next;
+      });
       return true;
     }
   };

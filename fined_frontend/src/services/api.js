@@ -428,13 +428,31 @@ export function fetchArticleIndexExport() {
   });
 }
 
-export async function getLeaderboard(timeframe = "all_time") {
+const leaderboardCache = new Map();
+const LEADERBOARD_CACHE_TTL_MS = 1000 * 60 * 3; // 3 minutes
+
+export async function getLeaderboard(timeframe = "all_time", { force = false } = {}) {
+  const cacheKey = `leaderboard_${timeframe}`;
+  if (!force && leaderboardCache.has(cacheKey)) {
+    const { data, timestamp } = leaderboardCache.get(cacheKey);
+    if (Date.now() - timestamp < LEADERBOARD_CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
   try {
-    return await request(`/home/leaderboard?timeframe=${timeframe}`, {
+    const data = await request(`/home/leaderboard?timeframe=${timeframe}`, {
       method: "GET",
     });
+    if (data && Array.isArray(data)) {
+      leaderboardCache.set(cacheKey, { data, timestamp: Date.now() });
+    }
+    return data;
   } catch (err) {
     console.warn("Failed to fetch leaderboard from API, fallback to default rankings:", err);
+    if (leaderboardCache.has(cacheKey)) {
+      return leaderboardCache.get(cacheKey).data;
+    }
     return null;
   }
 }
