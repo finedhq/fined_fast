@@ -12,7 +12,7 @@ function Leaderboard() {
       try {
         const data = await getLeaderboard();
         setLeaderboard(data);
-      } catch (err) {
+      } catch {
         setError("Failed to fetch leaderboard. Please check back later.");
       } finally {
         setLoading(false);

@@ -4,7 +4,6 @@ import { parseBoldText } from "../../../../utils/textFormatters";
 
 function InteractiveCard({ card, onContinue }) {
   const {
-    card_label,
     title = "",
     intro_text = "",
     items = [],

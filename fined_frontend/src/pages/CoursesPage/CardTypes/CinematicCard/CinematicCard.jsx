@@ -13,7 +13,7 @@ import { parseBoldText } from "../../../../utils/textFormatters";
 const LINE_STAGGER_MS = 700;
 
 function CinematicCard({ card, onContinue }) {
-  const { card_label, lines = [], tagline = "", cta_text = "Continue", finstars = 0, allotted_finstars = 0 } = card?.card_data || {};
+  const { lines = [], tagline = "", cta_text = "Continue", finstars = 0, allotted_finstars = 0 } = card?.card_data || {};
 
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTagline, setShowTagline] = useState(false);

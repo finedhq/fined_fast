@@ -65,7 +65,6 @@ export const M4_CH1_MAP = {
       lit: ["demat", "depository"],
       arrows: [["exchange", "demat"]],
       tokens: { rupees: { at: "bank" }, shares: { at: "demat", from: "exchange" } },
-      pulse: "demat",
       caption: "Account three: the demat account holds the shares, in Arjun's name, with a depository.",
     },
   ],

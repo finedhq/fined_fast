@@ -4,7 +4,6 @@ import { parseBoldText } from "../../../../utils/textFormatters";
 
 function QuizCard({ card, onContinue }) {
   const {
-    card_label,
     title = "",
     question = "",
     options = [],

@@ -22,6 +22,28 @@ export const STATIC_ROUTE_TITLES = {
   "/admin/cards/add": "Add Card | FinEd Admin",
 };
 
+const SITE_ORIGIN = "https://myfined.com";
+
+const CANONICAL_STATIC_PATHS = new Set([
+  "/", "/courses", "/articles", "/about", "/contact", "/feedback",
+  "/help", "/privacy-policy", "/termsofservice",
+]);
+
+/**
+ * Returns the canonical URL for public pages whose canonical is not set by a component
+ * (trailing slash dropped), or null for everything else (articles set their own).
+ */
+export function getCanonicalForPath(pathname) {
+  const cleanPath = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  if (
+    CANONICAL_STATIC_PATHS.has(cleanPath) ||
+    /^\/(tags|authors|courses)\/[^/]+$/.test(cleanPath)
+  ) {
+    return `${SITE_ORIGIN}${cleanPath}`;
+  }
+  return null;
+}
+
 /**
  * Returns a static title if mapped, or a derived fallback title for known patterns.
  * Returns null if the route title is fully managed dynamically by the component (e.g. articles).

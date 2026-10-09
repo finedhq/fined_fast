@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 
 export const EMPTY_RISK_SPECTRUM_DATA = {
   card_type: "risk_spectrum",

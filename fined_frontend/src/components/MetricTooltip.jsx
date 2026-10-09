@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiInfo } from "react-icons/fi";
 
 export const METRIC_TOOLTIP_DATA = {
@@ -70,7 +70,6 @@ export default function MetricTooltip({
   const wrapperRef = useRef(null);
 
   const info = customInfo || METRIC_TOOLTIP_DATA[metricKey];
-  if (!info) return null;
 
   // Determine visibility: controlled vs internal
   const isControlled = activeKey !== undefined && onToggle !== undefined;
@@ -114,6 +113,8 @@ export default function MetricTooltip({
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [isControlled]);
+
+  if (!info) return null;
 
   const posStyle = POSITION_STYLES[position] || POSITION_STYLES.col1;
 

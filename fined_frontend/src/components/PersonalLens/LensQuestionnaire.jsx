@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiChevronLeft, FiArrowRight } from "react-icons/fi";
 
 export default function LensQuestionnaire({

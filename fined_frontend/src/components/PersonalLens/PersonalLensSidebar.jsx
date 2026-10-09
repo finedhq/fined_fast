@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowRight, FiZap, FiLayers, FiCheckCircle, FiCpu, FiRefreshCw } from "react-icons/fi";
+import { FiArrowRight, FiZap, FiLayers, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
 import { IoSparkles } from "react-icons/io5";
 import LensQuestionnaire from "./LensQuestionnaire";
 import GeneratingLens from "./GeneratingLens";
@@ -14,9 +14,7 @@ export default function PersonalLensSidebar({
   article = null,
   articleId = "",
   articleTitle = "",
-  articleTag = "",
   customQuestions = null,
-  isMobileDrawer = false,
   onCloseDrawer = null,
 }) {
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ export default function PersonalLensSidebar({
   const [answers, setAnswers] = useState({});
   const [viewState, setViewState] = useState("intro"); // "intro" | "questionnaire" | "generating" | "result"
   const [lensData, setLensData] = useState(null);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
 
   // Check localStorage and fetch dynamic questions on article change
   useEffect(() => {
@@ -142,7 +140,9 @@ export default function PersonalLensSidebar({
   const handleReset = () => {
     try {
       localStorage.removeItem(storageKey);
-    } catch (e) { }
+    } catch {
+      // storage blocked (private mode): nothing to clear
+    }
     setAnswers({});
     setStepIndex(0);
     setLensData(null);
@@ -170,7 +170,7 @@ export default function PersonalLensSidebar({
       } else {
         navigate(`/articles`);
       }
-    } catch (e) {
+    } catch {
       navigate(`/articles`);
     }
   };

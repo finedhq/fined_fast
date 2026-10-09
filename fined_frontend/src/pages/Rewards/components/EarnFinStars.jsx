@@ -83,7 +83,7 @@ Start your financial freedom journey:
             ]);
             triggerCopiedFeedback();
             return;
-          } catch (clipItemErr) {
+          } catch {
             // Fallback to writeText if ClipboardItem fails
             await navigator.clipboard.writeText(plainText);
             triggerCopiedFeedback();
@@ -97,7 +97,7 @@ Start your financial freedom journey:
       } else {
         fallbackCopy(plainText);
       }
-    } catch (err) {
+    } catch {
       fallbackCopy(plainText);
     }
   };
@@ -127,7 +127,7 @@ Start your financial freedom journey:
       setTimeout(() => {
         setCopiedInvite(false);
       }, 3000);
-    } catch (e) {
+    } catch {
       toast.error('Failed to copy invite link');
     }
   };

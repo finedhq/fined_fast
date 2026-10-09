@@ -39,7 +39,7 @@ export function hasAiLens(article) {
     try {
       const parsed = JSON.parse(meta);
       return Boolean(parsed && typeof parsed === "object" && Object.keys(parsed).length > 0);
-    } catch (e) {
+    } catch {
       return false;
     }
   }

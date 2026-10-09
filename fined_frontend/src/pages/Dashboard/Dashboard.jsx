@@ -428,7 +428,7 @@ const Dashboard = () => {
                 {course.thumbnail_url ? <img src={course.thumbnail_url} alt="" loading="lazy" /> : <PiBookOpenTextBold aria-hidden="true" />}
               </div>
               <div className="dh-course-body">
-                <span className="dh-tag">{course.modules_count || 0} modules</span>
+                <span className="dh-tag">{course.planned_modules || course.modules_count || 0} modules</span>
                 <h3 className="dh-course-title">
                   <Link to={`/courses/${course.slug || course.id}`} className="dh-stretch">{course.title}</Link>
                 </h3>

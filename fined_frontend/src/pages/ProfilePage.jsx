@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FiSettings, FiShare2, FiCheck, FiTrendingUp, FiInfo } from "react-icons/fi";
+import { FiSettings, FiShare2, FiCheck, FiTrendingUp } from "react-icons/fi";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getUserProfile, updateUserProfile } from "../services/api";
 import { useUserProfile } from "../context/UserProfileContext";
@@ -174,10 +174,6 @@ export default function ProfilePage() {
 
   const toggleTooltip = (key) => {
     setActiveTooltip((prev) => (prev === key ? null : key));
-  };
-
-  const isTooltipVisible = (key) => {
-    return hoveredTooltip === key || activeTooltip === key;
   };
 
   useEffect(() => {
