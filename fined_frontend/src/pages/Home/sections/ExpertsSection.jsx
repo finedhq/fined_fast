@@ -19,6 +19,7 @@ const TITLES = {
   "deepan-datta": "Investment Writer",
   "dharsana-gandhi-r": "Finance Professional",
   madhvendra: "Finance Writer",
+  "puja-tayal": "Financial Writer & Equity Analyst",
 };
 
 const clean = (s) => (s || "").replace(/\s+/g, " ").trim();
@@ -83,7 +84,7 @@ export default function ExpertsSection({ authors }) {
                   </div>
                 </button>
                 {a.linkedin_url && (
-                  <a className="lp-exp-in" href={a.linkedin_url} target="_blank" rel="noreferrer" aria-label={`${a.name} on LinkedIn`}>
+                  <a className="lp-exp-in" href={a.linkedin_url} target="_blank" rel="noopener" referrerPolicy="origin" aria-label={`${a.name} on LinkedIn`}>
                     <PiLinkedinLogoFill aria-hidden="true" />
                   </a>
                 )}
