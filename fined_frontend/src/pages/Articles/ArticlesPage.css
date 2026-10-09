@@ -55,7 +55,7 @@
 
 .ap-main-title {
   margin: 0 0 6px 0;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: clamp(28px, 3vw, 38px);
   font-weight: 800;
   letter-spacing: -0.025em;
@@ -178,7 +178,7 @@
 }
 
 .ap-spotlight-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 17px;
   font-weight: 800;
   color: #171321;
@@ -393,7 +393,7 @@
 }
 
 .ap-lead-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: clamp(18px, 1.6vw, 21px);
   font-weight: 800;
   line-height: 1.25;
@@ -582,7 +582,7 @@
 }
 
 .ap-row-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14.5px;
   font-weight: 750;
   line-height: 1.35;
@@ -635,7 +635,7 @@
 }
 
 .ap-explore-heading {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: clamp(22px, 2.4vw, 28px);
   font-weight: 800;
   color: #171321;
@@ -807,7 +807,7 @@
 }
 
 .ap-grid-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 16px;
   font-weight: 800;
   line-height: 1.35;
@@ -999,7 +999,7 @@
 }
 
 .ap-empty-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 18px;
   font-weight: 800;
   color: #171321;

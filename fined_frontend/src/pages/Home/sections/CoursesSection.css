@@ -1,0 +1,212 @@
+/* ── "Start with the right course" (CoursesSection.jsx) ──────────────── */
+.lp-cs {
+  padding: clamp(64px, 9vw, 120px) 0;
+  background: var(--lp-bg);
+}
+
+.lp-cs-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.lp-cs-head {
+  margin-bottom: 32px;
+}
+
+.lp-cs-title {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: var(--lp-ink);
+}
+
+.lp-cs-title span {
+  color: var(--lp-purple);
+}
+
+.lp-cs-sub {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+  color: var(--lp-ink-3);
+}
+
+/* The featured course */
+.lp-cs-card {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 1px solid var(--lp-border);
+  border-radius: var(--lp-radius);
+  background: linear-gradient(135deg, var(--lp-surface) 55%, var(--lp-purple-surface));
+  box-shadow: var(--lp-shadow);
+}
+
+.lp-cs-thumb {
+  aspect-ratio: 722 / 387; /* the course artwork's own shape, so nothing is cropped */
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--lp-purple-surface);
+  box-shadow: 0 18px 40px -22px rgba(65, 0, 188, 0.45);
+}
+
+.lp-cs-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lp-cs-body h3 {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--lp-ink);
+}
+
+.lp-cs-facts {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lp-cs-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: var(--lp-purple-surface);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--lp-ink-2);
+}
+
+.lp-cs-facts svg {
+  color: var(--lp-purple);
+}
+
+.lp-cs-desc {
+  margin: 16px 0 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--lp-ink-2);
+}
+
+.lp-cs-ctas {
+  margin-top: 22px;
+}
+
+/* "More courses coming soon": a quiet strip with locked placeholders */
+.lp-cs-soon {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  border: 1.5px dashed var(--lp-purple-border);
+  border-radius: var(--lp-radius);
+  background: var(--lp-surface);
+}
+
+.lp-cs-soon-copy h3 {
+  margin: 0;
+  font-family: var(--lp-font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--lp-ink);
+}
+
+.lp-cs-soon-copy p {
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+  color: var(--lp-ink-3);
+}
+
+.lp-cs-soon-cards {
+  display: flex;
+  gap: 10px;
+}
+
+.lp-cs-ghost {
+  width: 120px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  border-radius: 12px;
+  background: var(--lp-purple-surface);
+  color: var(--lp-purple-border);
+}
+
+.lp-cs-ghost svg {
+  font-size: 1.2rem;
+  color: var(--lp-purple-border);
+}
+
+.lp-cs-ghost span {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--lp-purple-border);
+}
+
+.lp-cs-ghost span:last-child {
+  width: 60%;
+}
+
+.lp-cs-all {
+  margin-top: 28px;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .lp-cs-inner {
+    padding: 0 20px;
+  }
+
+  .lp-cs-card {
+    grid-template-columns: 1fr;
+  }
+
+
+  .lp-cs-soon {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lp-cs-soon-cards {
+    width: 100%;
+  }
+
+  .lp-cs-ghost {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-cs-inner {
+    padding: 0 16px;
+  }
+
+  .lp-cs-head {
+    margin-bottom: 20px;
+  }
+
+  .lp-cs-desc {
+    font-size: 0.95rem;
+  }
+
+  .lp-cs-ctas .lp-btn {
+    width: 100%;
+  }
+}

@@ -1,118 +1,112 @@
-import React, { useEffect, useRef, useState } from "react";
-import "./Footer.css";
+// Site footer (every page under MainLayout): brand + socials, the two link
+// columns and the newsletter sign-up. The sign-up saves the email against the
+// signed-in account (the same list the admin newsletter is sent to); signed-out
+// visitors are asked to log in first.
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { PiCheckCircleBold, PiInstagramLogoFill, PiLinkedinLogoFill } from "react-icons/pi";
+import { saveNewsletterEmail } from "../services/api";
 import footerLogo from "../assets/fined-footer-logo.webp";
-import { Link } from "react-router-dom";
-function RevealOnScroll({ children, delay = 0 }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef(null);
+import "./Footer.css";
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.15 }
+function Newsletter() {
+  const { isAuthenticated, user, loginWithRedirect } = useAuth0();
+  const { pathname } = useLocation();
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle"); // idle | saving | done | error
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      loginWithRedirect({ appState: { returnTo: pathname } });
+      return;
+    }
+    setState("saving");
+    try {
+      await saveNewsletterEmail(user?.email || "", email.trim());
+      setState("done");
+    } catch {
+      setState("error");
+    }
+  };
+
+  if (state === "done") {
+    return (
+      <p className="ft-done" role="status">
+        <PiCheckCircleBold aria-hidden="true" /> You&apos;re subscribed. Watch your inbox.
+      </p>
     );
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      if (ref.current) observer.unobserve(ref.current);
-    };
-  }, []);
+  }
 
-  const child = React.Children.only(children);
-  const existingClassName = child.props.className || "";
-  const className = `${existingClassName} reveal-on-scroll ${isVisible ? "is-visible" : ""}`.trim();
-
-  return React.cloneElement(child, {
-    ref,
-    className,
-    style: { ...child.props.style, transitionDelay: `${delay}ms` }
-  });
+  return (
+    <form className="ft-form" onSubmit={submit}>
+      <label htmlFor="ft-email">Email address</label>
+      <div className="ft-form-row">
+        <input
+          id="ft-email"
+          type="email"
+          required
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={state === "saving"}
+        />
+        <button type="submit" disabled={state === "saving"}>
+          {state === "saving" ? "Saving…" : "Subscribe Now"}
+        </button>
+      </div>
+      {state === "error" && <p className="ft-error">Something went wrong. Please try again.</p>}
+      {!isAuthenticated && <p className="ft-help">You&apos;ll be asked to log in first.</p>}
+    </form>
+  );
 }
 
-
 export default function Footer() {
-    return (
-        <footer className="footer">
-            <div className="footer-inner">
+  return (
+    <footer className="ft">
+      <div className="ft-inner">
+        <div className="ft-brand">
+          <img src={footerLogo} alt="FinEd" className="ft-logo" />
+          <p className="ft-tagline">Financial Education made Easy.</p>
+          <div className="ft-socials">
+            <a href="https://www.linkedin.com/company/fined-personal-finance/" aria-label="FinEd on LinkedIn" target="_blank" rel="noreferrer">
+              <PiLinkedinLogoFill aria-hidden="true" />
+            </a>
+            <a href="https://www.instagram.com/fined.personalfinance/" aria-label="FinEd on Instagram" target="_blank" rel="noreferrer">
+              <PiInstagramLogoFill aria-hidden="true" />
+            </a>
+          </div>
+        </div>
 
-                {/* LEFT — Logo + tagline + socials */}
-                <div className="footer-brand">
-                    <div className="footer-logo">
-                        <img src={footerLogo} alt="FinEd Logo" style={{ height: "48px", width: "auto" }} />
-                    </div>
-                    <p className="footer-tagline">Financial Education made Easy.</p>
-                    <div className="footer-socials">
-                        {/* LinkedIn */}
-                        <a href="https://www.linkedin.com/company/fined-personal-finance/" className="social-icon" aria-label="LinkedIn">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                <rect width="24" height="24" rx="4" fill="#0077B5" />
-                                <path d="M7 9h2v8H7V9zm1-1a1.1 1.1 0 110-2.2A1.1 1.1 0 018 8zm4 1h2v1.1C14.4 9.4 15 9 16 9c2 0 3 1.3 3 3.3V17h-2v-4.4c0-1-.4-1.6-1.3-1.6-.8 0-1.4.6-1.7 1.2V17h-2V9z" fill="white" />
-                            </svg>
-                        </a>
-                        {/* Instagram */}
-                        <a href="https://www.instagram.com/fined.personalfinance/" className="social-icon" aria-label="Instagram">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                <rect width="24" height="24" rx="6" fill="url(#ig)" />
-                                <circle cx="12" cy="12" r="3.5" stroke="white" strokeWidth="1.5" />
-                                <circle cx="17" cy="7" r="1" fill="white" />
-                                <rect x="4" y="4" width="16" height="16" rx="5" stroke="white" strokeWidth="1.5" fill="none" />
-                                <defs>
-                                    <linearGradient id="ig" x1="0" y1="24" x2="24" y2="0">
-                                        <stop stopColor="#f09433" />
-                                        <stop offset="0.25" stopColor="#e6683c" />
-                                        <stop offset="0.5" stopColor="#dc2743" />
-                                        <stop offset="0.75" stopColor="#cc2366" />
-                                        <stop offset="1" stopColor="#bc1888" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-                                {/* FEATURED links */}
-                <div className="footer-col">
-                    <h4 className="footer-col-title">FEATURED</h4>
-                    <ul>
-                        <li><Link to="/courses">Courses</Link></li>
-                        <li><Link to="/articles">Articles</Link></li>
-                        <li><Link to="/about">About Us</Link></li>
-                    </ul>
-                </div>
+        <nav className="ft-col" aria-label="Featured">
+          <h4>Featured</h4>
+          <ul>
+            <li><Link to="/courses">Courses</Link></li>
+            <li><Link to="/articles">Articles</Link></li>
+            <li><Link to="/about">About Us</Link></li>
+          </ul>
+        </nav>
 
-                {/* OTHER links */}
-                <div className="footer-col">
-                    <h4 className="footer-col-title">OTHER</h4>
-                    <ul>
-                        <li><Link to="/contact">Contact Us</Link></li>
-                        <li><Link to="/feedback">Feedback</Link></li>
-                        <li><Link to="/privacy-policy">Privacy Policy</Link></li>
-                        <li><Link to="/termsofservice">Terms of Service</Link></li>
-                    </ul>
-                </div>
+        <nav className="ft-col" aria-label="Other">
+          <h4>Other</h4>
+          <ul>
+            <li><Link to="/contact">Contact Us</Link></li>
+            <li><Link to="/feedback">Feedback</Link></li>
+            <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+            <li><Link to="/termsofservice">Terms of Service</Link></li>
+          </ul>
+        </nav>
 
-                {/* NEWSLETTER */}
-                <div className="footer-col footer-newsletter">
-                    <h4 className="footer-col-title">NEWSLETTER</h4>
-                        <input
-                            type="email"
-                            placeholder="Enter your email address"
-                            className="footer-email-input"
-                        />
-                        <button className="footer-subscribe-btn">Subscribe Now</button>
-                   
-                </div>
+        <div className="ft-news">
+          <h4>Newsletter</h4>
+          <Newsletter />
+        </div>
+      </div>
 
-            </div>
-
-           
-                <div className="footer-bottom">
-                    <p>© Copyright 2025, All Rights Reserved by FinEd.</p>
-                </div>
-
-        </footer>
-    );
+      <div className="ft-bottom">
+        <p>© Copyright {new Date().getFullYear()}, All Rights Reserved by FinEd.</p>
+      </div>
+    </footer>
+  );
 }

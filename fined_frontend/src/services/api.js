@@ -36,16 +36,48 @@ const adjacentArticlesCache = new Map();
 const authorProfileCache = new Map();
 const CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutes cache for instant navigation & reading
 
+const STORAGE_KEY_ARTICLES = "fined_articles_cache_v2";
+
+export function getLocalCachedArticles() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY_ARTICLES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    // sessionStorage unavailable
+  }
+  return null;
+}
+
+export function setLocalCachedArticles(articles) {
+  try {
+    if (Array.isArray(articles) && articles.length > 0) {
+      sessionStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(articles));
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
 export function getCachedArticle(slug) {
   if (!slug) return null;
   const entry = singleArticleCache.get(slug);
-  return entry ? entry.data : null;
+  return (entry && entry.data && entry.data.content) ? entry.data : null;
 }
 
 export function clearArticleCache() {
   articleCache.clear();
   singleArticleCache.clear();
   adjacentArticlesCache.clear();
+  try {
+    sessionStorage.removeItem(STORAGE_KEY_ARTICLES);
+  } catch (e) {
+    // ignore
+  }
 }
 
 export async function prefetchArticle(slug) {
@@ -68,23 +100,30 @@ export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {})
     }
   }
 
-  const data = await request("/articles/getall", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ limit, offset, tag }),
+  const params = new URLSearchParams();
+  if (limit) params.append("limit", limit);
+  if (offset) params.append("offset", offset);
+  if (tag) params.append("tag", tag);
+  const queryStr = params.toString() ? `?${params.toString()}` : "";
+
+  const data = await request(`/articles${queryStr}`, {
+    method: "GET",
   });
   
   const now = Date.now();
   
-  // Prime single article cache
+  // Prime single article cache only if content is present
   const articles = Array.isArray(data) ? data : (data.articles || []);
   articles.forEach(article => {
-    if (article.slug) {
+    if (article.slug && article.content) {
       singleArticleCache.set(article.slug, { data: article, timestamp: now });
     }
   });
 
   articleCache.set(cacheKey, { data, timestamp: now });
+  if (offset === 0 && (!tag || tag === "all")) {
+    setLocalCachedArticles(articles);
+  }
   
   return data;
 }
@@ -299,6 +338,15 @@ export function getBundleByCardSlug(cardSlug, email) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email || "" }),
+  });
+}
+
+// Newsletter sign-up (signed-in users; saved against their account).
+export function saveNewsletterEmail(email, enteredEmail) {
+  return request("/articles/saveemail", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, enteredEmail }),
   });
 }
 

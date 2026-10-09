@@ -115,9 +115,12 @@ class UserRepository:
         except Exception as e:
             print(f"Warning: Failed to log score change for {email}: {e}")
     
-    def get_score_logs(self, email: str) -> list:
-        res = supabase.from_("finScoreLogs").select("*").eq("email", email)\
-            .order("created_at", desc=True).execute()
+    def get_score_logs(self, email: str, limit: int = 10) -> list:
+        query = supabase.from_("finScoreLogs").select("change, description, created_at").eq("email", email)\
+            .order("created_at", desc=True)
+        if limit:
+            query = query.limit(limit)
+        res = query.execute()
         return res.data or []
 
     def get_leaderboard(self, limit: int = None, timeframe: str = "all_time") -> list:
@@ -181,9 +184,10 @@ class UserRepository:
             
         return ranked
 
-    def get_rank(self, email: str) -> int:
+    def get_rank(self, email: str, user: dict = None) -> int:
         """Get rank via a single COUNT query instead of fetching all users."""
-        user = self.get_by_email(email)
+        if not user:
+            user = self.get_by_email(email)
         if not user:
             return 1
         

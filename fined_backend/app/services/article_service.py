@@ -18,11 +18,27 @@ class ArticleService:
         self._author_cache_ttl = 30
         self._author_profile_cache = {}
         self._author_profile_cache_ttl = 30
+        self._all_articles_cache = {}
+        self._all_articles_cache_ttl = 60  # 60 seconds memory cache
 
+    def clear_cache(self):
+        self._all_articles_cache.clear()
+        self._slug_cache.clear()
+        self._author_cache.clear()
+        self._author_profile_cache.clear()
 
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
-        """Fetch all articles — equivalent to getAllArticles"""
-        return article_repo.get_all(limit=limit, offset=offset, tag=tag)
+        """Fetch all articles with in-memory caching — rapid responses without hitting DB every time"""
+        cache_key = f"{limit}:{offset}:{tag or 'all'}"
+        now = time.time()
+        if cache_key in self._all_articles_cache:
+            entry, timestamp = self._all_articles_cache[cache_key]
+            if now - timestamp < self._all_articles_cache_ttl:
+                return entry
+
+        articles = article_repo.get_all(limit=limit, offset=offset, tag=tag)
+        self._all_articles_cache[cache_key] = (articles, now)
+        return articles
 
     def get_by_slug(self, slug: str) -> dict | None:
         """Fetch a specific article directly by its slug with in-memory caching and fallback for legacy articles."""
@@ -121,8 +137,7 @@ class ArticleService:
         else:
             final_slug = self._generate_slug(title)
         
-        self._slug_cache.clear()
-        self._author_profile_cache.clear()
+        self.clear_cache()
         
         return article_repo.insert(
             title=title,
@@ -140,6 +155,10 @@ class ArticleService:
             editor_summary=editor_summary,
             metadata=metadata
         )
+
+    def delete(self, article_id: str):
+        self.clear_cache()
+        return article_repo.delete(article_id)
         
     def get_all_authors(self) -> list:
         return article_repo.get_all_authors()

@@ -47,7 +47,7 @@
 }
 
 .contact-hero-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 800;
   line-height: 1.18;
@@ -131,7 +131,7 @@
 }
 
 .contact-email-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 19px;
   font-weight: 750;
   color: #171321;
@@ -361,7 +361,7 @@
 }
 
 .contact-form-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 22px;
   font-weight: 800;
   color: #171321;

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchArticles } from "../../services/api";
+import { fetchArticles, getLocalCachedArticles } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
@@ -40,9 +40,15 @@ function ArticlesPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [articles, setArticles] = useState([]);
+  // Stale-While-Revalidate: load immediately from session cache (0ms paint)
+  const [articles, setArticles] = useState(() => {
+    return getLocalCachedArticles() || [];
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [fetchingArticle, setFetchingArticle] = useState(false);
+  const [fetchingArticle, setFetchingArticle] = useState(() => {
+    const cached = getLocalCachedArticles();
+    return !cached || cached.length === 0;
+  });
   const [error, setError] = useState("");
   const exploreSectionRef = useRef(null);
 
@@ -59,7 +65,13 @@ function ArticlesPage() {
   }, []);
 
   const loadArticles = async () => {
-    setFetchingArticle(true);
+    // Only show skeleton on first ever load when cache is empty
+    setArticles((current) => {
+      if (!current || current.length === 0) {
+        setFetchingArticle(true);
+      }
+      return current;
+    });
     setError("");
     try {
       let incoming = [];
@@ -79,7 +91,12 @@ function ArticlesPage() {
 
       setArticles(incoming);
     } catch (err) {
-      setError(err.message || "Failed to load articles.");
+      setArticles((current) => {
+        if (!current || current.length === 0) {
+          setError(err.message || "Failed to load articles.");
+        }
+        return current;
+      });
     } finally {
       setFetchingArticle(false);
     }

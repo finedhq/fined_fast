@@ -6,9 +6,10 @@ router = APIRouter(prefix="/authors", tags=["Authors"])
 
 @router.get("/")
 def get_all_authors():
-    """Fetch all authors (used for admin dropdowns)"""
+    """Fetch all authors (admin dropdowns, the landing page's experts). Public,
+    so authors' private email addresses are left out."""
     try:
-        return article_service.get_all_authors()
+        return [{k: v for k, v in a.items() if k != "email"} for a in article_service.get_all_authors()]
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

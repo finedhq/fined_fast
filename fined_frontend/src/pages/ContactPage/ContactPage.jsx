@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { sendContactQuery } from "../../services/api";
+import { trackFormSubmission } from "../../utils/analytics";
 import toast from "react-hot-toast";
 import Lenis from "lenis";
 import RevealOnScroll from "../../components/RevealOnScroll";
@@ -62,6 +63,7 @@ export default function ContactPage() {
     try {
       const fullMessage = `[Topic: ${selectedTopic}]\n\n${message.trim()}`;
       const res = await sendContactQuery(name.trim(), email.trim(), fullMessage);
+      trackFormSubmission("contact", { topic: selectedTopic });
       setSubmitStatus({
         type: "success",
         text: res.message || "Thank you! Your message has been sent. We'll be in touch soon."

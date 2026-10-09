@@ -63,8 +63,15 @@ class ArticleRepository:
                 self._enrich_reviewer(a, authors_map)
         return articles
 
+    ARTICLE_CARD_FIELDS = (
+        "id, title, slug, description, image_url, tag, status, created_at, published_at, "
+        "scheduled_at, author_id, reviewer_id, editor_summary, metadata, "
+        "authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), "
+        "reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)"
+    )
+
     def get_all(self, limit: int = 30, offset: int = 0, tag: str | None = None) -> list:
-        query = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)").eq("status", "published")
+        query = supabase.from_("articles").select(self.ARTICLE_CARD_FIELDS).eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
         res = query.order("created_at", desc=True)\
@@ -73,7 +80,7 @@ class ArticleRepository:
         return self._enrich_reviewers_list(articles)
 
     def get_all_admin(self, limit: int = 50, offset: int = 0, status: str | None = None) -> list:
-        query = supabase.from_("articles").select("*, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")
+        query = supabase.from_("articles").select(self.ARTICLE_CARD_FIELDS)
         if status and status != "all":
             query = query.eq("status", status)
         res = query.order("created_at", desc=True)\

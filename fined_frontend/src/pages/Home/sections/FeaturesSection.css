@@ -1,0 +1,284 @@
+/* ── "Everything you need…" (FeaturesSection.jsx) ─────────────────────
+   The ORIGINAL landing page's styles for this section (from the old
+   Hero.css), with its duplicate rules merged to the values that applied,
+   scoped under .lp-wf so nothing leaks out. */
+.lp-wf.why-fined-section {
+  /* White, like the illustrations' own backgrounds, so they blend in */
+  background: var(--lp-surface);
+  padding: 120px 80px 64px;
+  /* Same type as the rest of the page: Plus Jakarta Sans headings, Inter text */
+  font-family: var(--lp-font-body);
+  color: var(--lp-ink);
+}
+
+.lp-wf .wf-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.lp-wf .wf-title {
+  font-size: clamp(32px, 3vw, 48px);
+  font-weight: 800;
+  color: var(--lp-ink);
+  line-height: 1.2;
+  margin: 0 0 11px;
+  font-family: var(--lp-font-display);
+  letter-spacing: -0.03em;
+  /* Even line lengths, so no word is left alone on the last line */
+  text-wrap: balance;
+}
+
+.lp-wf .wf-title-underline {
+  width: 400px;
+  max-width: 100%;
+  height: 20px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 30' preserveAspectRatio='none'%3E%3Cpath d='M 10 22 Q 200 0 390 12' stroke='%23FFB600' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center;
+  background-size: 100% 100%;
+  margin: -9px auto 18px;
+}
+
+.lp-wf .wf-highlight {
+  color: var(--lp-purple);
+}
+
+.lp-wf .pc-subtitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Rows */
+.lp-wf .wf-rows-container {
+  position: relative;
+}
+
+.lp-wf .wf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 60px;
+  padding: 40px 0;
+}
+
+.lp-wf .wf-img-placeholder {
+  border-radius: 20px;
+  height: 400px;
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-wf .wf-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+}
+
+.lp-wf .wf-content {
+  font-size: 21px;
+  max-width: 600px;
+}
+
+.lp-wf #wf-row-2 .wf-content,
+.lp-wf #wf-row-4 .wf-content {
+  padding-left: 75px;
+}
+
+.lp-wf #wf-row-4 {
+  padding-left: 69px;
+}
+
+.lp-wf .wf-step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.lp-wf .wf-step-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--lp-ink);
+  margin: 0;
+  font-family: var(--lp-font-display);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.lp-wf .wf-tick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.lp-wf .wf-tick-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.lp-wf .wf-tick-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--lp-purple-surface);
+  color: var(--lp-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.lp-wf .wf-tick-text {
+  font-size: 17px;
+  color: var(--lp-ink-2);
+  font-family: var(--lp-font-body);
+  line-height: 1.6;
+}
+
+/* The connecting paths */
+.lp-wf .wf-path-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
+
+.lp-wf .wf-connector-path {
+  fill: none;
+  stroke: var(--lp-electric);
+  stroke-width: 3.5;
+  stroke-dasharray: 12 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+@media (max-width: 900px) {
+  .lp-wf.why-fined-section {
+    padding: 48px 24px;
+  }
+
+  .lp-wf .wf-title-underline {
+    display: none;
+  }
+
+  .lp-wf .wf-highlight {
+    color: var(--lp-purple);
+  }
+
+  .lp-wf .wf-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 16px 24px;
+  }
+
+  .lp-wf .wf-img-placeholder {
+    height: 240px;
+    width: 100%;
+  }
+
+  .lp-wf #wf-row-2 .wf-content,
+  .lp-wf #wf-row-4 .wf-content,
+  .lp-wf #wf-row-4 {
+    padding-left: 0;
+  }
+
+  .lp-wf .wf-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+  }
+
+  .lp-wf .wf-step-header {
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .lp-wf .wf-tick-list {
+    margin-top: 12px;
+    gap: 12px;
+  }
+
+  /* Rows whose text comes first: show the image first on phones */
+  .lp-wf #wf-row-2,
+  .lp-wf #wf-row-4 {
+    flex-direction: column-reverse;
+  }
+
+  .lp-wf .wf-step-title {
+    font-size: 32px;
+  }
+
+  .lp-wf .wf-header .pc-subtitle {
+    margin-top: 16px;
+  }
+
+  .lp-wf .wf-path-svg {
+    display: none;
+  }
+}
+
+/* Phones: the original's look, scaled for a small screen (its own phone
+   styles left this section about four screens tall). */
+@media (max-width: 640px) {
+  .lp-wf.why-fined-section {
+    padding: 56px 16px 24px;
+  }
+
+  .lp-wf .wf-header {
+    margin-bottom: 24px;
+  }
+
+  .lp-wf .wf-title {
+    font-size: 26px;
+  }
+
+  .lp-wf .wf-row {
+    margin-bottom: 20px;
+    padding: 8px 0;
+  }
+
+  .lp-wf .wf-img-placeholder {
+    height: 190px;
+  }
+
+  .lp-wf .wf-content {
+    font-size: 16px;
+    align-items: flex-start;
+  }
+
+  .lp-wf .wf-step-header {
+    justify-content: flex-start;
+    text-align: left;
+    margin: 12px 0 4px;
+  }
+
+  .lp-wf .wf-step-title {
+    font-size: 24px;
+  }
+
+  .lp-wf .wf-tick-list {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .lp-wf .wf-tick-icon {
+    margin-top: 2px;
+  }
+
+  .lp-wf .wf-tick-text {
+    font-size: 15.5px;
+    line-height: 1.5;
+  }
+}

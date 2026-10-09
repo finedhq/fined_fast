@@ -1,5 +1,6 @@
 import { Auth0Provider } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { trackAuthLogin } from "../utils/analytics";
 
 export const Auth0ProviderWithNavigate = ({ children }) => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export const Auth0ProviderWithNavigate = ({ children }) => {
   const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
   const onRedirectCallback = (appState) => {
+    trackAuthLogin("auth0");
     navigate(appState?.returnTo || '/dashboard');
   };
 

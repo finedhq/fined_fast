@@ -21,10 +21,13 @@
 // draw whatever their `config` says, and Handoff switches from one to another
 // part-way through a chapter. A new chapter using them = a new entry here with
 // its own config (numbers in e.g. module2Figures.js) — no new component.
+// TradeMap (Module 4 on) takes its step count from its config: `steps` below
+// is the length of the config's step list.
 import { lazy } from "react";
 import { revealNote } from "./figureMath";
 import { M2_CH1_GRID, M2_CH2_BARS, M2_CH3_GRID, M2_CH3_QUEUE } from "./module2Figures";
 import { M3_CH1_BARS, M3_CH2_RULEBOOK, M3_CH3_VAULT } from "./module3Figures";
+import { M4_CH1_MAP, M4_CH2_MAP, M4_CH3_MAP, M4_CH3_ORDER } from "./module4Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -82,5 +85,28 @@ export const FIGURES = {
     steps: 4,
     component: lazy(() => import("./VaultPreview")),
     config: M3_CH3_VAULT,
+  },
+  trade_map_accounts: {
+    label: "Trade map: three accounts — Module 4 §1",
+    steps: M4_CH1_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: M4_CH1_MAP,
+  },
+  trade_map_brokers: {
+    label: "Trade map: same exchange, different doors — Module 4 §2",
+    steps: M4_CH2_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: M4_CH2_MAP,
+  },
+  trade_map_settlement: {
+    label: "Trade map → put it in order (3.3) → map — Module 4 §3",
+    steps: M4_CH3_MAP.steps.length,
+    component: lazy(() => import("./Handoff")),
+    config: {
+      at: 2,
+      until: 3,
+      before: { figure: "trade_map", config: M4_CH3_MAP },
+      after: { figure: "liquidation_queue", config: M4_CH3_ORDER },
+    },
   },
 };

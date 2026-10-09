@@ -5,10 +5,14 @@
 // then shows the real order: the pot drains down the queue and runs out
 // before it reaches the owners. The answer is saved (state.queueOrder) and
 // stays answered; a restored answer is shown without replaying the animation.
+// Optional `playOut: {kind: "timeline", button, title, days}` (Module 4 on)
+// plays the right order out on a day-by-day timeline instead of the pot, and
+// `labels` renames the columns; `feedbackId` picks the item the feedback names.
 import { useEffect, useState } from "react";
 import { inrFull, payOut, placesRight, queueFeedback } from "./blocksMath";
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+const LABELS = { items: "Groups", slots: "Paid in this order", slot: "Paid" };
 
 export default function LiquidationQueue({ config, state, onState }) {
   const { claimants, pot } = config;
@@ -17,6 +21,8 @@ export default function LiquidationQueue({ config, state, onState }) {
   const order = state.queueOrder;
   const revealed = Array.isArray(order) && order.length === n;
   const label = (id) => claimants.find((c) => c.id === id)?.label;
+  const words = { ...LABELS, ...config.labels };
+  const timeline = config.playOut?.kind === "timeline";
 
   // Animate only a fresh answer, not one restored from earlier.
   const [animate, setAnimate] = useState(false);
@@ -60,8 +66,8 @@ export default function LiquidationQueue({ config, state, onState }) {
       <div className="lq-figure">
         <p className="lq-prompt">{config.prompt}</p>
         <div className="lq-board">
-        <div className="lq-pool" aria-label="Groups waiting to be placed">
-          <span className="lq-col-label">Groups</span>
+        <div className="lq-pool" aria-label={`${words.items} waiting to be placed`}>
+          <span className="lq-col-label">{words.items}</span>
           {pool.map((id) => (
             <button key={id} type="button" className="lq-card" draggable onDragStart={onDragStart(id)} onClick={() => place(id)}>
               {label(id)}
@@ -69,30 +75,69 @@ export default function LiquidationQueue({ config, state, onState }) {
           ))}
           {!pool.length && <span className="lq-pool-empty">All placed. Tap one to take it back.</span>}
         </div>
-        <ol className="lq-slots" aria-label="Paid in this order">
+        <ol className="lq-slots" aria-label={words.slots}>
           {slots.map((id, i) => (
             <li key={i} className={`lq-slot${id ? " filled" : ""}`} onDragOver={(e) => e.preventDefault()} onDrop={onDrop(i)}>
               <span className="lq-slot-num">{ORDINALS[i]}</span>
               {id ? (
-                <button type="button" className="lq-card lq-card--placed" draggable onDragStart={onDragStart(id)} onClick={() => takeBack(i)} aria-label={`${label(id)}, paid ${ORDINALS[i]}. Tap to take back.`}>
+                <button type="button" className="lq-card lq-card--placed" draggable onDragStart={onDragStart(id)} onClick={() => takeBack(i)} aria-label={`${label(id)}, ${words.slot.toLowerCase()} ${ORDINALS[i]}. Tap to take back.`}>
                   {label(id)}
                 </button>
               ) : (
-                <span className="lq-slot-empty">Paid {ORDINALS[i]}</span>
+                <span className="lq-slot-empty">{words.slot} {ORDINALS[i]}</span>
               )}
             </li>
           ))}
         </ol>
         </div>
         <button type="button" className="lq-go" disabled={!full} onClick={payOutNow}>
-          Pay out {inrFull(pot)}
+          {timeline ? config.playOut.button : `Pay out ${inrFull(pot)}`}
         </button>
       </div>
     );
   }
 
-  const paid = payOut(claimants, config.correctOrder, pot);
   const right = placesRight(order, config.correctOrder);
+  const yours = (
+    <>
+      <div className="lq-yours">
+        Your order: {order.map((id, i) => `${i + 1}. ${label(id)}`).join(" · ")} — {right} of {n} places right.
+      </div>
+      <div className="lq-feedback" aria-live="polite">
+        {queueFeedback(config, order)}
+      </div>
+    </>
+  );
+
+  if (timeline) {
+    return (
+      <div className={`lq-figure lq-figure--revealed${animate ? " lq-figure--animate" : ""}`}>
+        <p className="lq-prompt">{config.playOut.title}</p>
+        <ol className="lq-days">
+          {config.playOut.days.map((day) => (
+            <li key={day.label} className="lq-day">
+              <span className="lq-day-label">{day.label}</span>
+              <ol className="lq-result">
+                {day.items.map((id) => {
+                  const i = config.correctOrder.indexOf(id);
+                  return (
+                    <li key={id} className={`lq-row lq-row--event${id === config.feedbackId ? " lq-row--key" : ""}`} style={{ "--lq-delay": `${i * 0.45}s` }}>
+                      <span className="lq-row-name">
+                        {ORDINALS[i]} · {label(id)}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </li>
+          ))}
+        </ol>
+        {yours}
+      </div>
+    );
+  }
+
+  const paid = payOut(claimants, config.correctOrder, pot);
   return (
     <div className={`lq-figure lq-figure--revealed${animate ? " lq-figure--animate" : ""}`}>
       <p className="lq-prompt">What the law actually does with {inrFull(pot)}:</p>
@@ -116,12 +161,7 @@ export default function LiquidationQueue({ config, state, onState }) {
           </li>
         ))}
       </ol>
-      <div className="lq-yours">
-        Your order: {order.map((id, i) => `${i + 1}. ${label(id)}`).join(" · ")} — {right} of {n} places right.
-      </div>
-      <div className="lq-feedback" aria-live="polite">
-        {queueFeedback(config, order)}
-      </div>
+      {yours}
     </div>
   );
 }

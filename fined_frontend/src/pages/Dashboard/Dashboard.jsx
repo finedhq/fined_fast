@@ -110,19 +110,55 @@ function DashboardSkeleton() {
   );
 }
 
+const DASHBOARD_CACHE_PREFIX = "fined_dashboard_data_";
+
+function getCachedDashboard(email) {
+  try {
+    const key = email ? `${DASHBOARD_CACHE_PREFIX}${email}` : `${DASHBOARD_CACHE_PREFIX}default`;
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedDashboard(email, data) {
+  try {
+    const key = email ? `${DASHBOARD_CACHE_PREFIX}${email}` : `${DASHBOARD_CACHE_PREFIX}default`;
+    sessionStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // ignore sessionStorage errors
+  }
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const { profile, refreshProfile } = useUserProfile();
 
-  const [userData, setUserData] = useState({});
-  const [ongoingCourse, setOngoingCourse] = useState({});
-  const [loadingData, setLoadingData] = useState(true);
+  const [userData, setUserData] = useState(() => {
+    const c = getCachedDashboard();
+    return c?.userData || {};
+  });
+  const [ongoingCourse, setOngoingCourse] = useState(() => {
+    const c = getCachedDashboard();
+    return c?.ongoingCourse || {};
+  });
+  const [recommendedCourses, setRecommendedCourses] = useState(() => {
+    const c = getCachedDashboard();
+    return c?.recommendedCourses || [];
+  });
+  const [recommendedArticles, setRecommendedArticles] = useState(() => {
+    const c = getCachedDashboard();
+    return c?.recommendedArticles || [];
+  });
+
+  const [loadingData, setLoadingData] = useState(() => {
+    const c = getCachedDashboard();
+    return !c?.userData || !c.userData.streak_count;
+  });
   const [error, setError] = useState("");
   const [showScoreInfo, setShowScoreInfo] = useState(false);
-
-  const [recommendedCourses, setRecommendedCourses] = useState([]);
-  const [recommendedArticles, setRecommendedArticles] = useState([]);
 
   useEffect(() => {
     const lenis = new Lenis();
@@ -136,8 +172,25 @@ const Dashboard = () => {
     };
   }, []);
 
+  // When user profile loads from Auth0, hydrate user-specific cache if available
+  useEffect(() => {
+    if (!user?.email) return;
+    const cached = getCachedDashboard(user.email);
+    if (cached?.userData) {
+      setUserData(cached.userData);
+      if (cached.ongoingCourse) setOngoingCourse(cached.ongoingCourse);
+      if (cached.recommendedCourses) setRecommendedCourses(cached.recommendedCourses);
+      if (cached.recommendedArticles) setRecommendedArticles(cached.recommendedArticles);
+      setLoadingData(false);
+    }
+  }, [user?.email]);
+
   async function fetchData(userEmail, userId) {
-    setLoadingData(true);
+    const cached = getCachedDashboard(userEmail);
+    const hasCache = Boolean(cached?.userData || (userData && userData.streak_count !== undefined));
+    if (!hasCache) {
+      setLoadingData(true);
+    }
     try {
       // 1. Fire /home/getdata and recommended articles in parallel!
       const [homeRes, articlesRes] = await Promise.all([
@@ -145,12 +198,20 @@ const Dashboard = () => {
         fetchArticles({ limit: 6, offset: 0 }).catch(() => ({ articles: [] }))
       ]);
 
+      let newUserData = null;
+      let newOngoingCourse = null;
+      let newRecommendedCourses = [];
+
       if (homeRes.data?.userData) {
-        setUserData(homeRes.data.userData);
-        setOngoingCourse(homeRes.data.ongoingCourseData || {});
+        newUserData = homeRes.data.userData;
+        newOngoingCourse = homeRes.data.ongoingCourseData || {};
         // Use recommendedCourses already provided by /home/getdata (no separate call needed!)
         const courses = homeRes.data.recommendedCourses || [];
-        setRecommendedCourses(courses.slice(0, 1));
+        newRecommendedCourses = courses.slice(0, 1);
+
+        setUserData(newUserData);
+        setOngoingCourse(newOngoingCourse);
+        setRecommendedCourses(newRecommendedCourses);
       }
 
       const allArticles = Array.isArray(articlesRes) ? articlesRes : (articlesRes.articles || []);
@@ -158,8 +219,19 @@ const Dashboard = () => {
         .sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
       setRecommendedArticles(sortedArticles);
 
+      if (newUserData) {
+        setCachedDashboard(userEmail, {
+          userData: newUserData,
+          ongoingCourse: newOngoingCourse,
+          recommendedCourses: newRecommendedCourses,
+          recommendedArticles: sortedArticles
+        });
+      }
+      setError("");
     } catch {
-      setError("Failed to fetch your data.");
+      if (!hasCache) {
+        setError("Failed to fetch your data.");
+      }
     } finally {
       setLoadingData(false);
     }
@@ -175,7 +247,9 @@ const Dashboard = () => {
       refreshProfile();
     }).catch(err => {
       console.error("Error fetching access token", err);
-      setError("Authentication error. Please log in again.");
+      if (!userData || !userData.streak_count) {
+        setError("Authentication error. Please log in again.");
+      }
       setLoadingData(false);
     });
   }, [isLoading, isAuthenticated, user, getAccessTokenSilently, refreshProfile]);

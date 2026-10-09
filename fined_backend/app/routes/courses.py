@@ -3,7 +3,7 @@ import asyncio
 import re
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Response
 from pydantic import BaseModel, Field, ValidationError
 from typing import Optional, Dict, Any, List
 
@@ -122,8 +122,9 @@ async def add_course(
 
 
 @router.get("/getall")
-async def get_all_courses():
+async def get_all_courses(response: Response):
     """Fetch all published courses — public"""
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=300"
     try:
         return await asyncio.to_thread(course_repo.get_listed)
     except Exception as e:
@@ -201,22 +202,24 @@ async def delete_course(id: str, user: AuthUser = Depends(require_admin)):
 async def get_ongoing_course(body: GetOngoingCourseRequest, user: AuthUser = Depends(get_optional_current_user)):
     """Fetch user's current in-progress course"""
     try:
+        target_email = (user.email if user and user.email else body.email)
+        if not target_email:
+            return {"error": "No ongoing course found for this user."}
+
         # Get user's ongoing course ID
-        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("ongoing_course_id").eq("email", user.email).limit(1).execute())
+        user_res = await asyncio.to_thread(lambda: supabase.from_("users").select("ongoing_course_id").eq("email", target_email).limit(1).execute())
         user_data = user_res.data[0] if user_res and user_res.data else None
         course_id = user_data.get("ongoing_course_id") if user_data else None
         
         if not course_id:
             return {"error": "No ongoing course found for this user."}
             
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_id).limit(1).execute())
-        # Only a published course is "continue learning" — not a draft, and not
-        # an archived course that was replaced (it still opens by old links).
-        if course_res and course_res.data and not is_listed(course_res.data[0]):
+        course = await asyncio.to_thread(course_repo.get_by_id_cached, course_id)
+        if not course or not is_listed(course):
             return {"error": "No ongoing course found for this user."}
-        if not (course_res and course_res.data):
-            return {}
-        return (await asyncio.to_thread(course_repo.with_released_counts, [course_res.data[0]]))[0]
+        if "modules_count" not in course:
+            course = (await asyncio.to_thread(course_repo.with_released_counts, [course]))[0]
+        return course
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

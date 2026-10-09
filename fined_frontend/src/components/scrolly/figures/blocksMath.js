@@ -119,11 +119,15 @@ export function positionWord(index, count) {
   return index === count - 1 ? "last" : POSITION_WORDS[index] || `number ${index + 1}`;
 }
 
-/** The feedback line for the reader's order (their guess vs the law's). */
+/**
+ * The feedback line for the reader's order: where they put one named item
+ * (`feedbackId`, or `ownerId` in Module 2) against where it really goes.
+ */
 export function queueFeedback(config, order) {
   if (!order || order.length !== config.claimants.length) return "";
-  const at = order.indexOf(config.ownerId);
-  if (at === order.length - 1) return config.feedback.right;
+  const id = config.feedbackId ?? config.ownerId;
+  const at = order.indexOf(id);
+  if (at === config.correctOrder.indexOf(id)) return config.feedback.right;
   return config.feedback.wrong.replace("{position}", positionWord(at, order.length));
 }
 
@@ -161,4 +165,36 @@ export function rulebookScene(rule, phase, { priceBefore, priceAfter }) {
     feedback: "With the rulebook on, the fall still happened. What changed is who got to act on it first.",
     dot: () => "sold-together",
   };
+}
+
+// ── Trade map (Module 4 on) ────────────────────────────────────────────────
+/**
+ * The map's state at a step position. A `null` entry (a step where the
+ * chapter shows another figure) falls back to the step before it; before the
+ * reader arrives, the first step.
+ */
+export function mapStep(config, step) {
+  const at = Math.min(Math.max(step ?? 0, 0), config.steps.length - 1);
+  for (let i = at; i >= 0; i -= 1) if (config.steps[i]) return config.steps[i];
+  return config.steps.find(Boolean);
+}
+
+/**
+ * Where a line from box `a` to box `b` should start and end so it stops at
+ * the two boxes' edges instead of their centres. Points and half-sizes in px.
+ */
+export function edgeLine(a, b, halfW, halfH, gap = 4) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  if (!dx && !dy) return null;
+  // Fraction of the way from a centre to its box edge, along the line.
+  const t = Math.min(dx ? (halfW + gap) / Math.abs(dx) : Infinity, dy ? (halfH + gap) / Math.abs(dy) : Infinity);
+  if (t >= 0.5) return null; // boxes touch: no room for a line
+  return { x1: a.x + dx * t, y1: a.y + dy * t, x2: b.x - dx * t, y2: b.y - dy * t };
+}
+
+/** Screen-reader line for a map step: its caption plus any badges. */
+export function mapSummary(config, s) {
+  const badges = Object.entries(s.badges || {}).map(([id, text]) => `${config.nodes[id].label}: ${text}.`);
+  return [s.tag && `${s.tag}.`, s.caption, ...badges].filter(Boolean).join(" ");
 }
