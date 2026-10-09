@@ -108,6 +108,7 @@ if os.path.exists(FRONTEND_DIST_DIR):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 import html
+import json
 from app.services.page_shell import get_shell_html, strip_replaced_tags
 
 @app.api_route("/{fallback_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
@@ -135,10 +136,12 @@ async def spa_fallback(fallback_path: str):
     # when the API runs without the frontend on disk (cached in page_shell).
     shell_html = await get_shell_html()
 
-    # Check if request is for a single article (for social crawler preview generation)
+    # Check if request is for a single article or author page (for social crawler preview generation)
     is_article_path = fallback_path.startswith("articles/")
+    is_author_path = fallback_path.startswith("authors/")
     lookup_failed = False
     article_missing = False
+    author_missing = False
     if is_article_path:
         slug = fallback_path.split("articles/")[1].strip("/").split("?")[0]
         if slug:
@@ -280,14 +283,119 @@ async def spa_fallback(fallback_path: str):
             except Exception:
                 lookup_failed = True  # Fall back to standard index.html on any error
 
+    elif is_author_path:
+        author_path = fallback_path.split("authors/")[1].strip("/").split("?")[0]
+        parts = [p for p in author_path.split("/") if p]
+        slug = parts[0] if parts else ""
+        if slug:
+            try:
+                author = article_service.get_author_by_slug(slug)
+                if author:
+                    author_name = html.escape(author.get("name") or "FinEd Author")
+                    author_title = f"{author_name} – Author at FinEd"
+                    bio = author.get("bio") or ""
+                    description_full = author.get("description") or bio or f"Financial insights and analysis by {author_name} on FinEd."
+                    meta_desc = html.escape((bio or description_full)[:160].strip())
+                    author_url = f"https://myfined.com/authors/{slug}"
+                    image_url = html.escape(author.get("image_url") or "https://myfined.com/fined_card_banner.png")
+                    linkedin_url = author.get("linkedin_url") or ""
+
+                    # Schema.org Person JSON-LD
+                    schema_data = {
+                        "@context": "https://schema.org",
+                        "@type": "Person",
+                        "name": author.get("name") or "FinEd Author",
+                        "url": author_url,
+                        "image": author.get("image_url") or "https://myfined.com/fined_card_banner.png",
+                        "worksFor": {
+                            "@type": "Organization",
+                            "name": "FinEd",
+                            "url": "https://myfined.com"
+                        }
+                    }
+                    if bio:
+                        schema_data["jobTitle"] = bio
+                    if author.get("description"):
+                        schema_data["description"] = author.get("description")
+                    elif bio:
+                        schema_data["description"] = bio
+                    if linkedin_url:
+                        schema_data["sameAs"] = [linkedin_url]
+
+                    schema_json = json.dumps(schema_data, ensure_ascii=False)
+
+                    seo_meta_tags = f"""
+  <title>{author_title}</title>
+  <meta name="description" content="{meta_desc}" />
+  <link rel="canonical" href="{author_url}" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="profile" />
+  <meta property="og:site_name" content="FinEd" />
+  <meta property="og:title" content="{author_title}" />
+  <meta property="og:description" content="{meta_desc}" />
+  <meta property="og:image" content="{image_url}" />
+  <meta property="og:url" content="{author_url}" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@FinEd" />
+  <meta name="twitter:title" content="{author_title}" />
+  <meta name="twitter:description" content="{meta_desc}" />
+  <meta name="twitter:image" content="{image_url}" />
+
+  <!-- Person Structured Data JSON-LD -->
+  <script type="application/ld+json">{schema_json}</script>
+"""
+                    bio_html = f"<p><strong>{html.escape(bio)}</strong></p>" if bio else ""
+                    desc_html = f"<p>{html.escape(author.get('description') or '')}</p>" if author.get('description') else ""
+                    linkedin_html = f'<p><a href="{html.escape(linkedin_url)}" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a></p>' if linkedin_url else ""
+
+                    # Fetch a few articles by author for crawlable links
+                    author_articles_res = article_service.get_articles_by_author(author.get("id"), limit=10)
+                    author_articles = author_articles_res.get("articles", []) if author_articles_res else []
+                    articles_html = "".join(
+                        f'<li><a href="https://myfined.com/articles/{html.escape(a.get("slug") or "")}">{html.escape(a.get("title") or "")}</a></li>'
+                        for a in author_articles if a.get("title")
+                    )
+                    articles_list_html = f"<h3>Articles by {author_name}</h3><ul>{articles_html}</ul>" if articles_html else ""
+
+                    crawler_noscript = f"""
+  <noscript>
+    <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6;">
+      <h1>{author_name}</h1>
+      {bio_html}
+      {desc_html}
+      {linkedin_html}
+      {articles_list_html}
+    </div>
+  </noscript>
+"""
+                    if shell_html and "</head>" in shell_html:
+                        page_html = strip_replaced_tags(shell_html).replace("</head>", f"{seo_meta_tags}\n</head>", 1)
+                        if '<div id="root"></div>' in page_html:
+                            page_html = page_html.replace('<div id="root"></div>', f'<div id="root">{crawler_noscript}</div>', 1)
+                    else:
+                        page_html = (
+                            '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
+                            '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+                            f'{seo_meta_tags}</head><body><div id="root">{crawler_noscript}</div>'
+                            f'<p><a href="{author_url}">{author_name}</a></p></body></html>'
+                        )
+                    return Response(content=page_html, media_type="text/html")
+                author_missing = True
+            except Exception:
+                lookup_failed = True  # Fall back to standard index.html on any error
+
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
     if shell_html:
-        # Unknown article slug: keep the SPA's own "not found" page but tell crawlers it is a 404
-        return Response(content=shell_html, media_type="text/html", status_code=404 if article_missing else 200)
+        # Unknown article or author slug: keep the SPA's own "not found" page but tell crawlers it is a 404
+        return Response(content=shell_html, media_type="text/html", status_code=404 if (article_missing or author_missing) else 200)
 
-    # No shell available. Never redirect article URLs: the frontend host sends crawlers
-    # for /articles/* straight back here, which makes a redirect loop.
-    if is_article_path:
+    # No shell available. Never redirect article or author URLs: the frontend host sends crawlers
+    # straight back here, which makes a redirect loop.
+    if is_article_path or is_author_path:
         if lookup_failed:
             return Response(content="Temporarily unavailable", status_code=503, headers={"Retry-After": "60"})
         return Response(content="Not found", status_code=404, media_type="text/plain")

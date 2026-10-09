@@ -95,23 +95,127 @@ function AuthorPage() {
     }
   };
 
-  // Lock body scroll when article open
+  // Lock body scroll and sync document title / meta / Person JSON-LD
   useEffect(() => {
     if (selectedArticle) {
       document.body.style.overflow = "hidden";
-      document.title = `${selectedArticle.title} | FinEd`;
       window.dispatchEvent(new CustomEvent("articleReaderOpen"));
-    } else {
-      document.body.style.overflow = "";
-      if (author?.name) {
-        document.title = `${author.name} | FinEd`;
-      }
-      window.dispatchEvent(new CustomEvent("articleReaderClose"));
+      return () => {
+        document.body.style.overflow = "";
+      };
     }
+
+    document.body.style.overflow = "";
+    window.dispatchEvent(new CustomEvent("articleReaderClose"));
+
+    if (!author?.name) return;
+
+    const prevTitle = document.title;
+    const authorName = author.name;
+    const authorTitle = `${authorName} – Author at FinEd`;
+    document.title = authorTitle;
+
+    const bioText = author.bio || author.description || `Read articles and market insights by ${authorName} on FinEd.`;
+    const metaDescText = bioText.length > 160 ? `${bioText.slice(0, 157)}...` : bioText;
+    const authorUrl = `https://myfined.com/authors/${slug}`;
+    const authorImg = author.image_url || "https://myfined.com/fined_card_banner.png";
+
+    const ensureMeta = (sel, attrs) => {
+      let tag = document.head.querySelector(sel);
+      if (!tag) {
+        tag = document.createElement("meta");
+        Object.entries(attrs).forEach(([k, v]) => tag.setAttribute(k, v));
+        document.head.appendChild(tag);
+      }
+      return tag;
+    };
+
+    let canonicalTag = document.head.querySelector('link[rel="canonical"]');
+    const createdCanonical = !canonicalTag;
+    if (!canonicalTag) {
+      canonicalTag = document.createElement("link");
+      canonicalTag.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalTag);
+    }
+    const prevCanonical = canonicalTag.getAttribute("href");
+    canonicalTag.setAttribute("href", authorUrl);
+
+    const metaDesc = ensureMeta('meta[name="description"]', { name: "description" });
+    const ogTitle = ensureMeta('meta[property="og:title"]', { property: "og:title" });
+    const ogDesc = ensureMeta('meta[property="og:description"]', { property: "og:description" });
+    const ogImage = ensureMeta('meta[property="og:image"]', { property: "og:image" });
+    const ogUrl = ensureMeta('meta[property="og:url"]', { property: "og:url" });
+    const ogType = ensureMeta('meta[property="og:type"]', { property: "og:type" });
+    const ogSite = ensureMeta('meta[property="og:site_name"]', { property: "og:site_name" });
+    const twitterCard = ensureMeta('meta[name="twitter:card"]', { name: "twitter:card" });
+    const twitterSite = ensureMeta('meta[name="twitter:site"]', { name: "twitter:site" });
+    const twitterTitle = ensureMeta('meta[name="twitter:title"]', { name: "twitter:title" });
+    const twitterDesc = ensureMeta('meta[name="twitter:description"]', { name: "twitter:description" });
+    const twitterImage = ensureMeta('meta[name="twitter:image"]', { name: "twitter:image" });
+
+    const prevDesc = metaDesc.getAttribute("content");
+    const prevOgT = ogTitle.getAttribute("content");
+    const prevOgD = ogDesc.getAttribute("content");
+    const prevOgI = ogImage.getAttribute("content");
+    const prevTwitterI = twitterImage.getAttribute("content");
+
+    metaDesc.setAttribute("content", metaDescText);
+    ogTitle.setAttribute("content", authorTitle);
+    ogDesc.setAttribute("content", metaDescText);
+    ogImage.setAttribute("content", authorImg);
+    ogUrl.setAttribute("content", authorUrl);
+    ogType.setAttribute("content", "profile");
+    ogSite.setAttribute("content", "FinEd");
+    twitterCard.setAttribute("content", "summary_large_image");
+    twitterSite.setAttribute("content", "@FinEd");
+    twitterTitle.setAttribute("content", authorTitle);
+    twitterDesc.setAttribute("content", metaDescText);
+    twitterImage.setAttribute("content", authorImg);
+
+    // Person Structured Data JSON-LD
+    let scriptTag = document.getElementById("author-person-jsonld");
+    if (!scriptTag) {
+      scriptTag = document.createElement("script");
+      scriptTag.id = "author-person-jsonld";
+      scriptTag.type = "application/ld+json";
+      document.head.appendChild(scriptTag);
+    }
+
+    const personSchema = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: authorName,
+      url: authorUrl,
+      image: authorImg,
+      description: metaDescText,
+      ...(author.bio ? { jobTitle: author.bio } : {}),
+      ...(author.linkedin_url ? { sameAs: [author.linkedin_url] } : {}),
+      worksFor: {
+        "@type": "Organization",
+        name: "FinEd",
+        url: "https://myfined.com"
+      }
+    };
+    scriptTag.textContent = JSON.stringify(personSchema);
+
     return () => {
       document.body.style.overflow = "";
+      document.title = prevTitle;
+      if (prevDesc) metaDesc.setAttribute("content", prevDesc);
+      if (prevOgT) ogTitle.setAttribute("content", prevOgT);
+      if (prevOgD) ogDesc.setAttribute("content", prevOgD);
+      if (prevOgI) ogImage.setAttribute("content", prevOgI);
+      if (prevTwitterI) twitterImage.setAttribute("content", prevTwitterI);
+      if (prevCanonical) {
+        canonicalTag.setAttribute("href", prevCanonical);
+      } else if (createdCanonical && canonicalTag.parentNode) {
+        canonicalTag.parentNode.removeChild(canonicalTag);
+      }
+      if (scriptTag && scriptTag.parentNode) {
+        scriptTag.parentNode.removeChild(scriptTag);
+      }
     };
-  }, [selectedArticle, author]);
+  }, [selectedArticle, author, slug]);
 
   // Handle URL articleSlug changes & deep links
   useEffect(() => {
