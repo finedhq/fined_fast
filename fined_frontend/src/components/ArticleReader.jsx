@@ -581,58 +581,8 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
     return () => el.removeEventListener("scroll", onScroll);
   }, [tocItems]);
 
-  if (!article) return null;
-
-  const scrollToSection = (event, id) => {
-    event.preventDefault();
-
-    const el = document.getElementById(id);
-    const container = scrollRef.current;
-
-    if (el && container) {
-      let collapseOffset = 0;
-      // If the TOC is open on mobile, it will collapse and shift the document UP.
-      // We must subtract its height from the target scroll position.
-      if (isMobileTocOpen && window.innerWidth <= 900) {
-        const tocContent = document.querySelector('.ar-toc-content-wrapper');
-        if (tocContent) {
-          collapseOffset = tocContent.offsetHeight;
-        }
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-
-      // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
-      const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
-
-      container.scrollTo({ top: offset, behavior: "smooth" });
-    } else {
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    setIsMobileTocOpen(false);
-  };
-
-  const publishedDate = formatDate(article.published_at || article.created_at);
-  const updatedDateFormatted = formatDate(article.updated_at);
-  const articleTag = article.tag || "Finance";
-
-  const authorName = article.authors?.name || article.author || "Shravan Mutha";
-  const authorSlug = article.authors?.slug || "shravan-mutha";
-  const authorRole = article.authors?.role || "FinEd Research & Editorial";
-  const authorBio = article.authors?.bio || "Dedicated to breaking down complex financial systems, Indian regulatory frameworks, and market mechanisms into clear, actionable explainers.";
-  const authorLinkedin = article.authors?.linkedin_url || (authorSlug === "shravan-mutha" ? "https://www.linkedin.com/in/shravan-mutha-302247297/" : null);
-  const authorEmail = article.authors?.email || null;
-
-  const tocFontSize = tocItems.length > 16 ? "14px" : tocItems.length > 11 ? "15px" : "16.5px";
-  const tocLineHeight = tocItems.length > 16 ? "1.35" : tocItems.length > 11 ? "1.4" : "1.45";
-  const tocRowPadding =
-    tocItems.length > 16
-      ? "0.25rem 1rem"
-      : tocItems.length > 11
-        ? "0.3rem 1.1rem"
-        : "0.4rem 1.15rem";
+  const authorName = article?.authors?.name || article?.author || "Shravan Mutha";
+  const authorSlug = article?.authors?.slug || "shravan-mutha";
 
   // Build full Schema.org graph (Article, BreadcrumbList, FAQPage)
   const structuredData = useMemo(() => {
@@ -749,7 +699,46 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
       "@context": "https://schema.org",
       "@graph": graph,
     };
-  }, [article, metaDescription, blocks]);
+  }, [article, metaDescription, blocks, authorName, authorSlug]);
+
+  if (!article) return null;
+
+  const scrollToSection = (event, id) => {
+    event.preventDefault();
+
+    const el = document.getElementById(id);
+    const container = scrollRef.current;
+
+    if (el && container) {
+      let collapseOffset = 0;
+      // If the TOC is open on mobile, it will collapse and shift the document UP.
+      // We must subtract its height from the target scroll position.
+      if (isMobileTocOpen && window.innerWidth <= 900) {
+        const tocContent = document.querySelector('.ar-toc-content-wrapper');
+        if (tocContent) {
+          collapseOffset = tocContent.offsetHeight;
+        }
+      }
+
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+
+      // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
+      const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
+
+      container.scrollTo({ top: offset, behavior: "smooth" });
+    } else {
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    setIsMobileTocOpen(false);
+  };
+
+  const publishedDate = formatDate(article.published_at || article.created_at);
+  const updatedDateFormatted = formatDate(article.updated_at);
+  const articleTag = article.tag || "Finance";
+
+
 
   const schemaJson = structuredData ? serializeJsonLd(structuredData) : "";
 

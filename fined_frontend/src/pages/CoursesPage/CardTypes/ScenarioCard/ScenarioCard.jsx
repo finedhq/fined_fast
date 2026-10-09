@@ -10,7 +10,6 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
 
 function ScenarioCard({ card, onContinue }) {
   const { 
-    card_label, 
     title, 
     intro_text = "", 
     stages = [], 

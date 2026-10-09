@@ -232,7 +232,7 @@ function AdminArticleForm() {
     try {
       const parsed = JSON.parse(q.optionsJson);
       handleQuestionChange(idx, "optionsJson", JSON.stringify(parsed, null, 2));
-    } catch (err) {
+    } catch {
       // ignore
     }
   };
@@ -346,7 +346,7 @@ function AdminArticleForm() {
     const end = textarea.selectionEnd;
     const selectedText = form.content.substring(start, end) || "text";
 
-    let inserted = "";
+    let inserted;
     switch (type) {
       case "bold":
         inserted = `**${selectedText}**`;

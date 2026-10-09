@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function SmartImage({
   src,
   alt,
-  fill, // Ignore Next.js fill prop
   width,
   height,
   className = "",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IoSparkles } from "react-icons/io5";
 
 const MICROCOPY_STEPS = [
@@ -9,7 +9,7 @@ const MICROCOPY_STEPS = [
   "Almost ready for your reading flow…"
 ];
 
-export default function GeneratingLens({ answers = {} }) {
+export default function GeneratingLens() {
   const [microcopyIndex, setMicrocopyIndex] = useState(0);
 
   // Microcopy rotation

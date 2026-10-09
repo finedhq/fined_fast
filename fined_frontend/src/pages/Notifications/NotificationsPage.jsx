@@ -1,14 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import instance from '../../lib/axios'
 import toast from 'react-hot-toast'
-import { useNavigate as useRouter } from 'react-router-dom'
 import { useAuth0 as useUser } from '@auth0/auth0-react'
 
 const Notifications = () => {
-
-	const router = useRouter()
 
 	const { user, isLoading } = useUser()
 	const isAuthenticated = !!user;
@@ -19,7 +16,6 @@ const Notifications = () => {
 	const [notifications, setNotifications] = useState([])
 	const [loading, setLoading] = useState(true)
 
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
 	useEffect(() => {
 		if (isLoading || !isAuthenticated) return;
@@ -39,9 +35,9 @@ const Notifications = () => {
 			const res = await instance.post("/home/notifications", { email })
 			if (res.data) {
 				setNotifications(res.data || [])
-				const response = await instance.post("/home/updatenotifications", { email })
+				await instance.post("/home/updatenotifications", { email })
 			}
-		} catch (err) {
+		} catch {
 			toast.error("Failed to load notifications.")
 		} finally {
 			setLoading(false)
@@ -52,10 +48,6 @@ const Notifications = () => {
 		if (!email) return
 		fetchNotifications()
 	}, [email])
-
-	const toggleSidebar = () => {
-		setIsSidebarOpen(!isSidebarOpen);
-	};
 
 	return (
 		<div className="text-[#1e1e1e] bg-gray-100 min-h-screen">

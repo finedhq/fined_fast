@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
   FiX, 
   FiCopy, 
@@ -169,7 +169,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
       awardShareStars();
       trackArticleShare("copy_link", articleTitle);
       setTimeout(() => setCopied(false), 2500);
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy link");
     }
   };

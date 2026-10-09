@@ -1,4 +1,3 @@
-import { useState } from "react";
 
 export const EMPTY_SLIDER_CALCULATOR_DATA = {
   card_type: "slider_calculator",

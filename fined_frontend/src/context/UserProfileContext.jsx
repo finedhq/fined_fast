@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { fetchUserProfile, updateUserProfile } from "../services/api";
 
@@ -131,6 +131,9 @@ export const UserProfileProvider = ({ children }) => {
     </UserProfileContext.Provider>
   );
 };
+
+// For components that also work outside the provider: null instead of throwing
+export const useOptionalUserProfile = () => useContext(UserProfileContext);
 
 export const useUserProfile = () => {
   const context = useContext(UserProfileContext);

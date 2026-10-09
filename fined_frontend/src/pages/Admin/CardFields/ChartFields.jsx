@@ -1,4 +1,3 @@
-import { useState } from "react";
 
 export const EMPTY_CHART_DATA = {
   card_type: "chart",

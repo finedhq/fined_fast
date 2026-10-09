@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import instance from '../../lib/axios';
 import { useAuth0 } from '@auth0/auth0-react';

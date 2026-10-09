@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import instance from "../../lib/axios";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const AddModuleForm = () => {
   const { courseId } = useParams();
-  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     title: '',

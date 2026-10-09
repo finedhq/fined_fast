@@ -4,7 +4,6 @@ import { parseBoldText } from "../../../../utils/textFormatters";
 
 function PillSelectorCard({ card, onContinue }) {
   const {
-    card_label,
     title = "",
     body_text = "",
     output_categories = [],

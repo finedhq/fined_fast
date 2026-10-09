@@ -47,7 +47,7 @@ export function getLocalCachedArticles() {
         return parsed;
       }
     }
-  } catch (e) {
+  } catch {
     // sessionStorage unavailable
   }
   return null;
@@ -58,7 +58,7 @@ export function setLocalCachedArticles(articles) {
     if (Array.isArray(articles) && articles.length > 0) {
       sessionStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(articles));
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 }
@@ -75,7 +75,7 @@ export function clearArticleCache() {
   adjacentArticlesCache.clear();
   try {
     sessionStorage.removeItem(STORAGE_KEY_ARTICLES);
-  } catch (e) {
+  } catch {
     // ignore
   }
 }

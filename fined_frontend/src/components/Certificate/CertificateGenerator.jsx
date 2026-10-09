@@ -1,4 +1,4 @@
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useImperativeHandle, forwardRef } from 'react';
 import './CertificateGenerator.css';
 import footerLogo from '../../assets/fined-footer-logo.webp';
 

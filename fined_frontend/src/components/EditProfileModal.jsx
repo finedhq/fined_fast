@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FiX, FiChevronDown } from "react-icons/fi";
-import { useUserProfile } from "../context/UserProfileContext";
+import { useOptionalUserProfile } from "../context/UserProfileContext";
 
 const CAREER_STAGES = [
   "Student",
@@ -21,12 +21,7 @@ export default function EditProfileModal({
   profile: propProfile,
   onSave: propOnSave,
 } = {}) {
-  let context = null;
-  try {
-    context = useUserProfile();
-  } catch {
-    // context not available
-  }
+  const context = useOptionalUserProfile();
 
   const isControlled = propIsOpen !== undefined;
   const isOpen = isControlled ? propIsOpen : context?.isEditModalOpen;
