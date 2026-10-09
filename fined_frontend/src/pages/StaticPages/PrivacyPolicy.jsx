@@ -1,4 +1,3 @@
-import React from 'react';
 import LegalPage, { Section, Bullets, Callout } from './LegalPage';
 
 const LAST_UPDATED = '4 October 2026';

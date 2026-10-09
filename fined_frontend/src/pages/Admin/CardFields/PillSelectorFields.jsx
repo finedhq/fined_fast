@@ -1,4 +1,3 @@
-import { useState } from "react";
 
 export const EMPTY_PILL_SELECTOR_DATA = {
   card_type: "pill_selector",

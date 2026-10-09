@@ -9,20 +9,71 @@ import RedeemSection from './components/RedeemSection';
 import LeaderboardSection from './components/LeaderboardSection';
 import './RewardsPage.css';
 
+const DASHBOARD_CACHE_PREFIX = "fined_dashboard_data_";
+const LAST_DASHBOARD_KEY = "fined_dashboard_last_data";
+const USER_PROFILE_CACHE_KEY = "fined_user_profile_cache_v2";
+
+function getInitialRewardsData(email) {
+  try {
+    let dash = null;
+    if (email) {
+      const userRaw = localStorage.getItem(`${DASHBOARD_CACHE_PREFIX}${email}`) ||
+                      sessionStorage.getItem(`${DASHBOARD_CACHE_PREFIX}${email}`);
+      if (userRaw) dash = JSON.parse(userRaw);
+    }
+    if (!dash) {
+      const lastRaw = localStorage.getItem(LAST_DASHBOARD_KEY) ||
+                      sessionStorage.getItem(LAST_DASHBOARD_KEY);
+      if (lastRaw) dash = JSON.parse(lastRaw);
+    }
+
+    let profile = null;
+    const profRaw = localStorage.getItem(USER_PROFILE_CACHE_KEY) ||
+                    sessionStorage.getItem(USER_PROFILE_CACHE_KEY);
+    if (profRaw) profile = JSON.parse(profRaw);
+
+    const dUser = dash?.userData || {};
+    return {
+      fin_score: dUser.fin_score ?? profile?.fin_score ?? 0,
+      fin_stars: dUser.fin_stars ?? profile?.fin_stars ?? 0,
+      rank: dUser.rank ?? profile?.rank ?? 1,
+      streak_count: dUser.streak_count ?? profile?.streak_count ?? 1,
+      best_streak: dUser.best_streak ?? dUser.streak_count ?? profile?.streak_count ?? 1,
+      score_delta: dUser.score_delta ?? 0,
+      name: dUser.name || profile?.display_name || "",
+      email: dUser.email || profile?.email || email || "",
+    };
+  } catch {
+    return {
+      fin_score: 0,
+      fin_stars: 0,
+      rank: 1,
+      streak_count: 1,
+      best_streak: 1,
+      score_delta: 0,
+      name: "",
+      email: "",
+    };
+  }
+}
+
+function hasCachedRewardsData(email) {
+  try {
+    if (email && localStorage.getItem(`${DASHBOARD_CACHE_PREFIX}${email}`)) return true;
+    if (localStorage.getItem(LAST_DASHBOARD_KEY)) return true;
+    if (localStorage.getItem(USER_PROFILE_CACHE_KEY)) return true;
+  } catch {}
+  return false;
+}
+
 const RewardsPage = () => {
   const { user, isAuthenticated, isLoading, loginWithRedirect, getAccessTokenSilently } = useAuth0();
   
-  const [userData, setUserData] = useState({
-    fin_score: 0,
-    fin_stars: 0,
-    rank: 1,
-    streak_count: 1,
-    best_streak: 1,
-  });
+  const [userData, setUserData] = useState(() => getInitialRewardsData());
   
   const [timeframe, setTimeframe] = useState('all_time');
   const [leaderboardData, setLeaderboardData] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [loadingData, setLoadingData] = useState(() => !hasCachedRewardsData());
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,49 +96,76 @@ const RewardsPage = () => {
     }
   }, []);
 
-  // 1. Load User Stats once on auth ready
+  // Hydrate user cache once user becomes available
+  useEffect(() => {
+    if (!user?.email) return;
+    const initial = getInitialRewardsData(user.email);
+    setUserData(prev => ({
+      ...prev,
+      ...initial,
+      name: user.name || prev.name || initial.name,
+      email: user.email || prev.email || initial.email
+    }));
+  }, [user?.email, user?.name]);
+
+  // 1. Load User Stats once on auth ready (stale-while-revalidate)
   useEffect(() => {
     if (isLoading) return;
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user?.email) {
       setLoadingData(false);
       return;
     }
 
     async function loadUserData() {
-      setLoadingData(true);
+      const hasCache = hasCachedRewardsData(user.email);
+      if (!hasCache) {
+        setLoadingData(true);
+      }
       setError('');
       try {
-        try {
-          const token = await getAccessTokenSilently();
-          setAuthToken(token);
-        } catch (tokenErr) {
-          console.warn('Could not get silent auth token:', tokenErr);
-        }
-
-        // Fetch user dashboard data
         const res = await instance.post('/home/getdata', {
           email: user.email,
           userId: user.sub
         });
 
         if (res.data?.userData) {
-          setUserData(prev => ({
-            ...prev,
+          const fresh = {
             ...res.data.userData,
             email: user.email,
             name: user.name || user.nickname || (user.email ? user.email.split('@')[0] : 'User')
+          };
+          setUserData(prev => ({
+            ...prev,
+            ...fresh
           }));
+
+          // Sync with dashboard cache so returning to dashboard is seamless
+          try {
+            const rawDash = localStorage.getItem(LAST_DASHBOARD_KEY);
+            const dashObj = rawDash ? JSON.parse(rawDash) : {};
+            dashObj.userData = { ...(dashObj.userData || {}), ...fresh };
+            const serialized = JSON.stringify(dashObj);
+            localStorage.setItem(LAST_DASHBOARD_KEY, serialized);
+            localStorage.setItem(`${DASHBOARD_CACHE_PREFIX}${user.email}`, serialized);
+          } catch {}
         }
       } catch (err) {
         console.error('Failed to load user rewards data:', err);
-        setError('Failed to fetch your rewards data. Please make sure the backend is running and try again.');
+        if (!hasCache) {
+          setError('Failed to fetch your rewards data. Please make sure the backend is running and try again.');
+        }
       } finally {
         setLoadingData(false);
       }
     }
 
     loadUserData();
-  }, [isAuthenticated, user, isLoading, getAccessTokenSilently]);
+
+    // Sync token in background
+    getAccessTokenSilently()
+      .then(token => setAuthToken(token))
+      .catch(() => {});
+  }, [isAuthenticated, user?.email, user?.sub, user?.name, user?.nickname, isLoading, getAccessTokenSilently]);
 
   // 2. Fetch leaderboard whenever timeframe changes or on mount
   useEffect(() => {
@@ -99,10 +177,23 @@ const RewardsPage = () => {
     const handleStarsUpdated = (e) => {
       const added = e.detail?.added || 0;
       if (added > 0) {
-        setUserData(prev => ({
-          ...prev,
-          fin_stars: (prev.fin_stars || 0) + added
-        }));
+        setUserData(prev => {
+          const updatedStars = (prev.fin_stars || 0) + added;
+          try {
+            const rawDash = localStorage.getItem(LAST_DASHBOARD_KEY);
+            if (rawDash) {
+              const dashObj = JSON.parse(rawDash);
+              if (dashObj.userData) {
+                dashObj.userData.fin_stars = updatedStars;
+                localStorage.setItem(LAST_DASHBOARD_KEY, JSON.stringify(dashObj));
+              }
+            }
+          } catch {}
+          return {
+            ...prev,
+            fin_stars: updatedStars
+          };
+        });
       }
     };
     window.addEventListener('finstars-updated', handleStarsUpdated);
@@ -111,7 +202,6 @@ const RewardsPage = () => {
 
   const handleTimeframeChange = (newTimeframe) => {
     setTimeframe(newTimeframe);
-    fetchLeaderboardData(newTimeframe);
   };
 
   const scrollToRedeem = () => {

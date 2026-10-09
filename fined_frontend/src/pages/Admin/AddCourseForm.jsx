@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import instance from "../../lib/axios";
 
 const AddCourseForm = () => {
-  const navigate = useNavigate();
-  const { user, isLoading, isAuthenticated } = useAuth0();
+  const { isLoading, isAuthenticated } = useAuth0();
 
   const [form, setForm] = useState({
     title: "",

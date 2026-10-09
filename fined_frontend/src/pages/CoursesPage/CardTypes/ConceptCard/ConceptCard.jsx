@@ -12,7 +12,6 @@ function ConceptCard({ card, onContinue }) {
   const [activeTermIndex, setActiveTermIndex] = useState(null);
 
   const {
-    card_label,
     title = "",
     body_text_1 = "",
     explanation = "", // legacy

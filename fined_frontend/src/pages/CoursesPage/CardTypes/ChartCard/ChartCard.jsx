@@ -60,7 +60,6 @@ function parseSpecialText(text) {
 
 function ChartCard({ card, onContinue }) {
   const {
-    card_label,
     title = "",
     quote,
     chart_style = "line",

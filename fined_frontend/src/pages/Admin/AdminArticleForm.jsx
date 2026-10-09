@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { postArticle, fetchAuthors, uploadArticleImage } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
+// Mirrors the backend's slug for new articles: apostrophes are dropped, not turned into dashes
+const slugFromTitle = (title) =>
+  title.toLowerCase().replace(/['‘’`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 function AdminArticleForm() {
   const navigate = useNavigate();
   const textareaRef = useRef(null);
@@ -232,7 +236,7 @@ function AdminArticleForm() {
     try {
       const parsed = JSON.parse(q.optionsJson);
       handleQuestionChange(idx, "optionsJson", JSON.stringify(parsed, null, 2));
-    } catch (err) {
+    } catch {
       // ignore
     }
   };
@@ -346,7 +350,7 @@ function AdminArticleForm() {
     const end = textarea.selectionEnd;
     const selectedText = form.content.substring(start, end) || "text";
 
-    let inserted = "";
+    let inserted;
     switch (type) {
       case "bold":
         inserted = `**${selectedText}**`;
@@ -606,7 +610,7 @@ function AdminArticleForm() {
                 />
                 <div className="admin-slug-badge">
                   <span>URL:</span>
-                  <code>/articles/{form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : "custom-slug")}</code>
+                  <code>/articles/{form.slug || (form.title ? slugFromTitle(form.title) : "custom-slug")}</code>
                 </div>
               </div>
 
@@ -1149,7 +1153,7 @@ function AdminArticleForm() {
                   }
                   placeholder={
                     form.title
-                      ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                      ? slugFromTitle(form.title)
                       : "e.g., how-stock-market-works"
                   }
                   style={{ fontSize: "13px", padding: "8px 10px" }}

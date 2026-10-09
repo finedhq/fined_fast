@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticleBySlug, fetchAdjacentArticles, getCachedArticle, prefetchArticle } from "../../services/api";
@@ -69,7 +69,7 @@ function SingleArticlePage() {
           if (adjData?.previous?.slug) prefetchArticle(adjData.previous.slug);
           if (adjData?.next?.slug) prefetchArticle(adjData.next.slug);
         }).catch(console.error);
-      } catch (err) {
+      } catch {
         if (!isCurrent) return;
         if (!cached) {
           if (slug && slug.includes("etf")) {

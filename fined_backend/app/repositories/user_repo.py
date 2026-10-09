@@ -222,20 +222,17 @@ class UserRepository:
         if not user:
             user = {"email": email, "user_sub": user_sub, "streak_count": 0, "fin_stars": 0}
 
-        record = user or {}
+        # Check DB columns or fallback store
         store_data = self._PROFILE_STORE.get(email, {})
-
-        # Read directly from Supabase query result record; in-memory fallback only if column is not set in DB
-        location = record.get("location") or store_data.get("location") or "Nagpur, IN"
-        financial_level = record.get("financial_level") or record.get("knowledge_level") or store_data.get("financial_level") or "Beginner (Level 1) - Starting with basics"
-        career_stage = record.get("career_stage") or store_data.get("career_stage") or "Student"
-        bio = record.get("bio") if record.get("bio") is not None else (store_data.get("bio") or "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd.")
-        username = record.get("username") or store_data.get("username")
+        username = store_data.get("username") or user.get("username")
         if not username:
             email_user = email.split("@")[0].replace(".", "_")
-            # If default user is rashi, set handle to rashi
-            username = "rashi" if "rashi" in email_user.lower() else email_user[:20]
+            username = email_user[:20]
 
+        career_stage = store_data.get("career_stage") or user.get("career_stage") or "Student"
+        financial_level = store_data.get("financial_level") or user.get("financial_level") or "Beginner (Level 1) - Starting with basics"
+        bio = store_data.get("bio") or user.get("bio") or "Building daily personal finance & investing discipline 10 minutes a day on FinEd."
+        location = store_data.get("location") or user.get("location") or ""
         # Compute fin_score directly using the 4 columns from the user dict
         fin_score = int(
             (user.get("article_score") or 0) +
@@ -258,8 +255,6 @@ class UserRepository:
             display_name = user.get("name")
         elif user.get("display_name"):
             display_name = user.get("display_name")
-        elif "karulerashi" in email.lower() or "rashi" in email.lower():
-            display_name = "Rashi Karule"
         else:
             display_name = email.split("@")[0].replace(".", " ").title()
 

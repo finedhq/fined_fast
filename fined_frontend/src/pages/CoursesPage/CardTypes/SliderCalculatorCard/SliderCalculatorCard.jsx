@@ -10,7 +10,6 @@ function renderDetailWithGlossary(detailText, glossaryTerms, activeTermIndex, se
 
 function SliderCalculatorCard({ card, onContinue }) {
   const {
-    card_label,
     title = "",
     body_text = "",
     glossary_terms = [],
@@ -36,7 +35,7 @@ function SliderCalculatorCard({ card, onContinue }) {
     const i = rate / 100 / 12; // monthly interest rate
     
     // M = P * ({[1 + i]^n - 1} / i) * (1 + i)
-    let M = 0;
+    let M;
     if (i === 0) {
       M = monthly * n;
     } else {

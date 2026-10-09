@@ -108,40 +108,43 @@ if os.path.exists(FRONTEND_DIST_DIR):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 import html
+from app.services.page_shell import get_shell_html, strip_replaced_tags
 
-@app.get("/{fallback_path:path}", include_in_schema=False)
+@app.api_route("/{fallback_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
 async def spa_fallback(fallback_path: str):
     # Do not intercept API or docs routes
     if (
-        fallback_path.startswith("api") 
-        or fallback_path.startswith("docs") 
+        fallback_path.startswith("api")
+        or fallback_path.startswith("docs")
         or fallback_path.startswith("openapi.json")
         or fallback_path.startswith("redoc")
     ):
         return {"detail": "Not Found"}
-        
+
     # If a specific static file is requested (like favicon.svg, logo.ico, etc.)
-    file_path = os.path.join(FRONTEND_DIST_DIR, fallback_path)
-    if fallback_path and os.path.exists(file_path) and os.path.isfile(file_path):
+    file_path = os.path.realpath(os.path.join(FRONTEND_DIST_DIR, fallback_path))
+    dist_root = os.path.realpath(FRONTEND_DIST_DIR)
+    if (
+        fallback_path
+        and file_path.startswith(dist_root + os.sep)
+        and os.path.isfile(file_path)
+    ):
         return FileResponse(file_path)
 
-    # Locate index.html (dist or root for local dev)
-    index_path = os.path.join(FRONTEND_DIST_DIR, "index.html")
-    if not os.path.exists(index_path):
-        dev_index = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "fined_frontend", "index.html"))
-        if os.path.exists(dev_index):
-            index_path = dev_index
+    # The built index.html: local dist/dev copy, or fetched from the frontend host
+    # when the API runs without the frontend on disk (cached in page_shell).
+    shell_html = await get_shell_html()
 
     # Check if request is for a single article (for social crawler preview generation)
-    if fallback_path.startswith("articles/") and os.path.exists(index_path):
+    is_article_path = fallback_path.startswith("articles/")
+    lookup_failed = False
+    article_missing = False
+    if is_article_path:
         slug = fallback_path.split("articles/")[1].strip("/").split("?")[0]
         if slug:
             try:
                 article = article_service.get_by_slug(slug)
                 if article:
-                    with open(index_path, "r", encoding="utf-8") as f:
-                        html_content = f.read()
-
                     metadata = article.get("metadata") or {}
                     seo_title = article.get("seo_title") or metadata.get("seo_title") or article.get("title") or "FinEd Article"
                     title = html.escape(seo_title)
@@ -154,7 +157,7 @@ async def spa_fallback(fallback_path: str):
                         or (article.get("content", "").split("\n")[0] if article.get("content") else "A clear, practical finance explainer from FinEd.")
                     )
                     description = html.escape(raw_desc[:160].strip())
-                    image_url = html.escape(article.get("image_url") or "https://www.myfined.com/assets/images/fined_card_banner.png")
+                    image_url = html.escape(article.get("image_url") or "https://myfined.com/fined_card_banner.png")
                     article_url = f"https://myfined.com/articles/{slug}"
                     tag = article.get("tag") or "Finance"
                     published_date = article.get("published_at") or article.get("created_at") or ""
@@ -261,17 +264,35 @@ async def spa_fallback(fallback_path: str):
   <!-- Structured Data JSON-LD -->
   <script type="application/ld+json">{schema_json}</script>
 """
-                    if "</head>" in html_content:
-                        html_content = html_content.replace("</head>", f"{seo_meta_tags}\n</head>", 1)
-                    return Response(content=html_content, media_type="text/html")
+                    if shell_html and "</head>" in shell_html:
+                        # Drop the shell's generic title/description/OG tags so the page has one of each
+                        page_html = strip_replaced_tags(shell_html).replace("</head>", f"{seo_meta_tags}\n</head>", 1)
+                    else:
+                        # No shell available: still answer with the tags rather than redirecting
+                        page_html = (
+                            '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
+                            '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+                            f'{seo_meta_tags}</head><body><div id="root"></div>'
+                            f'<p><a href="{article_url}">{display_title}</a></p></body></html>'
+                        )
+                    return Response(content=page_html, media_type="text/html")
+                article_missing = True
             except Exception:
-                pass  # Fall back to standard index.html on any error
-        
+                lookup_failed = True  # Fall back to standard index.html on any error
+
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-        
-    # Fallback redirect to Frontend URL if dist is not built or available
+    if shell_html:
+        # Unknown article slug: keep the SPA's own "not found" page but tell crawlers it is a 404
+        return Response(content=shell_html, media_type="text/html", status_code=404 if article_missing else 200)
+
+    # No shell available. Never redirect article URLs: the frontend host sends crawlers
+    # for /articles/* straight back here, which makes a redirect loop.
+    if is_article_path:
+        if lookup_failed:
+            return Response(content="Temporarily unavailable", status_code=503, headers={"Retry-After": "60"})
+        return Response(content="Not found", status_code=404, media_type="text/plain")
+
+    # Fallback redirect to Frontend URL if the frontend shell isn't available
     return RedirectResponse(url=f"{settings.FRONTEND_URL}/{fallback_path}")
 
 

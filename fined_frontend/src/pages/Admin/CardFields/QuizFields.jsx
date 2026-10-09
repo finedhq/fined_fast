@@ -1,4 +1,3 @@
-import { useState } from "react";
 
 export const EMPTY_QUIZ_DATA = {
   card_type: "quiz",

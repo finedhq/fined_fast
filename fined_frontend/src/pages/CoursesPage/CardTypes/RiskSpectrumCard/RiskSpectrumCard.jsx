@@ -14,7 +14,7 @@ function getColorClass(colorStr) {
 }
 
 function RiskSpectrumCard({ card, onContinue }) {
-  const { card_label, title = "", body_text = "", dots = [], highlight_line, cta_text = "Continue", allotted_finstars = 0 } = card?.card_data || {};
+  const { title = "", body_text = "", dots = [], highlight_line, cta_text = "Continue", allotted_finstars = 0 } = card?.card_data || {};
   
   const [activeDotId, setActiveDotId] = useState(null);
 

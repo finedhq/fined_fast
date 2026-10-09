@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import instance from "../../lib/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -16,7 +16,7 @@ const AdminCourseList = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const { user, isLoading, isAuthenticated } = useAuth0();
+  const { isLoading, isAuthenticated } = useAuth0();
 
   const fetchCourses = async () => {
     try {

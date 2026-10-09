@@ -1,10 +1,8 @@
-import React from "react";
 import "./CompletionCard.css";
 import { parseBoldText } from "../../../../utils/textFormatters";
 
 function CompletionCard({ card, onContinue }) {
   const {
-    card_label,
     badge_icon = "🔔",
     title = "Module Completed",
     subtitle = "You have successfully finished all topics in this module.",

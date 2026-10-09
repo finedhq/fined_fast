@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import instance from "../../lib/axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ export default function Courses() {
     }
   });
   const [ongoingCourse, setOngoingCourse] = useState({});
-  const [isFetchingOngoing, setIsFetchingOngoing] = useState(false);
+  const [, setIsFetchingOngoing] = useState(false);
   const [loading, setLoading] = useState(() => {
     try {
       const raw = sessionStorage.getItem("fined_courses_cache_v1");
@@ -61,7 +61,7 @@ export default function Courses() {
           // ignore
         }
       }
-    } catch (err) {
+    } catch {
       if (courses.length === 0) {
         setError("Failed to load courses.");
       }
@@ -192,7 +192,7 @@ export default function Courses() {
                     <div className="courses-resume-content">
                       <div className="courses-resume-meta">
                         <span className="courses-meta-chip">
-                          <IoLayersOutline /> {targetCourse.modules_count || 0} Modules
+                          <IoLayersOutline /> {targetCourse.planned_modules || targetCourse.modules_count || 0} Modules
                         </span>
                       </div>
 
@@ -359,7 +359,7 @@ function CourseCard({ course, navigate }) {
         <div className="course-card-meta-row">
           <span className="course-card-modules-badge">
             <IoLayersOutline size={13} />
-            <span>{course.modules_count || 0} Modules</span>
+            <span>{course.planned_modules || course.modules_count || 0} Modules</span>
           </span>
           <span className="course-card-free-badge">
             Free
