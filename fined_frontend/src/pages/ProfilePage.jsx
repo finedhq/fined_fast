@@ -307,7 +307,7 @@ export default function ProfilePage() {
     profile?.username ||
     user?.nickname ||
     user?.given_name ||
-    (emailPrefix ? (emailPrefix.includes("rashi") ? "rashi" : emailPrefix.slice(0, 20)) : "user");
+    (emailPrefix ? emailPrefix.slice(0, 20) : "user");
 
   const userInitial = (displayName[0] || "U").toUpperCase();
 

@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import MainLayout from "./layouts/MainLayout";
 import { Auth0ProviderWithNavigate } from "./components/Auth0ProviderWithNavigate";
-import { AuthLoader } from "./components/AuthLoader";
 import { ApiTokenProvider } from "./components/ApiTokenProvider";
 import { AuthenticationGuard } from "./components/AuthenticationGuard";
 import { AdminGuard } from "./components/AdminGuard";
@@ -58,9 +57,8 @@ function App() {
       <ScrollToTop />
       <PageTitleTracker />
       <Auth0ProviderWithNavigate>
-        <AuthLoader>
-          <ApiTokenProvider>
-            <UserProfileProvider>
+        <ApiTokenProvider>
+          <UserProfileProvider>
               <EditProfileModal />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
@@ -115,7 +113,6 @@ function App() {
             </Suspense>
             </UserProfileProvider>
           </ApiTokenProvider>
-        </AuthLoader>
       </Auth0ProviderWithNavigate>
 
     </BrowserRouter>

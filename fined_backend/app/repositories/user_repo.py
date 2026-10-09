@@ -214,13 +214,12 @@ class UserRepository:
         username = store_data.get("username") or user.get("username")
         if not username:
             email_user = email.split("@")[0].replace(".", "_")
-            # If default user is rashi, set handle to rashi
-            username = "rashi" if "rashi" in email_user.lower() else email_user[:20]
+            username = email_user[:20]
 
         career_stage = store_data.get("career_stage") or user.get("career_stage") or "Student"
         financial_level = store_data.get("financial_level") or user.get("financial_level") or "Beginner (Level 1) - Starting with basics"
-        bio = store_data.get("bio") or user.get("bio") or "Engineering student building daily personal finance & investing discipline 10 minutes a day on FinEd."
-        location = store_data.get("location") or user.get("location") or "Nagpur, IN"
+        bio = store_data.get("bio") or user.get("bio") or "Building daily personal finance & investing discipline 10 minutes a day on FinEd."
+        location = store_data.get("location") or user.get("location") or ""
 
         # Compute fin_score directly using the 4 columns from the user dict
         fin_score = int(
@@ -244,8 +243,6 @@ class UserRepository:
             display_name = user.get("name")
         elif user.get("display_name"):
             display_name = user.get("display_name")
-        elif "karulerashi" in email.lower() or "rashi" in email.lower():
-            display_name = "Rashi Karule"
         else:
             display_name = email.split("@")[0].replace(".", " ").title()
 
