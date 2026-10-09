@@ -4,7 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
 import './DashboardHome.css';
-import { fetchArticles } from '../../services/api';
+import { fetchArticles, getLocalCachedArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
 import { getUserLevel } from "../../utils/level";
 import { useUserProfile } from "../../context/UserProfileContext";
@@ -110,23 +110,35 @@ function DashboardSkeleton() {
 }
 
 const DASHBOARD_CACHE_PREFIX = "fined_dashboard_data_";
+const LAST_DASHBOARD_KEY = "fined_dashboard_last_data";
 
 function getCachedDashboard(email) {
   try {
-    const key = email ? `${DASHBOARD_CACHE_PREFIX}${email}` : `${DASHBOARD_CACHE_PREFIX}default`;
-    const raw = sessionStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
+    if (email) {
+      const userRaw = localStorage.getItem(`${DASHBOARD_CACHE_PREFIX}${email}`) ||
+                      sessionStorage.getItem(`${DASHBOARD_CACHE_PREFIX}${email}`);
+      if (userRaw) return JSON.parse(userRaw);
+    }
+    const lastRaw = localStorage.getItem(LAST_DASHBOARD_KEY) ||
+                    sessionStorage.getItem(LAST_DASHBOARD_KEY);
+    if (lastRaw) return JSON.parse(lastRaw);
   } catch {
-    return null;
+    // Ignore storage parse errors
   }
+  return null;
 }
 
 function setCachedDashboard(email, data) {
   try {
-    const key = email ? `${DASHBOARD_CACHE_PREFIX}${email}` : `${DASHBOARD_CACHE_PREFIX}default`;
-    sessionStorage.setItem(key, JSON.stringify(data));
+    const serialized = JSON.stringify(data);
+    if (email) {
+      localStorage.setItem(`${DASHBOARD_CACHE_PREFIX}${email}`, serialized);
+      sessionStorage.setItem(`${DASHBOARD_CACHE_PREFIX}${email}`, serialized);
+    }
+    localStorage.setItem(LAST_DASHBOARD_KEY, serialized);
+    sessionStorage.setItem(LAST_DASHBOARD_KEY, serialized);
   } catch {
-    // ignore sessionStorage errors
+    // Ignore storage quota errors
   }
 }
 
@@ -149,12 +161,16 @@ const Dashboard = () => {
   });
   const [recommendedArticles, setRecommendedArticles] = useState(() => {
     const c = getCachedDashboard();
-    return c?.recommendedArticles || [];
+    if (c?.recommendedArticles && c.recommendedArticles.length > 0) {
+      return c.recommendedArticles;
+    }
+    const local = getLocalCachedArticles();
+    return Array.isArray(local) ? local.slice(0, 6) : [];
   });
 
   const [loadingData, setLoadingData] = useState(() => {
     const c = getCachedDashboard();
-    return !c?.userData || !c.userData.streak_count;
+    return !c?.userData || c.userData.fin_score === undefined;
   });
   const [error, setError] = useState("");
   const [showScoreInfo, setShowScoreInfo] = useState(false);
@@ -186,12 +202,12 @@ const Dashboard = () => {
 
   async function fetchData(userEmail, userId) {
     const cached = getCachedDashboard(userEmail);
-    const hasCache = Boolean(cached?.userData || (userData && userData.streak_count !== undefined));
+    const hasCache = Boolean(cached?.userData || (userData && userData.fin_score !== undefined));
     if (!hasCache) {
       setLoadingData(true);
     }
     try {
-      // 1. Fire /home/getdata and recommended articles in parallel!
+      // Fire /home/getdata and recommended articles in parallel!
       const [homeRes, articlesRes] = await Promise.all([
         instance.post("/home/getdata", { email: userEmail, userId }),
         fetchArticles({ limit: 6, offset: 0 }).catch(() => ({ articles: [] }))
@@ -203,8 +219,10 @@ const Dashboard = () => {
 
       if (homeRes.data?.userData) {
         newUserData = homeRes.data.userData;
+        if (user?.name && !newUserData.name) newUserData.name = user.name;
+        if (user?.picture && !newUserData.picture) newUserData.picture = user.picture;
+
         newOngoingCourse = homeRes.data.ongoingCourseData || {};
-        // Use recommendedCourses already provided by /home/getdata (no separate call needed!)
         const courses = homeRes.data.recommendedCourses || [];
         newRecommendedCourses = courses.slice(0, 1);
 
@@ -237,23 +255,17 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    if (isLoading || !isAuthenticated || !user) return;
+    if (isLoading || !isAuthenticated || !user?.email) return;
 
-    getAccessTokenSilently().then(token => {
-      setAuthToken(token);
-      // Fire and forget - don't block the UI rendering on refreshProfile()
-      fetchData(user.email, user.sub);
-      refreshProfile();
-    }).catch(err => {
-      console.error("Error fetching access token", err);
-      if (!userData || !userData.streak_count) {
-        setError("Authentication error. Please log in again.");
-      }
-      setLoadingData(false);
-    });
-  }, [isLoading, isAuthenticated, user, getAccessTokenSilently, refreshProfile]);
+    fetchData(user.email, user.sub);
 
-  if (isLoading || loadingData) {
+    // Keep token in sync and refresh profile in background
+    getAccessTokenSilently()
+      .then(token => setAuthToken(token))
+      .catch(() => {});
+  }, [isLoading, isAuthenticated, user?.email, user?.sub, getAccessTokenSilently]);
+
+  if (loadingData && (!userData || userData.fin_score === undefined)) {
     return <DashboardSkeleton />;
   }
 
@@ -270,7 +282,7 @@ const Dashboard = () => {
     );
   }
 
-  const firstName = user?.name?.split(" ")[0] || "User";
+  const firstName = user?.name?.split(" ")[0] || userData?.name?.split(" ")[0] || "User";
   const finStars = userData?.fin_stars || 0;
   const finScore = userData?.fin_score || 0;
   const streak = userData?.streak_count || 0;
@@ -339,8 +351,8 @@ const Dashboard = () => {
           </div>
 
           <div className="dh-card-holder">
-            <Avatar src={user?.picture} name={user?.name} />
-            <span className="dh-card-name">{user?.name || "User Name"}</span>
+            <Avatar src={user?.picture || userData?.picture} name={user?.name || userData?.name} />
+            <span className="dh-card-name">{user?.name || userData?.name || "User Name"}</span>
           </div>
 
           <p id="dh-score-info" role="tooltip" className={`dh-info-body${showScoreInfo ? " is-open" : ""}`}>

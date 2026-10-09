@@ -66,7 +66,22 @@ export function setLocalCachedArticles(articles) {
 export function getCachedArticle(slug) {
   if (!slug) return null;
   const entry = singleArticleCache.get(slug);
-  return (entry && entry.data && entry.data.content) ? entry.data : null;
+  if (entry && entry.data && entry.data.content) {
+    return entry.data;
+  }
+  try {
+    const localArticles = getLocalCachedArticles();
+    if (Array.isArray(localArticles)) {
+      const found = localArticles.find((a) => a.slug === slug);
+      if (found && found.content) {
+        singleArticleCache.set(slug, { data: found, timestamp: Date.now() });
+        return found;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return null;
 }
 
 export function clearArticleCache() {
