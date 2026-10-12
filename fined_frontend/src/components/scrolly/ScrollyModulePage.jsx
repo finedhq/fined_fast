@@ -161,7 +161,8 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             maxStars={maxStars}
             open={open}
             nextHref={nextSlug && !preview ? `/cards/${nextSlug}` : null}
-            comingSoon={!nextSlug && !preview}
+            comingSoon={!nextSlug && !preview && !bundle.is_final_module}
+            certificate={bundle.is_final_module && !preview && !onSignup ? { courseSlug: bundle.course_slug, courseTitle: bundle.course_title } : null}
             onSignup={onSignup}
             onReached={() => markReached(card.slug)}
             onGoTo={goToPart}

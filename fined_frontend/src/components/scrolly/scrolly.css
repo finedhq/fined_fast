@@ -2594,6 +2594,21 @@
   transform: translateX(4px);
 }
 
+/* Final module: the "Up next" box is the course certificate */
+.nc-root .nc-cert-card {
+  background: linear-gradient(135deg, #4100BC 0%, #22005F 100%);
+  border: 2px solid var(--amber);
+}
+
+.nc-root .nc-cert-pill {
+  border: none;
+  cursor: pointer;
+}
+
+.nc-root .nc-cert-pill:hover {
+  transform: translateX(4px);
+}
+
 .nc-root .btn-secondary {
   display: inline-flex;
   align-items: center;

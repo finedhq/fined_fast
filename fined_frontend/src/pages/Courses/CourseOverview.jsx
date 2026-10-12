@@ -3,7 +3,8 @@ import instance from "../../lib/axios";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router-dom";
 import RevealOnScroll from "../../components/RevealOnScroll";
-import CertificateGenerator from "../../components/Certificate/CertificateGenerator";
+import CertificateModal from "../../components/Certificate/CertificateModal";
+import CertificatePreview from "../../components/Certificate/CertificatePreview";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import "./CourseOverview.css";
 import "../Dashboard/Dashboard.css";
@@ -14,7 +15,7 @@ import {
   PiCaretRightBold,
   PiCertificateBold,
   PiDesktopBold,
-  PiDownloadSimpleBold,
+  PiArrowRightBold,
   PiFireFill,
   PiInfoBold,
   PiLockSimpleBold,
@@ -55,9 +56,8 @@ export default function CourseOverview() {
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const certificateRef = useRef(null);
   const [, setHeroHeight] = useState('auto');
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
   const [isMobileWidgetExpanded, setIsMobileWidgetExpanded] = useState(false);
   const [showScoreInfo, setShowScoreInfo] = useState(false);
   const [activeMobileModule, setActiveMobileModule] = useState(null);
@@ -161,16 +161,11 @@ export default function CourseOverview() {
   // its certificate needs every planned module done, not just the ones out so far.
   const certificateModulesCount = Math.max(totalModulesCount, plannedModules || 0);
   const levelInfo = getUserLevel(userData);
+  // Thumbnail only; the real certificate uses the name the learner confirms
+  const certificateName = user?.name && !user.name.includes("@") ? user.name : "Your Name";
   // Header ring: progress through the whole planned course (not just the modules out so far)
   const coursePercent = certificateModulesCount > 0 ? Math.round((completedModulesCount / certificateModulesCount) * 100) : 0;
 
-  const handleDownloadCertificate = async () => {
-    if (certificateRef.current) {
-      setIsDownloading(true);
-      await certificateRef.current.downloadPDF();
-      setIsDownloading(false);
-    }
-  };
   const handlePointerDown = (e) => {
     e.target.setPointerCapture(e.pointerId);
     dragRef.current = {
@@ -628,8 +623,11 @@ export default function CourseOverview() {
                   </div>
                   <h3 className="co-cert-title">Course completed</h3>
                   <p className="co-cert-text">You've finished every module in this course. Your certificate is ready.</p>
-                  <button type="button" className="dh-btn co-cert-btn" onClick={handleDownloadCertificate} disabled={isDownloading}>
-                    {isDownloading ? "Generating..." : <>Download certificate <PiDownloadSimpleBold aria-hidden="true" /></>}
+                  <button type="button" className="co-cert-thumb" onClick={() => setShowCertificate(true)} aria-label="Open your certificate">
+                    <CertificatePreview name={certificateName} courseTitle={courseTitle} modulesCount={certificateModulesCount} sample />
+                  </button>
+                  <button type="button" className="dh-btn co-cert-btn" onClick={() => setShowCertificate(true)}>
+                    Get your certificate <PiArrowRightBold aria-hidden="true" />
                   </button>
                 </div>
               ) : (
@@ -644,6 +642,10 @@ export default function CourseOverview() {
                       ? `Finish all ${certificateModulesCount} modules to unlock it. A new module arrives every Monday.`
                       : 'Finish every module in this course to unlock it.'}
                   </p>
+                  <div className="co-cert-thumb co-cert-thumb--locked" aria-hidden="true">
+                    <CertificatePreview name={certificateName} courseTitle={courseTitle} modulesCount={certificateModulesCount} sample />
+                    <span className="co-cert-thumb-lock"><PiLockSimpleBold /></span>
+                  </div>
                   <div className="co-cert-meter">
                     <div className="co-cert-bar" aria-hidden="true">
                       <span style={{ width: `${certificateModulesCount ? (completedModulesCount / certificateModulesCount) * 100 : 0}%` }}></span>
@@ -717,11 +719,13 @@ export default function CourseOverview() {
         </div>
       )}
 
-      <CertificateGenerator 
-        ref={certificateRef} 
-        userName={user?.name || user?.nickname || "Student"} 
-        courseName={courseTitle} 
-      />
+      {showCertificate && (
+        <CertificateModal
+          courseSlug={courseSlug}
+          courseTitle={courseTitle}
+          onClose={() => setShowCertificate(false)}
+        />
+      )}
     </div>
   );
 }

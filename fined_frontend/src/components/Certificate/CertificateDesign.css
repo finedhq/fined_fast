@@ -1,0 +1,328 @@
+/* The printed certificate. Always rendered at sheet size (1123 x 794); previews
+   scale the whole sheet with a transform. Colours are fixed (it's a printed
+   document, so it ignores dark mode). Fonts: the site's three. */
+
+.fcert {
+  --fc-purple: #4100BC;
+  --fc-purple-deep: #22005F;
+  --fc-electric: #4A3AFF;
+  --fc-gold: #F5A623;
+  --fc-gold-deep: #B8740A;
+  --fc-ink: #171321;
+  --fc-muted: #625D6D;
+  --fc-paper: #FFFDF8;
+  --fc-line: #E9E1CF;
+
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  background: var(--fc-paper);
+  color: var(--fc-ink);
+  font-family: 'Nunito', system-ui, sans-serif;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.fcert *,
+.fcert *::before,
+.fcert *::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* ---------- Left band ---------- */
+.fcert-band {
+  position: relative;
+  width: 300px;
+  flex: none;
+  height: 100%;
+  padding: 40px 30px 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(170deg, #5226E0 0%, var(--fc-purple) 34%, #2E0482 72%, var(--fc-purple-deep) 100%);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* gold edge between band and paper: a solid strip and a fine line beside it */
+.fcert-band::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #FFE08F, var(--fc-gold) 50%, var(--fc-gold-deep));
+}
+
+.fcert-band::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 10px;
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 224, 143, 0.45);
+}
+
+.fcert-logo-chip {
+  position: relative;
+  background: #fff;
+  border-radius: 14px;
+  padding: 9px 18px;
+  box-shadow: 0 6px 18px rgba(10, 0, 40, 0.22);
+}
+
+.fcert-logo-chip img {
+  display: block;
+  height: 50px;
+  width: auto;
+}
+
+.fcert-band-mid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* centred on the seal's medal (its top 110 of 150 units = 72px down) */
+.fcert-rings {
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  width: 520px;
+  height: 520px;
+  margin: -260px 0 0 -260px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.fcert-seal {
+  position: relative;
+  width: 144px;
+  height: 196px;
+  filter: drop-shadow(0 10px 16px rgba(10, 0, 40, 0.35));
+}
+
+.fcert-seal svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fcert-band-label {
+  position: relative;
+  margin-top: 18px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #FFE3A3;
+}
+
+.fcert-band-stat {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.fcert-band-dot {
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: var(--fc-gold);
+}
+
+.fcert-verify {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fcert-qr {
+  flex: none;
+  padding: 6px;
+  background: #fff;
+  border-radius: 10px;
+  line-height: 0;
+}
+
+.fcert-qr-placeholder {
+  width: 80px;
+  height: 80px;
+  background:
+    linear-gradient(90deg, #E6E1EC 50%, transparent 50%) 0 0 / 12px 12px,
+    linear-gradient(#E6E1EC 50%, transparent 50%) 0 0 / 12px 12px;
+  opacity: 0.6;
+}
+
+.fcert-verify-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.fcert-verify-kicker {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #FFE3A3;
+}
+
+.fcert-verify-url {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- Main sheet ---------- */
+.fcert-main {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  padding: 64px 72px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.fcert-frame {
+  position: absolute;
+  inset: 24px;
+  border: 1px solid var(--fc-line);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.fcert-body {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.fcert-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--fc-gold-deep);
+  margin-bottom: 46px;
+}
+
+.fcert-eyebrow-rule {
+  display: inline-block;
+  width: 40px;
+  height: 2px;
+  background: var(--fc-gold);
+}
+
+.fcert-lead {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--fc-muted);
+}
+
+.fcert-name {
+  margin-top: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--fc-ink);
+  max-width: 680px;
+  overflow-wrap: anywhere;
+  padding-bottom: 4px;
+}
+
+.fcert-name-rule {
+  position: relative;
+  width: 360px;
+  height: 1.5px;
+  margin: 18px 0 30px;
+  background: linear-gradient(90deg, rgba(245, 166, 35, 0) 0%, var(--fc-gold) 50%, rgba(245, 166, 35, 0) 100%);
+}
+
+.fcert-name-rule span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  transform: rotate(45deg);
+  background: var(--fc-gold);
+}
+
+.fcert-course {
+  margin-top: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--fc-purple);
+  max-width: 660px;
+}
+
+.fcert-footer {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.fcert-date {
+  font-size: 15px;
+  color: var(--fc-muted);
+}
+
+.fcert-date strong {
+  font-weight: 800;
+  color: var(--fc-ink);
+}
+
+.fcert-id {
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #A39FAB;
+}
+
+.fcert-sample {
+  position: absolute;
+  top: 42px;
+  right: 44px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--fc-gold-deep);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fc-gold-deep);
+}

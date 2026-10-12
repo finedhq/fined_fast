@@ -6,6 +6,7 @@ import { getUserProfile, updateUserProfile } from "../services/api";
 import { useUserProfile } from "../context/UserProfileContext";
 import EditProfileModal from "../components/EditProfileModal";
 import MetricTooltip from "../components/MetricTooltip";
+import ProfileCertificates from "../components/Certificate/ProfileCertificates";
 import { getUserLevel } from "../utils/level";
 
 const COLOR_LEVELS = {
@@ -657,7 +658,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 4. Ongoing Learning Track Card */}
+        {/* 4. Ongoing Learning Track Card (+ completed courses with their certificates) */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-extrabold tracking-wider uppercase text-slate-400">
@@ -708,6 +709,8 @@ export default function ProfilePage() {
               </Link>
             </div>
           )}
+
+          <ProfileCertificates />
         </div>
       </div>
 
