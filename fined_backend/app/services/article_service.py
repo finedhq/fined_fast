@@ -88,9 +88,12 @@ class ArticleService:
     def get_adjacent(self, slug: str) -> dict:
         """Get previous and next articles based on current slug"""
         article = self.get_by_slug(slug)
-        if not article or not article.get("created_at"):
+        if not article:
             return {"previous": None, "next": None}
-        return article_repo.get_adjacent(article["created_at"])
+        current_date = article.get("published_at") or article.get("created_at")
+        if not current_date:
+            return {"previous": None, "next": None}
+        return article_repo.get_adjacent(current_date)
 
     def get_related(self, slug: str, limit: int = 3) -> list:
         """Fetch related articles: matching tag first, then backfilling with recent published articles"""

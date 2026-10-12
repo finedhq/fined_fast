@@ -42,7 +42,8 @@ function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   // Stale-While-Revalidate: load immediately from session cache (0ms paint)
   const [articles, setArticles] = useState(() => {
-    return getLocalCachedArticles() || [];
+    const cached = getLocalCachedArticles() || [];
+    return [...cached].sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchingArticle, setFetchingArticle] = useState(() => {
@@ -88,6 +89,8 @@ function ArticlesPage() {
       } else if (!incoming.some((a) => (a.slug || "").includes("etf") || (a.title || "").toLowerCase().includes("etf"))) {
         incoming = [...incoming, ETF_DEMO_ARTICLE];
       }
+
+      incoming.sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
 
       setArticles(incoming);
     } catch (err) {
