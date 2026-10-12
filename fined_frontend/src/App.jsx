@@ -28,6 +28,8 @@ const AdminSources = lazy(() => import("./pages/Admin/AdminSources"));
 const AddCardForm = lazy(() => import("./pages/Admin/AddCardForm"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const CourseOverview = lazy(() => import("./pages/Courses/CourseOverview"));
+const VerifyCertificatePage = lazy(() => import("./pages/Certificate/VerifyCertificatePage"));
+const CertificatePreviewPage = lazy(() => import("./pages/Admin/CertificatePreviewPage"));
 const AddCourseForm = lazy(() => import("./pages/Admin/AddCourseForm"));
 const AdminCourseList = lazy(() => import("./pages/Admin/AdminCourseList"));
 const AdminModuleList = lazy(() => import("./pages/Admin/AdminModuleList"));
@@ -99,6 +101,8 @@ function App() {
                   <Route path="admin/sources" element={<AdminGuard><AdminSources /></AdminGuard>} />
                   <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                   <Route path="courses/:courseSlug" element={<CourseOverview />} />
+                  <Route path="certificate/:code" element={<VerifyCertificatePage />} />
+                  <Route path="admin/certificate-preview" element={<AdminGuard><CertificatePreviewPage /></AdminGuard>} />
                   <Route path="notifications" element={<AuthenticationGuard component={NotificationsPage} />} />
                   <Route path="leaderboard" element={<AuthenticationGuard component={Leaderboard} />} />
                   <Route path="admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />

@@ -12,6 +12,7 @@
 //     finished when every part is done.
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import CertificateModal from "../Certificate/CertificateModal";
 import SafeText from "./SafeText";
 import { replayText } from "./text";
 
@@ -58,11 +59,15 @@ function SkippedLine({ open, onGoTo }) {
 // releases, plan §0.2) — the "Up next" box says so instead of opening anything.
 // `onSignup`: a visitor trying the module without an account — the "Up next"
 // box asks them to sign up instead.
-export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, onSignup, onGoTo, onReviewTop, onReached }) {
+// `certificate`: { courseSlug, courseTitle } on the course's final module — the
+// "Up next" box becomes the course certificate (the window checks the whole
+// course is done before issuing it).
+export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, onGoTo, onReviewTop, onReached }) {
   const d = card.card_data || {};
   const sectionRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
   const [confetti, setConfetti] = useState(null);
+  const [showCertificate, setShowCertificate] = useState(false);
   const reachedRef = useRef(onReached);
   useEffect(() => {
     reachedRef.current = onReached;
@@ -154,6 +159,21 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
               {teaserBody}
               <span className="nc-signup-pill">Sign up free to keep going →</span>
             </button>
+          ) : certificate ? (
+            <div className="next-module-card nc-cert-card">
+              <div className="next-module-tag">Course complete</div>
+              <div className="next-module-title">You finished {certificate.courseTitle || "the course"}</div>
+              <div className="next-module-desc">
+                {open.length
+                  ? "Finish the parts you skipped above, then come back here for your certificate."
+                  : "Every module done. Your certificate of completion is ready to download and share."}
+              </div>
+              {!open.length && (
+                <button type="button" className="nc-signup-pill nc-cert-pill" onClick={() => setShowCertificate(true)}>
+                  Get your certificate →
+                </button>
+              )}
+            </div>
           ) : teaser &&
             (nextHref ? (
               <Link to={nextHref} className="next-module-card">
@@ -178,6 +198,13 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
           </a>
         </div>
       </section>
+      {showCertificate && (
+        <CertificateModal
+          courseSlug={certificate.courseSlug}
+          courseTitle={certificate.courseTitle}
+          onClose={() => setShowCertificate(false)}
+        />
+      )}
     </>
   );
 }

@@ -343,7 +343,7 @@ async def _noop():
     return None
 
 
-async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str, write_ongoing: bool = True, viewer: AuthUser = None):
+async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str, write_ongoing: bool = True, viewer: AuthUser = None, planned_modules: Optional[int] = None):
     # 1. Parallel lookups: cards, user progress, course modules, ongoing state
     #    (draft previews don't move the viewer's "continue learning" pointer)
     cards_res, progress_res, modules_res, _ = await asyncio.gather(
@@ -366,6 +366,12 @@ async def _build_bundle_response(course_id: str, course_title: str, course_slug:
     # 2. Adjacent modules navigation lookup (a module not released yet is never
     #    "Up next" for learners; admins previewing it still get their bearings)
     modules = modules_res.data or []
+    # The course's last module (counting ones not released yet), once the course
+    # has all its planned modules: its completion screen offers the certificate
+    is_final_module = (
+        bool(modules) and modules[-1]["id"] == module_id
+        and (planned_modules is None or len(modules) >= int(planned_modules))
+    )
     modules = [m for m in modules if m["id"] == module_id or can_view_module(m, viewer)]
     module_index = next((i for i, m in enumerate(modules) if m["id"] == module_id), -1)
     prev_module = modules[module_index - 1] if module_index > 0 else None
@@ -429,7 +435,8 @@ async def _build_bundle_response(course_id: str, course_title: str, course_slug:
         "module_total_cards": len(all_cards),
         "cards": cards_packaged,
         "prevModuleFirstCard": prev_module_first_card,
-        "nextModuleFirstCard": next_module_first_card
+        "nextModuleFirstCard": next_module_first_card,
+        "is_final_module": is_final_module,
     }
 
 
@@ -467,7 +474,7 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
             raise HTTPException(status_code=404, detail="Module not found")
 
         is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
-        return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email, write_ongoing=not is_draft, viewer=user)
+        return await _build_bundle_response(course_id, course_title, c_slug_real, module_id, module_title, module_order, user.email, write_ongoing=not is_draft, viewer=user, planned_modules=course_res.data[0].get("planned_modules"))
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -512,7 +519,7 @@ async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: Au
         c_slug_real = course_res.data[0].get("slug")
 
         is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
-        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user)
+        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user, planned_modules=course_res.data[0].get("planned_modules"))
     except HTTPException as he:
         raise he
     except Exception as e:

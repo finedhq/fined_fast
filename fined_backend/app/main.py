@@ -110,6 +110,7 @@ if os.path.exists(FRONTEND_DIST_DIR):
 import html
 import json
 from app.services.page_shell import get_shell_html, strip_replaced_tags
+from app.routes.certificates import find_public as find_public_certificate
 
 @app.api_route("/{fallback_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
 async def spa_fallback(fallback_path: str):
@@ -387,6 +388,39 @@ async def spa_fallback(fallback_path: str):
                 author_missing = True
             except Exception:
                 lookup_failed = True  # Fall back to standard index.html on any error
+
+    # A certificate verify link shared on LinkedIn/WhatsApp: name the holder and course in the preview
+    if fallback_path.startswith("certificate/"):
+        code = fallback_path.split("certificate/")[1].strip("/").split("?")[0]
+        try:
+            cert = find_public_certificate(code)
+        except Exception:
+            cert = None
+        if cert and shell_html and "</head>" in shell_html:
+            holder = html.escape(cert["recipient_name"])
+            course_name = html.escape(cert["course_title"])
+            cert_url = f"https://myfined.com/certificate/{html.escape(cert['code'])}"
+            og_title = f"{holder} completed {course_name} on FinEd"
+            modules = f"all {cert['modules_count']} modules" if cert.get("modules_count") else "every module"
+            og_desc = f"Verified FinEd certificate {html.escape(cert['code'])}: {holder} finished {modules} of {course_name}."
+            cert_tags = f"""
+  <title>{og_title}</title>
+  <meta name="description" content="{og_desc}" />
+  <link rel="canonical" href="{cert_url}" />
+  <meta name="robots" content="noindex, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="FinEd" />
+  <meta property="og:title" content="{og_title}" />
+  <meta property="og:description" content="{og_desc}" />
+  <meta property="og:image" content="https://myfined.com/fined_card_banner.png" />
+  <meta property="og:url" content="{cert_url}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{og_title}" />
+  <meta name="twitter:description" content="{og_desc}" />
+  <meta name="twitter:image" content="https://myfined.com/fined_card_banner.png" />
+"""
+            page_html = strip_replaced_tags(shell_html).replace("</head>", f"{cert_tags}\n</head>", 1)
+            return Response(content=page_html, media_type="text/html")
 
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
     if shell_html:

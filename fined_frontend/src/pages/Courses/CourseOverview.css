@@ -1275,6 +1275,55 @@
 .co-cert--done .co-cert-text { color: rgba(255, 255, 255, 0.82); }
 .co-cert-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
+/* Small picture of the certificate inside the card */
+.co-cert-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: none;
+  box-shadow: 0 10px 24px -12px rgba(23, 19, 33, 0.45);
+}
+
+button.co-cert-thumb {
+  cursor: pointer;
+  transition: transform 0.18s ease-out;
+}
+
+button.co-cert-thumb:hover { transform: translateY(-2px) rotate(-0.4deg); }
+button.co-cert-thumb:focus-visible { outline: 3px solid var(--dh-amber); outline-offset: 3px; }
+
+.co-cert-thumb--locked {
+  border: 1px solid var(--dh-line);
+  box-shadow: none;
+}
+
+.co-cert-thumb--locked .fcert-preview {
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+
+.co-cert-thumb-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--dh-line);
+  box-shadow: 0 8px 20px -8px rgba(23, 19, 33, 0.35);
+  font-size: 24px;
+  color: var(--dh-ink);
+}
+
 /* "Best on a laptop or desktop" — phones and tablets only */
 .co-desktop-tip {
   display: flex;
