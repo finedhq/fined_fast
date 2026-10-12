@@ -133,6 +133,11 @@ async def spa_fallback(fallback_path: str):
     ):
         return FileResponse(file_path)
 
+    # Crawlers asking for /articles/ are routed here by the frontend host; send them to the
+    # canonical /articles, which the frontend host serves itself (no redirect loop).
+    if fallback_path == "articles/":
+        return RedirectResponse(url="https://myfined.com/articles", status_code=301)
+
     # The built index.html: local dist/dev copy, or fetched from the frontend host
     # when the API runs without the frontend on disk (cached in page_shell).
     shell_html = await get_shell_html()
