@@ -52,6 +52,12 @@
   scrollbar-width: none;
 }
 
+/* More than four: shrink the columns a little so the 5th portrait peeks in
+   at the right edge, hinting that the row scrolls. */
+.lp-exp-grid--more {
+  grid-auto-columns: calc((100% - 4 * 22px) / 4.4);
+}
+
 .lp-exp-grid::-webkit-scrollbar {
   display: none;
 }
