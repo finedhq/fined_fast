@@ -50,7 +50,7 @@ export default function ExpertsSection({ authors }) {
         {/* The row animates in as a whole: a card half off-screen (the one that
             hints you can swipe) still appears with the others. */}
         <motion.ul
-          className="lp-exp-grid"
+          className={`lp-exp-grid${experts.length > 4 ? " lp-exp-grid--more" : ""}`}
           initial={reduce ? false : "hidden"}
           whileInView="shown"
           viewport={{ once: true, amount: 0.2 }}
