@@ -73,10 +73,14 @@ const paths = [
 // Every file needs a rewrite, or Vercel would keep serving the plain index.html for that route
 const vercelConfig = JSON.parse(readFileSync(resolve(root, 'vercel.json'), 'utf-8'))
 const rewrites = new Map((vercelConfig.rewrites || []).map((rule) => [rule.source, rule.destination]))
-const missingRewrites = paths.filter((path) => rewrites.get(path) !== `${path}.html`)
+// Vercel matches a trailing slash strictly, so /about/ needs its own rule or it gets the plain index.html
+const wantedSources = paths.flatMap((path) => [path, `${path}/`])
+const missingRewrites = wantedSources.filter(
+  (source) => rewrites.get(source) !== `${source.replace(/\/$/, '')}.html`,
+)
 if (missingRewrites.length) {
   throw new Error(
-    `vercel.json needs a rewrite from each path to its .html file. Missing: ${missingRewrites.join(', ')}`,
+    `vercel.json needs a rewrite from each path (with and without a trailing slash) to its .html file. Missing: ${missingRewrites.join(', ')}`,
   )
 }
 

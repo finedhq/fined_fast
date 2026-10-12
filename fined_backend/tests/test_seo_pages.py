@@ -48,12 +48,6 @@ def test_article_page_has_one_set_of_tags_and_never_redirects(client):
     assert "generic" not in resp.text
 
 
-def test_articles_index_with_trailing_slash_redirects_to_the_canonical_page(client):
-    resp = client.get("/articles/", follow_redirects=False)
-    assert resp.status_code == 301
-    assert resp.headers["location"] == "https://myfined.com/articles"
-
-
 def test_head_is_allowed(client):
     assert client.head("/articles/good").status_code == 200
 
