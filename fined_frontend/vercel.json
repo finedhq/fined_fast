@@ -1,5 +1,21 @@
 {
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
+    { "source": "/articles", "destination": "/articles.html" },
+    { "source": "/courses", "destination": "/courses.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/feedback", "destination": "/feedback.html" },
+    { "source": "/help", "destination": "/help.html" },
+    { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
+    { "source": "/termsofservice", "destination": "/termsofservice.html" },
+    { "source": "/tags/personal-finance", "destination": "/tags/personal-finance.html" },
+    { "source": "/tags/ipo", "destination": "/tags/ipo.html" },
+    { "source": "/tags/investing", "destination": "/tags/investing.html" },
+    { "source": "/tags/deep-dives", "destination": "/tags/deep-dives.html" },
+    { "source": "/tags/economy", "destination": "/tags/economy.html" },
     {
       "source": "/sitemap.xml",
       "destination": "https://api.myfined.com/sitemap.xml"

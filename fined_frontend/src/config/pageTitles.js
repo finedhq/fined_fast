@@ -12,7 +12,7 @@ export const STATIC_ROUTE_DESCRIPTIONS = {
   "/termsofservice": "The terms of service for using FinEd's website, articles and courses.",
 };
 
-const TAG_NAMES = {
+export const TAG_NAMES = {
   "personal-finance": "Personal Finance",
   "ipo": "IPO",
   "investing": "Investing",
@@ -44,7 +44,7 @@ export const STATIC_ROUTE_TITLES = {
 
 const SITE_ORIGIN = "https://myfined.com";
 
-const CANONICAL_STATIC_PATHS = new Set([
+export const CANONICAL_STATIC_PATHS = new Set([
   "/", "/courses", "/articles", "/about", "/contact", "/feedback",
   "/help", "/privacy-policy", "/termsofservice",
 ]);
