@@ -74,7 +74,8 @@ class ArticleRepository:
         query = supabase.from_("articles").select(self.ARTICLE_CARD_FIELDS).eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
-        res = query.order("created_at", desc=True)\
+        res = query.order("published_at", desc=True, nullsfirst=False)\
+            .order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
         articles = res.data or []
         return self._enrich_reviewers_list(articles)
@@ -83,7 +84,8 @@ class ArticleRepository:
         query = supabase.from_("articles").select(self.ARTICLE_CARD_FIELDS)
         if status and status != "all":
             query = query.eq("status", status)
-        res = query.order("created_at", desc=True)\
+        res = query.order("published_at", desc=True, nullsfirst=False)\
+            .order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
         articles = res.data or []
         return self._enrich_reviewers_list(articles)
@@ -230,6 +232,7 @@ class ArticleRepository:
     def get_all_for_sitemap(self) -> list:
         res = supabase.from_("articles").select("id, title, slug, created_at, published_at")\
             .eq("status", "published")\
+            .order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True).execute()
         return res.data or []
 
@@ -246,6 +249,7 @@ class ArticleRepository:
             "id, title, slug, description, image_url, tag, created_at, published_at, editor_summary, metadata, author_id",
             count="exact"
         ).eq("author_id", author_id).eq("status", "published")\
+         .order("published_at", desc=True, nullsfirst=False)\
          .order("created_at", desc=True)\
          .range(offset, offset + limit - 1)
         res = query.execute()
@@ -264,9 +268,19 @@ class ArticleRepository:
             return None
         return self._enrich_reviewer(res.data[0])
 
-    def get_adjacent(self, current_created_at: str) -> dict:
-        prev_res = supabase.from_("articles").select("title, slug, created_at").eq("status", "published").lt("created_at", current_created_at).order("created_at", desc=True).limit(1).execute()
-        next_res = supabase.from_("articles").select("title, slug, created_at").eq("status", "published").gt("created_at", current_created_at).order("created_at", desc=False).limit(1).execute()
+    def get_adjacent(self, current_date: str) -> dict:
+        prev_res = supabase.from_("articles").select("title, slug, created_at, published_at")\
+            .eq("status", "published")\
+            .lt("published_at", current_date)\
+            .order("published_at", desc=True, nullsfirst=False)\
+            .order("created_at", desc=True)\
+            .limit(1).execute()
+        next_res = supabase.from_("articles").select("title, slug, created_at, published_at")\
+            .eq("status", "published")\
+            .gt("published_at", current_date)\
+            .order("published_at", desc=False, nullsfirst=False)\
+            .order("created_at", desc=False)\
+            .limit(1).execute()
         return {
             "previous": prev_res.data[0] if prev_res.data else None,
             "next": next_res.data[0] if next_res.data else None
@@ -280,6 +294,7 @@ class ArticleRepository:
             .eq("status", "published")\
             .eq("tag", tag)\
             .neq("slug", exclude_slug)\
+            .order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True)\
             .limit(limit)
         res = query.execute()
@@ -290,6 +305,7 @@ class ArticleRepository:
         res = supabase.from_("articles")\
             .select("id, title, slug, description, image_url, tag, created_at, published_at, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")\
             .eq("status", "published")\
+            .order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True)\
             .limit(limit + len(exclude_slugs) + 2)\
             .execute()
