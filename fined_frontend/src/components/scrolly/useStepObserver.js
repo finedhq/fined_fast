@@ -3,12 +3,16 @@
 // `.scrolly-step` on the page, the same trigger zones as the prototype
 // (desktop vs ≤960 px), scroll direction for reversible figures, rebuilt on
 // resize, and fully cleaned up when the page unmounts.
+// `zone` (optional): a different trigger zone { rootMargin, threshold } — used
+// by the experimental phone layouts in mock/ (pass it with a matching resetKey).
 import { useEffect, useRef } from "react";
 
-export default function useStepObserver(rootRef, onActivate, resetKey) {
+export default function useStepObserver(rootRef, onActivate, resetKey, zone) {
   const callback = useRef(onActivate);
+  const zoneRef = useRef(zone);
   useEffect(() => {
     callback.current = onActivate;
+    zoneRef.current = zone;
   });
 
   useEffect(() => {
@@ -38,7 +42,9 @@ export default function useStepObserver(rootRef, onActivate, resetKey) {
             });
           });
         },
-        { root: null, rootMargin: isMobile ? "-38% 0px -25% 0px" : "-20% 0px -40% 0px", threshold: 0.2 }
+        zoneRef.current
+          ? { root: null, ...zoneRef.current }
+          : { root: null, rootMargin: isMobile ? "-38% 0px -25% 0px" : "-20% 0px -40% 0px", threshold: 0.2 }
       );
       stepEls.forEach((el) => observer.observe(el));
     };

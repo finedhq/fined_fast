@@ -6,6 +6,7 @@ import { Suspense, useMemo } from "react";
 import { Term, Tokens } from "./SafeText";
 import { annotationText, linkText, stepBody } from "./text";
 import { FIGURES } from "./figures/registry";
+import StoriesChapter from "./mock/StoriesChapter";
 
 // The prototype's tap-to-guess (engine.js _renderTapGuess): once answered,
 // every option locks, the chosen one is marked, the right one is revealed and
@@ -33,12 +34,12 @@ function TapGuess({ interaction, picked, onPick }) {
   );
 }
 
-function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess, onGuess }) {
+export function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess, onGuess, className = "scrolly-step" }) {
   const { paragraphs, keyWords } = useMemo(() => stepBody(step.body, step.glossary_terms), [step.body, step.glossary_terms]);
   const note = step.annotation ? annotationText(step.annotation.text) : null;
 
   return (
-    <div className={`scrolly-step${active ? " is-active" : ""}`} data-step-id={step.step_id} data-chapter={chapterSlug} data-step={index}>
+    <div className={`${className}${active ? " is-active" : ""}`} data-step-id={step.step_id} data-chapter={chapterSlug} data-step={index}>
       <div className="step-badge">
         <span className="step-num">
           {chapterNum}.{index + 1}
@@ -82,7 +83,12 @@ function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess,
   );
 }
 
-export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState }) {
+// `layout` / `onStep`: the experimental phone layouts (mock/). "stories" draws
+// the chapter as one tap-through screen that reports its own step via onStep.
+export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, layout, onStep }) {
+  if (layout === "stories") {
+    return <StoriesChapter card={card} chapterNum={chapterNum} chapterCount={chapterCount} figureState={figureState} onFigureState={onFigureState} onStep={onStep} />;
+  }
   const d = card.card_data || {};
   const steps = d.steps || [];
   const figure = FIGURES[d.figure?.kind];

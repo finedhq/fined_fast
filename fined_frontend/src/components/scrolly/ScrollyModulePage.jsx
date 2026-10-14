@@ -29,13 +29,23 @@ import useSaveProgress from "./useSaveProgress";
 import { earnedStars, maxStars as moduleMaxStars, openParts } from "./progress";
 import { scrollToElement } from "./scroll";
 import { TOOLS } from "./tools/registry";
+import useMobileLayout from "./mock/useMobileLayout";
 import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
+import "./mock/mobile-mock.css";
 
 export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride, onSignup }) {
   const rootRef = useRef(null);
   const moduleId = bundle.module_id;
+  // EXPERIMENTAL phone layouts (?layout=reels|stories|snap, see mock/).
+  const layout = useMobileLayout(embedded);
+  useEffect(() => {
+    if (!layout) return undefined;
+    const cls = `nc-snap-${layout}`;
+    document.documentElement.classList.add(cls);
+    return () => document.documentElement.classList.remove(cls);
+  }, [layout]);
 
   const cards = useMemo(() => [...(bundle.cards || [])].sort((a, b) => a.order_index - b.order_index), [bundle.cards]);
   const hero = cards.find((c) => c.card_template === "hero");
@@ -73,15 +83,15 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
 
   // Which step is being read in each chapter: { [chapterSlug]: { step, direction } }
   const [active, setActive] = useState({});
-  useStepObserver(
-    rootRef,
-    ({ chapter, step, direction }) => {
-      setActive((a) => (a[chapter]?.step === step ? a : { ...a, [chapter]: { step, direction } }));
-      if (hero) markReached(hero.slug);
-      if (step === lastStep[chapter]) markReached(chapter);
-    },
-    moduleId
-  );
+  const onStepActive = ({ chapter, step, direction }) => {
+    setActive((a) => (a[chapter]?.step === step ? a : { ...a, [chapter]: { step, direction } }));
+    if (hero) markReached(hero.slug);
+    if (step === lastStep[chapter]) markReached(chapter);
+  };
+  // Reels / snap: a step counts once it sits in the part of the screen below
+  // the pinned figure.
+  const zone = layout === "reels" || layout === "snap" ? { rootMargin: "-62% 0px -22% 0px", threshold: 0 } : undefined;
+  useStepObserver(rootRef, onStepActive, `${moduleId}:${layout}`, zone);
 
   // Open at the top (decision 7f); a link to a specific part jumps there.
   const focusRef = useRef(focusSlug);
@@ -128,6 +138,8 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             direction={active[card.slug]?.direction}
             figureState={page.steps[card.slug]}
             onFigureState={patchPart("steps", card.slug)}
+            layout={layout}
+            onStep={onStepActive}
           />
         );
       case "model": {
@@ -175,7 +187,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   };
 
   return (
-    <div className="nc-root" ref={rootRef}>
+    <div className={`nc-root${layout ? ` layout-${layout}` : ""}`} ref={rootRef}>
       {!embedded && (
         <Topbar
           rootRef={rootRef}
