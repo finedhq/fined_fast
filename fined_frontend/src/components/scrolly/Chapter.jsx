@@ -2,11 +2,13 @@
 // the prototype's _renderSection / _renderStep (engine.js): "Chapter N of M"
 // header, the steps on one side and the sticky figure (with its step dots) on
 // the other. The figure itself is a plug-in from figures/registry.js.
-import { Suspense, useMemo } from "react";
+// On phones (`reels`) the same markup is laid out by scrolly-reels.css, with
+// the figure sized for each step by useReelsFit.
+import { Suspense, useMemo, useRef } from "react";
 import { Term, Tokens } from "./SafeText";
 import { annotationText, linkText, stepBody } from "./text";
 import { FIGURES } from "./figures/registry";
-import StoriesChapter from "./mock/StoriesChapter";
+import useReelsFit from "./useReelsFit";
 
 // The prototype's tap-to-guess (engine.js _renderTapGuess): once answered,
 // every option locks, the chosen one is marked, the right one is revealed and
@@ -34,12 +36,12 @@ function TapGuess({ interaction, picked, onPick }) {
   );
 }
 
-export function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess, onGuess, className = "scrolly-step" }) {
+function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess, onGuess }) {
   const { paragraphs, keyWords } = useMemo(() => stepBody(step.body, step.glossary_terms), [step.body, step.glossary_terms]);
   const note = step.annotation ? annotationText(step.annotation.text) : null;
 
   return (
-    <div className={`${className}${active ? " is-active" : ""}`} data-step-id={step.step_id} data-chapter={chapterSlug} data-step={index}>
+    <div className={`scrolly-step${active ? " is-active" : ""}`} data-step-id={step.step_id} data-chapter={chapterSlug} data-step={index}>
       <div className="step-badge">
         <span className="step-num">
           {chapterNum}.{index + 1}
@@ -83,12 +85,9 @@ export function Step({ step, index, chapterNum, chapterSlug, active, figureNote,
   );
 }
 
-// `layout` / `onStep`: the experimental phone layouts (mock/). "stories" draws
-// the chapter as one tap-through screen that reports its own step via onStep.
-export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, layout, onStep }) {
-  if (layout === "stories") {
-    return <StoriesChapter card={card} chapterNum={chapterNum} chapterCount={chapterCount} figureState={figureState} onFigureState={onFigureState} onStep={onStep} />;
-  }
+export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, reels = false }) {
+  const sectionRef = useRef(null);
+  useReelsFit(sectionRef, reels, activeStep);
   const d = card.card_data || {};
   const steps = d.steps || [];
   const figure = FIGURES[d.figure?.kind];
@@ -99,12 +98,17 @@ export default function Chapter({ card, chapterNum, chapterCount, activeStep, di
   const onGuess = (stepId, optionId) => onFigureState((current) => ({ guesses: { ...(current.guesses || {}), [stepId]: optionId } }));
 
   return (
-    <section className="scrolly-section" id={`section-${card.slug}`} data-part={card.slug}>
+    <section className="scrolly-section" id={`section-${card.slug}`} data-part={card.slug} ref={sectionRef}>
       <header className="chapter-header">
         <div className="chapter-count">
           Chapter {chapterNum} <span>of {chapterCount}</span>
         </div>
         <h2 className="chapter-title">{d.title}</h2>
+        {reels && (
+          <p className="reel-chapter-hint">
+            {steps.length} short steps · Swipe up to start <span aria-hidden="true">↑</span>
+          </p>
+        )}
       </header>
 
       <div className="scrolly-container">

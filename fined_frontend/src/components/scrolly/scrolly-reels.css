@@ -1,0 +1,273 @@
+/* The module page on phones and small tablets (≤ 960 px): "Reels".
+   ScrollyModulePage adds .layout-reels to .nc-root and .nc-snap-reels to
+   <html> at that width; nothing here applies anywhere else.
+
+   The page snaps one screen at a time. Each step is a full-screen panel with
+   the chapter's figure pinned under the top bar; useReelsFit.js sizes that
+   figure for each step (--reel-fig, --reel-zoom, and --step-fig on the step).
+   A step's text starts just below the figure; a long step makes its panel
+   taller (read on by scrolling under the pinned figure) instead of scrolling
+   inside a box. Chapter titles and quick checks are screens of their own; the
+   opening, the hands-on tool and the completion scroll normally. */
+
+html.nc-snap-reels {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: auto;
+}
+
+.nc-root.layout-reels {
+  --header-height: 56px;
+  --reel-h: calc(100svh - var(--header-height));
+  --reel-fig: 44svh;
+  --reel-zoom: 1;
+}
+
+/* The opening screen is for phones now, so the "use a laptop" tip goes. */
+.nc-root.layout-reels .hero-device-tip { display: none; }
+
+/* Warm-up poll answers are full-width rows with left-aligned text (like the
+   quick-check answers), so a long answer that wraps onto two lines looks the
+   same as the short ones instead of a wide centred pill beside small ones.
+   The savings amounts (₹10k…) are short and stay as pills in a row. */
+.nc-root.layout-reels .hero-poll--poll .poll-chip-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.nc-root.layout-reels .hero-poll--poll .poll-chip {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: var(--radius-md);
+  text-align: left;
+  line-height: 1.35;
+}
+
+.nc-root.layout-reels .nc-hero,
+.nc-root.layout-reels .tool-section,
+.nc-root.layout-reels .completion-section {
+  scroll-snap-align: start;
+}
+
+/* A quick check is a reel of its own: one full screen, content centred. */
+.nc-root.layout-reels .checkpoint-section {
+  min-height: var(--reel-h);
+  margin-top: 0;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.nc-root.layout-reels .scrolly-section { padding-top: 0; }
+
+/* Each chapter opens with its own title screen. */
+.nc-root.layout-reels .chapter-header {
+  min-height: var(--reel-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 24px;
+  background: linear-gradient(180deg, var(--purple-surface), var(--bg));
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: var(--header-height);
+}
+
+.nc-root.layout-reels .chapter-title { font-size: 2.3rem; }
+
+.nc-root .reel-chapter-hint {
+  margin-top: 36px;
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--purple);
+}
+
+.nc-root .reel-chapter-hint span {
+  display: inline-block;
+  animation: nc-reel-bob 1.6s ease-in-out infinite;
+}
+
+/* Figure and steps share one grid cell: the figure sticks on top of the
+   steps, so its height can change without moving anything on the page. */
+.nc-root.layout-reels .scrolly-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  position: relative;
+  padding: 0;
+}
+
+.nc-root.layout-reels .scrolly-article,
+.nc-root.layout-reels .scrolly-figure {
+  grid-area: 1 / 1;
+}
+
+.nc-root.layout-reels .scrolly-figure {
+  align-self: start;
+  top: var(--header-height);
+  height: var(--reel-fig);
+  min-height: 0;
+  margin: 0;
+  padding: 10px 16px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: 0 10px 22px -16px rgba(23, 19, 33, 0.35);
+  z-index: 22;
+  transition: height 0.35s var(--ease);
+}
+
+/* The hidden copy useReelsFit measures: its natural height. */
+.nc-root.layout-reels .scrolly-figure.is-measuring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
+
+/* The figure's drawing keeps its natural height and is scaled down as a
+   whole when the box is shorter (a transform, so grids sized by their width
+   shrink too); the figure box clips anything left over. When the box has
+   spare room, the drawing sits centred in it. */
+.nc-root.layout-reels .viz-content {
+  flex: none;
+  margin-block: auto;
+  overflow: visible;
+  transform: scale(var(--reel-zoom));
+  transform-origin: top center;
+}
+
+.nc-root.layout-reels .scrolly-figure.is-measuring .viz-content { transform: none; }
+.nc-root.layout-reels .chart-header { margin-bottom: 8px; padding-bottom: 8px; }
+.nc-root.layout-reels .chart-title-tag { font-size: 0.84rem; }
+.nc-root.layout-reels .scrolly-article { padding: 0; }
+
+.nc-root.layout-reels .scrolly-step {
+  min-height: var(--reel-h);
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: calc(var(--step-fig, 44svh) + 16px) 20px 12px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--bg);
+  opacity: 1;
+  z-index: 1;
+  transition: padding-top 0.35s var(--ease);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: var(--header-height);
+}
+
+.nc-root.layout-reels .scrolly-step::before { display: none; }
+
+/* Tighter text so more of each step fits on one screen. */
+.nc-root.layout-reels .step-badge { margin-bottom: 6px; }
+.nc-root.layout-reels .step-title { font-size: 1.18rem; margin-bottom: 8px; }
+.nc-root.layout-reels .step-body { font-size: 0.97rem; line-height: 1.58; }
+.nc-root.layout-reels .step-body p + p { margin-top: 10px; }
+.nc-root.layout-reels .stat-chip { margin-top: 12px; font-size: 1.15rem; }
+.nc-root.layout-reels .key-words { margin-top: 12px; padding-top: 10px; }
+.nc-root.layout-reels .annotation { margin-top: 12px; padding: 10px 14px; font-size: 0.86rem; line-height: 1.5; }
+
+/* "Swipe up" arrow: sits under the text, at the bottom of a short step. */
+.nc-root.layout-reels .scrolly-step:not(:last-child)::after {
+  content: "↑";
+  align-self: center;
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 1.1rem;
+  color: var(--purple);
+  opacity: 0.6;
+  animation: nc-reel-bob 1.6s ease-in-out infinite;
+}
+
+/* Hands-on tool. On a phone the card's own frame and side padding, plus the
+   results panel inside it, left the innermost numbers about 240px wide, so
+   the tool fills the screen as one white surface (20px sides). It is also
+   kept short: the "+N FinStars" reward is a small pill at the top right
+   (its rule is one line under the description) and the spacing is tight. */
+.nc-root.layout-reels .tool-section { padding: 0; }
+
+.nc-root.layout-reels .tool-card {
+  padding: 22px 20px 26px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Header: eyebrow + reward pill on one row, then title, description, rule. */
+.nc-root.layout-reels .tool-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "eyebrow reward"
+    "title   title"
+    "target  target"
+    "rule    rule";
+  align-items: center;
+  gap: 0;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.nc-root.layout-reels .tool-head > div:first-child,
+.nc-root.layout-reels .tool-reward { display: contents; }
+.nc-root.layout-reels .tool-eyebrow { grid-area: eyebrow; margin-bottom: 0; }
+.nc-root.layout-reels .tool-title { grid-area: title; margin: 6px 0 4px; font-size: 1.6rem; }
+.nc-root.layout-reels .tool-target { grid-area: target; font-size: 0.94rem; line-height: 1.5; }
+
+.nc-root.layout-reels .tool-reward strong {
+  grid-area: reward;
+  padding: 4px 10px;
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-pill);
+  background: var(--amber-surface);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.nc-root.layout-reels .tool-reward span {
+  grid-area: rule;
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+
+/* Resting point with the tool's last block (its results) fully on screen,
+   so a swipe never jumps past the results to the next chapter. */
+.nc-root.layout-reels .tool-card > :last-child {
+  scroll-snap-align: end;
+  scroll-margin-bottom: 16px;
+}
+
+.nc-root.layout-reels .leak-lab-grid { gap: 20px; }
+.nc-root.layout-reels .control-group { margin-bottom: 18px; }
+.nc-root.layout-reels .control-label { margin-bottom: 8px; }
+.nc-root.layout-reels .where-options { gap: 6px; }
+.nc-root.layout-reels .where-btn { padding: 9px 14px; }
+.nc-root.layout-reels .control-note { margin-top: 6px; }
+.nc-root.layout-reels .more-assumptions-toggle { margin-bottom: 4px; }
+.nc-root.layout-reels .leak-lab-output { padding: 16px; }
+.nc-root.layout-reels .leak-output-numbers { gap: 10px; margin-bottom: 12px; }
+.nc-root.layout-reels .sc-ownership { padding: 12px 14px; margin-bottom: 12px; }
+.nc-root.layout-reels .leak-aside { margin-top: 12px; padding: 10px 12px; }
+
+@keyframes nc-reel-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Small figure labels wrap instead of being cut off ("Mess th…"). */
+.nc-root.layout-reels .basket-item-label,
+.nc-root.layout-reels .basket-mini-label {
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}

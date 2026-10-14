@@ -4,10 +4,11 @@
 import SafeText from "./SafeText";
 import { scrollToElement } from "./scroll";
 
-function PollGroup({ num, prompt, options, picked, ack, onPick }) {
+// `kind` ("poll" or "savings") only names the group for styling.
+function PollGroup({ kind, num, prompt, options, picked, ack, onPick }) {
   const answered = picked !== undefined && picked !== null;
   return (
-    <div className={`hero-poll${answered ? " is-answered" : ""}`}>
+    <div className={`hero-poll hero-poll--${kind}${answered ? " is-answered" : ""}`}>
       <div className="hero-poll-prompt">
         <span className="poll-num">{num}</span>
         {prompt}
@@ -71,6 +72,7 @@ export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSe
           <div className="warmup-label">{d.warmup_label}</div>
           {d.poll && (
             <PollGroup
+              kind="poll"
               num="01"
               prompt={d.poll.prompt}
               options={d.poll.options}
@@ -81,6 +83,7 @@ export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSe
           )}
           {chip && (
             <PollGroup
+              kind="savings"
               num="02"
               prompt={chip.prompt}
               options={chip.options}
