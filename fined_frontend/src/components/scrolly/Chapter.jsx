@@ -2,10 +2,13 @@
 // the prototype's _renderSection / _renderStep (engine.js): "Chapter N of M"
 // header, the steps on one side and the sticky figure (with its step dots) on
 // the other. The figure itself is a plug-in from figures/registry.js.
-import { Suspense, useMemo } from "react";
+// On phones (`reels`) the same markup is laid out by scrolly-reels.css, with
+// the figure sized for each step by useReelsFit.
+import { Suspense, useMemo, useRef } from "react";
 import { Term, Tokens } from "./SafeText";
 import { annotationText, linkText, stepBody } from "./text";
 import { FIGURES } from "./figures/registry";
+import useReelsFit from "./useReelsFit";
 
 // The prototype's tap-to-guess (engine.js _renderTapGuess): once answered,
 // every option locks, the chosen one is marked, the right one is revealed and
@@ -82,7 +85,9 @@ function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess,
   );
 }
 
-export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState }) {
+export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, reels = false }) {
+  const sectionRef = useRef(null);
+  useReelsFit(sectionRef, reels, activeStep);
   const d = card.card_data || {};
   const steps = d.steps || [];
   const figure = FIGURES[d.figure?.kind];
@@ -93,12 +98,17 @@ export default function Chapter({ card, chapterNum, chapterCount, activeStep, di
   const onGuess = (stepId, optionId) => onFigureState((current) => ({ guesses: { ...(current.guesses || {}), [stepId]: optionId } }));
 
   return (
-    <section className="scrolly-section" id={`section-${card.slug}`} data-part={card.slug}>
+    <section className="scrolly-section" id={`section-${card.slug}`} data-part={card.slug} ref={sectionRef}>
       <header className="chapter-header">
         <div className="chapter-count">
           Chapter {chapterNum} <span>of {chapterCount}</span>
         </div>
         <h2 className="chapter-title">{d.title}</h2>
+        {reels && (
+          <p className="reel-chapter-hint">
+            {steps.length} short steps · Swipe up to start <span aria-hidden="true">↑</span>
+          </p>
+        )}
       </header>
 
       <div className="scrolly-container">
