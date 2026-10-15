@@ -9,7 +9,9 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import ModuleLoader from "../CoursesPage/CardViewer/ModuleLoader";
 import "../CoursesPage/CardViewer/CardViewer.css";
 
-const ScrollyModulePage = lazy(() => import("../../components/scrolly/ScrollyModulePage"));
+// Fetched alongside the module's data (below), so the two downloads overlap.
+const loadScrollyModulePage = () => import("../../components/scrolly/ScrollyModulePage");
+const ScrollyModulePage = lazy(loadScrollyModulePage);
 
 export default function TryModule() {
   const { isAuthenticated, loginWithRedirect } = useAuth0();
@@ -20,6 +22,7 @@ export default function TryModule() {
 
   useEffect(() => {
     let cancelled = false;
+    loadScrollyModulePage();
     getSampleModule()
       .then((data) => !cancelled && setBundle(data))
       .catch((err) => !cancelled && setError(err.message || "Failed to load the module."));

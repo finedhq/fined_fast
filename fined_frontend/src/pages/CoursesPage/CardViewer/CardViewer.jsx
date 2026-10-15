@@ -11,7 +11,10 @@ import { getCardFinstars } from "../../../utils/finstars";
 import { isScrollyModule } from "../../../components/scrolly/templates";
 
 // New-course modules are drawn as one long page, like the prototype (loaded only when needed).
-const ScrollyModulePage = lazy(() => import("../../../components/scrolly/ScrollyModulePage"));
+// The module page's code is fetched alongside the module's data (below), not
+// after it arrives, so the two downloads overlap.
+const loadScrollyModulePage = () => import("../../../components/scrolly/ScrollyModulePage");
+const ScrollyModulePage = lazy(loadScrollyModulePage);
 
 
 function CardViewer() {
@@ -54,6 +57,7 @@ function CardViewer() {
     setLoading(true);
     setError("");
 
+    loadScrollyModulePage();
     getBundleByCardSlug(cardSlug, email)
       .then((data) => {
         if (isCancelled) return;

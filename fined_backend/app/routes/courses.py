@@ -1,6 +1,7 @@
 # HTTP endpoints for educational courses and quiz submissions
 import asyncio
 import re
+import time
 import uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Response
@@ -19,6 +20,10 @@ from app.services.course_visibility import (
 from app.services.course_authoring import checked_slug, require_draft_module, require_free_slug, slug_from_title
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
+
+# /sample-module answer, kept in memory (see get_sample_module).
+SAMPLE_CACHE_SECONDS = 60
+_sample_cache = {"data": None, "time": 0.0}
 
 
 def _is_valid_uuid(value: str) -> bool:
@@ -137,7 +142,12 @@ async def get_all_courses(response: Response):
 @router.get("/sample-module")
 async def get_sample_module():
     """Public, no login: Module 1 of the published stock-market course, so
-    landing-page visitors can try a module. No progress is read or written."""
+    landing-page visitors can try a module. No progress is read or written.
+    The same for every visitor, so it is kept in memory for a minute (like
+    the published course list) instead of three database calls per visit."""
+    now = time.time()
+    if _sample_cache["data"] is not None and now - _sample_cache["time"] < SAMPLE_CACHE_SECONDS:
+        return _sample_cache["data"]
     try:
         courses = await asyncio.to_thread(course_repo.get_listed)
         course = next((c for c in courses if "stock market" in (c.get("title") or "").lower()), None)
@@ -149,7 +159,7 @@ async def get_sample_module():
             raise HTTPException(status_code=404, detail="Sample module not found")
         cards_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("*").eq("module_id", module["id"]).order("order_index").execute())
         cards = [{**c, "status": "incompleted", "userAnswer": None} for c in (cards_res.data or [])]
-        return {
+        data = {
             "course_id": course["id"],
             "course_title": course.get("title"),
             "course_slug": course.get("slug"),
@@ -161,6 +171,8 @@ async def get_sample_module():
             "prevModuleFirstCard": None,
             "nextModuleFirstCard": None,
         }
+        _sample_cache.update(data=data, time=now)
+        return data
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -343,6 +355,28 @@ async def _noop():
     return None
 
 
+# Lookups that follow the foreign keys (cards.module_id -> modules,
+# modules.course_id -> courses), so one request returns the rows together.
+_MODULE_WITH_COURSE = "*, courses(*)"
+_CARD_WITH_MODULE_AND_COURSE = "module_id, modules(*, courses(*))"
+
+
+def _first_card_link(module: Optional[dict]) -> Optional[dict]:
+    """Link to a module's first card, from the cards listed with the module
+    (lowest order_index first, cards without one last — as the database orders)."""
+    if not module:
+        return None
+    cards = sorted(module.get("cards") or [], key=lambda c: (c.get("order_index") is None, c.get("order_index") or 0))
+    if not cards:
+        return None
+    return {
+        "moduleId": module["id"],
+        "moduleSlug": module.get("slug"),
+        "cardId": cards[0]["card_id"],
+        "cardSlug": cards[0].get("slug"),
+    }
+
+
 async def _build_bundle_response(course_id: str, course_title: str, course_slug: str, module_id: str, module_title: str, module_order: int, user_email: str, write_ongoing: bool = True, viewer: AuthUser = None, planned_modules: Optional[int] = None):
     # 1. Parallel lookups: cards, user progress, course modules, ongoing state
     #    (draft previews don't move the viewer's "continue learning" pointer)
@@ -353,7 +387,9 @@ async def _build_bundle_response(course_id: str, course_title: str, course_slug:
             "module_id": module_id,
             "progress_type": "card"
         }).execute()),
-        asyncio.to_thread(lambda: supabase.from_("modules").select("*").eq("course_id", course_id).order("order_index").execute()),
+        # Each module comes with its cards' ids and order, so "previous / next
+        # module" links need no second round trip to the database.
+        asyncio.to_thread(lambda: supabase.from_("modules").select("*, cards(card_id, slug, order_index)").eq("course_id", course_id).order("order_index").execute()),
         asyncio.to_thread(lambda: supabase.from_("users").update({
             "ongoing_module_id": module_id,
             "ongoing_course_id": course_id
@@ -377,37 +413,8 @@ async def _build_bundle_response(course_id: str, course_title: str, course_slug:
     prev_module = modules[module_index - 1] if module_index > 0 else None
     next_module = modules[module_index + 1] if module_index < len(modules) - 1 else None
 
-    prev_module_first_card = None
-    next_module_first_card = None
-
-    nav_queries = []
-    if prev_module:
-        nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", prev_module["id"]).order("order_index").limit(1).execute()))
-    if next_module:
-        nav_queries.append(asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, slug").eq("module_id", next_module["id"]).order("order_index").limit(1).execute()))
-
-    if nav_queries:
-        nav_results = await asyncio.gather(*nav_queries)
-        nav_idx = 0
-        if prev_module:
-            prev_cards = nav_results[nav_idx].data
-            if prev_cards:
-                prev_module_first_card = {
-                    "moduleId": prev_module["id"],
-                    "moduleSlug": prev_module.get("slug"),
-                    "cardId": prev_cards[0]["card_id"],
-                    "cardSlug": prev_cards[0].get("slug")
-                }
-            nav_idx += 1
-        if next_module:
-            next_cards = nav_results[nav_idx].data
-            if next_cards:
-                next_module_first_card = {
-                    "moduleId": next_module["id"],
-                    "moduleSlug": next_module.get("slug"),
-                    "cardId": next_cards[0]["card_id"],
-                    "cardSlug": next_cards[0].get("slug")
-                }
+    prev_module_first_card = _first_card_link(prev_module)
+    next_module_first_card = _first_card_link(next_module)
 
     # Package cards with user progress attached
     cards_packaged = []
@@ -447,8 +454,12 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
     Enables zero-latency client-side card transitions.
     """
     try:
-        # Resolve course_slug
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("slug", course_slug).execute())
+        # Course and module looked up together (the module comes with its own
+        # course, for the check below): one round trip instead of four.
+        course_res, module_res = await asyncio.gather(
+            asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("slug", course_slug).execute()),
+            asyncio.to_thread(lambda: supabase.from_("modules").select(_MODULE_WITH_COURSE).eq("slug", module_slug).execute()),
+        )
         if not course_res.data and _is_valid_uuid(course_slug):
             course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", course_slug).execute())
         if not course_res.data or not can_view_course(course_res.data[0], user):
@@ -457,19 +468,21 @@ async def get_module_bundle(course_slug: str, module_slug: str, body: GetCardReq
         course_title = course_res.data[0].get("title")
         c_slug_real = course_res.data[0].get("slug")
 
-        # Resolve module_slug
-        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("slug", module_slug).execute())
         if not module_res.data and _is_valid_uuid(module_slug):
-            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("id", module_slug).execute())
+            module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select(_MODULE_WITH_COURSE).eq("id", module_slug).execute())
         if not module_res.data:
             raise HTTPException(status_code=404, detail="Module not found")
-        module_course_id = module_res.data[0].get("course_id")
-        if module_course_id != course_id and await _hidden_from(module_course_id, user):
-            raise HTTPException(status_code=404, detail="Module not found")
-        module_id = module_res.data[0]["id"]
-        module_title = module_res.data[0].get("title")
-        module_order = module_res.data[0].get("order_index", 0)
-        module_row = await asyncio.to_thread(course_repo.get_module_by_id, module_id)
+        module_row = module_res.data[0]
+        if module_row.get("course_id") != course_id:
+            # The module belongs to another course: allowed only if that course
+            # is one this user may open (looked up again if it didn't come along).
+            module_course = module_row.get("courses")
+            hidden = not can_view_course(module_course, user) if module_course is not None else await _hidden_from(module_row.get("course_id"), user)
+            if hidden:
+                raise HTTPException(status_code=404, detail="Module not found")
+        module_id = module_row["id"]
+        module_title = module_row.get("title")
+        module_order = module_row.get("order_index", 0)
         if not can_view_module(module_row, user):
             raise HTTPException(status_code=404, detail="Module not found")
 
@@ -490,36 +503,29 @@ async def get_bundle_by_card_slug(card_slug: str, body: GetCardRequest, user: Au
     Fetch module bundle directly via a unique card slug.
     """
     try:
-        # Resolve card to get module_id
-        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("slug", card_slug).execute())
+        # The card with its module and that module's course, in one round trip
+        # (previously three lookups one after another, plus the module again).
+        card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select(_CARD_WITH_MODULE_AND_COURSE).eq("slug", card_slug).execute())
         if not card_res.data and _is_valid_uuid(card_slug):
-            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select("module_id").eq("card_id", card_slug).execute())
+            card_res = await asyncio.to_thread(lambda: supabase.from_("cards").select(_CARD_WITH_MODULE_AND_COURSE).eq("card_id", card_slug).execute())
         if not card_res.data:
             raise HTTPException(status_code=404, detail="Card not found")
-        m_id = card_res.data[0]["module_id"]
-
-        # Resolve module to get course_id
-        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id, title, slug, order_index, course_id").eq("id", m_id).execute())
-        if not module_res.data:
+        module_row = card_res.data[0].get("modules")
+        if not module_row:
             raise HTTPException(status_code=404, detail="Module not found")
-        m_title = module_res.data[0].get("title")
-        m_order = module_res.data[0].get("order_index", 0)
-        c_id = module_res.data[0]["course_id"]
-
-        # Resolve course to get details
-        course_res = await asyncio.to_thread(lambda: supabase.from_("courses").select("*").eq("id", c_id).execute())
-        if not course_res.data:
+        course = module_row.get("courses")
+        if not course:
             raise HTTPException(status_code=404, detail="Course not found")
-        if not can_view_course(course_res.data[0], user):
+        if not can_view_course(course, user):
             raise HTTPException(status_code=404, detail="Card not found")
-        module_row = await asyncio.to_thread(course_repo.get_module_by_id, m_id)
         if not can_view_module(module_row, user):
             raise HTTPException(status_code=404, detail="Card not found")
-        c_title = course_res.data[0].get("title")
-        c_slug_real = course_res.data[0].get("slug")
+        m_id = module_row["id"]
+        m_title = module_row.get("title")
+        m_order = module_row.get("order_index", 0)
 
-        is_draft = not is_listed(course_res.data[0]) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
-        return await _build_bundle_response(c_id, c_title, c_slug_real, m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user, planned_modules=course_res.data[0].get("planned_modules"))
+        is_draft = not is_listed(course) or not is_released(module_row)  # draft/archived courses and unreleased modules never become "continue learning"
+        return await _build_bundle_response(course["id"], course.get("title"), course.get("slug"), m_id, m_title, m_order, user.email, write_ongoing=not is_draft, viewer=user, planned_modules=course.get("planned_modules"))
     except HTTPException as he:
         raise he
     except Exception as e:
