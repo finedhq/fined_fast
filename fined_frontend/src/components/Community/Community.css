@@ -1,0 +1,230 @@
+/* WhatsApp community: floating button, popup and inline banner */
+
+/* ── Floating button (landing page) ── */
+.cm-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 18px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: #171321;
+  color: #fff;
+  font: 800 14px 'Manrope', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 14px 34px -12px rgba(23, 19, 33, 0.55);
+}
+
+.cm-float-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #25D366;
+  color: #fff;
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .cm-float { right: 16px; bottom: 16px; padding: 6px; }
+  .cm-float-label { display: none; }
+}
+
+/* ── Popup ── */
+.cm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(23, 19, 33, 0.55);
+  backdrop-filter: blur(6px);
+  overflow-y: auto;
+}
+
+.cm-sheet {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 32px 28px 24px;
+  border-radius: 24px;
+  background: #fff;
+  color: #171321;
+  box-shadow: 0 40px 80px -24px rgba(23, 19, 33, 0.45);
+  font-family: 'Nunito', sans-serif;
+}
+
+.cm-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #F8F7FA;
+  color: #625D6D;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.cm-close:hover { background: #EFEBF5; color: #171321; }
+
+.cm-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #E9FBF0;
+  color: #1DA851;
+  font-size: 26px;
+}
+
+.cm-title {
+  margin: 18px 0 8px;
+  font: 800 24px/1.15 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+  color: #171321;
+}
+
+.cm-text {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: #625D6D;
+}
+
+.cm-points {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 26px;
+  padding: 18px 0 0;
+  list-style: none;
+  border-top: 1px solid #E6E1EC;
+}
+
+.cm-points li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #171321;
+}
+
+.cm-points svg {
+  flex: none;
+  font-size: 20px;
+  color: #4100BC;
+}
+
+.cm-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px 14px 24px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #FFC24A 0%, #F5A623 100%);
+  color: #171321;
+  font: 800 16px 'Manrope', sans-serif;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 12px 28px -12px rgba(245, 166, 35, 0.9);
+  transition: transform 0.2s;
+}
+
+.cm-cta:hover { transform: translateY(-1px); }
+
+.cm-cta-arrow {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #171321;
+  color: #FFB600;
+  font-size: 12px;
+}
+
+.cm-fine {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #8E8A95;
+}
+
+/* ── Inline banner (articles, dashboard) ── */
+.cm-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  margin: 32px 0;
+  padding: 20px 22px;
+  border: 1px solid #E6E1EC;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(23, 19, 33, 0.03);
+  box-sizing: border-box;
+}
+
+.cm-banner-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #E9FBF0;
+  color: #1DA851;
+  font-size: 26px;
+}
+
+.cm-banner-text { flex: 1; min-width: 0; }
+
+.cm-banner-title {
+  margin: 0;
+  font: 800 18px/1.25 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.02em;
+  color: #171321;
+}
+
+.cm-banner-sub {
+  margin: 4px 0 0;
+  font: 400 14.5px/1.5 'Nunito', sans-serif;
+  color: #625D6D;
+}
+
+.cm-banner-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: #4100BC;
+  color: #fff;
+  font: 800 14px 'Manrope', sans-serif;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.cm-banner-cta:hover { background: #2D007F; }
+.cm-banner-cta svg { font-size: 13px; transition: transform 0.25s; }
+.cm-banner-cta:hover svg { transform: translateX(2px); }
+
+@media (max-width: 640px) {
+  .cm-banner { flex-wrap: wrap; padding: 18px; gap: 14px; }
+  .cm-banner-text { flex-basis: calc(100% - 64px); }
+  .cm-banner-cta { width: 100%; justify-content: center; }
+}

@@ -511,6 +511,65 @@
   transform: translate(3px, 3px);
 }
 
+/* ───── Optional onboarding card (accounts from before onboarding) ───── */
+.dh-setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: 20px;
+  padding: 18px 22px;
+  background: var(--dh-violet-50);
+  border-color: var(--dh-violet-100);
+}
+
+.dh-setup-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dh-ink);
+}
+
+.dh-setup-sub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--dh-muted);
+}
+
+.dh-setup-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dh-setup-btn {
+  margin-top: 0;
+  text-decoration: none;
+}
+
+.dh-setup-dismiss {
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--dh-muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dh-setup-dismiss:hover {
+  color: var(--dh-ink);
+}
+
+/* WhatsApp community card: last row, full width */
+.dh-community {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+}
+
 /* ───── Stats ───── */
 .dh-stats {
   margin: 0;

@@ -19,6 +19,8 @@ class UserRepository:
             "email": email,
             "streak_count": 0,
             "fin_stars": 0,
+            # Accounts created from here on go through /onboarding; older ones are only offered it
+            "macro_profile": {"onboarding_required": True},
         }
         if name:
             payload["name"] = name
@@ -392,10 +394,29 @@ class UserRepository:
             "ongoing_course": ongoing_course,
             "consistency_grid": consistency_grid,
             "activity_map": activity_map,
+            **self._onboarding_state(user),
+        }
+
+    @staticmethod
+    def _onboarding_state(user: dict) -> dict:
+        macro = user.get("macro_profile")
+        if not isinstance(macro, dict):
+            macro = {}
+        interests = macro.get("learning_interests")
+        return {
+            "learning_interests": interests if isinstance(interests, list) else [],
+            "onboarding_required": bool(macro.get("onboarding_required")),
+            "onboarding_completed": bool(macro.get("onboarding_completed")),
+            "onboarding_dismissed": bool(macro.get("onboarding_dismissed")),
         }
 
     def update_profile(self, email: str, fields: dict, user_sub: str = None) -> dict:
         """Update profile fields with database persistence and memory sync"""
+        onboarding_keys = ("learning_interests", "onboarding_completed", "onboarding_dismissed")
+        onboarding = {k: fields.pop(k) for k in onboarding_keys if fields.get(k) is not None}
+        if onboarding:
+            self._update_macro_profile(email, onboarding, user_sub)
+
         # Save to memory store first for immediate consistency
         current = self._PROFILE_STORE.get(email, {})
         current.update({k: v for k, v in fields.items() if v is not None})
@@ -414,6 +435,21 @@ class UserRepository:
             print(f"Notice: Supabase column update skipped ({e}). Maintained in profile repository.")
 
         return self.get_profile(email, user_sub)
+
+    def _update_macro_profile(self, email: str, changes: dict, user_sub: str = None) -> None:
+        """Merge onboarding answers into users.macro_profile without dropping other keys"""
+        user = self.get_by_email(email)
+        key, value = "email", email
+        if not user and user_sub:
+            user = self.get_by_sub(user_sub)
+            key, value = "user_sub", user_sub
+        if not user:
+            raise LookupError(f"No users row for {email}")
+        macro = user.get("macro_profile")
+        macro = dict(macro) if isinstance(macro, dict) else {}
+        macro.update(changes)
+        # No fallback store here: if this fails the caller must see it, or onboarding would look saved
+        supabase.from_("users").update({"macro_profile": macro}).eq(key, value).execute()
 
 
 user_repo = UserRepository()
