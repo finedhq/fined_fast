@@ -28,6 +28,7 @@ import { revealNote } from "./figureMath";
 import { M2_CH1_GRID, M2_CH2_BARS, M2_CH3_GRID, M2_CH3_QUEUE } from "./module2Figures";
 import { M3_CH1_BARS, M3_CH2_RULEBOOK, M3_CH3_VAULT } from "./module3Figures";
 import { M4_CH1_MAP, M4_CH2_MAP, M4_CH3_MAP, M4_CH3_ORDER } from "./module4Figures";
+import { M5_CH1_MAP, M5_CH2_MAP, M5_CH3_GRID } from "./module5Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -108,5 +109,23 @@ export const FIGURES = {
       before: { figure: "trade_map", config: M4_CH3_MAP },
       after: { figure: "liquidation_queue", config: M4_CH3_ORDER },
     },
+  },
+  trade_map_going_public: {
+    label: "Trade map: from a few backers to the public — Module 5 §1",
+    steps: M5_CH1_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: M5_CH1_MAP,
+  },
+  trade_map_ipo_steps: {
+    label: "Trade map: offer document to allotment — Module 5 §2",
+    steps: M5_CH2_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: M5_CH2_MAP,
+  },
+  ownership_grid_two_ways: {
+    label: "Ownership grid: new shares vs owners selling — Module 5 §3",
+    steps: M5_CH3_GRID.steps.length,
+    component: lazy(() => import("./OwnershipGrid")),
+    config: M5_CH3_GRID,
   },
 };
