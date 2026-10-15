@@ -45,6 +45,7 @@ const RewardsPage = lazy(() => import("./pages/Rewards/RewardsPage"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
+const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -64,6 +65,7 @@ function App() {
               <EditProfileModal />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  <Route path="/onboarding" element={<AuthenticationGuard component={OnboardingPage} />} />
                   <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                   <Route path="/try" element={<TryModule />} />
                   {/* Admin preview of a new-course module page: full window, like /cards (no site navbar) */}

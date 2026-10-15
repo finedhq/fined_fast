@@ -18,6 +18,7 @@ import ArticlesSection from "./sections/ArticlesSection";
 import ExpertsSection from "./sections/ExpertsSection";
 import TestimonialsSection from "./sections/TestimonialsSection";
 import FinalCta from "./sections/FinalCta";
+import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
 import "./landing.css";
 
 export default function Hero() {
@@ -58,6 +59,7 @@ export default function Hero() {
       <ExpertsSection authors={authors} />
       <TestimonialsSection />
       <FinalCta />
+      <FloatingWhatsAppButton />
     </div>
   );
 }

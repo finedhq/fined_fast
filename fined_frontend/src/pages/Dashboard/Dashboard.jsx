@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
 import Lenis from 'lenis';
@@ -8,6 +8,7 @@ import { fetchArticles, getLocalCachedArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
 import { getUserLevel } from "../../utils/level";
 import { useUserProfile } from "../../context/UserProfileContext";
+import CommunityBanner from "../../components/Community/CommunityBanner";
 import {
   PiArrowRightBold,
   PiBookOpenTextBold,
@@ -145,7 +146,7 @@ function setCachedDashboard(email, data) {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-  const { refreshProfile } = useUserProfile();
+  const { profile, saveProfile } = useUserProfile();
 
   const [userData, setUserData] = useState(() => {
     const c = getCachedDashboard();
@@ -299,23 +300,51 @@ const Dashboard = () => {
     : 0;
   const courseLink = ongoingCourse?.id ? `/courses/${ongoingCourse.slug || ongoingCourse.id}` : '/courses';
 
+  // New sign-ups go through onboarding first; older accounts only get the optional card
+  const needsOnboarding = profile?.onboarding_required && !profile.onboarding_completed;
+  const offerOnboarding = profile && !profile.onboarding_required
+    && !profile.onboarding_completed && !profile.onboarding_dismissed;
+
   const goToRewards = () => navigate('/rewards');
   const course = recommendedCourses[0];
+
+  if (needsOnboarding) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   return (
     <div className="dh-page">
       <div className="dh-grid">
         {/* Greeting */}
-        <header className="dh-area-greet dh-greet">
-          <div>
-            <h1 className="dh-title">Welcome back, {firstName}</h1>
-            <p className="dh-sub">Let's continue your journey towards financial freedom.</p>
-          </div>
-          <button type="button" className="dh-streak" onClick={goToRewards} title="View Rewards & Streaks">
-            <PiFireFill aria-hidden="true" />
-            {streak > 0 ? `You're on a ${streak} day streak!` : "Start your streak today"}
-          </button>
-        </header>
+        <div className="dh-area-greet">
+          <header className="dh-greet">
+            <div>
+              <h1 className="dh-title">Welcome back, {firstName}</h1>
+              <p className="dh-sub">Let's continue your journey towards financial freedom.</p>
+            </div>
+            <button type="button" className="dh-streak" onClick={goToRewards} title="View Rewards & Streaks">
+              <PiFireFill aria-hidden="true" />
+              {streak > 0 ? `You're on a ${streak} day streak!` : "Start your streak today"}
+            </button>
+          </header>
+
+          {offerOnboarding && (
+            <section className="dh-panel dh-setup" aria-labelledby="dh-setup-title">
+              <div>
+                <h2 id="dh-setup-title" className="dh-setup-title">Get lessons picked for you</h2>
+                <p className="dh-setup-sub">
+                  Optional: four quick questions so we can recommend the right courses and articles.
+                </p>
+              </div>
+              <div className="dh-setup-actions">
+                <Link to="/onboarding" className="dh-btn dh-setup-btn">Personalise (1 min)</Link>
+                <button type="button" className="dh-setup-dismiss" onClick={() => saveProfile({ onboarding_dismissed: true })}>
+                  Not now
+                </button>
+              </div>
+            </section>
+          )}
+        </div>
 
         {/* FinEd card: identity + FinScore */}
         <section className="dh-area-card dh-card" aria-label="Your FinEd card">
@@ -464,6 +493,8 @@ const Dashboard = () => {
             <p className="dh-empty">No articles available right now.</p>
           )}
         </section>
+
+        <CommunityBanner className="dh-community" heading="Talk money with other FinEd learners" />
       </div>
     </div>
   );

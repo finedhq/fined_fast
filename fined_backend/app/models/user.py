@@ -62,6 +62,10 @@ class UserProfileUpdate(BaseModel):
     financial_level: Optional[str] = None
     bio: Optional[str] = None
     location: Optional[str] = None
+    # Onboarding answers and state, kept inside users.macro_profile
+    learning_interests: Optional[list[str]] = None
+    onboarding_completed: Optional[bool] = None
+    onboarding_dismissed: Optional[bool] = None
 
 
 class UserProfileResponse(BaseModel):
@@ -85,4 +89,9 @@ class UserProfileResponse(BaseModel):
     ongoing_course: Optional[OngoingCourseProgress] = None
     consistency_grid: list[int] = []
     activity_map: dict[str, int] = {}
+    learning_interests: list[str] = []
+    # required: new sign-up, sent to /onboarding. optional: existing user, offered a card
+    onboarding_required: bool = False
+    onboarding_completed: bool = False
+    onboarding_dismissed: bool = False
 
