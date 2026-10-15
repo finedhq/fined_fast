@@ -309,12 +309,14 @@ FigureKind = Literal[
     "ownership_grid_one_share", "bars_price_vs_size", "ownership_grid_rights_queue",  # Module 2
     "bars_who_trades", "rulebook_switch", "vault_preview",                             # Module 3
     "trade_map_accounts", "trade_map_brokers", "trade_map_settlement",                 # Module 4
+    "trade_map_going_public", "trade_map_ipo_steps", "ownership_grid_two_ways",        # Module 5
 ]
 ModelKind = Literal["leak_lab", "slice_calculator"]
 
 # Each figure reacts to the step's position (1st, 2nd, …), so a chapter must
 # have exactly as many steps as its figure has states. The trade maps take
-# theirs from their frontend config (scrolly/figures/module4Figures.js); keep
+# theirs from their frontend config (scrolly/figures/module4Figures.js and
+# module5Figures.js, as does Module 5's owner-groups grid); keep
 # these numbers equal to the length of each config's step list.
 FIGURE_STEP_COUNTS = {
     "shrinking_basket_predict": 4,
@@ -329,6 +331,9 @@ FIGURE_STEP_COUNTS = {
     "trade_map_accounts": 4,
     "trade_map_brokers": 4,
     "trade_map_settlement": 4,
+    "trade_map_going_public": 4,
+    "trade_map_ipo_steps": 4,
+    "ownership_grid_two_ways": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")

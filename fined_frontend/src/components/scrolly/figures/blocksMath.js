@@ -193,8 +193,38 @@ export function edgeLine(a, b, halfW, halfH, gap = 4) {
   return { x1: a.x + dx * t, y1: a.y + dy * t, x2: b.x - dx * t, y2: b.y - dy * t };
 }
 
-/** Screen-reader line for a map step: its caption plus any badges. */
+/** Screen-reader line for a map step: its caption plus any badges, notes and line labels. */
 export function mapSummary(config, s) {
-  const badges = Object.entries(s.badges || {}).map(([id, text]) => `${config.nodes[id].label}: ${text}.`);
-  return [s.tag && `${s.tag}.`, s.caption, ...badges].filter(Boolean).join(" ");
+  const name = (id) => config.nodes[id].label;
+  const badges = Object.entries(s.badges || {}).map(([id, text]) => `${name(id)}: ${[text].flat().join(", ")}.`);
+  const notes = Object.entries(s.notes || {}).map(([id, text]) => `${name(id)}: ${text}.`);
+  const links = (s.linkLabels || []).map(([a, b, text]) => `${name(a)} to ${name(b)}: ${text}.`);
+  return [s.tag && `${s.tag}.`, s.caption, ...badges, ...notes, ...links].filter(Boolean).join(" ");
+}
+
+/**
+ * Owner-groups grid (Module 5): which group owns each square under a way of
+ * selling to the public (null = before any sale). Groups fill the grid in
+ * order; squares an owner sells keep their place but pass to the public
+ * (the last ones of that owner's block); new squares are added at the end.
+ * Returns { cells: [groupId], counts: {groupId: n}, total }.
+ */
+export function ownerCells(config, way) {
+  const w = way ? config.ways[way] : { newUnits: 0, sold: {} };
+  const buyer = config.groups[config.groups.length - 1].id; // the public, last
+  const cells = [];
+  for (const g of config.groups) {
+    const sold = w.sold?.[g.id] || 0;
+    for (let i = 0; i < g.units; i += 1) cells.push(i >= g.units - sold ? buyer : g.id);
+  }
+  for (let i = 0; i < (w.newUnits || 0); i += 1) cells.push(buyer);
+  const counts = Object.fromEntries(config.groups.map((g) => [g.id, 0]));
+  cells.forEach((id) => (counts[id] += 1));
+  return { cells, counts, total: cells.length };
+}
+
+/** The most squares an owner-groups grid ever shows (rows are kept for it). */
+export function ownerGridMax(config) {
+  const base = config.groups.reduce((n, g) => n + g.units, 0);
+  return base + Math.max(0, ...Object.values(config.ways).map((w) => w.newUnits || 0));
 }

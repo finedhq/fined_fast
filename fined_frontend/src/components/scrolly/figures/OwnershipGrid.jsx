@@ -8,9 +8,11 @@
 //   profit     the grid as a profit pool, shared out by squares
 //   vote       the grid as a voting board
 //   transfer   the holder's squares pass to a buyer; the total never changes
+// A config with `groups` (Module 5 on) draws owner groups instead — see
+// OwnerGroupsGrid below.
 // Owned squares are solid, everyone else's are outlined, so the difference
 // never depends on colour alone. A screen-reader line describes each state.
-import { fmtPct, gridSummary, inrFull, packedCells, spreadCells } from "./blocksMath";
+import { fmtPct, gridSummary, inrFull, ownerCells, ownerGridMax, packedCells, spreadCells } from "./blocksMath";
 
 function Swatch({ kind, children }) {
   return (
@@ -21,7 +23,93 @@ function Swatch({ kind, children }) {
   );
 }
 
-export default function OwnershipGrid({ step, config, state, onState }) {
+// Owner-groups mode (Module 5 on): the squares coloured by who owns them, and
+// `ways` of selling some to the public. Each step's `way` is null (before),
+// a way's id, "choose" (the reader flips between the ways, saved as
+// state.way) or "chosen" (the reader's way, no buttons). A money line says who is paid for the squares sold; `listing`
+// dims the grid and shows a ticker with no price on it. The last group is the
+// buyer (the public): its squares are outlined, the owners' solid.
+function OwnerGroupsGrid({ step, config, state, onState }) {
+  const view = config.steps[Math.min(Math.max(step ?? 0, 0), config.steps.length - 1)];
+  const chosen = config.ways[state.way] ? state.way : config.defaultWay;
+  const wayId = view.way === "choose" || view.way === "chosen" ? chosen : view.way;
+  const way = wayId ? config.ways[wayId] : null;
+  const { cells, counts, total } = ownerCells(config, wayId);
+  const { cols } = config;
+  const rows = Math.ceil(ownerGridMax(config) / cols);
+  const groupIndex = Object.fromEntries(config.groups.map((g, i) => [g.id, i]));
+  const base = config.groups.reduce((n, g) => n + g.units, 0);
+
+  const legend = config.groups.map((g) => `${g.label} ${counts[g.id].toLocaleString("en-IN")}`).join(", ");
+  const money = way ? way.money.map((m) => `${m.amount} to ${m.to}`).join(", ") : "";
+  const summary = `${config.company} as ${total.toLocaleString("en-IN")} squares: ${legend}.${money ? ` Money from the public: ${money}.` : ""}`;
+
+  return (
+    <div className={`og-figure og-figure--groups${view.listing ? " is-listing" : ""}`}>
+      <div className="og-stage">
+        <svg className="og-grid" viewBox={`0 0 ${cols} ${rows}`} role="img" aria-label={summary}>
+          {cells.map((id, i) => (
+            <rect
+              key={i}
+              className={`og-cell og-cell--g${groupIndex[id]}${i >= base ? " og-cell--new" : ""}`}
+              x={(i % cols) + 0.1}
+              y={Math.floor(i / cols) + 0.1}
+              width="0.8"
+              height="0.8"
+              rx="0.14"
+            />
+          ))}
+        </svg>
+        {view.listing && (
+          <div className="og-ticker" aria-hidden="true">
+            <span className="og-ticker-name">{view.ticker}</span>
+            <span className="og-ticker-price">₹ —</span>
+          </div>
+        )}
+      </div>
+
+      <div className="og-panel">
+        <div className="og-legend">
+          {config.groups.map((g, i) => (
+            <Swatch key={g.id} kind={`g${i}`}>
+              {g.label} · {counts[g.id].toLocaleString("en-IN")}
+            </Swatch>
+          ))}
+        </div>
+
+        {view.way === "choose" && (
+          <div className="og-hold og-hold--two" role="group" aria-label="How the shares are sold">
+            {Object.entries(config.ways).map(([id, w]) => (
+              <button key={id} type="button" className={`og-hold-btn${id === chosen ? " active" : ""}`} aria-pressed={id === chosen} onClick={() => onState({ way: id })}>
+                {w.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {way && !view.listing && (
+          <div className="og-chips" aria-live="polite">
+            {way.money.map((m) => (
+              <div key={m.to} className={`marker-chip${m.zero ? " marker-chip--zero" : " marker-chip--real"}`}>
+                <span>To {m.to}</span>
+                <strong>{m.amount}</strong>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {view.caption && <p className="og-caption">{view.caption}</p>}
+      </div>
+    </div>
+  );
+}
+
+export default function OwnershipGrid(props) {
+  if (props.config.groups) return <OwnerGroupsGrid {...props} />;
+  return <HoldingGrid {...props} />;
+}
+
+function HoldingGrid({ step, config, state, onState }) {
   const s = Math.min(step ?? 0, config.steps.length - 1);
   const view = config.steps[s];
   const { total, cols, owner, company } = config;

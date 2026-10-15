@@ -6,7 +6,10 @@
 //   links   [[from, to]]  faint lines, drawn when both boxes are shown
 //   steps   one entry per step (so the step count is the config's), each
 //           {show, lit, arrows?, back?, tokens?: {id: {at, from?}}, badges?,
-//            pulse?, tag?, caption}; `null` = the chapter shows another figure
+//            notes?, linkLabels?, pulse?, tag?, caption}; `null` = the
+//           chapter shows another figure. badges: {box: text or [texts]} pills
+//           on a box's top edge; notes: {box: text} a line under the box;
+//           linkLabels: [[from, to, text]] a pill on that line's middle
 // The reader doesn't touch the map. Its one reaction: once the step's
 // tap-to-guess is answered, the `pulse` box pulses. Nothing is saved.
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
@@ -98,8 +101,20 @@ export default function TradeMap({ step, steps, state, config }) {
           >
             <span className="tm-node-label">{n.label}</span>
             {n.sub && <span className="tm-node-sub">{n.sub}</span>}
-            {s.badges?.[id] && <span className="tm-badge">{s.badges[id]}</span>}
+            {s.badges?.[id] && (
+              <span className="tm-badges">
+                {[s.badges[id]].flat().map((b) => (
+                  <span key={b} className="tm-badge">{b}</span>
+                ))}
+              </span>
+            )}
+            {s.notes?.[id] && <span className="tm-note">{s.notes[id]}</span>}
           </div>
+        ))}
+        {(s.linkLabels || []).filter(both).map(([a, b, text]) => (
+          <span key={`ll-${a}-${b}`} className="tm-link-label" style={{ left: `${(config.nodes[a].x + config.nodes[b].x) / 2}%`, top: `${(config.nodes[a].y + config.nodes[b].y) / 2}%` }} aria-hidden="true">
+            {text}
+          </span>
         ))}
         {Object.entries(s.tokens || {}).map(([id, t], i) => (
           <Token key={`${id}-${at}`} token={config.tokens[id]} spot={config.nodes[t.at]} from={t.from && config.nodes[t.from]} index={i} />
