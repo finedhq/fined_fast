@@ -40,6 +40,10 @@ instance.interceptors.request.use(
     const token = await getAuthToken();
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
+    } else if (tokenFetcher) {
+      // Signed in but the token couldn't be renewed: don't fall back to an
+      // expired one left in the defaults by setAuthToken
+      delete config.headers['Authorization'];
     }
     return config;
   },
