@@ -128,16 +128,18 @@ export default function CourseOverview() {
         promises.push(instance.post("/home/getdata", { email: email, userId: user?.sub || 'guest_sub' }));
       }
 
-      const results = await Promise.all(promises);
-      const courseRes = results[0];
+      // The course is what matters here; the dashboard stats beside it are optional
+      const [courseResult, homeResult] = await Promise.allSettled(promises);
+      if (courseResult.status === "rejected") throw courseResult.reason;
+      const courseRes = courseResult.value;
 
       setCourseTitle(courseRes.data.title);
       setCourseDescription(courseRes.data.description || "");
       setCourse(courseRes.data.data || []);
       setPlannedModules(courseRes.data.planned_modules || null);
 
-      if (results.length > 1 && results[1].data?.userData) {
-        setUserData(results[1].data.userData);
+      if (homeResult?.status === "fulfilled" && homeResult.value.data?.userData) {
+        setUserData(homeResult.value.data.userData);
       }
     } catch {
       setWarning("Failed to load course details.");
