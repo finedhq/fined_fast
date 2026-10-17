@@ -9,10 +9,13 @@
 //   vote       the grid as a voting board
 //   transfer   the holder's squares pass to a buyer; the total never changes
 // A config with `groups` (Module 5 on) draws owner groups instead — see
-// OwnerGroupsGrid below.
+// OwnerGroupsGrid below. A config with `actions` (Module 8 on) draws what a
+// company can do to its shares — see ActionsGrid below.
 // Owned squares are solid, everyone else's are outlined, so the difference
 // never depends on colour alone. A screen-reader line describes each state.
-import { fmtPct, gridSummary, inrFull, ownerCells, ownerGridMax, packedCells, spreadCells } from "./blocksMath";
+import { useState } from "react";
+import { bonusOutcome, fmtPct, gridSummary, inrFull, inrPrice, ownerCells, ownerGridMax, packedCells, splitOutcome, spreadCells } from "./blocksMath";
+import SliderControl from "./SliderControl";
 
 function Swatch({ kind, children }) {
   return (
@@ -104,8 +107,143 @@ function OwnerGroupsGrid({ step, config, state, onState }) {
   );
 }
 
+// Actions mode (Module 8 on): the company's squares with the holder's packed
+// first, and one company action per step:
+//   dividend {perShare}  every square earns ₹perShare; the holder's add up
+//   kept                 the pool dims: "kept for growth"
+//   split    {control}   the reader splits each share into n pieces (slider,
+//                        not saved): more shares, lower price, same value
+//   bonus    {ratio, label} [get, per] free shares: the grid grows (rows are kept
+//                        for the largest, so nothing reflows), same pie
+function ActionsGrid({ step, config }) {
+  const view = config.steps[Math.min(Math.max(step ?? 0, 0), config.steps.length - 1)];
+  const { company, owner, cols, total, holding, price } = config;
+  const [pieces, setPieces] = useState(view.control?.start ?? 1);
+  const n = view.action === "split" ? pieces : 1;
+  const bonus = view.action === "bonus" ? bonusOutcome(total, holding, view.ratio) : null;
+  const shown = bonus ? bonus.total : total;
+  const maxTotal = Math.max(total, ...config.steps.filter((v) => v.ratio).map((v) => bonusOutcome(total, holding, v.ratio).total));
+  const rows = Math.ceil(maxTotal / cols);
+  const extraMine = bonus ? bonus.holding - holding : 0;
+  const isMine = (i) => i < holding || (i >= total && i < total + extraMine);
+  const rest = view.action === "dividend" ? "og-cell--profit" : view.action === "kept" ? "og-cell--faint" : "og-cell--other";
+  const split = splitOutcome(holding, price, n);
+  const patternId = `og-split-${n}`;
+
+  let summary = `${company} as ${shown.toLocaleString("en-IN")} squares; ${owner}'s ${(bonus ? bonus.holding : holding).toLocaleString("en-IN")} lit.`;
+  if (view.action === "dividend") summary += ` ${inrFull(view.perShare)} a share: ${owner} gets ${inrFull(view.perShare * holding)}.`;
+  if (view.action === "kept") summary += " The profit is kept for growth.";
+  if (view.action === "split") summary += ` Each share split into ${n}: ${split.shares} shares at ${inrPrice(split.price)}, worth ${inrFull(split.value)}.`;
+
+  return (
+    <div className={`og-figure og-figure--actions og-figure--${view.action}`}>
+      <div className="og-stage">
+        <svg className="og-grid" viewBox={`0 0 ${cols} ${rows}`} role="img" aria-label={summary}>
+          {n > 1 && (
+            <defs>
+              <pattern id={patternId} width="1" height="1" patternUnits="userSpaceOnUse">
+                {Array.from({ length: n - 1 }, (_, k) => (
+                  <line key={k} className="og-split-line" x1={0.1 + (0.8 * (k + 1)) / n} x2={0.1 + (0.8 * (k + 1)) / n} y1="0.1" y2="0.9" />
+                ))}
+              </pattern>
+            </defs>
+          )}
+          {Array.from({ length: shown }, (_, i) => (
+            <rect
+              key={i}
+              className={`og-cell ${isMine(i) ? "og-cell--mine" : rest}${i >= total ? " og-cell--new" : ""}`}
+              x={(i % cols) + 0.1}
+              y={Math.floor(i / cols) + 0.1}
+              width="0.8"
+              height="0.8"
+              rx="0.14"
+            />
+          ))}
+          {n > 1 && <rect className="og-split" x="0" y="0" width={cols} height={Math.ceil(total / cols)} fill={`url(#${patternId})`} />}
+        </svg>
+      </div>
+
+      <div className="og-panel" aria-live="polite">
+        {view.action === "dividend" && (
+          <div className="og-chips">
+            <div className="marker-chip marker-chip--real">
+              <span>Dividend</span>
+              <strong>{inrFull(view.perShare)} a share</strong>
+            </div>
+            <div className="marker-chip marker-chip--real">
+              <span>{owner}'s {holding} shares</span>
+              <strong>{inrFull(view.perShare * holding)}</strong>
+            </div>
+          </div>
+        )}
+        {view.action === "kept" && (
+          <div className="og-chips">
+            <div className="marker-chip marker-chip--zero">
+              <span>This year's profit</span>
+              <strong>Kept for growth</strong>
+            </div>
+          </div>
+        )}
+        {view.action === "split" && (
+          <>
+            <SliderControl
+              label={view.control.label}
+              valueText={`${n} ${n === 1 ? "piece" : "pieces"}`}
+              value={n}
+              min={view.control.min}
+              max={view.control.max}
+              step={view.control.step}
+              onChange={setPieces}
+              lessLabel="One piece fewer"
+              moreLabel="One piece more"
+            />
+            <div className="og-chips og-chips--three">
+              <div className="marker-chip marker-chip--real">
+                <span>{owner}'s shares</span>
+                <strong>{split.shares.toLocaleString("en-IN")}</strong>
+              </div>
+              <div className="marker-chip marker-chip--real">
+                <span>Price per share</span>
+                <strong>{inrPrice(split.price)}</strong>
+              </div>
+              <div className="marker-chip marker-chip--real">
+                <span>Value of his holding</span>
+                <strong>{inrFull(split.value)}</strong>
+              </div>
+            </div>
+          </>
+        )}
+        {bonus && (
+          <div className="og-chips">
+            <div className="marker-chip marker-chip--real">
+              <span>Shares in total</span>
+              <strong>
+                {total.toLocaleString("en-IN")} → {bonus.total.toLocaleString("en-IN")}
+              </strong>
+            </div>
+            <div className="marker-chip marker-chip--real">
+              <span>{owner}'s shares</span>
+              <strong>
+                {holding} → {bonus.holding}
+              </strong>
+            </div>
+            {view.label && (
+              <div className="marker-chip marker-chip--zero og-chip-wide">
+                <span>The business</span>
+                <strong>{view.label}</strong>
+              </div>
+            )}
+          </div>
+        )}
+        {view.caption && <p className="og-caption">{view.caption}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function OwnershipGrid(props) {
   if (props.config.groups) return <OwnerGroupsGrid {...props} />;
+  if (props.config.actions) return <ActionsGrid {...props} />;
   return <HoldingGrid {...props} />;
 }
 

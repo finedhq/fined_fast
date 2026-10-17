@@ -1,6 +1,6 @@
 /* Styles for the reusable v2 building blocks that the prototype doesn't have
    (Module 2 on): ownership grid (og-), bars (nb-), liquidation queue (lq-),
-   trade map (tm-, Module 4 on),
+   trade map (tm-, Module 4 on), order book (ob-, Module 6 on),
    "Your Slice" tool (sc-). Prototype tokens only, so they sit in the same
    visual language. scrolly.css stays a faithful copy of the prototype. */
 
@@ -249,7 +249,8 @@
 .nc-root .nb-note {
   font-size: 0.78rem;
   color: var(--ink-3);
-  min-height: 1.2em;
+  min-height: 1.4em;
+  line-height: 1.4;
 }
 
 .nc-root .nb-plot {
@@ -1153,12 +1154,453 @@
 
 .nc-root .sc-footnote { margin-top: 14px; }
 
+/* ── Order book (Module 6 on) ──────────────────────────────────────── */
+.nc-root .ob-figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: 8px;
+  min-height: 0;
+}
+
+.nc-root .ob-book {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nc-root .ob-side-label {
+  font-family: var(--font-action);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.nc-root .ob-side-label.is-shown { opacity: 1; }
+
+.nc-root .ob-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 84px;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 8px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), border-color 0.3s ease, background-color 0.3s ease;
+}
+.nc-root .ob-row.is-shown { opacity: 1; transform: none; }
+.nc-root .ob-row.is-lit { background: var(--purple-surface); border-color: var(--purple-border); }
+.nc-root .ob-row.is-last { border-color: var(--purple); }
+
+.nc-root .ob-price {
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.nc-root .ob-track { height: 14px; }
+
+.nc-root .ob-bar {
+  position: relative;
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.nc-root .ob-row--ask .ob-bar { background: var(--gold); }
+.nc-root .ob-row--bid .ob-bar { background: var(--purple); }
+
+/* The part a trade used up: faded and striped, growing from the left. */
+.nc-root .ob-used {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(135deg, var(--surface) 0 4px, var(--surface-alt) 4px 8px);
+  opacity: 0.85;
+  transition: width 0.6s var(--ease);
+}
+
+.nc-root .ob-qty {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  text-align: right;
+  white-space: nowrap;
+}
+.nc-root .ob-row.is-hit .ob-qty { color: var(--ink); font-weight: 700; }
+
+.nc-root .ob-mid {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 4px 0;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.nc-root .ob-last-kicker { font-size: 0.78rem; color: var(--ink-3); }
+
+.nc-root .ob-last {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--ink);
+  animation: nc-obPop 0.4s var(--ease);
+}
+
+@keyframes nc-obPop { from { transform: scale(0.9); opacity: 0.4; } }
+
+.nc-root .ob-move {
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-alt);
+  color: var(--ink-3);
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.nc-root .ob-move.is-up { background: var(--success-bg); color: var(--success-dark); }
+.nc-root .ob-move.is-down { background: var(--warn-bg); color: var(--warn-dark); }
+
+.nc-root .ob-gap {
+  margin-left: auto;
+  padding: 2px 10px;
+  border: 1.5px dashed var(--purple);
+  border-radius: var(--radius-pill);
+  color: var(--purple);
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+.nc-root .ob-mid.has-gap .ob-gap { opacity: 1; }
+.nc-root .ob-mid.is-pulse .ob-gap { animation: nc-tmPulse 1.2s var(--ease) 3; }
+
+.nc-root .ob-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--purple-surface);
+  border: 1px solid var(--purple-border);
+  border-radius: var(--radius-md);
+}
+.nc-root .ob-control-label { font-size: 0.84rem; color: var(--ink-2); }
+.nc-root .ob-control-label strong { color: var(--purple); }
+.nc-root .ob-control-row { display: flex; align-items: center; gap: 12px; }
+.nc-root .ob-control-row input[type="range"] { flex: 1; background: #E4DCFB; }
+
+.nc-root .ob-note { margin: 0; font-size: 0.72rem; color: var(--muted); }
+.nc-root .ob-choose { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* A step with a slider is the tallest: the note (shown on every other step) gives way. */
+.nc-root .ob-figure.has-control .ob-note { display: none; }
+.nc-root .ob-figure.has-control .ob-row { padding-top: 1px; padding-bottom: 1px; }
+
+/* Module 7 on: the reader's order on the book. */
+.nc-root .ob-tickets { display: flex; gap: 8px; }
+
+.nc-root .ob-ticket {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--purple);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  animation: nc-obTicketIn 0.5s var(--ease);
+  transition: opacity 0.4s var(--ease), border-color 0.3s ease;
+}
+.nc-root .ob-ticket.is-pulse { animation: nc-tmPulse 1.2s var(--ease) 3; }
+.nc-root .ob-ticket.is-lapsed { opacity: 0.55; border-style: dashed; border-color: var(--muted); }
+.nc-root .ob-ticket--compare { border-color: var(--purple-border); }
+
+@keyframes nc-obTicketIn { from { opacity: 0; transform: translateY(-6px); } }
+
+.nc-root .ob-ticket-kicker {
+  font-family: var(--font-action);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--purple);
+}
+.nc-root .ob-ticket-label { font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; color: var(--ink); }
+.nc-root .ob-ticket-status { font-size: 0.78rem; color: var(--ink-3); }
+.nc-root .ob-ticket-rule {
+  align-self: flex-start;
+  padding: 1px 10px;
+  border: 1.5px dashed var(--purple);
+  border-radius: var(--radius-pill);
+  color: var(--purple);
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+  animation: nc-tmPulse 1.2s var(--ease) infinite;
+}
+
+.nc-root .ob-row.is-pulse { animation: nc-tmPulse 1.2s var(--ease) 3; border-color: var(--purple); }
+.nc-root .ob-row.is-mine { background: var(--purple-surface); border-color: var(--purple-border); }
+.nc-root .ob-track { display: flex; align-items: center; gap: 6px; }
+
+.nc-root .ob-mine {
+  flex-shrink: 0;
+  padding: 0 8px;
+  border: 1.5px solid var(--purple);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--purple);
+  font-family: var(--font-action);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.nc-root .ob-mine.is-lapsed { border-style: dashed; color: var(--muted); border-color: var(--muted); text-decoration: line-through; }
+
+.nc-root .ob-eod {
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-top: 2px dashed var(--warn);
+  color: var(--warn-dark);
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.nc-root .ob-eod.is-pulse { animation: nc-tmPulse 1.2s var(--ease) 3; }
+
+.nc-root .ob-fill { display: flex; flex-direction: column; gap: 4px; }
+.nc-root .ob-fill-track {
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: repeating-linear-gradient(135deg, var(--surface) 0 4px, var(--purple-subtle) 4px 8px);
+  border: 1px solid var(--purple-border);
+  overflow: hidden;
+}
+.nc-root .ob-fill-done { display: block; height: 100%; background: var(--purple); transition: width 0.6s var(--ease); }
+.nc-root .ob-fill-text { font-size: 0.8rem; color: var(--ink-3); }
+.nc-root .ob-fill-text strong { color: var(--ink); }
+
+.nc-root .ob-settle {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.nc-root .ob-settle-when {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.nc-root .ob-settle-row { display: grid; grid-template-columns: 1fr auto 1.4fr; align-items: center; gap: 8px; }
+.nc-root .ob-settle-box {
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-align: center;
+}
+.nc-root .ob-settle-box.is-lit { border-color: var(--purple); background: var(--purple-surface); color: var(--ink); }
+.nc-root .ob-settle-arrow { color: var(--purple); font-weight: 800; }
+.nc-root .ob-settle-back { font-size: 0.74rem; color: var(--muted); border-top: 1.5px dashed var(--border); padding-top: 6px; }
+
+/* ── Module 8 on: bars pulse, company actions, line chart ─────────────── */
+.nc-root .nb-col--pulse .nb-bar { animation: nc-tmPulse 1.2s var(--ease) 3; }
+
+.nc-root .og-split-line { stroke: var(--surface); stroke-width: 0.07; }
+.nc-root .og-split { pointer-events: none; }
+.nc-root .og-figure--kept .og-cell--faint { opacity: 0.35; }
+.nc-root .og-figure--actions .og-grid { max-width: 440px; margin: 0 auto; }
+.nc-root .og-figure--actions { gap: 12px; }
+.nc-root .og-figure--actions .og-chips { flex-wrap: wrap; }
+.nc-root .og-figure--actions .og-chips > .marker-chip { flex: 1 1 0; }
+.nc-root .og-figure--actions .og-chips > .og-chip-wide, .nc-root .og-chip-wide { grid-column: 1 / -1; flex: 1 1 100%; }
+.nc-root .og-chips--three { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+.nc-root .lc-figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: 8px;
+  min-height: 0;
+}
+.nc-root .scrolly-figure:has(.lc-figure) { align-self: stretch; }
+.nc-root .lc-stage { width: 100%; min-height: 200px; }
+.nc-root .lc-stage svg { display: block; overflow: visible; }
+.nc-root .lc-grid { stroke: var(--border-subtle); stroke-width: 1; }
+.nc-root .lc-ylabel, .nc-root .lc-xlabel, .nc-root .lc-vol-label { font-size: 11px; fill: var(--ink-3); font-family: var(--font-body); }
+.nc-root .lc-line { fill: none; stroke: var(--purple); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; transition: opacity 0.3s ease; }
+.nc-root .lc-marker circle { fill: var(--gold); stroke: var(--surface); stroke-width: 2; }
+.nc-root .lc-marker-stem { stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.nc-root .lc-marker text { font-size: 11px; font-weight: 800; fill: var(--amber-dark); font-family: var(--font-action); }
+.nc-root .lc-marker { transition: opacity 0.3s ease; }
+.nc-root .lc-vol { fill: var(--purple-border); transition: opacity 0.3s ease; }
+.nc-root .is-dim { opacity: 0.25; }
+.nc-root .lc-future rect { fill: var(--bg); opacity: 0.92; }
+.nc-root .lc-future-q { font-size: 40px; font-weight: 800; fill: var(--purple); font-family: var(--font-display); }
+.nc-root .lc-future-label { margin: 0; text-align: right; font-size: 0.78rem; font-weight: 700; color: var(--purple); }
+.nc-root .lc-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-height: 24px; }
+.nc-root .lc-badge {
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-action);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.nc-root .lc-scale-note { font-size: 0.74rem; color: var(--ink-3); font-style: italic; }
+.nc-root .lc-baseline line { stroke: var(--ink-3); stroke-width: 1.2; stroke-dasharray: 5 4; }
+.nc-root .lc-baseline text { font-size: 11px; fill: var(--ink-3); font-family: var(--font-body); }
+.nc-root .lc-marker.is-pulse circle { animation: nc-lcPulse 1.2s var(--ease) 3; transform-box: fill-box; transform-origin: center; }
+@keyframes nc-lcPulse { 50% { transform: scale(1.9); } }
+.nc-root .lc-marker--hz circle { fill: var(--purple); }
+.nc-root .lc-marker--hz .lc-marker-stem { stroke: var(--purple); }
+.nc-root .lc-marker--hz text { fill: var(--purple); }
+.nc-root .lc-choose { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.nc-root .lc-meaning { margin: 0; min-height: 1.4em; font-size: 0.9rem; color: var(--ink-2); }
+
+/* Module 9 on: heavier / lighter arrows on the trade map; the ripple play-out. */
+.nc-root .tm-figure--tall .tm-stage { min-height: 340px; }
+.nc-root .tm-arrow--thick { stroke-width: 4.5; }
+.nc-root .tm-arrow--thin { stroke-width: 1.2; opacity: 0.6; }
+.nc-root .lq-ripple { gap: 14px; }
+.nc-root .lq-row--ripple { position: relative; display: flex; align-items: center; gap: 10px; }
+.nc-root .lq-ripple .lq-row--ripple:not(:last-child)::after {
+  content: "↓";
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  color: var(--purple);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.nc-root .lq-ripple-word {
+  flex-shrink: 0;
+  min-width: 58px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--purple);
+  color: #fff;
+  font-family: var(--font-action);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+.nc-root .lq-figure--animate .lq-row--ripple { animation: nc-lqRipple 0.6s var(--ease) var(--lq-delay, 0s) both; }
+@keyframes nc-lqRipple {
+  0% { opacity: 0.2; border-color: var(--border); }
+  60% { opacity: 1; border-color: var(--purple); box-shadow: 0 0 0 6px rgba(65, 0, 188, 0.12); }
+  100% { opacity: 1; }
+}
+
+/* ── Module 10 on: Where Should This Money Live? (prototype's sorter) ── */
+.nc-root .sorter-howto { margin: 0 0 14px; font-size: 0.9rem; color: var(--ink-2); }
+.nc-root .sorter-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.nc-root .sorter-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: 1.5px dashed var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-family: var(--font-action);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.nc-root .sorter-card:hover { border-color: var(--purple); transform: translateY(-1px); }
+.nc-root .sorter-card.selected {
+  border-color: var(--purple);
+  border-style: solid;
+  background: var(--purple-surface);
+  color: var(--purple);
+  box-shadow: 0 4px 12px rgba(65, 0, 188, 0.1);
+}
+.nc-root .sorter-card.placed { border-style: solid; opacity: 0.7; }
+.nc-root .sorter-card.placed.selected { opacity: 1; }
+.nc-root .sorter-card-placed { font-size: 0.74rem; color: var(--purple); font-weight: 800; }
+.nc-root .sorter-zones { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.nc-root .sorter-zone {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  min-height: 96px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.nc-root .sorter-zone.is-ready { border-color: var(--purple); border-style: dashed; background: var(--purple-surface); }
+.nc-root .sorter-zone-label { font-family: var(--font-display); font-weight: 800; font-size: 0.88rem; margin-bottom: 8px; color: var(--ink); }
+.nc-root .sorter-feedback-line { font-size: 0.82rem; color: var(--ink-2); line-height: 1.5; margin-bottom: 6px; }
+.nc-root .sorter-summary {
+  margin-top: 18px;
+  background: var(--purple-surface);
+  border: 1px solid var(--purple-border);
+  border-radius: var(--radius-card);
+  padding: 14px 18px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--purple);
+}
+
+/* ── Module 11 on: Try a Mix ─────────────────────────────────────────── */
+.nc-root .mix-years { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.nc-root .mix-year small { display: block; margin-top: 2px; font-weight: 800; }
+
 @media (max-width: 960px) {
   .nc-root .og-inset { left: 4%; top: 8%; padding: 8px 12px; }
   .nc-root .og-inset-square { width: 24px; height: 24px; }
 }
 
 @media (max-width: 640px) {
+  .nc-root .ob-row { grid-template-columns: 44px 1fr 70px; gap: 8px; padding: 2px 6px; }
+  .nc-root .ob-price { font-size: 0.78rem; }
+  .nc-root .ob-qty { font-size: 0.72rem; }
+  .nc-root .ob-track { height: 11px; }
+  .nc-root .ob-mid { margin: 3px 0; padding: 6px 10px; }
+  .nc-root .ob-last { font-size: 1.3rem; }
+  .nc-root .ob-note { font-size: 0.66rem; }
+  .nc-root .sorter-cards, .nc-root .sorter-zones { grid-template-columns: 1fr; gap: 8px; }
+  .nc-root .sorter-zone { min-height: 64px; padding: 10px 12px; }
+  .nc-root .mix-years { grid-template-columns: 1fr; }
+  .nc-root .og-chips--three .marker-chip { padding: 6px 8px; }
+  .nc-root .lc-choose .og-hold-btn { font-size: 0.78rem; padding: 8px 4px; }
+  .nc-root .lc-meaning { font-size: 0.82rem; }
+  .nc-root .ob-ticket { padding: 6px 10px; }
+  .nc-root .ob-ticket-label { font-size: 0.84rem; }
+  .nc-root .ob-ticket-status { font-size: 0.72rem; }
+  .nc-root .ob-mine { font-size: 0.6rem; padding: 0 6px; }
+  .nc-root .ob-settle-box { font-size: 0.74rem; padding: 6px 8px; }
   /* Phones: the figure box is short (54vh), so interactive states must fit it. */
   .nc-root .og-figure { gap: 10px; }
   .nc-root .og-figure .og-caption { display: none; } /* repeats the step text */

@@ -8,6 +8,8 @@
 // Optional `playOut: {kind: "timeline", button, title, days}` (Module 4 on)
 // plays the right order out on a day-by-day timeline instead of the pot, and
 // `labels` renames the columns; `feedbackId` picks the item the feedback names.
+// `playOut: {kind: "ripple", button, title, words}` (Module 9 on) lights the
+// right order card by card, each tagged with its word ("first", "then", …).
 import { useEffect, useState } from "react";
 import { inrFull, payOut, placesRight, queueFeedback } from "./blocksMath";
 
@@ -23,6 +25,7 @@ export default function LiquidationQueue({ config, state, onState }) {
   const label = (id) => claimants.find((c) => c.id === id)?.label;
   const words = { ...LABELS, ...config.labels };
   const timeline = config.playOut?.kind === "timeline";
+  const ripple = config.playOut?.kind === "ripple";
 
   // Animate only a fresh answer, not one restored from earlier.
   const [animate, setAnimate] = useState(false);
@@ -91,7 +94,7 @@ export default function LiquidationQueue({ config, state, onState }) {
         </ol>
         </div>
         <button type="button" className="lq-go" disabled={!full} onClick={payOutNow}>
-          {timeline ? config.playOut.button : `Pay out ${inrFull(pot)}`}
+          {timeline || ripple ? config.playOut.button : `Pay out ${inrFull(pot)}`}
         </button>
       </div>
     );
@@ -108,6 +111,23 @@ export default function LiquidationQueue({ config, state, onState }) {
       </div>
     </>
   );
+
+  if (ripple) {
+    return (
+      <div className={`lq-figure lq-figure--revealed${animate ? " lq-figure--animate" : ""}`}>
+        <p className="lq-prompt">{config.playOut.title}</p>
+        <ol className="lq-result lq-ripple">
+          {config.correctOrder.map((id, i) => (
+            <li key={id} className={`lq-row lq-row--event lq-row--ripple${id === config.feedbackId ? " lq-row--key" : ""}`} style={{ "--lq-delay": `${i * 0.6}s` }}>
+              <span className="lq-ripple-word">{config.playOut.words[i]}</span>
+              <span className="lq-row-name">{label(id)}</span>
+            </li>
+          ))}
+        </ol>
+        {yours}
+      </div>
+    );
+  }
 
   if (timeline) {
     return (
