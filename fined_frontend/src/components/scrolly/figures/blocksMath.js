@@ -91,6 +91,9 @@ export function splitSeries(series, factor) {
 
 export function formatMeasure(value, measure) {
   if (measure === "percent") return `${Math.round(value)}%`;
+  if (measure === "count" || measure === "level") return Math.round(value).toLocaleString("en-IN");
+  if (measure === "points") return `${trim(value.toFixed(1))} points`;
+  if (measure === "years") return `${Math.round(value)} ${Math.round(value) === 1 ? "year" : "years"}`;
   if (measure === "shares") return `${indianWords(value)} shares`;
   if (measure === "price") return `${inrFull(value)} a share`;
   return inrWords(value);
@@ -228,3 +231,20 @@ export function ownerGridMax(config) {
   const base = config.groups.reduce((n, g) => n + g.units, 0);
   return base + Math.max(0, ...Object.values(config.ways).map((w) => w.newUnits || 0));
 }
+
+// ── Corporate actions (Module 8 on) ────────────────────────────────────────
+/** A price that may not be whole: ₹100 → "₹100", ₹33.333… → "₹33.33". */
+export const inrPrice = (n) => (Number.isInteger(n) ? inrFull(n) : `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+
+/** Each share split into `pieces`: more shares, a lower price, the same value. */
+export function splitOutcome(holding, price, pieces) {
+  return { shares: holding * pieces, price: price / pieces, value: holding * price };
+}
+
+/** A bonus of `get` free shares for every `per` held: the total and the holding grow by the same ratio. */
+export function bonusOutcome(total, holding, [get, per]) {
+  return { total: total + (total * get) / per, holding: holding + (holding * get) / per };
+}
+
+/** What `base` is worth after a fall of `pct`% (Module 11's "how big a fall?"). */
+export const afterFall = (base, pct) => base * (1 - pct / 100);

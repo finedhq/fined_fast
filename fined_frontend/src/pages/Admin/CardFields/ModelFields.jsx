@@ -96,6 +96,16 @@ function JsonBox({ label, value, onChange, hint }) {
   );
 }
 
+// Tools whose settings are edited as JSON, and what each one takes.
+const JSON_HINTS = {
+  slice_calculator:
+    "controls.amount / controls.business_change: {min, max, step, default, label}; controls.company: {label, options: [{id, label, price, total_shares}] (2–5), default}; min_controls_to_complete (1–3); neutrality_note; aside_text (may use {ownership_pct}); aside_when: {amount_below}; footnote.",
+  money_sorter:
+    "cards: [{id, label}] (2–6); zones: [{id, label}] (2–5); notes: {cardId: {zoneId: text}} for every pair; min_controls_to_complete (cards to place); neutrality_note; summary; guardrail (not shown).",
+  allocation_builder:
+    "controls.shares / controls.limit: {min, max, step, default, label, unit}; model: {steady_return_pct, share_returns_pct: {bad_year, typical_year, good_year}}; base_amount; labels: {bad_year, typical_year, good_year}; verdict: {within, beyond}; footnote (may use {steady_return_pct}); min_controls_to_complete (1–2).",
+};
+
 function SliceFields({ data, onChange, kindChoice }) {
   const setField = (key, value) => onChange(set(data, key, value));
   return (
@@ -108,7 +118,7 @@ function SliceFields({ data, onChange, kindChoice }) {
       </Section>
       <Section
         title="Settings (JSON)"
-        hint="controls.amount / controls.business_change: {min, max, step, default, label}; controls.company: {label, options: [{id, label, price, total_shares}] (2–5), default}; min_controls_to_complete (1–3); neutrality_note; aside_text (may use {ownership_pct}); aside_when: {amount_below}; footnote."
+        hint={JSON_HINTS[data.model_kind]}
       >
         <JsonBox key={data.model_kind} label="Settings" value={data.config} onChange={(v) => setField("config", v)} />
       </Section>
@@ -123,9 +133,9 @@ function SliceFields({ data, onChange, kindChoice }) {
 function ModelFields({ data, onChange }) {
   // Switching tool swaps in that tool's starting settings (the shapes differ).
   const changeKind = (kind) =>
-    onChange({ ...data, model_kind: kind, config: kind === "slice_calculator" ? EMPTY_SLICE_CONFIG : EMPTY_MODEL_DATA.config });
+    onChange({ ...data, model_kind: kind, config: kind === "slice_calculator" ? EMPTY_SLICE_CONFIG : kind === "leak_lab" ? EMPTY_MODEL_DATA.config : {} });
   const kindChoice = <Choice label="Which tool" value={data.model_kind} options={MODEL_OPTIONS} onChange={changeKind} />;
-  if (data.model_kind === "slice_calculator") return <SliceFields data={data} onChange={onChange} kindChoice={kindChoice} />;
+  if (JSON_HINTS[data.model_kind]) return <SliceFields data={data} onChange={onChange} kindChoice={kindChoice} />;
 
   const config = data.config || EMPTY_MODEL_DATA.config;
   const controls = config.controls || EMPTY_MODEL_DATA.config.controls;

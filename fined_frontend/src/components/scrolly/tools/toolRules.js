@@ -101,16 +101,72 @@ export function sliceAside(config, values, result) {
   return config.aside_text.replace("{ownership_pct}", fmtPct(result.ownership));
 }
 
+// ── Where Should This Money Live? (money_sorter, Module 10) ──────────
+// Saved tool state: { placements: {cardId: zoneId} }. Every placement shows
+// its own trade-off note; none is "right". Finished once enough are placed.
+export const sorterPlaced = (state) => Object.keys(state?.placements || {}).length;
+
+export function sorterDone(cardData, state) {
+  const c = cardData?.config || {};
+  const need = c.min_controls_to_complete ?? c.cards?.length ?? 4;
+  return sorterPlaced(state) >= need;
+}
+
+/** The note for one card in one place (from the card's settings). */
+export const sorterNote = (config, cardId, zoneId) => config?.notes?.[cardId]?.[zoneId] || "";
+
+// ── Try a Mix (allocation_builder, Module 11) ──────────────────────────
+// Saved tool state: { shares, limit, touchedControls[] }. One year each of
+// three kinds (no rebalancing): the shares part moves by that year's real
+// index return, the steady part by its made-up fixed rate.
+export function mixValues(config, state = {}) {
+  const c = config?.controls || {};
+  return {
+    shares: state.shares ?? c.shares?.default,
+    limit: state.limit ?? c.limit?.default,
+    touchedControls: state.touchedControls || [],
+  };
+}
+
+/** One year of a mix: the % change and what `base` becomes. */
+export function mixYear(sharesPct, shareReturnPct, steadyPct, base) {
+  const w = sharesPct / 100;
+  const change = w * shareReturnPct + (1 - w) * steadyPct;
+  return { change, value: base * (1 + change / 100) };
+}
+
+export function mixResult(config, values) {
+  const m = config?.model || {};
+  const base = config?.base_amount ?? 100000;
+  const years = ["bad_year", "typical_year", "good_year"].map((id) => ({
+    id,
+    label: config?.labels?.[id] || id,
+    ...mixYear(values.shares, m.share_returns_pct?.[id] ?? 0, m.steady_return_pct ?? 0, base),
+  }));
+  const bad = years[0];
+  const within = -bad.change <= values.limit + 1e-9;
+  return { base, years, within, verdict: within ? config?.verdict?.within : config?.verdict?.beyond };
+}
+
+export function mixDone(cardData, state) {
+  const need = cardData?.config?.min_controls_to_complete ?? 2;
+  return (state?.touchedControls?.length || 0) >= need;
+}
+
 // ── Registry of completion rules by model_kind ─────────────────────────
 export const TOOL_DONE = {
   leak_lab: leakLabDone,
   slice_calculator: sliceDone,
+  money_sorter: sorterDone,
+  allocation_builder: mixDone,
 };
 
 // What each tool saves to the learner's account (savedAnswers.js).
 export const TOOL_SAVED_KEYS = {
   leak_lab: ["years", "inflation", "where", "amount", "touchedControls"],
   slice_calculator: ["amount", "company", "change", "touchedControls"],
+  money_sorter: ["placements"],
+  allocation_builder: ["shares", "limit", "touchedControls"],
 };
 
 export function toolDone(cardData, state) {

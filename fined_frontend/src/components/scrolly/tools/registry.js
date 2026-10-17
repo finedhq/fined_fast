@@ -9,6 +9,8 @@
 // function of the latest state), and the hero's savings-chip amount.
 import LeakLab from "./LeakLab";
 import SliceCalculator from "./SliceCalculator";
+import MoneySorter from "./MoneySorter";
+import AllocationBuilder from "./AllocationBuilder";
 
 export const TOOLS = {
   leak_lab: {
@@ -18,5 +20,13 @@ export const TOOLS = {
   slice_calculator: {
     label: "Your Slice — what your money buys of a company",
     component: SliceCalculator,
+  },
+  money_sorter: {
+    label: "Where Should This Money Live? — goals into places",
+    component: MoneySorter,
+  },
+  allocation_builder: {
+    label: "Try a Mix — a share of money in shares, three kinds of year",
+    component: AllocationBuilder,
   },
 };

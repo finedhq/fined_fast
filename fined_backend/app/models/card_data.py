@@ -310,13 +310,20 @@ FigureKind = Literal[
     "bars_who_trades", "rulebook_switch", "vault_preview",                             # Module 3
     "trade_map_accounts", "trade_map_brokers", "trade_map_settlement",                 # Module 4
     "trade_map_going_public", "trade_map_ipo_steps", "ownership_grid_two_ways",        # Module 5
+    "order_book_two_prices", "order_book_moves", "bars_hoped_vs_actual",              # Module 6
+    "order_book_your_order", "order_book_two_ways", "order_book_what_next",  # Module 7
+    "bars_market_scoreboard", "ownership_grid_profit_shared", "line_chart_tiffin_year",  # Module 8
+    "trade_map_rbi_ripple", "trade_map_budget", "trade_map_world",  # Module 9
+    "line_chart_nifty_ride", "line_chart_end_of_2007", "trade_map_money_homes",  # Module 10
+    "bars_two_questions", "bars_fair_yardstick", "trade_map_course_parts",  # Module 11
 ]
-ModelKind = Literal["leak_lab", "slice_calculator"]
+ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder"]
 
 # Each figure reacts to the step's position (1st, 2nd, …), so a chapter must
 # have exactly as many steps as its figure has states. The trade maps take
 # theirs from their frontend config (scrolly/figures/module4Figures.js and
-# module5Figures.js, as does Module 5's owner-groups grid); keep
+# module5Figures.js, as does Module 5's owner-groups grid, and Module 6's
+# order books in module6Figures.js); keep
 # these numbers equal to the length of each config's step list.
 FIGURE_STEP_COUNTS = {
     "shrinking_basket_predict": 4,
@@ -334,6 +341,24 @@ FIGURE_STEP_COUNTS = {
     "trade_map_going_public": 4,
     "trade_map_ipo_steps": 4,
     "ownership_grid_two_ways": 4,
+    "order_book_two_prices": 4,
+    "order_book_moves": 4,
+    "bars_hoped_vs_actual": 4,
+    "order_book_your_order": 3,
+    "order_book_two_ways": 4,
+    "order_book_what_next": 3,
+    "bars_market_scoreboard": 4,
+    "ownership_grid_profit_shared": 4,
+    "line_chart_tiffin_year": 3,
+    "trade_map_rbi_ripple": 4,
+    "trade_map_budget": 3,
+    "trade_map_world": 3,
+    "line_chart_nifty_ride": 4,
+    "line_chart_end_of_2007": 3,
+    "trade_map_money_homes": 4,
+    "bars_two_questions": 4,
+    "bars_fair_yardstick": 4,
+    "trade_map_course_parts": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")
@@ -501,8 +526,80 @@ class SliceCalculatorConfig(BaseModel):
     aside_when: Optional[SliceAsideWhen] = None
     footnote: Optional[str] = None
 
+# ── "Where Should This Money Live?" (money_sorter, Module 10): goal cards
+# placed into places; every card × place pair has its own trade-off note
+# (never "right" or "wrong"). Finished once enough cards are placed.
+class SorterItem(BaseModel):
+    id: str
+    label: str
+
+class MoneySorterConfig(BaseModel):
+    cards: list[SorterItem] = Field(min_length=2, max_length=6)
+    zones: list[SorterItem] = Field(min_length=2, max_length=5)
+    notes: dict[str, dict[str, str]]
+    min_controls_to_complete: int = Field(ge=1, le=6, default=4)
+    neutrality_note: Optional[str] = None
+    summary: Optional[str] = None
+    guardrail: Optional[str] = None  # authoring note, not shown
+
+    @model_validator(mode="after")
+    def _check_notes(self):
+        cards = [c.id for c in self.cards]
+        zones = [z.id for z in self.zones]
+        _require_unique(cards, "card")
+        _require_unique(zones, "zone")
+        for c in cards:
+            for z in zones:
+                if not (self.notes.get(c) or {}).get(z):
+                    raise ValueError(f"no note for card '{c}' in zone '{z}'")
+        if self.min_controls_to_complete > len(cards):
+            raise ValueError("min_controls_to_complete is more than the number of cards")
+        return self
+
+# ── "Try a Mix" (allocation_builder, Module 11): a share of ₹1 lakh in shares
+# and the biggest fall the reader could sit through; one year each of three
+# kinds, no rebalancing. The steady part is made up; the share years are real.
+class AllocationRangeControl(RangeControl):
+    label: Optional[str] = None
+    unit: Optional[str] = None
+
+class AllocationControls(BaseModel):
+    shares: AllocationRangeControl   # % of the money in shares
+    limit: AllocationRangeControl    # biggest fall, %
+
+class AllocationModel(BaseModel):
+    steady_return_pct: float = Field(ge=0, le=30)
+    share_returns_pct: dict[str, float]  # bad_year / typical_year / good_year
+    single_year: bool = True
+    no_rebalancing: bool = True
+
+    @model_validator(mode="after")
+    def _check_years(self):
+        if set(self.share_returns_pct) != {"bad_year", "typical_year", "good_year"}:
+            raise ValueError("share_returns_pct needs bad_year, typical_year and good_year")
+        return self
+
+class AllocationVerdict(BaseModel):
+    within: str
+    beyond: str
+
+class AllocationBuilderConfig(BaseModel):
+    controls: AllocationControls
+    model: AllocationModel
+    base_amount: float = Field(gt=0, default=100000)
+    outputs: list[str] = []
+    labels: dict[str, str] = {}
+    verdict: AllocationVerdict
+    footnote: Optional[str] = None  # may use {steady_return_pct}
+    min_controls_to_complete: int = Field(ge=1, le=2, default=2)
+
 # Which settings shape each tool takes.
-MODEL_CONFIGS = {"leak_lab": LeakLabConfig, "slice_calculator": SliceCalculatorConfig}
+MODEL_CONFIGS = {
+    "leak_lab": LeakLabConfig,
+    "slice_calculator": SliceCalculatorConfig,
+    "money_sorter": MoneySorterConfig,
+    "allocation_builder": AllocationBuilderConfig,
+}
 
 class ModelCardData(BaseModel):
     card_type: Literal["model"] = "model"
@@ -510,7 +607,7 @@ class ModelCardData(BaseModel):
     title: str
     concept: Optional[str] = None
     model_kind: ModelKind
-    config: LeakLabConfig | SliceCalculatorConfig
+    config: LeakLabConfig | SliceCalculatorConfig | MoneySorterConfig | AllocationBuilderConfig
     as_of: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")  # month the rates were checked, e.g. "2026-09"
     rate_source: Optional[str] = None
     reward_rule: Optional[str] = None  # e.g. "Move at least two controls." (shown next to the stars)

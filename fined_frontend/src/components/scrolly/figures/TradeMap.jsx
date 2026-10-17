@@ -9,7 +9,11 @@
 //            notes?, linkLabels?, pulse?, tag?, caption}; `null` = the
 //           chapter shows another figure. badges: {box: text or [texts]} pills
 //           on a box's top edge; notes: {box: text} a line under the box;
-//           linkLabels: [[from, to, text]] a pill on that line's middle
+//           linkLabels: [[from, to, text]] a pill on that line's middle;
+//           thick / thin: [[from, to]] arrows drawn heavier or lighter, for
+//           an effect that lands harder on one box than another (Module 9)
+// Config `tall: true` (Module 10) gives a four-row layout more height.
+// `pulse` may be a list of boxes (Module 11: the whole map pulses).
 // The reader doesn't touch the map. Its one reaction: once the step's
 // tap-to-guess is answered, the `pulse` box pulses. Nothing is saved.
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
@@ -79,7 +83,7 @@ export default function TradeMap({ step, steps, state, config }) {
     });
 
   return (
-    <div className="tm-figure" role="img" aria-label={mapSummary(config, s)}>
+    <div className={`tm-figure${config.tall ? " tm-figure--tall" : ""}`} role="img" aria-label={mapSummary(config, s)}>
       <div className="tm-tag-row">{s.tag && <span className="tm-tag">{s.tag}</span>}</div>
       <div className="tm-stage" ref={stageRef}>
         <svg className="tm-lines" width={w} height={h} aria-hidden="true">
@@ -91,11 +95,13 @@ export default function TradeMap({ step, steps, state, config }) {
           {draw(config.links, "tm-link")}
           {draw(s.back, "tm-back", `url(#${head})`, BACK_OFFSET)}
           {draw(s.arrows, "tm-arrow", `url(#${head})`)}
+          {draw(s.thick, "tm-arrow tm-arrow--thick", `url(#${head})`)}
+          {draw(s.thin, "tm-arrow tm-arrow--thin", `url(#${head})`)}
         </svg>
         {Object.entries(config.nodes).map(([id, n]) => (
           <div
             key={id}
-            className={`tm-node${shown.has(id) ? " is-shown" : ""}${lit.has(id) ? " is-lit" : ""}${pulsing === id ? " is-pulse" : ""}${n.sub ? " has-sub" : ""}`}
+            className={`tm-node${shown.has(id) ? " is-shown" : ""}${lit.has(id) ? " is-lit" : ""}${pulsing && [pulsing].flat().includes(id) ? " is-pulse" : ""}${n.sub ? " has-sub" : ""}`}
             style={{ left: `${n.x}%`, top: `${n.y}%` }}
             aria-hidden="true"
           >
