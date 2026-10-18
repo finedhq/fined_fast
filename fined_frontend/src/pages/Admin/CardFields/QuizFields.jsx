@@ -14,6 +14,11 @@ export const EMPTY_QUIZ_DATA = {
 
 function QuizFields({ data, onChange }) {
   const { title, question, options = [], explanation, cta_text, allotted_finstars = 10 } = data;
+  // Module 12 formats: "multi" has several right options; order / sort /
+  // order_book keep their answer in the card's own fields (items, zones,
+  // correct_order, book), which this form leaves untouched.
+  const format = data.format || "choice";
+  const hasOptions = format === "choice" || format === "multi";
 
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
@@ -36,7 +41,7 @@ function QuizFields({ data, onChange }) {
   const setCorrectOption = (idx) => {
     const newOpts = options.map((opt, i) => ({
       ...opt,
-      is_correct: i === idx,
+      is_correct: format === "multi" ? (i === idx ? !opt.is_correct : opt.is_correct) : i === idx,
     }));
     handleChange("options", newOpts);
   };
@@ -77,15 +82,30 @@ function QuizFields({ data, onChange }) {
         />
       </label>
 
-      <fieldset className="cinematic-lines-fieldset" style={{ marginTop: "12px", marginBottom: "24px" }}>
+      {data.badge_label !== undefined && (
+        <label>
+          Badge (e.g. Question 7 of 20)
+          <input type="text" value={data.badge_label || ""} onChange={(e) => handleChange("badge_label", e.target.value)} />
+        </label>
+      )}
+
+      {!hasOptions && (
+        <div style={{ margin: "12px 0 24px", padding: "12px", fontSize: "0.85rem", color: "#6b7280", background: "#f9fafb", borderRadius: 8 }}>
+          This is a &ldquo;{format.replace("_", " ")}&rdquo; question. Its items and answer can&rsquo;t be edited here, but they are kept when you save.
+        </div>
+      )}
+
+      {hasOptions && <fieldset className="cinematic-lines-fieldset" style={{ marginTop: "12px", marginBottom: "24px" }}>
         <legend>Quiz Options</legend>
         <div style={{ marginBottom: "12px", fontSize: "0.85rem", color: "#6b7280" }}>
-          Select the radio button next to the correct answer. Minimum 2, maximum 5 options.
+          {format === "multi"
+            ? "Tick every right answer (at least 2, and at least 1 wrong). Minimum 2, maximum 5 options."
+            : "Select the radio button next to the correct answer. Minimum 2, maximum 5 options."}
         </div>
         {options.map((opt, idx) => (
           <div key={opt.id} style={{ display: "flex", gap: "12px", marginBottom: "12px", alignItems: "center" }}>
             <input 
-              type="radio" 
+              type={format === "multi" ? "checkbox" : "radio"} 
               name="quiz_correct_opt" 
               checked={opt.is_correct}
               onChange={() => setCorrectOption(idx)}
@@ -115,7 +135,7 @@ function QuizFields({ data, onChange }) {
             + Add Option
           </button>
         )}
-      </fieldset>
+      </fieldset>}
 
       <label>
         Explanation (Revealed after answer)

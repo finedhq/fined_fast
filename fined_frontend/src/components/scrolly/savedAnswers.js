@@ -7,10 +7,11 @@
 //   hero        {"poll":"raise_money","savings":"50k"}   when the reader reaches the chapters
 //   narrative   the chapter's figure state as JSON        when its last step is reached
 //   model       the tool's settings as JSON               when it is finished (e.g. 2 controls moved)
-//   quiz        the chosen option id, as plain text       when answered
+//   quiz        the answer as plain text (quizFormats.js)  when answered
 //   completion  nothing                                   when the completion screen is reached
 import { getCardFinstars } from "../../utils/finstars";
 import { isCorrectOption } from "./progress";
+import { decodeQuiz } from "./quizFormats";
 import { TOOL_SAVED_KEYS, toolDone } from "./tools/toolRules";
 
 // The settings a tool saves (Leak Lab when the kind is missing, as before).
@@ -75,7 +76,7 @@ export function decodeAnswer(card, raw) {
       return v ? pick(v, toolKeys(card)) : undefined;
     }
     case "quiz":
-      return typeof raw === "string" && (d.options || []).some((o) => o.id === raw) ? raw : undefined;
+      return decodeQuiz(d, raw);
     default:
       return undefined;
   }

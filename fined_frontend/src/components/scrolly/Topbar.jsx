@@ -2,11 +2,13 @@
 // setupChapterNav / setupProgressAndFinStars): FinEd logo, module tag,
 // chapter bar that fills as you read, FinStars pill, reading-progress line.
 // The only addition is the back arrow to the course page (decision 7b).
+// A module with no chapters (Module 12, the test) shows one segment per
+// question instead, filled once answered, with an "answered" count.
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { scrollToElement } from "./scroll";
 
-export default function Topbar({ rootRef, moduleNumber, title, chapters, stars, backTo }) {
+export default function Topbar({ rootRef, moduleNumber, title, chapters, questions = [], stars, backTo }) {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [chapterProgress, setChapterProgress] = useState(() => chapters.map(() => 0));
@@ -91,7 +93,25 @@ export default function Topbar({ rootRef, moduleNumber, title, chapters, stars, 
         </div>
       </div>
 
-      <div className="chapter-nav" role="navigation" aria-label="Chapters">
+      {!chapters.length && questions.length > 0 && (
+        <div className="chapter-nav question-nav" role="navigation" aria-label="Questions">
+          <div className="question-segs">
+            {questions.map((q, i) => (
+              <a
+                key={q.slug}
+                href={`#checkpoint-${q.slug}`}
+                className={`question-seg${q.answered ? " is-done" : ""}`}
+                aria-label={`Question ${i + 1}${q.answered ? ", answered" : ""}`}
+                onClick={(e) => goTo(e, `[data-part="${CSS.escape(q.slug)}"]`)}
+              ></a>
+            ))}
+          </div>
+          <span className="question-count">
+            {questions.filter((q) => q.answered).length} of {questions.length} answered
+          </span>
+        </div>
+      )}
+      <div className="chapter-nav" role="navigation" aria-label="Chapters" hidden={!chapters.length && questions.length > 0}>
         {chapters.map((c, i) => {
           const pct = chapterProgress[i] || 0;
           return (

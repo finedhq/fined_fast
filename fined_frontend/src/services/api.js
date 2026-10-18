@@ -378,6 +378,12 @@ export function updateCardBySlug(cardSlug, body) {
   });
 }
 
+// The course test (Module 12): clear the learner's answers so they can take it
+// again, when they finished it below its pass mark (never pays stars twice).
+export function retakeTest(moduleSlugOrId) {
+  return request(`/courses/module/${moduleSlugOrId}/retake-test`, { method: "POST" });
+}
+
 export function fetchAuthors() {
   return request("/authors/");
 }
