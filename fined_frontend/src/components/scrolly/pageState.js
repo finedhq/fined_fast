@@ -24,3 +24,12 @@ export function savePageState(moduleId, state) {
     /* ignore */
   }
 }
+
+/** Forget this tab's state for a module (after a test retake). */
+export function clearPageState(moduleId) {
+  try {
+    sessionStorage.removeItem(key(moduleId));
+  } catch {
+    /* ignore */
+  }
+}

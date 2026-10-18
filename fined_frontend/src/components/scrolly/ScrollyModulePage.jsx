@@ -23,10 +23,11 @@ import Checkpoint from "./Checkpoint";
 import Completion from "./Completion";
 import GlossaryTooltip from "./GlossaryTooltip";
 import useStepObserver from "./useStepObserver";
-import { EMPTY_PAGE_STATE, loadPageState, savePageState } from "./pageState";
+import { EMPTY_PAGE_STATE, clearPageState, loadPageState, savePageState } from "./pageState";
 import { mergePages, pageFromSaved } from "./savedAnswers";
 import useSaveProgress from "./useSaveProgress";
-import { earnedStars, maxStars as moduleMaxStars, openParts } from "./progress";
+import { earnedStars, maxStars as moduleMaxStars, openParts, partDone, testScore } from "./progress";
+import { retakeTest } from "../../services/api";
 import { scrollToElement } from "./scroll";
 import { TOOLS } from "./tools/registry";
 import useReelsLayout from "./useReelsLayout";
@@ -68,9 +69,31 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   const lastStep = useMemo(() => Object.fromEntries(chapters.map((c) => [c.slug, (c.card_data?.steps || []).length - 1])), [chapters]);
 
   // Save each finished part; `saved` = the cards with this visit's saves applied.
-  const saved = useSaveProgress({ cards, page, reached, email, enabled: !preview });
+  // With no chapters (the Module 12 test), the warm-up counts as reached once
+  // the first question is answered.
+  const heroByQuestion = !chapters.length && hero && Object.keys(page.checks || {}).length > 0;
+  const heroSlug = heroByQuestion ? hero.slug : null;
+  const reachedNow = useMemo(() => (heroSlug && !reached[heroSlug] ? { ...reached, [heroSlug]: true } : reached), [reached, heroSlug]);
+  const saved = useSaveProgress({ cards, page, reached: reachedNow, email, enabled: !preview });
   const stars = earnedStars(saved, page);
   const open = openParts(saved, page);
+  const test = testScore(saved, page);
+
+  // Retake the course test: the server clears the answers (never paying stars
+  // twice), then the page reloads from the top with the questions open again.
+  const [retakeError, setRetakeError] = useState(null);
+  const retake = async () => {
+    setRetakeError(null);
+    try {
+      await retakeTest(moduleId);
+      clearPageState(moduleId);
+      window.location.reload();
+    } catch (err) {
+      setRetakeError(err?.response?.data?.detail || err?.message || "Couldn't start the test again. Please try again.");
+    }
+  };
+  // A module without chapters (the Module 12 test) shows progress by question.
+  const questions = chapters.length ? [] : saved.filter((c) => c.card_template === "quiz").map((c) => ({ slug: c.slug, answered: partDone(c, page) }));
 
   // `patch` is an object, or a function of that part's latest state (so quick
   // repeated taps or slider moves never work from a stale value).
@@ -112,7 +135,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   }, [moduleId, hero?.slug]);
 
   const backTo = backToOverride || (bundle.course_slug ? `/courses/${bundle.course_slug}` : "/courses");
-  const firstSection = chapters[0] ? `#section-${CSS.escape(chapters[0].slug)}` : ".scrolly-section";
+  const firstSection = chapters[0] ? `#section-${CSS.escape(chapters[0].slug)}` : ".scrolly-section, .checkpoint-section";
   const nextSlug = bundle.nextModuleFirstCard?.cardSlug || bundle.nextModuleFirstCard?.cardId;
   const goToPart = (slug) => scrollToElement(rootRef.current?.querySelector(`[data-part="${CSS.escape(slug)}"]`));
 
@@ -178,6 +201,9 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             comingSoon={!nextSlug && !preview && !bundle.is_final_module}
             certificate={bundle.is_final_module && !preview && !onSignup ? { courseSlug: bundle.course_slug, courseTitle: bundle.course_title } : null}
             onSignup={onSignup}
+            test={test}
+            onRetake={preview ? null : retake}
+            retakeError={retakeError}
             onReached={() => markReached(card.slug)}
             onGoTo={goToPart}
             onReviewTop={() => scrollToElement(rootRef.current?.querySelector(".nc-hero"))}
@@ -196,6 +222,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
           moduleNumber={bundle.module_order_index}
           title={hero?.card_data?.short_title || bundle.module_title}
           chapters={chapterLinks}
+          questions={questions}
           stars={stars}
           backTo={backTo}
         />

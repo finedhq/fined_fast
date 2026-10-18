@@ -59,10 +59,12 @@ function SkippedLine({ open, onGoTo }) {
 // releases, plan §0.2) — the "Up next" box says so instead of opening anything.
 // `onSignup`: a visitor trying the module without an account — the "Up next"
 // box asks them to sign up instead.
+// `test` (Module 12, from progress.testScore): below its pass mark the
+// certificate box says so and offers `onRetake` instead of the certificate.
 // `certificate`: { courseSlug, courseTitle } on the course's final module — the
 // "Up next" box becomes the course certificate (the window checks the whole
 // course is done before issuing it).
-export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, onGoTo, onReviewTop, onReached }) {
+export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, test, onRetake, retakeError, onGoTo, onReviewTop, onReached }) {
   const d = card.card_data || {};
   const sectionRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
@@ -143,7 +145,7 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
 
           {(d.learnings || []).length > 0 && (
             <div className="key-takeaways">
-              <h3 className="takeaways-title">What this module covered</h3>
+              <h3 className="takeaways-title">{d.learnings_title || "What this module covered"}</h3>
               <ol className="takeaway-list">
                 {d.learnings.map((l, i) => (
                   <li key={i} className="takeaway-item">
@@ -159,6 +161,27 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
               {teaserBody}
               <span className="nc-signup-pill">Sign up free to keep going →</span>
             </button>
+          ) : certificate && !open.length && test && !test.passed ? (
+            <div className="next-module-card nc-cert-card nc-cert-locked">
+              <div className="next-module-tag">Certificate locked</div>
+              <div className="next-module-title">
+                You got {test.right} of {test.total} right
+              </div>
+              <div className="next-module-desc">
+                You need at least {test.passMark} right to get your certificate. Look back at the explanations above, then try
+                the whole test again. The FinStars you've earned stay in your account, and a retake doesn't add more.
+              </div>
+              {onRetake && (
+                <button type="button" className="nc-signup-pill nc-cert-pill" onClick={onRetake}>
+                  Try the test again →
+                </button>
+              )}
+              {retakeError && (
+                <p className="nc-cert-error" role="alert">
+                  {retakeError}
+                </p>
+              )}
+            </div>
           ) : certificate ? (
             <div className="next-module-card nc-cert-card">
               <div className="next-module-tag">Course complete</div>

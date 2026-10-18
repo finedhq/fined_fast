@@ -21,7 +21,9 @@
 // `pulse` (gap / ticket / best_ask / eod) pulses once the step's tap-to-guess
 // is answered. `choose {options [{id, label, trade: {side, qty}, text}]}`
 // (Module 6's 1.4): the reader picks who gives way; that trade prints and its
-// line shows. Nothing is saved.
+// line shows. Nothing is saved. Module 12's quiz drives the limit itself
+// (`value` / `onValue`) and passes `conceal` so the book doesn't show whether
+// the limit fills until the reader locks it in.
 import { useState } from "react";
 import { inrFull } from "./blocksMath";
 import SliderControl from "./SliderControl";
@@ -91,12 +93,14 @@ function Settle({ settle }) {
   );
 }
 
-export default function OrderBook({ step, steps, state, config }) {
+export default function OrderBook({ step, steps, state = {}, config, value: heldValue, onValue, conceal = false }) {
   const at = Math.min(Math.max(step ?? 0, 0), config.steps.length - 1);
   const s = config.steps[at];
   const { book } = config;
   const control = s.control;
-  const [value, setValue] = useState(control?.start ?? 0);
+  const [ownValue, setOwnValue] = useState(control?.start ?? 0);
+  const value = heldValue ?? ownValue;
+  const setValue = onValue || setOwnValue;
   const [way, setWay] = useState(null);
   const picked = s.choose?.options.find((o) => o.id === way) || null;
 
@@ -107,7 +111,7 @@ export default function OrderBook({ step, steps, state, config }) {
   // What happens on the book: a scripted trade, a limit order, or the reader's control.
   let trade = null;
   let order = null;
-  if (control?.kind === "limit") order = limitOrder(book, { side: control.side, qty: control.qty, limit: value });
+  if (control?.kind === "limit") order = conceal ? null : limitOrder(book, { side: control.side, qty: control.qty, limit: value });
   else if (control) trade = value > 0 ? bookTrade(book, { side: control.side, qty: value }) : null;
   else if (s.order) order = limitOrder(book, s.order);
   else if (s.trade) trade = bookTrade(book, s.trade);
@@ -190,7 +194,7 @@ export default function OrderBook({ step, steps, state, config }) {
             <strong key={last} className="ob-last">
               {inrFull(last)}
             </strong>
-            {trade || control ? (
+            {trade || (control && !conceal) ? (
               <span className={`ob-move${last > book.lastPrice ? " is-up" : last < book.lastPrice ? " is-down" : ""}`}>
                 {priceMove(book.lastPrice, last)}
               </span>

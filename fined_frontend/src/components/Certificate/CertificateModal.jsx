@@ -183,7 +183,9 @@ export default function CertificateModal({ courseSlug, courseTitle, onClose }) {
 
         {state && !state.eligible && (
           <p className="cm-text">
-            Finish every module in this course to unlock your certificate.{' '}
+            {state.test && state.test.answered === state.test.total && !state.test.passed
+              ? state.reason
+              : 'Finish every module in this course to unlock your certificate.'}{' '}
             <Link to={`/courses/${courseSlug}`} className="cm-inline-link" onClick={onClose}>See what's left</Link>
           </p>
         )}

@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from app.dependencies import get_current_user, AuthUser
 from app.integrations.supabase_client import supabase
 from app.repositories.course_repo import course_repo
+from app.services.course_test import test_score
 from app.services.course_visibility import can_view_course, course_can_complete, is_released
 
 router = APIRouter(prefix="/certificates", tags=["Certificates"])
@@ -28,6 +29,9 @@ NAME_MIN, NAME_MAX = 2, 60
 MAX_NAME_CHANGES = 3
 
 PUBLIC_FIELDS = ("code", "recipient_name", "course_title", "modules_count", "completed_at", "issued_at")
+
+
+FINISH_EVERY_MODULE = "Finish every module in this course to get its certificate."
 
 
 class ClaimRequest(BaseModel):
@@ -90,29 +94,47 @@ def _course_by_slug(slug: str) -> Optional[dict]:
 
 
 def completion_state(course: dict, email: str) -> dict:
-    """{eligible, completed_at, modules_count} for this learner and course.
-    Eligible = the course is whole (nothing left to release) and every card in
-    it is completed — the same rule as the course completion reward."""
+    """{eligible, completed_at, modules_count, test, reason} for this learner and course.
+    Eligible = the course is whole (nothing left to release), every card in it
+    is completed — the same rule as the course completion reward — and, when
+    the course has a test (a module whose completion card sets `pass_mark`),
+    at least that many of the test's questions are right."""
     modules = course_repo.get_modules(course["id"])
     released = [m for m in modules if is_released(m)]
     module_ids = [m["id"] for m in released]
     if not module_ids or not course_can_complete(course, modules):
-        return {"eligible": False, "completed_at": None, "modules_count": len(released)}
+        return {"eligible": False, "completed_at": None, "modules_count": len(released), "test": None, "reason": FINISH_EVERY_MODULE}
 
-    cards = supabase.from_("cards").select("card_id, module_id").in_("module_id", module_ids).execute().data or []
-    done = supabase.from_("userCourses").select("card_id, completion_date").match({
+    cards = supabase.from_("cards").select("card_id, module_id, card_template, card_data").in_("module_id", module_ids).execute().data or []
+    done = supabase.from_("userCourses").select("card_id, completion_date, user_answer").match({
         "email": email, "course_id": course["id"], "progress_type": "card", "status": "completed",
     }).execute().data or []
     done_dates = {r["card_id"]: r.get("completion_date") for r in done}
     card_ids = {c["card_id"] for c in cards}
     # every released module must have cards, and every card must be done
     modules_with_cards = {c["module_id"] for c in cards}
-    eligible = bool(card_ids) and modules_with_cards == set(module_ids) and card_ids <= done_dates.keys()
+    finished = bool(card_ids) and modules_with_cards == set(module_ids) and card_ids <= done_dates.keys()
+    # the course test, if there is one (the last test module counts)
+    answers = {r["card_id"]: r.get("user_answer") for r in done}
+    test = None
+    for m in released:
+        score = test_score([c for c in cards if c["module_id"] == m["id"]], answers)
+        if score:
+            test = {**score, "module_slug": m.get("slug"), "module_title": m.get("title")}
+    eligible = finished and (test is None or test["passed"])
+    reason = None
+    if not finished:
+        reason = FINISH_EVERY_MODULE
+    elif not eligible:
+        reason = (f"Get at least {test['pass_mark']} of {test['total']} questions right in "
+                  f"\"{test['module_title']}\" to unlock your certificate. You got {test['right']}. You can retake the test.")
     dates = [d for cid, d in done_dates.items() if cid in card_ids and d]
     return {
         "eligible": eligible,
         "completed_at": max(dates) if (eligible and dates) else None,
         "modules_count": len(released),
+        "test": test,
+        "reason": reason,
     }
 
 
@@ -135,6 +157,8 @@ async def my_certificate_for_course(course_slug: str, user: AuthUser = Depends(g
     state = await asyncio.to_thread(completion_state, course, user.email)
     return {
         "eligible": state["eligible"],
+        "reason": state["reason"],
+        "test": state["test"],
         "certificate": None,
         "suggested_name": suggested_name(user),
         "course_title": course.get("title"),
@@ -166,7 +190,7 @@ async def claim_certificate(course_slug: str, body: ClaimRequest, user: AuthUser
 
     state = await asyncio.to_thread(completion_state, course, user.email)
     if not state["eligible"]:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Finish every module in this course to get its certificate.")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, state["reason"] or FINISH_EVERY_MODULE)
 
     now = datetime.utcnow().isoformat() + "Z"
     row = {

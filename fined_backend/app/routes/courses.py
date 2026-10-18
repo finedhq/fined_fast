@@ -11,7 +11,8 @@ from typing import Optional, Dict, Any, List
 from app.integrations.storage import upload_to_supabase
 from app.integrations.supabase_client import supabase
 from app.dependencies import get_current_user, get_optional_current_user, require_admin, AuthUser
-from app.models.card_data import validate_card_data
+from app.models.card_data import quiz_answer_key, quiz_is_right, validate_card_data
+from app.services.course_test import RETAKE, test_score
 from app.repositories.course_repo import course_repo
 from app.services.course_visibility import (
     COURSE_STATUSES, can_view_course, can_view_module, course_can_complete, course_status, is_listed,
@@ -643,10 +644,7 @@ async def get_a_card(course_slug: str, module_slug: str, card_slug: str, body: G
                         finstars = get_card_finstars(cd, c.get("card_template", ""))
                         
                         if cd.get("card_type") == "quiz":
-                            user_ans = completed_map[c["card_id"]]
-                            opts = cd.get("options", [])
-                            is_correct = any(opt.get("id") == user_ans and opt.get("is_correct") for opt in opts)
-                            if not is_correct:
+                            if not quiz_is_right(cd, completed_map[c["card_id"]]):
                                 finstars = 0
                                 
                         earned += finstars
@@ -770,7 +768,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             await asyncio.to_thread(lambda: supabase.from_("userCourses").insert([payload_insert]).execute())
             
         # 3. Update stars if earned (and only if first time completing)
-        was_already_completed = existing_progress and existing_progress.get("status") == "completed"
+        was_already_completed = existing_progress and existing_progress.get("status") in ("completed", RETAKE)
         stars_earned = body.finStars
         if card_data.get("card_template") in SERVER_STARS_TEMPLATES:
             stars_earned = get_card_finstars(card_data.get("card_data") or {}, card_data["card_template"])
@@ -806,7 +804,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
         article_score = db_user.get("article_score") or 0
         
         # Only award bonus if this is the first time they completed this specific card to reach 100%
-        was_already_completed = existing_progress and existing_progress.get("status") == "completed"
+        was_already_completed = existing_progress and existing_progress.get("status") in ("completed", RETAKE)
         
         if module_progress == module_total_cards and not was_already_completed and course_count < 5:
             old_score = course_score + consistency_score + article_score
@@ -852,7 +850,7 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             for c in (keys_res.data or []):
                 cd = c.get("card_data") or {}
                 if cd.get("card_type") == "quiz":
-                    correct_opt = next((opt["id"] for opt in cd.get("options", []) if opt.get("is_correct")), None)
+                    correct_opt = quiz_answer_key(cd)
                     if correct_opt:
                         correct_map[c["card_id"]] = correct_opt
             
@@ -922,6 +920,38 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update progress: {str(e)}"
         )
+
+
+@router.post("/module/{module_slug}/retake-test")
+async def retake_test(module_slug: str, user: AuthUser = Depends(get_current_user)):
+    """Clear the learner's answers to a test module (Module 12) so they can take
+    it again, when they finished it below its pass mark. The rows are marked
+    "retake", which updateCard treats as already completed: answering again
+    never pays FinStars or bonuses twice."""
+    module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("slug", module_slug).execute())
+    if not module_res.data and _is_valid_uuid(module_slug):
+        module_res = await asyncio.to_thread(lambda: supabase.from_("modules").select("id").eq("id", module_slug).execute())
+    if not module_res.data or await _hidden_module_from(module_res.data[0]["id"], user):
+        raise HTTPException(status_code=404, detail="Module not found")
+    module_id = module_res.data[0]["id"]
+
+    cards = (await asyncio.to_thread(lambda: supabase.from_("cards").select("card_id, card_template, card_data").eq("module_id", module_id).execute())).data or []
+    done = (await asyncio.to_thread(lambda: supabase.from_("userCourses").select("card_id, user_answer").match({
+        "email": user.email, "module_id": module_id, "progress_type": "card", "status": "completed"}).execute())).data or []
+    score = test_score(cards, {r["card_id"]: r.get("user_answer") for r in done})
+    if score is None:
+        raise HTTPException(status_code=400, detail="This module isn't a test.")
+    if score["answered"] < score["total"]:
+        raise HTTPException(status_code=409, detail="Answer every question first.")
+    if score["passed"]:
+        raise HTTPException(status_code=409, detail="You've already passed this test.")
+
+    quiz_ids = [c["card_id"] for c in cards if c.get("card_template") == "quiz"]
+    await asyncio.to_thread(lambda: supabase.from_("userCourses")
+        .update({"status": RETAKE, "user_answer": None, "completion_date": None})
+        .match({"email": user.email, "module_id": module_id, "progress_type": "card"})
+        .in_("card_id", quiz_ids).execute())
+    return {"ok": True, "cleared": len(quiz_ids), "last_score": score}
 
 
 @router.post("/card/{card_slug}/updateCard")

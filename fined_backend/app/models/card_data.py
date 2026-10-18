@@ -119,15 +119,100 @@ class QuizOption(BaseModel):
     text: str
     is_correct: bool
 
+class QuizItem(BaseModel):
+    id: str
+    label: str
+    zone: Optional[str] = None                     # format "sort": the zone it belongs in
+
+class QuizZone(BaseModel):
+    id: str
+    label: str
+
 class QuizCardData(BaseModel):
+    """A quiz card. `format` (Module 12 on) picks how it is answered; every
+    format saves ONE answer string and is right only if it equals
+    quiz_answer_key() exactly (all or nothing):
+      choice      the option id                       ("c")
+      multi       the chosen option ids, sorted        ("a,c,e")
+      order       the item ids in the reader's order   ("costs,staff,govt,owners")
+      sort        item=zone for each item, items order ("bank=z_money;…")
+      order_book  the locked-in limit price            ("101")
+    """
     card_type: Literal["quiz"] = "quiz"
+    format: Literal["choice", "multi", "order", "sort", "order_book"] = "choice"
     card_label: Optional[str] = None
+    badge_label: Optional[str] = None              # "Question 7 of 20" (default "Quick check")
     title: str
     question: str
-    options: list[QuizOption] = Field(min_length=2, max_length=5)
+    instruction: Optional[str] = None              # "Select all that apply"
+    options: list[QuizOption] = Field(default_factory=list, max_length=5)
+    items: list[QuizItem] = Field(default_factory=list, max_length=6)
+    zones: list[QuizZone] = Field(default_factory=list, max_length=6)
+    correct_order: list[str] = Field(default_factory=list)
+    book: Optional[dict] = None                    # format "order_book" (see check below)
+    control: Optional[dict] = None
+    correct: Optional[int | float] = None           # format "order_book": the right limit price
     explanation: str
     cta_text: str = "Continue"
     allotted_finstars: int = Field(ge=0, default=0)
+
+    @model_validator(mode="after")
+    def _check_format(self):
+        f = self.format
+        n_right = sum(o.is_correct for o in self.options)
+        if f in ("choice", "multi"):
+            if len(self.options) < 2:
+                raise ValueError(f"a '{f}' quiz needs 2–5 options")
+            if len({o.id for o in self.options}) != len(self.options):
+                raise ValueError("option ids must be unique")
+        if f == "multi" and not (n_right >= 2 and n_right < len(self.options)):
+            raise ValueError("a 'multi' quiz needs at least 2 right options and at least 1 wrong one")
+        if f in ("order", "sort"):
+            ids = [i.id for i in self.items]
+            if len(ids) < 2 or len(set(ids)) != len(ids):
+                raise ValueError(f"a '{f}' quiz needs 2–6 items with unique ids")
+        if f == "order" and sorted(self.correct_order) != sorted(i.id for i in self.items):
+            raise ValueError("correct_order must list every item id exactly once")
+        if f == "sort":
+            zone_ids = {z.id for z in self.zones}
+            if len(zone_ids) < 2 or any(i.zone not in zone_ids for i in self.items):
+                raise ValueError("every 'sort' item needs a zone from zones (at least 2 zones)")
+        if f == "order_book":
+            book, control = self.book or {}, self.control or {}
+            asks = [lv["price"] for lv in book.get("levels", []) if lv.get("ask_qty")]
+            bids = [lv["price"] for lv in book.get("levels", []) if lv.get("bid_qty")]
+            if not asks or not bids or (book.get("order_ticket") or {}).get("side") != "buy":
+                raise ValueError("an 'order_book' quiz needs asks, bids and a buy ticket")
+            if not all(k in control for k in ("min", "max", "step", "default")):
+                raise ValueError("an 'order_book' quiz control needs min, max, step and default")
+            # The stored answer must be the book's cheapest ask: the lowest buy limit that fills now.
+            if self.correct != min(asks) or not (control["min"] <= self.correct <= control["max"]):
+                raise ValueError(f"'correct' must be the cheapest ask (₹{min(asks)}) and inside the control's range")
+        return self
+
+
+def _num(v) -> str:
+    """101.0 -> '101' (answers are saved as text)."""
+    return str(int(v)) if float(v).is_integer() else str(v)
+
+def quiz_answer_key(cd: dict) -> Optional[str]:
+    """The answer string a quiz card counts as right (see QuizCardData), or None."""
+    f = cd.get("format") or "choice"
+    if f == "choice":
+        return next((o["id"] for o in cd.get("options", []) if o.get("is_correct")), None)
+    if f == "multi":
+        return ",".join(sorted(o["id"] for o in cd.get("options", []) if o.get("is_correct"))) or None
+    if f == "order":
+        return ",".join(cd.get("correct_order") or []) or None
+    if f == "sort":
+        return ";".join(f"{i['id']}={i.get('zone')}" for i in cd.get("items", [])) or None
+    if f == "order_book":
+        return _num(cd["correct"]) if cd.get("correct") is not None else None
+    return None
+
+def quiz_is_right(cd: dict, answer) -> bool:
+    key = quiz_answer_key(cd)
+    return key is not None and (answer or "").strip() == key
 
 class ChartDataset(BaseModel):
     label: str
@@ -288,6 +373,10 @@ class CompletionCardData(BaseModel):
     subtitle: str
     badge_icon: str = "🔔"
     learnings: list[str] = Field(default_factory=list)
+    learnings_title: Optional[str] = None          # default "What this module covered" (Module 12: review pointers)
+    # A test module (Module 12): the course certificate needs at least this many
+    # of the module's quiz questions right; below it the learner can retake.
+    pass_mark: Optional[int] = Field(default=None, ge=1)
     total_finstars: Optional[int] = None
     next_module_teaser: Optional[NextModuleTeaser] = None
     # Optional line replaying the learner's warm-up poll answer; "{choice}" is
