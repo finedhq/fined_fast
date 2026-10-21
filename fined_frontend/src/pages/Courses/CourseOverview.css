@@ -1495,3 +1495,60 @@ button.co-cert-thumb:focus-visible { outline: 3px solid var(--dh-amber); outline
     margin-top: 0.5rem;
   }
 }
+
+/* ── Roadmap on phones and tablets (<1024px, same breakpoint as isMobile) ──
+   Row height (170) and top padding (40) must match rowHeight/topPadding in CourseOverview.jsx */
+@media (max-width: 1023px) {
+  .course-path-container {
+    padding-top: 40px;
+  }
+
+  .module-node-row {
+    margin-bottom: 106px;
+  }
+
+  /* 64px pot in a 64px row: its centre is where the path starts and ends */
+  .module-node {
+    top: 0;
+  }
+
+  .module-circle {
+    width: 64px;
+    height: 64px;
+  }
+
+  .module-base-label {
+    width: 185px;
+  }
+
+  /* an open tap card must sit above the next module's label */
+  .module-node-row:has(.active-mobile) {
+    z-index: 60;
+  }
+
+  /* take back the last row's gap, as on desktop */
+  .course-upcoming {
+    margin-top: calc(3rem - 106px);
+  }
+
+  /* tap card: wider and shorter, opening toward the middle of the screen */
+  .module-hover-card {
+    width: 230px;
+  }
+
+  .pop-right .module-hover-card {
+    transform: translateX(-25%) scale(0.95);
+  }
+
+  .pop-right.active-mobile .module-hover-card {
+    transform: translateX(-25%) scale(1);
+  }
+
+  .pop-left .module-hover-card {
+    transform: translateX(-75%) scale(0.95);
+  }
+
+  .pop-left.active-mobile .module-hover-card {
+    transform: translateX(-75%) scale(1);
+  }
+}
