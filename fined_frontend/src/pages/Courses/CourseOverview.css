@@ -322,6 +322,75 @@
   border-color: #f1f5f9;
 }
 
+/* ── "You are here" cue on the module the learner is up to ── */
+.module-circle.ongoing {
+  position: relative;
+}
+
+.module-circle.ongoing::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 3px solid #7547fb;
+  opacity: 0;
+  pointer-events: none;
+  animation: moduleRipple 2.2s ease-out infinite;
+}
+
+@keyframes moduleRipple {
+  0%   { transform: scale(1);    opacity: 0.55; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+.module-start-bubble {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  padding: 0.35rem 0.8rem;
+  border: 2px solid #e4dbff;
+  border-radius: 10px;
+  background: #fff;
+  color: #7547fb;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(117, 71, 251, 0.18);
+  animation: moduleBubbleBob 1.6s ease-in-out infinite;
+}
+
+/* little tail pointing down at the circle */
+.module-start-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-right: 2px solid #e4dbff;
+  border-bottom: 2px solid #e4dbff;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+@keyframes moduleBubbleBob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .module-circle.ongoing::after,
+  .module-start-bubble {
+    animation: none;
+  }
+}
+
 /* Labels next to circles when NOT hovered */
 .module-base-label {
   position: absolute;
@@ -1452,6 +1521,164 @@ button.co-cert-thumb:focus-visible { outline: 3px solid var(--dh-amber); outline
   color: var(--dh-amber-ink);
   font-size: 14px;
   font-weight: 800;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.co-hero-alert:hover {
+  background: #ffeab0;
+}
+
+/* ── Log-in dialog for logged-out visitors ── */
+.co-signin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(23, 19, 33, 0.55);
+  backdrop-filter: blur(4px);
+  animation: coSigninFade 0.18s ease-out;
+}
+
+.co-signin {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 28px 22px;
+  border: 2px solid var(--dh-ink);
+  border-radius: 24px;
+  background: var(--dh-surface);
+  box-shadow: 8px 8px 0 0 var(--dh-ink);
+  color: var(--dh-ink);
+  text-align: center;
+  animation: coSigninPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.co-signin-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dh-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.co-signin-close:hover {
+  background: var(--dh-violet-50);
+  color: var(--dh-ink);
+}
+
+.co-signin-art {
+  display: block;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 14px;
+  border: 4px solid var(--dh-violet-50);
+  border-radius: 50%;
+  background: #d4c5ff;
+}
+
+.co-signin-eyebrow {
+  margin-bottom: 6px;
+  color: var(--dh-violet);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.co-signin-title {
+  margin: 0 0 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.co-signin-text {
+  margin: 0;
+  color: var(--dh-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.co-signin-btn {
+  justify-content: center;
+  width: 100%;
+  margin-top: 22px;
+  cursor: pointer;
+}
+
+.co-signin-try {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: var(--dh-violet);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.co-signin-try:hover {
+  text-decoration: underline;
+}
+
+.co-signin-try + .co-signin-later {
+  display: block;
+  margin: 4px auto 0;
+}
+
+.co-signin-later {
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  color: var(--dh-muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.co-signin-later:hover {
+  color: var(--dh-ink);
+  text-decoration: underline;
+}
+
+@keyframes coSigninFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes coSigninPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .co-signin-backdrop,
+  .co-signin {
+    animation: none;
+  }
 }
 
 .co-hero-progress {

@@ -10,7 +10,7 @@ import { hasAiLens } from "../../utils/textFormatters";
 
 const ARTICLES_PER_PAGE = 30;
 
-const CATEGORIES = ["Personal Finance", "IPO", "Investing", "Deep Dives", "Economy"];
+const CATEGORIES = ["Personal Finance", "IPO", "Investing", "Deep Dives", "Economy", "Blogs"];
 
 function formatDate(date) {
   if (!date) return "";

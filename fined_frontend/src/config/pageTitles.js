@@ -18,6 +18,7 @@ export const TAG_NAMES = {
   "investing": "Investing",
   "deep-dives": "Deep Dives",
   "economy": "Economy",
+  "blogs": "Blogs",
 };
 
 export const STATIC_ROUTE_TITLES = {
