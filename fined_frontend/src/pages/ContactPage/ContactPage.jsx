@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { sendContactQuery } from "../../services/api";
 import { trackFormSubmission } from "../../utils/analytics";
 import toast from "react-hot-toast";
-import Lenis from "lenis";
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 import RevealOnScroll from "../../components/RevealOnScroll";
 import {
   IoMailOutline,
@@ -33,17 +33,7 @@ export default function ContactPage() {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  useSmoothScroll();
 
   const handleCopyEmail = async () => {
     try {

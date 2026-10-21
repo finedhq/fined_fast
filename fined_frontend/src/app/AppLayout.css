@@ -1,0 +1,262 @@
+/* Mobile app shell (app build only). Colours and fonts follow the website navbar. */
+.app-shell {
+  --app-purple: #4100bc;
+  --app-purple-surface: #f3efff;
+  --app-amber: #ffb600;
+  --app-ink: #171321;
+  --app-ink-2: #3e3a4a;
+  --app-ink-3: #625d6d;
+  --app-border: #ece8f2;
+  --app-topbar-h: 56px;
+  --app-tabbar-h: 64px;
+  min-height: 100vh;
+  background: #f7f5fc;
+}
+
+.app-topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: var(--app-topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px 0 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.app-wordmark {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--app-purple);
+}
+.app-wordmark b {
+  font-weight: 800;
+  color: var(--app-amber);
+}
+
+.app-topbar-title {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--app-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-icon-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--app-ink-2);
+  font-size: 22px;
+}
+.app-icon-btn:active {
+  background: var(--app-purple-surface);
+}
+
+.app-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #f4dc9a;
+  border-radius: 999px;
+  background: #fff6dc;
+  color: #7a5200;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+}
+.app-stars svg {
+  color: #e6a200;
+}
+
+.app-main {
+  overflow-x: clip; /* no sideways scroll while a screen slides in */
+  padding-top: var(--app-topbar-h);
+  padding-bottom: calc(var(--app-tabbar-h) + 8px);
+}
+
+.app-tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 60;
+  height: var(--app-tabbar-h);
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-top: 1px solid var(--app-border);
+}
+
+.app-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--app-ink-3);
+  text-decoration: none;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+}
+.app-tab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 30px;
+  border-radius: 999px;
+  font-size: 22px;
+  transition: background-color 0.2s ease;
+}
+.app-tab.is-active {
+  color: var(--app-purple);
+}
+.app-tab.is-active .app-tab-icon {
+  background: var(--app-purple-surface);
+}
+
+/* Profile tab: account and app settings list */
+.app-menu {
+  max-width: 640px;
+  margin: 8px auto 24px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.app-menu-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.app-menu-group li + li {
+  border-top: 1px solid var(--app-border);
+}
+.app-menu-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 0;
+  background: #fff;
+  color: var(--app-ink);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: left;
+}
+.app-menu-row:active {
+  background: var(--app-purple-surface);
+}
+.app-menu-row span {
+  flex: 1;
+}
+.app-menu-icon {
+  font-size: 20px;
+  color: var(--app-purple);
+}
+.app-menu-caret {
+  font-size: 16px;
+  color: var(--app-ink-3);
+}
+.app-menu-logout {
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  color: #b42318;
+}
+.app-menu-logout .app-menu-icon {
+  color: #b42318;
+}
+
+/* Screen entry animations: short, transform/opacity only, so they stay smooth on budget phones.
+   No fill-mode, so the transform is gone once it ends (fixed-position popups behave normally). */
+.app-page-tab {
+  animation: app-fade-in 160ms ease-out;
+}
+.app-page-inner {
+  animation: app-slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes app-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes app-slide-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(14%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-page-tab,
+  .app-page-inner {
+    animation: none;
+  }
+}
+
+/* Keyboard open (set by src/app/keyboard.js): the tab bar steps aside so it doesn't sit on the keyboard. */
+.app-keyboard-open .app-tabbar {
+  display: none;
+}
+.app-keyboard-open .app-main {
+  padding-bottom: 16px;
+}
+
+/* Loading placeholder (opacity pulse only: cheap to animate on budget phones) */
+.app-skeleton {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.app-skel {
+  border-radius: 14px;
+  background: #ebe6f3;
+  animation: app-skel-pulse 1.1s ease-in-out infinite alternate;
+}
+.app-skel-title {
+  height: 28px;
+  width: 62%;
+}
+.app-skel-line {
+  height: 14px;
+  width: 85%;
+}
+.app-skel-card {
+  height: 150px;
+}
+@keyframes app-skel-pulse {
+  to {
+    opacity: 0.45;
+  }
+}

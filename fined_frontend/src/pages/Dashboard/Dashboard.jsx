@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import instance, { setAuthToken } from '../../lib/axios';
-import Lenis from 'lenis';
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 import './DashboardHome.css';
 import { fetchArticles, getLocalCachedArticles } from '../../services/api';
 import { hasAiLens } from "../../utils/textFormatters";
@@ -176,17 +176,7 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [showScoreInfo, setShowScoreInfo] = useState(false);
 
-  useEffect(() => {
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  useSmoothScroll();
 
   // When user profile loads from Auth0, hydrate user-specific cache if available
   useEffect(() => {

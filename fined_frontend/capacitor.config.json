@@ -1,0 +1,14 @@
+{
+  "appId": "in.fined.app",
+  "appName": "FinEd",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#ffffff"
+    }
+  }
+}

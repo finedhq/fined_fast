@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Lenis from 'lenis';
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 import RevealOnScroll from '../../components/RevealOnScroll';
 import "./AboutPage.css";
 import bgImage from '../../assets/abt-us-bg-img.webp';
@@ -16,18 +16,10 @@ export default function AboutPage() {
   const navigate = useNavigate();
   const [authors, setAuthors] = useState([]);
 
+  useSmoothScroll();
+
   useEffect(() => {
     fetchAuthors().then(data => setAuthors(data || [])).catch(console.error);
-
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => {
-      lenis.destroy();
-    };
   }, []);
 
   return (

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FinEd</string>
+    <string name="title_activity_main">FinEd</string>
+    <string name="package_name">in.fined.app</string>
+    <string name="custom_url_scheme">in.fined.app</string>
+</resources>

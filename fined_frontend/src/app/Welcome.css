@@ -1,0 +1,95 @@
+/* App welcome screen (app build only). */
+.app-welcome {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 48px 24px 32px;
+  background: #fff;
+  text-align: center;
+}
+
+.app-welcome-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6vh;
+}
+
+.app-welcome-logo {
+  width: 148px;
+  height: auto;
+}
+
+.app-welcome-title {
+  margin: 8px 0 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #171321;
+}
+.app-welcome-title span {
+  color: #4100bc;
+}
+
+.app-welcome-sub {
+  margin: 0;
+  max-width: 340px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #625d6d;
+}
+
+.app-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.app-welcome-btn {
+  height: 54px;
+  border-radius: 999px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+}
+.app-welcome-primary {
+  border: 2px solid #171321;
+  background: #ffb600;
+  color: #171321;
+  box-shadow: 3px 3px 0 0 #171321;
+}
+.app-welcome-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 #171321;
+}
+.app-welcome-secondary {
+  border: 2px solid #e6e1ec;
+  background: #fff;
+  color: #4100bc;
+}
+.app-welcome-secondary:active {
+  background: #f3efff;
+}
+
+.app-welcome-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #4100bc;
+}

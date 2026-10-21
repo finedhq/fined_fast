@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticles } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
-import Lenis from 'lenis';
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 
 import { IoSparkles } from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
@@ -43,17 +43,7 @@ function TagArticlesPage() {
   const loaderRef = useRef(null);
   const loadingRef = useRef(false);
 
-  useEffect(() => {
-    const lenis = new Lenis()
-    function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-    requestAnimationFrame(raf)
-    return () => {
-      lenis.destroy()
-    }
-  }, [])
+  useSmoothScroll();
 
   const loadArticles = async (nextOffset = 0, append = false) => {
     if (loadingRef.current || (!hasMore && append)) return;

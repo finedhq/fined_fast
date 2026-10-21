@@ -1,0 +1,88 @@
+/* App build only (loaded by appEntry.js): website bits that don't make sense inside the app.
+   The website itself is unaffected; this file is never part of the website bundle. */
+
+/* "Best on a laptop or desktop" tips (course page and module hero): the app is the phone experience. */
+.co-desktop-tip,
+.hero-device-tip {
+  display: none !important;
+}
+
+/* Course page's own "All courses" link: the app's top bar already has a back arrow. */
+.co-hero-back {
+  display: none !important;
+}
+
+/* Feel like an app, not a web page: no grey tap flash, no overscroll glow/bounce. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Buttons, links, bars and images: no text selection or long-press menu (content text stays selectable). */
+button,
+a,
+label,
+[role='button'],
+[role='tab'],
+nav,
+img,
+svg {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img {
+  -webkit-user-drag: none;
+}
+
+/* No double-tap zoom delay on controls. */
+button,
+a,
+input,
+select,
+textarea,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+/* Offline banner (src/app/offline.js) */
+.app-net-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  top: 64px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font: 700 14px/1.3 'Manrope', sans-serif;
+  text-align: center;
+  transform: translateY(-140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.app-net-banner.is-shown {
+  transform: none;
+  opacity: 1;
+}
+.app-net-banner[data-tone='offline'] {
+  background: #171321;
+  color: #fff;
+}
+.app-net-banner[data-tone='online'] {
+  background: #e7f6ec;
+  color: #14532d;
+}
+
+/* Smoother module scrolling on budget phones (measured on an OPPO A-series / Helio G85, 2026-10-22:
+   stutter frames fell from ~8% to ~2.5%). In the phone (Reels) layout the figure box and step padding
+   used to animate their height at every step, which re-lays out the page each frame, and the sticky
+   figure's soft shadow was repainted while scrolling. In the app they change instantly instead.
+   The website (including on phones) keeps both. */
+.nc-root.layout-reels .scrolly-figure,
+.nc-root.layout-reels .scrolly-step {
+  transition: none !important;
+}
+.nc-root.layout-reels .scrolly-figure {
+  box-shadow: none !important;
+}

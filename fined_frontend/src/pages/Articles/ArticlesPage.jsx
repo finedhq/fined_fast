@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchArticles, getLocalCachedArticles } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
-import Lenis from 'lenis';
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
 import { 
   IoSparkles, 
@@ -53,17 +53,7 @@ function ArticlesPage() {
   const [error, setError] = useState("");
   const exploreSectionRef = useRef(null);
 
-  useEffect(() => {
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  useSmoothScroll();
 
   const loadArticles = async () => {
     // Only show skeleton on first ever load when cache is empty

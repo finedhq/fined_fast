@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchAuthorDetails, fetchArticleBySlug } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
-import Lenis from 'lenis';
+import { useSmoothScroll } from '../../hooks/useSmoothScroll';
 import { IoSparkles } from "react-icons/io5";
 import { hasAiLens } from "../../utils/textFormatters";
 
@@ -42,17 +42,7 @@ function AuthorPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  useSmoothScroll();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
