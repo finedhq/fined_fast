@@ -149,6 +149,7 @@ function AdminArticleForm() {
     "Investing",
     "Deep Dives",
     "Economy",
+    "Blogs",
   ];
 
   useEffect(() => {

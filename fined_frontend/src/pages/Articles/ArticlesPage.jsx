@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchArticles, getLocalCachedArticles } from "../../services/api";
+import { fetchArticles, getLocalCachedArticles, BLOGS_TAG, isBlogArticle } from "../../services/api";
 import RevealOnScroll from "../../components/RevealOnScroll";
 import Lenis from 'lenis';
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
@@ -34,7 +34,7 @@ const generateSlug = (title) => {
     .replace(/(^-|-$)+/g, '');
 };
 
-const CATEGORIES = ["All", "Deep Dives", "Personal Finance", "IPO", "Economy", "Investing"];
+const CATEGORIES = ["All", "Deep Dives", "Personal Finance", "IPO", "Economy", "Investing", "Blogs"];
 
 function ArticlesPage() {
   const navigate = useNavigate();
@@ -42,9 +42,11 @@ function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   // Stale-While-Revalidate: load immediately from session cache (0ms paint)
   const [articles, setArticles] = useState(() => {
-    const cached = getLocalCachedArticles() || [];
+    const cached = (getLocalCachedArticles() || []).filter((a) => !isBlogArticle(a));
     return [...cached].sort((a, b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
   });
+  // Blogs are kept out of the main list (lead, trending, "All") and only shown under the Blogs filter
+  const [blogArticles, setBlogArticles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchingArticle, setFetchingArticle] = useState(() => {
     const cached = getLocalCachedArticles();
@@ -112,6 +114,9 @@ function ArticlesPage() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
     loadArticles();
+    fetchArticles({ limit: 100, offset: 0, tag: BLOGS_TAG })
+      .then((data) => setBlogArticles(Array.isArray(data) ? data : data.articles || []))
+      .catch((err) => console.warn("Could not fetch blog posts", err));
   }, []);
 
   // Reset page to 1 whenever category or search query changes
@@ -133,12 +138,13 @@ function ArticlesPage() {
         counts[cat] = articles.filter((a) => (a.tag || "").toLowerCase() === cat.toLowerCase()).length;
       }
     });
+    counts[BLOGS_TAG] = blogArticles.length;
     return counts;
-  }, [articles]);
+  }, [articles, blogArticles]);
 
   // Filtered articles list based on active category & search query
   const filteredArticles = useMemo(() => {
-    let result = articles;
+    let result = activeCategory === BLOGS_TAG ? blogArticles : articles;
     if (activeCategory !== "All") {
       result = result.filter(
         (a) => (a.tag || "").toLowerCase() === activeCategory.toLowerCase()
@@ -156,7 +162,7 @@ function ArticlesPage() {
       );
     }
     return result;
-  }, [articles, activeCategory, searchQuery]);
+  }, [articles, blogArticles, activeCategory, searchQuery]);
 
   // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE));
