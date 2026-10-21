@@ -199,8 +199,12 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
             </div>
           ) : teaser &&
             (nextHref ? (
-              <Link to={nextHref} className="next-module-card">
+              <Link to={nextHref} className="next-module-card nc-next-card">
                 {teaserBody}
+                {/* the whole box is the link; the pill makes that obvious to a new learner */}
+                <span className="nc-signup-pill">
+                  {Number.isFinite(Number(moduleNumber)) ? `Start Module ${Number(moduleNumber) + 1}` : "Start next module"} →
+                </span>
               </Link>
             ) : (
               <div className={`next-module-card${comingSoon ? " nc-coming-soon" : ""}`}>

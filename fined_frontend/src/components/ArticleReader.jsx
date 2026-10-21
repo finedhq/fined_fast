@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate, Link } from "react-router-dom";
 import { IoStarOutline, IoStar, IoSparkles } from "react-icons/io5";
 import { RiShareForwardLine } from "react-icons/ri";
-import { FiX } from "react-icons/fi";
+import { FiX, FiAperture } from "react-icons/fi";
 import PersonalLensSidebar from "./PersonalLens/PersonalLensSidebar";
 import ShareModal from "./ShareModal";
 import CommunityBanner from "./Community/CommunityBanner";
@@ -707,32 +708,26 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
   const scrollToSection = (event, id) => {
     event.preventDefault();
 
+    // Close the phone/tablet dropdown first, synchronously, so the page has
+    // already shifted when we measure. (Subtracting the list's height instead
+    // double-counted: the browser also corrects for the shift, and the heading
+    // landed ~400px down the screen.)
+    flushSync(() => setIsMobileTocOpen(false));
+
     const el = document.getElementById(id);
     const container = scrollRef.current;
 
     if (el && container) {
-      let collapseOffset = 0;
-      // If the TOC is open on mobile, it will collapse and shift the document UP.
-      // We must subtract its height from the target scroll position.
-      if (isMobileTocOpen && window.innerWidth <= 900) {
-        const tocContent = document.querySelector('.ar-toc-content-wrapper');
-        if (tocContent) {
-          collapseOffset = tocContent.offsetHeight;
-        }
-      }
-
       const containerRect = container.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
 
-      // Calculate absolute scroll position minus the layout shift minus 100px for breathing room
-      const offset = elRect.top - containerRect.top + container.scrollTop - collapseOffset - 100;
+      // Absolute scroll position, leaving 100px of breathing room above the heading
+      const offset = elRect.top - containerRect.top + container.scrollTop - 100;
 
       container.scrollTo({ top: offset, behavior: "smooth" });
     } else {
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
-    setIsMobileTocOpen(false);
   };
 
   const publishedDate = formatDate(article.published_at || article.created_at);
@@ -771,7 +766,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
         <div className="ar-main-content">
           <div className="ar-grid">
           {/* TOC */}
-          <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''}`}>
+          <aside className={`ar-toc-aside ${isScrollingUp ? 'scroll-up' : ''} ${isMobileTocOpen ? 'toc-open' : ''}`}>
             <nav className="ar-toc-nav" aria-label="Article of contents" ref={tocNavRef}>
               <div
                 className={`ar-toc-header-wrapper ${isMobileTocOpen ? 'open' : ''}`}
@@ -1357,7 +1352,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
           onClick={() => setIsMobileLensOpen(true)}
           aria-label="Open Personal Lens"
         >
-          <IoSparkles />
+          <FiAperture aria-hidden="true" />
           <span>Personal Lens</span>
         </button>
 
@@ -1371,28 +1366,15 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               className="pl-drawer-modal"
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 16px 0" }}>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileLensOpen(false)}
-                  style={{
-                    background: "#f1f5f9",
-                    border: "none",
-                    borderRadius: "50%",
-                    width: "32px",
-                    height: "32px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    color: "#475569"
-                  }}
-                  aria-label="Close Personal Lens"
-                >
-                  <FiX size={18} />
-                </button>
-              </div>
-              <div style={{ padding: "0 16px 24px 16px" }}>
+              <button
+                type="button"
+                className="pl-drawer-close"
+                onClick={() => setIsMobileLensOpen(false)}
+                aria-label="Close Personal Lens"
+              >
+                <FiX size={18} />
+              </button>
+              <div className="pl-drawer-body">
                 <PersonalLensSidebar
                   article={article}
                   articleId={article?.slug || article?.id || "etf-101-guide"}

@@ -2804,10 +2804,6 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     border-bottom: 1px solid #e2e8f0;
   }
-
-  .ar-toc-aside.scroll-up {
-    top: 0;
-  }
 }
 
 .reveal-on-scroll {
@@ -3917,4 +3913,114 @@ h1, h2, h3, h4, h5, h6 {
 .ap-view-more-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+/* Phones and tablets (where the CONTENTS bar and the Share button show):
+   the CONTENTS bar behaves like the navbar and the Share button. It slides
+   away while the reader scrolls down and comes back on scroll up, sitting
+   just under the navbar, which returns at the same moment. It never hides
+   while its list is open. Kept at the end of the file so it wins over the
+   earlier sticky rules for these widths. */
+@media (max-width: 1100px) {
+  .ar-toc-aside {
+    transition:
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.25s ease;
+  }
+
+  /* Up past the reader's top padding (up to 96px) and its own height */
+  .ar-toc-aside:not(.scroll-up):not(.toc-open) {
+    transform: translateY(calc(-100% - 110px));
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Sticky top is measured inside the reader's top padding. On phones that
+   padding is 72px, right under the navbar (which ends at 70px), so top: 0 fits.
+   Wider screens have 96px of padding and a navbar ending at 70-78px: pull the
+   bar up 16px so it lands at 80px, just under the navbar at every width. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .ar-toc-aside { top: -16px; }
+}
+
+/* Phones and tablets (up to 1100px): the table of contents is a CONTENTS
+   dropdown. These rules used to stop at 900px, so 901-1100px showed the whole
+   list stuck to the top of the screen. */
+@media (max-width: 1100px) {
+  .ar-toc-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 16px;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .ar-toc-header-wrapper:hover {
+    background: #fafcff;
+    border-color: #cbd5e1;
+  }
+
+  .ar-toc-header-wrapper.open {
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .ar-toc-heading {
+    margin: 0;
+    color: #050816;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .ar-toc-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #8fa2b8;
+    transition: transform 0.2s ease;
+  }
+
+  .ar-toc-header-wrapper.open .ar-toc-icon {
+    transform: rotate(180deg);
+  }
+
+  .ar-toc-content-wrapper {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ar-toc-content-wrapper.open {
+    display: flex;
+    width: 100%;
+  }
+
+  /* An open list never runs off the screen: it scrolls inside itself */
+  .ar-toc-list {
+    width: 100%;
+    box-sizing: border-box;
+    max-height: min(60vh, 460px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    border: 1px solid #f3f4f6;
+    border-top: 0;
+    border-radius: 0 0 6px 6px;
+    background: #fff;
+    border-left: 0;
+  }
 }

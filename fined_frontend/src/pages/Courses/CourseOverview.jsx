@@ -286,8 +286,10 @@ export default function CourseOverview() {
               {(() => {
                 const xOffsets = isMobile ? [23, 77, 28, 72, 18, 82] : [12, 68, 22, 78, 8, 73, 18, 83];
                 const getX = (index) => xOffsets[index % xOffsets.length];
-                const rowHeight = 250;
-                const topPadding = 75;
+                // Must match .module-node-row (height + margin-bottom) and
+                // .course-path-container padding-top in CourseOverview.css
+                const rowHeight = isMobile ? 170 : 250;
+                const topPadding = isMobile ? 40 : 75;
 
                 const segments = [];
                 if (course.length > 1) {
