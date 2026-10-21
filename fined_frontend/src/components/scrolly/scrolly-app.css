@@ -73,6 +73,12 @@
   box-shadow: 0 16px 32px -18px rgba(23, 19, 33, 0.55);
 }
 
+/* The amber pill (same as the sign-up / certificate boxes) nudges right on hover */
+.nc-root a.nc-next-card:hover .nc-signup-pill,
+.nc-root a.nc-next-card:focus-visible .nc-signup-pill {
+  transform: translateX(4px);
+}
+
 /* Completion: the one line linking back to a skipped quick check / tool
    (decision 7d) — the only new element on the page. Existing tokens only. */
 .nc-root .nc-skipped {

@@ -1,18 +1,15 @@
-import {
-  FiTarget,
-  FiCompass,
-  FiBookmark,
-  FiCheckCircle,
-  FiRefreshCw,
-  FiArrowRight,
-  FiZap,
-} from "react-icons/fi";
+import { FiArrowRight, FiCheck, FiRefreshCw } from "react-icons/fi";
 
 export default function LensResultCard({ lens, onReset, onClose }) {
   if (!lens) return null;
 
+  const why = lens.whyItMatters || lens.why_it_matters;
+  const summary = lens.personalSummary || lens.personal_summary;
+  const focus = lens.focusSections || lens.focus_sections || [];
+  const todo = lens.whatToDo || lens.what_to_do;
+
   const scrollToHeading = (sectionName) => {
-    // Attempt to match heading in document by text content
+    // Match the section to a heading in the article by its text
     const headings = document.querySelectorAll(".ar-body h2, .ar-body h3, .ar-h2, .ar-h3");
     let target = null;
     const cleanSection = sectionName.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -35,85 +32,65 @@ export default function LensResultCard({ lens, onReset, onClose }) {
   return (
     <div className="pl-result-wrap">
       <div className="pl-result-body">
-        {/* 1. Why this matters to you */}
-        <div className="pl-why-matters-box">
-          <div className="pl-result-tag">
-            <FiTarget />
-            <span>Why This Matters to You</span>
-          </div>
-          <p className="pl-result-text" style={{ marginTop: "6px" }}>
-            {lens.whyItMatters || lens.why_it_matters}
-          </p>
-        </div>
-
-        {/* 2. Personalized Summary */}
-        <div className="pl-result-block">
-          <div className="pl-result-tag">
-            <FiCompass />
-            <span>Personalized Overview</span>
-          </div>
-          <p className="pl-result-text">
-            {lens.personalSummary || lens.personal_summary}
-          </p>
-        </div>
-
-        {/* 3. Focus Sections */}
-        {((lens.focusSections || lens.focus_sections) || []).length > 0 && (
-          <div className="pl-result-block">
-            <div className="pl-result-tag">
-              <FiBookmark />
-              <span>Priority Focus Sections</span>
-            </div>
-            <div className="pl-focus-chips">
-              {(lens.focusSections || lens.focus_sections).map((sec, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className="pl-focus-chip"
-                  onClick={() => scrollToHeading(sec)}
-                  title="Click to jump to this section"
-                >
-                  <span>{sec}</span>
-                  <FiArrowRight size={13} style={{ color: "#6366f1", flexShrink: 0 }} />
-                </button>
-              ))}
-            </div>
-          </div>
+        {why && (
+          <section className="pl-why-matters-box">
+            <span className="pl-label">Why this matters to you</span>
+            <p className="pl-result-text">{why}</p>
+          </section>
         )}
 
-        {/* 4. One Core Takeaway */}
-        <div className="pl-takeaway-box">
-          <div className="pl-result-tag">
-            <FiZap />
-            <span>One Core Takeaway</span>
-          </div>
-          <p className="pl-result-text" style={{ marginTop: "6px" }}>
-            "{lens.takeaway}"
-          </p>
-        </div>
+        {summary && (
+          <section>
+            <span className="pl-label">In short</span>
+            <p className="pl-result-text">{summary}</p>
+          </section>
+        )}
 
-        {/* 5. What You Should Do */}
-        {(lens.whatToDo || lens.what_to_do) && (
-          <div className="pl-action-box">
-            <div className="pl-result-tag">
-              <FiCheckCircle />
-              <span>What to Do Next</span>
+        {focus.length > 0 && (
+          <section>
+            <span className="pl-label">Read these first</span>
+            <ol className="pl-focus-chips">
+              {focus.map((sec, idx) => (
+                <li key={idx}>
+                  <button
+                    type="button"
+                    className="pl-focus-chip"
+                    onClick={() => scrollToHeading(sec)}
+                    title="Jump to this section"
+                  >
+                    <span className="pl-get-num">{idx + 1}</span>
+                    <span className="pl-focus-chip-text">{sec}</span>
+                    <FiArrowRight size={14} className="pl-focus-chip-arrow" />
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        {lens.takeaway && (
+          <section className="pl-takeaway-box">
+            <span className="pl-label">Remember this</span>
+            <p className="pl-result-text">{lens.takeaway}</p>
+          </section>
+        )}
+
+        {todo && (
+          <section>
+            <span className="pl-label">Try this next</span>
+            <div className="pl-action-box">
+              <span className="pl-action-icon" aria-hidden="true">
+                <FiCheck size={13} strokeWidth={3} />
+              </span>
+              <p className="pl-result-text">{todo}</p>
             </div>
-            <p className="pl-result-text" style={{ marginTop: "4px" }}>
-              {lens.whatToDo || lens.what_to_do}
-            </p>
-          </div>
+          </section>
         )}
       </div>
 
-      {/* Sticky Bottom Action Bar (Option 1) */}
       <div className="pl-result-footer">
-        <button
-          type="button"
-          className="pl-reset-btn"
-          onClick={onReset}
-        >
-          <FiRefreshCw size={12} />
+        <button type="button" className="pl-reset-btn" onClick={onReset}>
+          <FiRefreshCw size={13} />
           <span>Change my answers</span>
         </button>
       </div>
