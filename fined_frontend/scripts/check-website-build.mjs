@@ -23,7 +23,10 @@ const checks = [
   ['no app layout (tab bar / top bar / welcome)', !assets.some((f) => /AppLayout|Welcome/i.test(f)) && assetText(/app-tabbar|app-welcome|app-skel-pulse/).length === 0],
   ['no app start-up code (splash, back button, link handling)', assetText(/Press back again to exit|fadeOutDuration|OPENS_IN_THEIR_APP|toolbarColor|appUrlOpen|app-keyboard-open|app-net-banner|Save or send your file/).length === 0],
   // Capacitor plugins register as name + {web: …}; the website should contain none of the app's plugins
-  ['no app plugins (haptics, share, network…)', assetText(/[`"'](Haptics|Network|Share|Filesystem|Browser|SplashScreen|Keyboard)[`"'],\{web:/).length === 0],
+  ['no app plugins (haptics, share, network…)', assetText(/[`"'](Haptics|Network|Share|Filesystem|Browser|SplashScreen|Keyboard|CapacitorUpdater|PushNotifications)[`"'],\{web:/).length === 0],
+  ['no app sign-in (Auth0 in a browser tab)', !assets.some((f) => /auth0Native/.test(f)) && assetText(/in\.fined\.app/).length === 0],
+  ['no app live updates', assetText(/app-update\/manifest\.json|fined\.update\.ready/).length === 0],
+  ['no app push notifications', assetText(/fined\.push\.|pushNotificationActionPerformed/).length === 0],
   ['no app-only style overrides', assetText(/hero-device-tip\{display:none!important|overscroll-behavior-y:none|layout-reels .scrolly-step{transition:none!important/).length === 0],
 ];
 

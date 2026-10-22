@@ -12,6 +12,10 @@ const fakeAuth0 = fileURLToPath(
   new URL(process.env.FAKE_LOGGED_OUT ? './app-test/fakeAuth0LoggedOut.js' : './app-test/fakeAuth0.js', import.meta.url),
 );
 
-export default mergeConfig(app, {
-  resolve: { alias: { '@auth0/auth0-react': fakeAuth0 } },
-});
+// REAL_LOGIN=1: keep the app's real Auth0 login (Phase 5.5) in a test build, to try sign-in on a phone
+// against the local backend. Needs the Auth0 dashboard settings in MOBILE_APP.md.
+export default process.env.REAL_LOGIN
+  ? app
+  : mergeConfig(app, {
+      resolve: { alias: [{ find: /^@auth0\/auth0-react$/, replacement: fakeAuth0 }] },
+    });

@@ -23,6 +23,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Auth0 sign-in returns here: in.fined.app://<auth0 domain>/capacitor/in.fined.app/callback
+                 (src/app/auth0Native.jsx). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/custom_url_scheme" />
+            </intent-filter>
+
             <!-- App Links: myfined.com learning pages open in the app. Android only trusts this once
                  https://myfined.com/.well-known/assetlinks.json lists the app's signing key (Play Store phase). -->
             <intent-filter android:autoVerify="true">

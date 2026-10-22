@@ -5,12 +5,16 @@
 //  - src/app/appEntry.js runs at start-up (splash screen, fonts)
 //  - import.meta.env.VITE_NATIVE_APP is 'true', for app-only code paths
 //  - src/app/appShell.js (empty on the website) becomes the tab bar + top bar layout
+//  - '@auth0/auth0-react' becomes src/app/auth0Native.jsx: sign-in in a browser tab that returns to the app
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vite';
 import base from './vite.config.js';
 
 const appShell = fileURLToPath(new URL('./src/app/appShell.app.js', import.meta.url));
+// Real Auth0 login for the app (src/app/auth0Native.jsx wraps the original library)
+const auth0Native = fileURLToPath(new URL('./src/app/auth0Native.jsx', import.meta.url));
+const auth0Original = fileURLToPath(new URL('./node_modules/@auth0/auth0-react/dist/auth0-react.esm.js', import.meta.url));
 
 const GTM_HEAD = /[ \t]*<!-- Google Tag Manager -->[\s\S]*?<!-- End Google Tag Manager -->\n?/;
 const GTM_BODY = /[ \t]*<!-- Google Tag Manager \(noscript\) -->[\s\S]*?<!-- End Google Tag Manager \(noscript\) -->\n?/;
@@ -42,7 +46,13 @@ function appHtml() {
 export default mergeConfig(base, {
   plugins: [appHtml()],
   // the website imports an empty src/app/appShell.js; the app gets the real tab bar layout
-  resolve: { alias: [{ find: /^\.\.\/app\/appShell$/, replacement: appShell }] },
+  resolve: {
+    alias: [
+      { find: /^\.\.\/app\/appShell$/, replacement: appShell },
+      { find: /^@auth0\/auth0-react$/, replacement: auth0Native },
+      { find: /^@fined\/auth0-react-original$/, replacement: auth0Original },
+    ],
+  },
   define: {
     'import.meta.env.VITE_NATIVE_APP': JSON.stringify('true'),
     // identifies this web code for live updates (src/app/liveUpdate.js); set by scripts/build-app-update.mjs
