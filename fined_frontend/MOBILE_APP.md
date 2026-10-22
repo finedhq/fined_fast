@@ -43,6 +43,7 @@ This builds the site and fails if anything app-only leaked in, or if GTM / Googl
 2. **Java 21** — Android Studio's bundled Java 25 is too new for this Gradle. Unpack Temurin 21 into `~/.jdks/` (or set `JAVA21_HOME`). `scripts/android-build.mjs` finds it.
 3. If Gradle can't download itself (it timed out on GitHub on the owner's PC), fetch `gradle-8.14.3-all.zip` with curl into `~/.gradle/wrapper/dists/gradle-8.14.3-all/<hash>/` and re-run.
 4. Phone: Developer options → USB debugging; accept "Allow USB debugging".
+5. **`fined_frontend/.env`** (not in git; ask the owner for it). Even the fake-login test build needs `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID` to be set: without them the app shows a **blank white screen** (`Auth0ProviderWithNavigate` renders nothing). Placeholder values are enough for `npm run app:test`.
 
 **Build**
 - `npm run app:test` — app build with a **fake signed-in admin** (`app-test/fakeAuth0.js`), API at `http://localhost:8765` (`.env.apptest`), then sync and debug APK.
@@ -56,6 +57,24 @@ This builds the site and fails if anything app-only leaked in, or if GTM / Googl
 - **Never point a test build at production.**
 
 **Debugging:** debug builds allow Chrome DevTools on the WebView (`chrome://inspect`).
+
+## Phase 3 phone test checklist
+
+Already checked in a phone-sized desktop browser (2026-10-22, app test build, stand-in API): tab bar hides when the keyboard class is set; offline banner and "Back online" appear and clear; one buzz per quiz answer, FinStars pulse and confetti burst; certificate PNG and PDF saves go to the share sheet instead of a browser download; Profile, Feedback, Contact, Courses and Articles open inside the app shell. So on the phone, mainly confirm the **Android side** works.
+
+Use `npm run app:test`, install, `adb reverse tcp:8765 tcp:8765`, backend running on the practice database. Keep `chrome://inspect` open to catch errors.
+
+| # | Test | Steps | Pass if |
+|---|---|---|---|
+| 1 | Keyboard | Profile → Send feedback; tap Name, then a field low on the page (the last question). Repeat on Profile → Contact us. | Tab bar disappears while typing; the field you tapped stays visible above the keyboard; tab bar comes back when the keyboard closes; nothing jumps behind the white top bar. |
+| 2 | Share sheet (article) | Open any article → Share → **Open Device Share Menu**. | Android share sheet opens with the article title and link; WhatsApp gets text + link. Cancelling shows no error toast. |
+| 3 | Share sheet (certificate) | Course page or Profile → certificate → Share row → **More**. Needs a completed course on the practice database. | Share sheet offers the certificate **image** plus the text and verify link. (The LinkedIn and WhatsApp chips open the in-app browser instead.) |
+| 4 | Certificate save | Certificate → **Download PDF**, then **Download image**. | Share sheet opens with the file ("Save to Files", Drive, WhatsApp…); the saved PDF opens and shows the certificate. |
+| 5 | Haptics | Open a module; answer a quiz right, then another wrong; finish a module. | Short success buzz for right, firmer tap for wrong, light tap when FinStars tick up (not a double buzz), one celebration buzz at the confetti. Phone's "touch vibration" must be on. |
+| 6 | Offline banner | On Home, turn on airplane mode; open a module; turn it off. | Dark "You're offline…" strip under the top bar on every screen, including the module; green "Back online" for about 2 seconds after reconnecting. |
+| 7 | Module scrolling | Scroll a long module (e.g. Module 5) quickly, on the same OPPO. | Visibly smoother than the website in Chrome on the same phone; no figure jumping. For numbers: DevTools → Performance, record a scroll, compare dropped frames with the ~2.5% measured before. |
+
+Note any failures with the screen, the phone model and Android version, and a screenshot.
 
 ## Test-only pieces to remove before any real release
 
