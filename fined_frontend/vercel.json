@@ -58,6 +58,8 @@
     { "source": "/tags/deep-dives/", "destination": "/tags/deep-dives.html" },
     { "source": "/tags/economy", "destination": "/tags/economy.html" },
     { "source": "/tags/economy/", "destination": "/tags/economy.html" },
+    { "source": "/tags/blogs", "destination": "/tags/blogs.html" },
+    { "source": "/tags/blogs/", "destination": "/tags/blogs.html" },
     {
       "source": "/sitemap.xml",
       "destination": "https://api.myfined.com/sitemap.xml"

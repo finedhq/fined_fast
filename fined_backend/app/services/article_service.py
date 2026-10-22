@@ -337,7 +337,8 @@ class ArticleService:
             "https://myfined.com/tags/ipo",
             "https://myfined.com/tags/investing",
             "https://myfined.com/tags/deep-dives",
-            "https://myfined.com/tags/economy"
+            "https://myfined.com/tags/economy",
+            "https://myfined.com/tags/blogs"
         ]
 
         # The home page and article index change whenever a new article goes live

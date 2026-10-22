@@ -4,6 +4,11 @@ from app.integrations.supabase_client import supabase
 
 from datetime import datetime, timezone
 
+# Blogs are promotional/SEO posts. They only appear under their own tag
+# (/tags/blogs), never in the general feeds, related picks or prev/next links.
+BLOGS_TAG = "Blogs"
+NOT_BLOGS_FILTER = f"tag.is.null,tag.neq.{BLOGS_TAG}"
+
 class ArticleRepository:
 
     def _enrich_reviewer(self, article: dict, authors_map: dict = None) -> dict:
@@ -74,6 +79,8 @@ class ArticleRepository:
         query = supabase.from_("articles").select(self.ARTICLE_CARD_FIELDS).eq("status", "published")
         if tag:
             query = query.eq("tag", tag)
+        else:
+            query = query.or_(NOT_BLOGS_FILTER)
         res = query.order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True)\
             .range(offset, offset + limit - 1).execute()
@@ -271,12 +278,14 @@ class ArticleRepository:
     def get_adjacent(self, current_date: str) -> dict:
         prev_res = supabase.from_("articles").select("title, slug, created_at, published_at")\
             .eq("status", "published")\
+            .or_(NOT_BLOGS_FILTER)\
             .lt("published_at", current_date)\
             .order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True)\
             .limit(1).execute()
         next_res = supabase.from_("articles").select("title, slug, created_at, published_at")\
             .eq("status", "published")\
+            .or_(NOT_BLOGS_FILTER)\
             .gt("published_at", current_date)\
             .order("published_at", desc=False, nullsfirst=False)\
             .order("created_at", desc=False)\
@@ -305,6 +314,7 @@ class ArticleRepository:
         res = supabase.from_("articles")\
             .select("id, title, slug, description, image_url, tag, created_at, published_at, authors!articles_author_id_fkey(name, slug, image_url, bio, linkedin_url, description, email), reviewer:authors!articles_reviewer_id_fkey(name, slug, image_url, bio, linkedin_url, description, email)")\
             .eq("status", "published")\
+            .or_(NOT_BLOGS_FILTER)\
             .order("published_at", desc=True, nullsfirst=False)\
             .order("created_at", desc=True)\
             .limit(limit + len(exclude_slugs) + 2)\

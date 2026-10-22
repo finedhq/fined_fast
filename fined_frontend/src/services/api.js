@@ -105,6 +105,20 @@ export async function prefetchArticle(slug) {
   }
 }
 
+// Blogs are promotional/SEO posts. They only show under their own tag (/tags/blogs),
+// so untagged article lists (All feed, homepage, dashboard) leave them out.
+// The backend already does this; this also covers older backends and cached data.
+export const BLOGS_TAG = "Blogs";
+export const isBlogArticle = (article) => (article?.tag || "").toLowerCase() === BLOGS_TAG.toLowerCase();
+
+function withoutBlogs(data) {
+  if (Array.isArray(data)) return data.filter((a) => !isBlogArticle(a));
+  if (data && Array.isArray(data.articles)) {
+    return { ...data, articles: data.articles.filter((a) => !isBlogArticle(a)) };
+  }
+  return data;
+}
+
 export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {}) {
   const cacheKey = `articles-${limit}-${offset}-${tag || "all"}`;
   
@@ -121,10 +135,11 @@ export async function fetchArticles({ limit = 30, offset = 0, tag = null } = {})
   if (tag) params.append("tag", tag);
   const queryStr = params.toString() ? `?${params.toString()}` : "";
 
-  const data = await request(`/articles${queryStr}`, {
+  let data = await request(`/articles${queryStr}`, {
     method: "GET",
   });
-  
+  if (!tag) data = withoutBlogs(data);
+
   const now = Date.now();
   
   // Prime single article cache only if content is present

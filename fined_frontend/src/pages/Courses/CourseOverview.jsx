@@ -22,6 +22,7 @@ import {
   PiSparkleFill,
   PiStarFill,
   PiTrophyFill,
+  PiXBold,
 } from "react-icons/pi";
 import completedModuleLogo from '../../assets/completed_module_logo.webp';
 import currentModuleLogo from '../../assets/current_module_logo.webp';
@@ -53,6 +54,7 @@ export default function CourseOverview() {
   const [userData, setUserData] = useState({});
   const [showLockedAlert, setShowLockedAlert] = useState(false);
   const [showSignInAlert, setShowSignInAlert] = useState(false);
+  const [signInModule, setSignInModule] = useState(null);
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -65,6 +67,14 @@ export default function CourseOverview() {
   const [widgetPos, setWidgetPos] = useState({ x: 20, y: 80 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, offsetX: 0, offsetY: 0, hasMoved: false });
+  // Escape closes the log-in dialog
+  useEffect(() => {
+    if (!showSignInAlert) return;
+    const onKey = (e) => { if (e.key === 'Escape') setShowSignInAlert(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showSignInAlert]);
+
   useEffect(() => {
     let timeoutId;
     const handleResize = () => {
@@ -154,7 +164,12 @@ export default function CourseOverview() {
     }
   }, [email, courseSlug]);
 
-  const completedModulesCount = course.filter(module =>
+  // Logged-out visitors can play this course's Module 1 at /try without an account.
+  // Same rule the backend's /courses/sample-module uses to pick the course.
+  const hasFreeTry = courseTitle.toLowerCase().includes('stock market');
+
+  // logged-out visitors share one guest account, so its saved progress isn't theirs
+  const completedModulesCount = email === 'guest@fined.com' ? 0 : course.filter(module =>
     module.cards.length > 0 && module.cards.every(c => c.status === "completed")
   ).length;
 
@@ -260,9 +275,13 @@ export default function CourseOverview() {
                     </div>
 
                     {email === 'guest@fined.com' && (
-                      <div className="co-hero-alert">
-                        <PiLockSimpleBold aria-hidden="true" /> Sign in to start the course
-                      </div>
+                      <button
+                        type="button"
+                        className="co-hero-alert"
+                        onClick={() => { setSignInModule(null); setShowSignInAlert(true); }}
+                      >
+                        <PiLockSimpleBold aria-hidden="true" /> Log in to start the course
+                      </button>
                     )}
                   </div>
 
@@ -380,7 +399,11 @@ export default function CourseOverview() {
                       let statusStr = "locked";
                       let StatusImage = lockedModuleLogo;
 
-                      if (isGuest) {
+                      if (isGuest && isFirstModule) {
+                        // logged out: module 1 still shows where to start; opening it asks them to log in
+                        statusStr = "ongoing";
+                        StatusImage = currentModuleLogo;
+                      } else if (isGuest) {
                         statusStr = "locked";
                         StatusImage = lockedModuleLogo;
                       } else if (isCompleted) {
@@ -392,14 +415,24 @@ export default function CourseOverview() {
                       }
 
                       const cardToResume = module.cards?.find(c => c.status?.toLowerCase() !== "completed") || module.cards?.[0];
+                      const hasStarted = !isGuest && module.cards?.some(c => c.status?.toLowerCase() === "completed");
                       const x1 = getX(i);
 
                       const alignmentClass = isMobile
                         ? (i % 2 === 0 ? "pop-right" : "pop-left")
                         : (x1 < 50 ? "pop-right" : "pop-left");
 
+                      const badgeLabel = isGuest && isFirstModule
+                        ? (hasFreeTry ? 'Free · no sign-up' : 'Start here')
+                        : statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
+
                       const handleLaunchModule = () => {
+                        if (isGuest && isFirstModule && hasFreeTry) {
+                          navigate('/try');
+                          return;
+                        }
                         if (isGuest) {
+                          setSignInModule({ number: i + 1, title: module.moduleTitle });
                           setShowSignInAlert(true);
                           return;
                         }
@@ -421,15 +454,27 @@ export default function CourseOverview() {
                                 <div className="module-base-number">Module {i + 1}</div>
                                 <div className="module-base-title">{module.moduleTitle}</div>
                                 <div className={`module-base-badge badge-${statusStr}`}>
-                                  {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
+                                  {badgeLabel}
                                 </div>
                               </div>
+
+                              {statusStr === 'ongoing' && (
+                                <button
+                                  type="button"
+                                  className="module-start-bubble"
+                                  onClick={handleLaunchModule}
+                                  aria-label={`${hasStarted ? 'Continue' : 'Start'} module ${i + 1}`}
+                                >
+                                  {hasStarted ? 'Continue' : 'Start'}
+                                </button>
+                              )}
 
                               <div
                                 className={`module-circle ${statusStr}`}
                                 onClick={() => {
                                   if (isMobile) {
-                                    if (activeMobileModule === i) {
+                                    // the module you're up to opens in one tap; others show their card first
+                                    if (isGuest || statusStr === 'ongoing' || activeMobileModule === i) {
                                       handleLaunchModule();
                                     } else {
                                       setActiveMobileModule(i);
@@ -440,7 +485,7 @@ export default function CourseOverview() {
                                 }}
                                 role="button"
                                 tabIndex={0}
-                                title={isClickable ? "Click to open module" : "Module Locked"}
+                                title={isGuest ? "Log in to start" : isClickable ? "Click to open module" : "Module Locked"}
                               >
                                 <img src={StatusImage} alt={`${statusStr} module`} className="module-status-logo" />
                               </div>
@@ -452,7 +497,7 @@ export default function CourseOverview() {
                                   </div>
                                   <button
                                     className="hc-arrow-btn"
-                                    disabled={!isClickable}
+                                    disabled={!isClickable && !isGuest}
                                     onClick={handleLaunchModule}
                                   >
                                     <ArrowRightIcon />
@@ -463,7 +508,7 @@ export default function CourseOverview() {
                                   <div className="hc-module-num">Module {i + 1}</div>
                                   <div className="hc-title">{module.moduleTitle}</div>
                                   <div className={`hc-badge badge-${statusStr}`}>
-                                    {statusStr === 'ongoing' ? 'In Progress' : statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}
+                                    {badgeLabel}
                                   </div>
                                   <div className="hc-desc-container">
                                     <p className={`hc-desc ${isMobile && !expandedDescModules[i] ? 'line-clamp-4' : ''}`}>
@@ -700,25 +745,58 @@ export default function CourseOverview() {
       )}
 
       {showSignInAlert && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center transform scale-100 animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">👋</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h3>
-            <p className="text-gray-600 mb-6 text-sm">Please sign in or create an account to start learning and tracking your progress.</p>
-            <div className="flex gap-4">
+        <div
+          className="co-signin-backdrop"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSignInAlert(false); }}
+        >
+          <div
+            className="co-signin dh-tokens"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="co-signin-title"
+          >
+            <button
+              type="button"
+              className="co-signin-close"
+              onClick={() => setShowSignInAlert(false)}
+              aria-label="Close"
+            >
+              <PiXBold aria-hidden="true" />
+            </button>
+            <img src={currentModuleLogo} alt="" className="co-signin-art" />
+            {signInModule && (
+              <div className="co-signin-eyebrow">
+                Module {signInModule.number} · {signInModule.title}
+              </div>
+            )}
+            <h3 id="co-signin-title" className="co-signin-title">Log in to start the course</h3>
+            <p className="co-signin-text">
+              It's free. Log in or create an account and we'll save your progress, FinScore and certificate as you go.
+            </p>
+            <button
+              type="button"
+              className="dh-btn co-signin-btn"
+              autoFocus
+              onClick={() => loginWithRedirect({ appState: { returnTo: window.location.pathname } })}
+            >
+              Log in or sign up
+            </button>
+            {hasFreeTry && (
               <button
-                onClick={() => setShowSignInAlert(false)}
-                className="w-1/2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors cursor-pointer"
+                type="button"
+                className="co-signin-try"
+                onClick={() => navigate('/try')}
               >
-                Cancel
+                Not ready? Try Module 1 free, no sign-up <PiArrowRightBold aria-hidden="true" />
               </button>
-              <button
-                onClick={() => loginWithRedirect()}
-                className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
-              >
-                Sign In
-              </button>
-            </div>
+            )}
+            <button
+              type="button"
+              className="co-signin-later"
+              onClick={() => setShowSignInAlert(false)}
+            >
+              Not now
+            </button>
           </div>
         </div>
       )}
