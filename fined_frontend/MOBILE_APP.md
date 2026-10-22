@@ -11,7 +11,7 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
 | 0 | Capacitor + Android project, Lenis off in the app | Done, tested on a real phone |
 | 1 | Bundled fonts, no Google Tag Manager in the app, Sentry `platform` tag, FinEd icon + splash, release-signing setup | Done (Auth0 login deferred, see below) |
 | 2 | App navigation: top bar + 4-tab bar (Home, Courses, Articles, Profile), Profile settings list, welcome screen, Android back button, in-app browser for outside links, screen transitions, App Links | Done, tested on a real phone |
-| 3 | Native feel: white system bars + light-only theme, no browser behaviours, keyboard handling, offline banner, loading skeleton, native share + certificate save, haptics, smoother module scrolling | **Built; only partly tested on a phone** (status bar confirmed white). Logic checked in a phone-sized browser. Still to test on a phone: see "Phase 3 phone test checklist" |
+| 3 | Native feel: white system bars + light-only theme, no browser behaviours, keyboard handling, offline banner, loading skeleton, native share + certificate save, haptics, smoother module scrolling | **Done, tested on a real phone** (OPPO CPH2577, Android 15, 2026-10-22): all 7 checks in "Phase 3 phone test checklist" passed. Fixed during testing: share links and certificate QR codes said localhost (now myfined.com), certificate PDF went from ~29 s to ~12 s with a spinner while it works |
 | 4 | Live updates (new modules without a store release), self-hosted | **Built, not yet tried on a phone.** Unit-tested (`npm test`) and the publish step tested locally. Goes live with the first Vercel production deploy after merge |
 | 5 | Push notifications (Firebase): everything in the in-app bell also goes to the phone | **Built, switched off** until the owner creates the Firebase project (see "Owner setup"). Backend tested with fakes |
 | 5.5 | Real Auth0 login in the app (browser tab that returns to the app) | **Built, not yet tried on a phone.** Needs the Auth0 dashboard settings in "Owner setup". Checked in a browser: Log in opens Auth0 with the app's return address |
@@ -67,6 +67,8 @@ This builds the site and fails if anything app-only leaked in (now also the in-a
 **Automated checks** (no phone needed): `npm test` (live-update rules), `npm run check:website`, and in `fined_backend`: `pytest tests/test_mobile_app.py` (push, tokens, account deletion; database, Firebase and Auth0 are faked).
 
 ## Phase 3 phone test checklist
+
+**All 7 passed on the OPPO CPH2577 on 2026-10-22.** Kept as a checklist for future releases.
 
 Already checked in a phone-sized desktop browser (2026-10-22, app test build, stand-in API): tab bar hides when the keyboard class is set; offline banner and "Back online" appear and clear; one buzz per quiz answer, FinStars pulse and confetti burst; certificate PNG and PDF saves go to the share sheet instead of a browser download; Profile, Feedback, Contact, Courses and Articles open inside the app shell. So on the phone, mainly confirm the **Android side** works.
 
