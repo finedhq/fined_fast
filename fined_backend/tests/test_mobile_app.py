@@ -5,6 +5,7 @@ import json
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from postgrest.exceptions import APIError
 
 from app.dependencies import AuthUser, get_current_user
 from app.main import app
@@ -174,6 +175,40 @@ def test_delete_user_data_clears_every_table_users_last(monkeypatch):
     deleted = [name for action, name, column, value in fake.log if action == "delete"]
     assert deleted == [*USER_TABLES, "users"]
     assert all(column == "email" and value == "student@example.com" for _, _, column, value in fake.log)
+
+
+class FailingSupabase(FakeSupabase):
+    """Like FakeSupabase, but deleting from one table raises the given PostgREST error code."""
+
+    def __init__(self, table, code):
+        super().__init__()
+        self.table, self.code = table, code
+
+    def from_(self, name):
+        table = super().from_(name)
+        if name == self.table:
+            def execute():
+                raise APIError({"message": "boom", "code": self.code, "hint": None, "details": None})
+            table.execute = execute
+        return table
+
+
+def test_delete_user_data_skips_a_table_the_database_does_not_have(monkeypatch):
+    fake = FailingSupabase("reward_notifications", "PGRST205")  # "Could not find the table"
+    monkeypatch.setattr(account_repo_module, "supabase", fake)
+    cleared = account_repo_module.account_repo.delete_user_data("student@example.com")
+    deleted = [name for action, name, *_ in fake.log if action == "delete"]
+    assert deleted == [*USER_TABLES, "users"]  # every table was tried, users still last
+    assert "reward_notifications" not in cleared and cleared[-1] == "users"
+
+
+def test_delete_user_data_stops_on_any_other_database_error(monkeypatch):
+    fake = FailingSupabase("userCourses", "42501")  # e.g. permission denied
+    monkeypatch.setattr(account_repo_module, "supabase", fake)
+    with pytest.raises(APIError):
+        account_repo_module.account_repo.delete_user_data("student@example.com")
+    deleted = [name for action, name, *_ in fake.log if action == "delete"]
+    assert "users" not in deleted  # the account itself is kept, so the user can try again
 
 
 @pytest.fixture
