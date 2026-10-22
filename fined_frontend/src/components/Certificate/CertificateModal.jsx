@@ -11,6 +11,7 @@ import {
   PiLinkedinLogoBold,
   PiPencilSimpleBold,
   PiShareNetworkBold,
+  PiSpinnerGapBold,
   PiWhatsappLogoBold,
   PiXBold,
 } from 'react-icons/pi';
@@ -30,6 +31,9 @@ import {
 import './CertificateModal.css';
 
 const NAME_MAX = 60;
+
+// Let the "Preparing…" state reach the screen before the heavy capture work starts
+const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
 function errorText(err, fallback) {
   return err?.response?.data?.detail || fallback;
@@ -131,6 +135,7 @@ export default function CertificateModal({ courseSlug, courseTitle, onClose }) {
     if (!sheetRef.current || busy) return;
     setBusy(kind);
     try {
+      await nextPaint();
       await fn();
     } catch (err) {
       if (err?.name !== 'AbortError') toast.error('Something went wrong. Please try again.');
@@ -231,11 +236,11 @@ export default function CertificateModal({ courseSlug, courseTitle, onClose }) {
             ) : (
               <>
                 <div className="cm-actions">
-                  <button type="button" className="cm-btn cm-btn--primary" onClick={() => run('pdf', () => downloadCertificatePdf(sheetRef.current, exportData))} disabled={!!busy}>
-                    <PiDownloadSimpleBold aria-hidden="true" /> {busy === 'pdf' ? 'Preparing PDF…' : 'Download PDF'}
+                  <button type="button" className="cm-btn cm-btn--primary" onClick={() => run('pdf', () => downloadCertificatePdf(sheetRef.current, exportData))} disabled={!!busy} aria-busy={busy === 'pdf'}>
+                    {busy === 'pdf' ? <PiSpinnerGapBold className="cm-spin" aria-hidden="true" /> : <PiDownloadSimpleBold aria-hidden="true" />} {busy === 'pdf' ? 'Preparing PDF…' : 'Download PDF'}
                   </button>
-                  <button type="button" className="cm-btn" onClick={() => run('png', () => downloadCertificatePng(sheetRef.current, exportData))} disabled={!!busy}>
-                    <PiImageBold aria-hidden="true" /> {busy === 'png' ? 'Preparing…' : 'Download image'}
+                  <button type="button" className="cm-btn" onClick={() => run('png', () => downloadCertificatePng(sheetRef.current, exportData))} disabled={!!busy} aria-busy={busy === 'png'}>
+                    {busy === 'png' ? <PiSpinnerGapBold className="cm-spin" aria-hidden="true" /> : <PiImageBold aria-hidden="true" />} {busy === 'png' ? 'Preparing…' : 'Download image'}
                   </button>
                   <a className="cm-btn cm-btn--linkedin" href={linkedInAddUrl(cert)} target="_blank" rel="noopener noreferrer">
                     <PiLinkedinLogoBold aria-hidden="true" /> Add to LinkedIn profile

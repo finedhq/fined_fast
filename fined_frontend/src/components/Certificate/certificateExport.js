@@ -3,9 +3,18 @@
 // invisible text layer so the name/course/ID can be searched and copied, a
 // clickable verify link and document metadata.
 import { SHEET_WIDTH } from './certificateSheet';
+import { publicOrigin } from '../../lib/publicUrl';
 
 const PRINT_SCALE = 2.5;                // ~240 dpi on A4: crisp in print, quick to make
 const SHARE_SCALE = 2;                  // 2246 x 1588 PNG for social posts
+
+// The mobile app saves files through Android's share sheet. Waiting for it keeps the button on
+// "Preparing…" until the sheet is up. The website build drops this branch and downloads as before.
+const IN_APP = import.meta.env.VITE_NATIVE_APP === 'true';
+async function saveInApp(blob, name) {
+  const { saveFile } = await import('../../app/shareAndSave');
+  await saveFile(blob, name);
+}
 
 async function capture(element, scale) {
   if (document.fonts?.ready) await document.fonts.ready;
@@ -18,6 +27,11 @@ async function capture(element, scale) {
     scrollX: 0,
     scrollY: 0,
     logging: false,
+    // html2canvas copies the whole page before drawing. Skip everything in <body> that isn't
+    // the certificate or one of its parents: same picture, far less work (on a mid-range phone
+    // the Profile page alone took ~15 s to copy). <head> is kept, so all styles still apply.
+    ignoreElements: (node) =>
+      node !== element && !node.contains(element) && !element.contains(node) && !!node.closest('body'),
   });
 }
 
@@ -56,7 +70,9 @@ export async function buildCertificatePdf(element, cert) {
 
 export async function downloadCertificatePdf(element, cert) {
   const pdf = await buildCertificatePdf(element, cert);
-  pdf.save(certificateFileName(cert.course_title, 'pdf'));
+  const name = certificateFileName(cert.course_title, 'pdf');
+  if (IN_APP) return saveInApp(pdf.output('blob'), name);
+  pdf.save(name);
 }
 
 export async function certificatePngBlob(element) {
@@ -66,6 +82,7 @@ export async function certificatePngBlob(element) {
 
 export async function downloadCertificatePng(element, cert) {
   const blob = await certificatePngBlob(element);
+  if (IN_APP) return saveInApp(blob, certificateFileName(cert.course_title, 'png'));
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -77,7 +94,7 @@ export async function downloadCertificatePng(element, cert) {
 }
 
 export function verifyUrlFor(code) {
-  return `${window.location.origin}/certificate/${code}`;
+  return `${publicOrigin()}/certificate/${code}`;
 }
 
 // FinEd's LinkedIn company page, so certificates added to profiles show its logo

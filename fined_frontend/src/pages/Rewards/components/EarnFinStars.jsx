@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { publicOrigin } from '../../../lib/publicUrl';
 import {
   PiArrowRightBold,
   PiBookOpenTextFill,
@@ -17,7 +18,7 @@ const EarnFinStars = ({ userEmail }) => {
   const [copiedInvite, setCopiedInvite] = useState(false);
 
   const handleCopyInvite = async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://myfined.com';
+    const origin = typeof window !== 'undefined' ? publicOrigin() : 'https://myfined.com';
     const inviteLink = `${origin}/?ref=${encodeURIComponent(userEmail || 'fined-learner')}`;
     const logoUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
       ? `${window.location.origin}/logo.ico` 

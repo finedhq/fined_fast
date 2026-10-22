@@ -8,6 +8,7 @@ import EditProfileModal from "../components/EditProfileModal";
 import MetricTooltip from "../components/MetricTooltip";
 import ProfileCertificates from "../components/Certificate/ProfileCertificates";
 import { getUserLevel } from "../utils/level";
+import { publicOrigin } from "../lib/publicUrl";
 
 const COLOR_LEVELS = {
   0: "bg-slate-100",
@@ -247,7 +248,7 @@ export default function ProfilePage() {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/profile?u=${profile?.username || username || 'user'}`;
+    const shareUrl = `${publicOrigin()}/profile?u=${profile?.username || username || 'user'}`;
     const shareData = {
       title: `${displayName} on FinEd`,
       text: `Check out ${displayName}'s financial learning journey and FinScore on FinEd!`,

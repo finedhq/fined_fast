@@ -18,6 +18,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import toast from "react-hot-toast";
 import { claimEarnStars } from "../services/api";
 import { trackArticleShare } from "../utils/analytics";
+import { publicHref } from "../lib/publicUrl";
 
 /**
  * ShareModal
@@ -30,7 +31,7 @@ export default function ShareModal({ isOpen, onClose, article, description }) {
 
   if (!isOpen || !article) return null;
 
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const currentUrl = typeof window !== "undefined" ? publicHref() : "";
   const articleTitle = article.title || "FinEd Article";
   const articleExcerpt = description || article.description || "Read this insightful financial guide on FinEd.";
   const articleImage = article.image_url || "/assets/images/fined_card_banner.png";

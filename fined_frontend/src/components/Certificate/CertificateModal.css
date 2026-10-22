@@ -172,6 +172,9 @@
 .cm-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 0 #171321; }
 .cm-btn:disabled { opacity: 0.6; cursor: progress; }
 .cm-btn svg { font-size: 18px; }
+/* Busy icon: a transform animation keeps turning even while the capture work blocks the page */
+.cm-spin { animation: cm-spin 0.9s linear infinite; }
+@keyframes cm-spin { to { transform: rotate(360deg); } }
 
 .cm-btn--primary { background: #F5A623; }
 .cm-btn--primary:hover:not(:disabled) { background: #E09518; }
