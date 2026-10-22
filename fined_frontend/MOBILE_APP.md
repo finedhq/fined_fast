@@ -14,7 +14,7 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
 | 3 | Native feel: white system bars + light-only theme, no browser behaviours, keyboard handling, offline banner, loading skeleton, native share + certificate save, haptics, smoother module scrolling | **Done, tested on a real phone** (OPPO CPH2577, Android 15, 2026-10-22): all 7 checks in "Phase 3 phone test checklist" passed. Fixed during testing: share links and certificate QR codes said localhost (now myfined.com), certificate PDF went from ~29 s to ~12 s with a spinner while it works |
 | 4 | Live updates (new modules without a store release), self-hosted | **Built, not yet tried on a phone.** Unit-tested (`npm test`) and the publish step tested locally. Goes live with the first Vercel production deploy after merge |
 | 5 | Push notifications (Firebase): everything in the in-app bell also goes to the phone | **Built, switched off** until the owner creates the Firebase project (see "Owner setup"). Backend tested with fakes |
-| 5.5 | Real Auth0 login in the app (browser tab that returns to the app) | **Built, not yet tried on a phone.** Needs the Auth0 dashboard settings in "Owner setup". Checked in a browser: Log in opens Auth0 with the app's return address |
+| 5.5 | Real Auth0 login in the app (browser tab that returns to the app) | **Sign-in, sign-up and sign-out tested on a real phone** (OPPO CPH2577, 2026-10-22, Google account, practice backend): lands on Home, stays signed in after reopening, Log out returns to the welcome screen. Account deletion still needs the Machine-to-Machine app in "Owner setup" step 2 |
 | 6 | Play Store: in-app + web account deletion, release-only safety, store listing drafts | **Built** (deletion page, API, release guard, debug-only cleartext, no backups). Store listing, data safety and release steps: `PLAY_STORE.md`. Needs the owner's accounts and decisions |
 | 7 | Offline modules, iOS, extras | Later (owner's decision) |
 
@@ -29,6 +29,8 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
   - `ContactPage.jsx` (unused import removed)
 - Sharing, certificate downloads and haptics work **without changing website code**: `shareAndSave.js` gives the app `navigator.share` / `window.saveAs` backed by Android's share sheet, and `haptics.js` reacts to classes the module pages already set.
 - **Login (5.5):** the app build points `@auth0/auth0-react` at `src/app/auth0Native.jsx`, which wraps the real library. Sign-in/out open in a Chrome Custom Tab; Auth0 returns to `in.fined.app://<auth0 domain>/capacitor/in.fined.app/callback` (intent filter in `AndroidManifest.xml`). Website components are untouched.
+  - Auth0 only accepts the token request from a web page whose address is on its *Allowed Origins (CORS)* list, and that list can only be edited with *Allow Cross-Origin Authentication* switched on for the whole tenant. Instead, `auth0Native.jsx` sends just that one request (`/oauth/token`: sign-in and refresh) through Android with `CapacitorHttp`, where the browser rule doesn't apply. No tenant setting changes.
+  - "Create free account" opens the same Auth0 page as "Log in", like the website's Sign up button: FinEd signs in with Google, and a first sign-in creates the account. Asking Auth0 for its separate sign-up screen (`screen_hint: 'signup'`) fails with "connection not found for the client".
 - **Live updates (4):** `src/app/liveUpdate.js` + `scripts/build-app-update.mjs`, details below.
 - **Push (5):** `src/app/push.js` (app), `push_service.py` / `push_repo.py` + `migrations/004_push_tokens.sql` (backend). In-app notifications (`notification_service.send`) also go to phones.
 - **Account deletion (6), the one website addition:** a new page `/delete-account` (`src/pages/Account/DeleteAccountPage.jsx`) on the site and in the app (Profile → Delete account), `deleteMyAccount()` in `services/api.js`, and `DELETE /api/v1/users/me` on the backend. Google needs both the in-app option and a web address.
@@ -91,7 +93,7 @@ Note any failures with the screen, the phone model and Android version, and a sc
 | # | Test | Steps | Pass if |
 |---|---|---|---|
 | 1 | Real login | `REAL_LOGIN=1` test build (above). Welcome → Log in; sign in with Google; then Profile → Log out. | A browser sheet opens over the app, Google sign-in works, it closes by itself and you land on Home signed in. Log out returns to the welcome screen. Close and reopen the app: still signed in. |
-| 2 | Sign-up | Welcome → Create free account. | Auth0 opens on the sign-up form; afterwards you land on Home (or onboarding). |
+| 2 | Sign-up | Welcome → Create free account. | Auth0 opens on the same page as Log in (Continue with Google); a new Google account lands on Home (or onboarding). |
 | 3 | Push | Build with `android/app/google-services.json` present. Home shows "Keep your streak going" → Turn on → Allow. On the practice database, trigger a streak message (or send a test message from Firebase console → Messaging to the phone's token). | Notification shows with the star icon, purple tint. Tapping it opens Notifications. With the app open, it shows as a toast instead. |
 | 4 | Account deletion | Profile → Delete account → type DELETE → delete. Use a throwaway account on the **practice** setup. | "Your account has been deleted", then the welcome screen. That account's rows are gone from practice Supabase and the user is gone from Auth0. |
 | 5 | Live update | Needs a release build installed (live updates are off in test builds). Deploy a visible text change to production. Open the app, wait ~10 s, close it fully (swipe away), reopen. | The change appears on the second open. If not: `chrome://inspect` → console, and check `myfined.com/app-update/manifest.json` shows the new build. |
@@ -113,7 +115,8 @@ Note any failures with the screen, the phone model and Android version, and a sc
 **1. Auth0, so the app can sign in** (Auth0 dashboard → Applications → the FinEd website application → Settings). Replace `<AUTH0_DOMAIN>` with the `VITE_AUTH0_DOMAIN` value from `.env`:
 - *Allowed Callback URLs*: add `in.fined.app://<AUTH0_DOMAIN>/capacitor/in.fined.app/callback`
 - *Allowed Logout URLs*: add the same address
-- *Allowed Web Origins* and *Allowed Origins (CORS)*: add `https://localhost` (the app's own origin)
+- *Allowed Web Origins*: add `https://localhost` (the app's own origin)
+- Leave *Cross-Origin Authentication* and its *Allowed Origins (CORS)* box alone: the app doesn't need them (see "Login (5.5)" above)
 - Advanced → Grant Types: *Refresh Token* ticked. Refresh Token Rotation: on. (The website already uses refresh tokens, so these are probably set already.)
 
 **2. Auth0, so account deletion can remove the login** (Applications → Create Application → *Machine to Machine* → authorise **Auth0 Management API** with only the **`delete:users`** permission). Put its Client ID and Client Secret in the backend's environment as `AUTH0_MGMT_CLIENT_ID` / `AUTH0_MGMT_CLIENT_SECRET`. If `AUTH0_DOMAIN` is a custom domain (not `*.auth0.com`), also set `AUTH0_MGMT_DOMAIN` to the tenant's `*.auth0.com` domain. Until this is set, account deletion politely refuses and asks people to email support.

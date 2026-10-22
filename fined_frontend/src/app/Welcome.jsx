@@ -23,11 +23,11 @@ export default function Welcome() {
       </div>
 
       <div className="app-welcome-actions">
-        <button
-          type="button"
-          className="app-welcome-btn app-welcome-primary"
-          onClick={() => loginWithRedirect({ ...returnHome, authorizationParams: { screen_hint: 'signup' } })}
-        >
+        {/* Same Auth0 page as Log in, like the website's Sign up button: FinEd signs in with
+            Google, and a first sign-in creates the account. (Asking Auth0 for its separate
+            sign-up screen fails with "connection not found", since there's no email/password
+            sign-up to show.) */}
+        <button type="button" className="app-welcome-btn app-welcome-primary" onClick={() => loginWithRedirect(returnHome)}>
           Create free account
         </button>
         <button type="button" className="app-welcome-btn app-welcome-secondary" onClick={() => loginWithRedirect(returnHome)}>
