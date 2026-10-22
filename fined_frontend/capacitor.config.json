@@ -9,6 +9,15 @@
     "SplashScreen": {
       "launchAutoHide": false,
       "backgroundColor": "#ffffff"
+    },
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "statsUrl": "",
+      "autoDeleteFailed": false,
+      "autoDeletePrevious": true,
+      "resetWhenUpdate": true,
+      "keepUrlPathAfterReload": true,
+      "appReadyTimeout": 15000
     }
   }
 }

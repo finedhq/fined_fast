@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prerender-static-pages.mjs",
+    "build": "vite build && node scripts/prerender-static-pages.mjs && node scripts/build-app-update.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "app:test": "vite build --config vite.config.apptest.js --mode apptest && cap sync android && node scripts/android-build.mjs debug",
     "app:android:debug": "node scripts/android-build.mjs debug",
     "app:android:release": "node scripts/android-build.mjs release",
-    "check:website": "node scripts/check-website-build.mjs"
+    "check:website": "node scripts/check-website-build.mjs",
+    "app:native-bump": "node scripts/app-native-bump.mjs"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.19.0",
@@ -24,8 +25,10 @@
     "@capacitor/haptics": "8.0.2",
     "@capacitor/keyboard": "8.0.6",
     "@capacitor/network": "8.0.1",
+    "@capacitor/push-notifications": "8.1.3",
     "@capacitor/share": "8.0.3",
     "@capacitor/splash-screen": "8.0.2",
+    "@capgo/capacitor-updater": "8.53.1",
     "@fontsource/manrope": "5.3.0",
     "@fontsource/nunito": "5.3.0",
     "@fontsource/plus-jakarta-sans": "5.3.0",
@@ -56,6 +59,7 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "fflate": "0.8.3",
     "globals": "^17.6.0",
     "vite": "^8.0.12",
     "vitest": "^5.0.2"

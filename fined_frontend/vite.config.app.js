@@ -5,6 +5,7 @@
 //  - src/app/appEntry.js runs at start-up (splash screen, fonts)
 //  - import.meta.env.VITE_NATIVE_APP is 'true', for app-only code paths
 //  - src/app/appShell.js (empty on the website) becomes the tab bar + top bar layout
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vite';
 import base from './vite.config.js';
@@ -42,5 +43,9 @@ export default mergeConfig(base, {
   plugins: [appHtml()],
   // the website imports an empty src/app/appShell.js; the app gets the real tab bar layout
   resolve: { alias: [{ find: /^\.\.\/app\/appShell$/, replacement: appShell }] },
-  define: { 'import.meta.env.VITE_NATIVE_APP': JSON.stringify('true') },
+  define: {
+    'import.meta.env.VITE_NATIVE_APP': JSON.stringify('true'),
+    // identifies this web code for live updates (src/app/liveUpdate.js); set by scripts/build-app-update.mjs
+    'import.meta.env.VITE_APP_BUILD': JSON.stringify(process.env.FINED_APP_BUILD || `builtin-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}`),
+  },
 });
