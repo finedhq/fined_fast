@@ -23,6 +23,7 @@ import {
   PiShieldCheck,
   PiSignOut,
   PiStarFill,
+  PiTrash,
   PiTrophy,
   PiUser,
   PiUserFill,
@@ -142,6 +143,7 @@ function ProfileMenu() {
     [
       { icon: PiShieldCheck, label: 'Privacy policy', to: '/privacy-policy' },
       { icon: PiFileText, label: 'Terms of service', to: '/termsofservice' },
+      { icon: PiTrash, label: 'Delete account', to: '/delete-account' },
     ],
   ];
 

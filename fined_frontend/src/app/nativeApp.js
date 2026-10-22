@@ -11,7 +11,7 @@ export const APP_TABS = [
     key: 'profile',
     to: '/profile',
     label: 'Profile',
-    match: ['/profile', '/rewards', '/leaderboard', '/notifications', '/feedback', '/contact', '/help', '/privacy-policy', '/termsofservice'],
+    match: ['/profile', '/rewards', '/leaderboard', '/notifications', '/feedback', '/contact', '/help', '/privacy-policy', '/termsofservice', '/delete-account'],
   },
 ];
 
@@ -41,6 +41,7 @@ const TITLES = [
   ['/help', 'Help'],
   ['/privacy-policy', 'Privacy policy'],
   ['/termsofservice', 'Terms of service'],
+  ['/delete-account', 'Delete account'],
 ];
 
 export function titleForPath(pathname) {

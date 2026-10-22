@@ -249,6 +249,11 @@ export function sendFeedback(form) {
   });
 }
 
+// Permanently deletes the signed-in user's account (data + login). See /delete-account.
+export function deleteMyAccount() {
+  return request("/v1/users/me", { method: "DELETE" });
+}
+
 export function getCourses() {
   return request("/courses/getall", {
     method: "GET",

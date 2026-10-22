@@ -46,6 +46,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
+const DeleteAccountPage = lazy(() => import("./pages/Account/DeleteAccountPage"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -89,6 +90,7 @@ function App() {
                   <Route path="help" element={<StaticPage />} />
                   <Route path="privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="termsofservice" element={<TermsOfService />} />
+                  <Route path="delete-account" element={<DeleteAccountPage />} />
 
                   <Route path="authors/:slug" element={<AuthorPage />} />
                   <Route path="authors/:slug/:articleSlug" element={<AuthorPage />} />

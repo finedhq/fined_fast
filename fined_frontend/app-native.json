@@ -1,7 +1,7 @@
 {
   "_about": "Live-update safety record (scripts/app-native.mjs). minVersionCode: oldest Play Store build that can run the current web code. fingerprint: native pieces it was built against. Update with `npm run app:native-bump` after a Play Store release that changed plugins, capacitor.config.json or android/.",
   "minVersionCode": 1,
-  "fingerprint": "5e48f21ec395cbdbb1974ad3b82bcbc894ab7be8a6401d05b9781a84f7cc6f47",
+  "fingerprint": "9062464fb6cc44bfca95fa417b6f89ed8227fbdb4c8e049fcdbab1fb078e8b1f",
   "plugins": {
     "@capacitor/android": "8.5.3",
     "@capacitor/app": "8.1.2",

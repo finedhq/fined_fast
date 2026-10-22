@@ -3,7 +3,7 @@
 //   node scripts/android-build.mjs release   -> android/app/build/outputs/bundle/release/app-release.aab
 // Java 21 is taken from JAVA21_HOME, or the newest jdk-21* folder in ~/.jdks.
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +33,24 @@ const androidDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'andro
 if (kind === 'release' && !existsSync(join(androidDir, 'keystore.properties'))) {
   console.error('android/keystore.properties is missing, so the release build would be unsigned. See keystore.properties.example.');
   process.exit(1);
+}
+
+// A Play Store build must never contain the phone-test pieces (fake login, local test backend).
+if (kind === 'release') {
+  const web = join(androidDir, 'app', 'src', 'main', 'assets', 'public');
+  const files = existsSync(join(web, 'assets')) ? readdirSync(join(web, 'assets')).filter((f) => f.endsWith('.js')) : [];
+  const code = files.map((f) => readFileSync(join(web, 'assets', f), 'utf8')).join('\n');
+  const problems = [
+    [!files.length, 'no web build synced into android/ (run `npm run app:release`, not this script directly)'],
+    [/fakeAuth0|Local Admin/.test(code), 'it contains the FAKE login from the phone-test build'],
+    [/localhost:8765|http:\/\/localhost:8000/.test(code), 'it points at a local test backend, not the real API'],
+    [!/capacitor\/\$\{|\/capacitor\/in\.fined\.app\/callback/.test(code), 'the real in-app Auth0 login is missing'],
+  ].filter(([bad]) => bad);
+  if (problems.length) {
+    console.error('Refusing to build a Play Store release:');
+    for (const [, why] of problems) console.error(`  - ${why}`);
+    process.exit(1);
+  }
 }
 
 // Full path to the wrapper: Windows may be set not to run programs from the current folder by name.

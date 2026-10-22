@@ -13,7 +13,9 @@
     "app:android:debug": "node scripts/android-build.mjs debug",
     "app:android:release": "node scripts/android-build.mjs release",
     "check:website": "node scripts/check-website-build.mjs",
-    "app:native-bump": "node scripts/app-native-bump.mjs"
+    "app:native-bump": "node scripts/app-native-bump.mjs",
+    "app:release": "vite build --config vite.config.app.js && cap sync android && node scripts/android-build.mjs release",
+    "app:version": "node scripts/app-version.mjs"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.19.0",

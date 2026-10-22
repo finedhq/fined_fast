@@ -11,12 +11,12 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
 | 0 | Capacitor + Android project, Lenis off in the app | Done, tested on a real phone |
 | 1 | Bundled fonts, no Google Tag Manager in the app, Sentry `platform` tag, FinEd icon + splash, release-signing setup | Done (Auth0 login deferred, see below) |
 | 2 | App navigation: top bar + 4-tab bar (Home, Courses, Articles, Profile), Profile settings list, welcome screen, Android back button, in-app browser for outside links, screen transitions, App Links | Done, tested on a real phone |
-| 3 | Native feel: white system bars + light-only theme, no browser behaviours, keyboard handling, offline banner, loading skeleton, native share + certificate save, haptics, smoother module scrolling | **Built; only partly tested on a phone** (status bar confirmed white). Still to test: keyboard on Feedback/Contact, share sheet, certificate save, haptics, offline banner (airplane mode), module scroll smoothness |
-| 4 | Live updates (new modules without a store release) | Not started |
-| 5 | Push notifications (Firebase) | Not started |
-| 5.5 | **Real Auth0 login in the app** | Deferred by the owner — must be done before real-data testing and Phase 6 |
-| 6 | Play Store launch | Not started |
-| 7 | Offline modules, iOS, extras | Later |
+| 3 | Native feel: white system bars + light-only theme, no browser behaviours, keyboard handling, offline banner, loading skeleton, native share + certificate save, haptics, smoother module scrolling | **Built; only partly tested on a phone** (status bar confirmed white). Logic checked in a phone-sized browser. Still to test on a phone: see "Phase 3 phone test checklist" |
+| 4 | Live updates (new modules without a store release), self-hosted | **Built, not yet tried on a phone.** Unit-tested (`npm test`) and the publish step tested locally. Goes live with the first Vercel production deploy after merge |
+| 5 | Push notifications (Firebase): everything in the in-app bell also goes to the phone | **Built, switched off** until the owner creates the Firebase project (see "Owner setup"). Backend tested with fakes |
+| 5.5 | Real Auth0 login in the app (browser tab that returns to the app) | **Built, not yet tried on a phone.** Needs the Auth0 dashboard settings in "Owner setup". Checked in a browser: Log in opens Auth0 with the app's return address |
+| 6 | Play Store: in-app + web account deletion, release-only safety, store listing drafts | **Built** (deletion page, API, release guard, debug-only cleartext, no backups). Store listing, data safety and release steps: `PLAY_STORE.md`. Needs the owner's accounts and decisions |
+| 7 | Offline modules, iOS, extras | Later (owner's decision) |
 
 ## How the app differs from the website (and stays out of it)
 
@@ -28,13 +28,17 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
   - six pages that now use `src/hooks/useSmoothScroll.js` (Lenis, skipped in the app; also fixes an animation loop that never stopped)
   - `ContactPage.jsx` (unused import removed)
 - Sharing, certificate downloads and haptics work **without changing website code**: `shareAndSave.js` gives the app `navigator.share` / `window.saveAs` backed by Android's share sheet, and `haptics.js` reacts to classes the module pages already set.
+- **Login (5.5):** the app build points `@auth0/auth0-react` at `src/app/auth0Native.jsx`, which wraps the real library. Sign-in/out open in a Chrome Custom Tab; Auth0 returns to `in.fined.app://<auth0 domain>/capacitor/in.fined.app/callback` (intent filter in `AndroidManifest.xml`). Website components are untouched.
+- **Live updates (4):** `src/app/liveUpdate.js` + `scripts/build-app-update.mjs`, details below.
+- **Push (5):** `src/app/push.js` (app), `push_service.py` / `push_repo.py` + `migrations/004_push_tokens.sql` (backend). In-app notifications (`notification_service.send`) also go to phones.
+- **Account deletion (6), the one website addition:** a new page `/delete-account` (`src/pages/Account/DeleteAccountPage.jsx`) on the site and in the app (Profile → Delete account), `deleteMyAccount()` in `services/api.js`, and `DELETE /api/v1/users/me` on the backend. Google needs both the in-app option and a web address.
 
 ## Website safety
 
 ```bash
 npm run check:website
 ```
-This builds the site and fails if anything app-only leaked in, or if GTM / Google Fonts / pinch-zoom went missing. Also open key pages in a browser (Home, Courses, Articles, About, Contact, Help). Note: `npm run app:test` overwrites `dist/`, so never inspect `dist/` after an app build and call it the website.
+This builds the site and fails if anything app-only leaked in (now also the in-app login, live updates and push), or if GTM / Google Fonts / pinch-zoom went missing. Also open key pages in a browser (Home, Courses, Articles, About, Contact, Help). Note: `npm run app:test` overwrites `dist/`, so never inspect `dist/` after an app build and call it the website.
 
 ## Building and testing on a phone
 
@@ -56,7 +60,11 @@ This builds the site and fails if anything app-only leaked in, or if GTM / Googl
 - Alternative: run the real backend locally on port 8765 with `ENVIRONMENT=development` against the **practice** Supabase. In development mode requests without a token are treated as admin, which matches the fake login.
 - **Never point a test build at production.**
 
+- `REAL_LOGIN=1 npx vite build --config vite.config.apptest.js --mode apptest && npx cap sync android && npm run app:android:debug`: test build with the **real Auth0 login** (needs the Auth0 settings in "Owner setup") against the local backend.
+
 **Debugging:** debug builds allow Chrome DevTools on the WebView (`chrome://inspect`).
+
+**Automated checks** (no phone needed): `npm test` (live-update rules), `npm run check:website`, and in `fined_backend`: `pytest tests/test_mobile_app.py` (push, tokens, account deletion; database, Firebase and Auth0 are faked).
 
 ## Phase 3 phone test checklist
 
@@ -76,23 +84,63 @@ Use `npm run app:test`, install, `adb reverse tcp:8765 tcp:8765`, backend runnin
 
 Note any failures with the screen, the phone model and Android version, and a screenshot.
 
-## Test-only pieces to remove before any real release
+## Phase 4–6 phone tests (after the owner setup below)
 
-- `vite.config.apptest.js`, `app-test/`, `.env.apptest`
-- `"server": { "cleartext": true }` in `capacitor.config.json`
-- `android:usesCleartextTraffic="true"` in `android/app/src/main/AndroidManifest.xml`
+| # | Test | Steps | Pass if |
+|---|---|---|---|
+| 1 | Real login | `REAL_LOGIN=1` test build (above). Welcome → Log in; sign in with Google; then Profile → Log out. | A browser sheet opens over the app, Google sign-in works, it closes by itself and you land on Home signed in. Log out returns to the welcome screen. Close and reopen the app: still signed in. |
+| 2 | Sign-up | Welcome → Create free account. | Auth0 opens on the sign-up form; afterwards you land on Home (or onboarding). |
+| 3 | Push | Build with `android/app/google-services.json` present. Home shows "Keep your streak going" → Turn on → Allow. On the practice database, trigger a streak message (or send a test message from Firebase console → Messaging to the phone's token). | Notification shows with the star icon, purple tint. Tapping it opens Notifications. With the app open, it shows as a toast instead. |
+| 4 | Account deletion | Profile → Delete account → type DELETE → delete. Use a throwaway account on the **practice** setup. | "Your account has been deleted", then the welcome screen. That account's rows are gone from practice Supabase and the user is gone from Auth0. |
+| 5 | Live update | Needs a release build installed (live updates are off in test builds). Deploy a visible text change to production. Open the app, wait ~10 s, close it fully (swipe away), reopen. | The change appears on the second open. If not: `chrome://inspect` → console, and check `myfined.com/app-update/manifest.json` shows the new build. |
 
-## Before the Play Store (Phase 6)
+## Live updates (Phase 4): how they work and the one rule to remember
 
-- **Auth0 in the app:**
-  - native login via `@capacitor/browser` and an `in.fined.app://` callback;
-  - add the callback / logout / origin URLs in the Auth0 dashboard (the owner does this).
-- **Upload key:** the owner creates it; copy `android/keystore.properties.example` to `keystore.properties` (git-ignored); `npm run app:android:release` builds the signed bundle.
-- **App Links:** publish `https://myfined.com/.well-known/assetlinks.json` with the release key's SHA-256 (the manifest filter is already in place).
-- **Store listing:**
-  - in-app account deletion (Google requires it);
-  - data safety form;
-  - "education, not financial services" declaration.
+- Every **Vercel production deploy** runs `scripts/build-app-update.mjs` at the end of `npm run build`. It builds the app's web code and publishes it under `myfined.com/app-update/`: `manifest.json`, every file by content hash, and a zip as fallback. Preview deploys and local builds skip it (`FINED_APP_UPDATE=1` forces it). If anything goes wrong it **only warns**: the website deploy still succeeds and phones keep their version.
+- The app checks the manifest at start-up and on return (at most every 30 min), downloads only changed files, and switches **behind the splash**: on the next cold start, or on return after 30+ minutes away. Nobody is reloaded mid-module.
+- If a new version fails to start, the plugin rolls back by itself and the app never tries that version again.
+- No Capgo account or cloud: `autoUpdate` and `statsUrl` are off in `capacitor.config.json`.
+- **The rule: web code can't bring new native pieces.** `app-native.json` records the native shell: Capacitor plugins, `capacitor.config.json`, `android/` (including `google-services.json`). If any of these change, the deploy prints `APP LIVE UPDATE NOT PUBLISHED` and updates pause until you:
+  1. raise the version (`npm run app:version`) and ship a Play Store release;
+  2. run `npm run app:native-bump` and commit `app-native.json`.
+
+  From then on, updates go only to phones with that release. Older installs keep their last version until they update from the Play Store.
+
+## Owner setup (one-time, in this order)
+
+**1. Auth0, so the app can sign in** (Auth0 dashboard → Applications → the FinEd website application → Settings). Replace `<AUTH0_DOMAIN>` with the `VITE_AUTH0_DOMAIN` value from `.env`:
+- *Allowed Callback URLs*: add `in.fined.app://<AUTH0_DOMAIN>/capacitor/in.fined.app/callback`
+- *Allowed Logout URLs*: add the same address
+- *Allowed Web Origins* and *Allowed Origins (CORS)*: add `https://localhost` (the app's own origin)
+- Advanced → Grant Types: *Refresh Token* ticked. Refresh Token Rotation: on. (The website already uses refresh tokens, so these are probably set already.)
+
+**2. Auth0, so account deletion can remove the login** (Applications → Create Application → *Machine to Machine* → authorise **Auth0 Management API** with only the **`delete:users`** permission). Put its Client ID and Client Secret in the backend's environment as `AUTH0_MGMT_CLIENT_ID` / `AUTH0_MGMT_CLIENT_SECRET`. If `AUTH0_DOMAIN` is a custom domain (not `*.auth0.com`), also set `AUTH0_MGMT_DOMAIN` to the tenant's `*.auth0.com` domain. Until this is set, account deletion politely refuses and asks people to email support.
+
+**3. Firebase, for push** (console.firebase.google.com):
+- Create a project (Analytics not needed) → *Add app* → Android → package name `in.fined.app`.
+- Download `google-services.json` → put it in `fined_frontend/android/app/` and **commit it** (it holds no secrets, and the live-update build needs it to know push is on).
+- Project settings → Service accounts → *Generate new private key*. Put the whole JSON, on **one line**, in the backend's environment as `FIREBASE_SERVICE_ACCOUNT`. This one **is** secret: never commit it.
+
+**4. Database:** run `fined_backend/migrations/004_push_tokens.sql` in the Supabase SQL editor, on practice first, then production.
+
+**5. Backend dependency:** the backend host installs `google-auth` from `requirements.txt` on the next deploy.
+
+**6. Vercel:** nothing to set. The build command must stay `npm run build` (the default), since it publishes the app updates.
+
+## Releasing to the Play Store (Phase 6)
+
+Full checklist, store listing text and data safety answers: **`PLAY_STORE.md`**. In short:
+1. Owner setup above done; phone tests pass on a release build.
+2. `npm run app:version -- 1.0` (raises versionCode; `1.0` is what users see).
+3. `npm run app:release` builds the web code, syncs it into Android and builds the signed bundle `android/app/build/outputs/bundle/release/app-release.aab`. It **refuses** if the bundle contains the fake login, a local backend, or lacks the real login.
+4. If native pieces changed since the last release: `npm run app:native-bump`, commit.
+5. Upload to Play Console.
+
+## Test-only pieces (kept for phone testing; they can't reach a release)
+
+- `vite.config.apptest.js`, `app-test/`, `.env.apptest`: only used by `npm run app:test`. The release build uses `vite.config.app.js`, and `npm run app:release` refuses a bundle containing them.
+- Unencrypted traffic to `http://localhost:8765` is allowed only in **debug** builds (`android/app/src/debug/AndroidManifest.xml`). It used to be in `capacitor.config.json`, which Capacitor also copies into release builds; removed.
+- Live updates are off in test builds, so a test app never swaps itself for the production one.
 
 ## Decisions so far (owner)
 
@@ -101,3 +149,7 @@ Note any failures with the screen, the phone model and Android version, and a sc
 - App icon and splash use `resources/app-logo.png` (full logo with wordmark) only.
 - Contact page stays reachable in the app (from Profile). Landing, About and admin pages are hidden.
 - Module scrolling in the app drops two phone-layout effects (step height animation, sticky-figure shadow). Measured on a Helio G85 phone: stutter frames fell from ~8% to ~2.5%. The website keeps both.
+- Live updates: free and self-hosted (open-source Capgo plugin, files on myfined.com), published with every production website deploy.
+- Push: whatever lands in the in-app bell also goes to the phone. No separate marketing pushes yet.
+- Account deletion: instant and self-serve (data, then the Auth0 login), plus `myfined.com/delete-account` for the web.
+- App data is not backed up to the cloud or copied to new phones (`allowBackup="false"`): users sign in again on a new phone.
