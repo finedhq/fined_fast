@@ -260,3 +260,64 @@
     opacity: 0.45;
   }
 }
+
+/* "Turn on notifications" card on Home (src/app/push.js), just above the tab bar */
+.app-push-prompt {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--app-tabbar-h) + 12px);
+  z-index: 70;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--app-border);
+  box-shadow: 0 10px 30px rgba(23, 19, 33, 0.14);
+  animation: app-push-in 0.25s ease-out;
+}
+.app-push-icon {
+  font-size: 26px;
+  color: var(--app-purple);
+  margin-top: 2px;
+}
+.app-push-title {
+  margin: 0;
+  font: 800 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--app-ink);
+}
+.app-push-sub {
+  margin: 2px 0 0;
+  font: 500 13px/1.4 'Manrope', sans-serif;
+  color: var(--app-ink-3);
+}
+.app-push-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+.app-push-actions button {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 12px;
+  font: 700 14px 'Manrope', sans-serif;
+}
+.app-push-yes {
+  background: var(--app-purple);
+  color: #fff;
+}
+.app-push-no {
+  background: var(--app-purple-surface);
+  color: var(--app-purple);
+}
+.app-keyboard-open .app-push-prompt {
+  display: none;
+}
+@keyframes app-push-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}

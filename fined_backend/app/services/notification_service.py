@@ -1,5 +1,6 @@
 # Notification delivery and retrieval logic
 from app.repositories.notification_repo import notification_repo
+from app.services.push_service import push_service
 
 
 class NotificationService:
@@ -10,6 +11,8 @@ class NotificationService:
         Called by other services — not directly by routes.
         """
         notification_repo.send(email, content)
+        # Mobile app users also get it as a phone notification (no-op until Firebase is configured)
+        push_service.notify(email, content)
 
     def get_all(self, email: str) -> list:
         """Fetch all notifications for a user — newest first"""

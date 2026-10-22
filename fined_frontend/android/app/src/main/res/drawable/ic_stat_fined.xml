@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small icon for phone notifications (status bar). Android shows it in one colour, so it's a plain
+     white shape: a FinStar. Replace with a white silhouette of the FinEd mark if preferred. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,2.5l2.86,6.03l6.64,0.77l-4.93,4.53l1.33,6.57L12,17.08l-5.9,3.32l1.33,-6.57L2.5,9.3l6.64,-0.77z" />
+</vector>

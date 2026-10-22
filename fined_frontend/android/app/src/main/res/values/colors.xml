@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- FinEd purple: tints the notification icon -->
+    <color name="fined_purple">#4100BC</color>
+</resources>

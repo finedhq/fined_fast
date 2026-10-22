@@ -6,6 +6,7 @@
 //  - import.meta.env.VITE_NATIVE_APP is 'true', for app-only code paths
 //  - src/app/appShell.js (empty on the website) becomes the tab bar + top bar layout
 //  - '@auth0/auth0-react' becomes src/app/auth0Native.jsx: sign-in in a browser tab that returns to the app
+import { existsSync } from 'node:fs';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { mergeConfig } from 'vite';
@@ -55,6 +56,8 @@ export default mergeConfig(base, {
   },
   define: {
     'import.meta.env.VITE_NATIVE_APP': JSON.stringify('true'),
+    // push notifications only with Firebase configured; registering without it crashes the app (src/app/push.js)
+    'import.meta.env.VITE_PUSH_ENABLED': JSON.stringify(String(existsSync(fileURLToPath(new URL('./android/app/google-services.json', import.meta.url))))),
     // identifies this web code for live updates (src/app/liveUpdate.js); set by scripts/build-app-update.mjs
     'import.meta.env.VITE_APP_BUILD': JSON.stringify(process.env.FINED_APP_BUILD || `builtin-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}`),
   },

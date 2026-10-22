@@ -1,11 +1,12 @@
 // Mobile app shell (app build only): top bar + page + bottom tab bar, in place of the
 // website's Navbar and Footer. MainLayout switches to this when IS_NATIVE_APP is true.
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import {
   PiArrowLeft,
   PiBell,
+  PiBellRinging,
   PiCaretRight,
   PiChatCircleText,
   PiEnvelopeSimple,
@@ -26,7 +27,9 @@ import {
   PiUser,
   PiUserFill,
 } from 'react-icons/pi';
+import { Toaster } from 'react-hot-toast';
 import { useUserProfile } from '../context/UserProfileContext';
+import { forgetPushToken, pushPrompt, usePhoneNotifications } from './push';
 import { APP_TABS, TAB_ROOTS, isHiddenInApp, tabForPath, titleForPath } from './nativeApp';
 import Welcome from './Welcome';
 import './AppLayout.css';
@@ -116,12 +119,20 @@ function ProfileMenu() {
   const navigate = useNavigate();
   const { logout } = useAuth0();
   const { openEditModal } = useUserProfile();
+  const phoneNotifications = usePhoneNotifications();
+  const signOut = async () => {
+    await forgetPushToken();
+    logout({ logoutParams: { returnTo: window.location.origin } });
+  };
   const groups = [
     [
       { icon: PiPencilSimple, label: 'Edit profile', onClick: () => openEditModal?.() },
       { icon: PiGift, label: 'Rewards', to: '/rewards' },
       { icon: PiTrophy, label: 'Leaderboard', to: '/leaderboard' },
       { icon: PiBell, label: 'Notifications', to: '/notifications' },
+      ...(phoneNotifications.status === 'prompt' || phoneNotifications.status === 'denied'
+        ? [{ icon: PiBellRinging, label: 'Turn on phone notifications', onClick: phoneNotifications.enable }]
+        : []),
     ],
     [
       { icon: PiQuestion, label: 'Help', to: '/help' },
@@ -152,12 +163,40 @@ function ProfileMenu() {
       <button
         type="button"
         className="app-menu-row app-menu-logout"
-        onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+        onClick={signOut}
       >
         <PiSignOut className="app-menu-icon" aria-hidden="true" />
         <span>Log out</span>
       </button>
     </section>
+  );
+}
+
+// One-time card on Home asking to turn on notifications, before Android's own permission dialog.
+function PushPrompt() {
+  const { status, enable } = usePhoneNotifications();
+  const [hidden, setHidden] = useState(pushPrompt.dismissed);
+  if (status !== 'prompt' || hidden) return null;
+  const close = () => {
+    pushPrompt.dismiss();
+    setHidden(true);
+  };
+  return (
+    <div className="app-push-prompt" role="dialog" aria-labelledby="app-push-title">
+      <PiBellRinging className="app-push-icon" aria-hidden="true" />
+      <div className="app-push-text">
+        <p id="app-push-title" className="app-push-title">Keep your streak going</p>
+        <p className="app-push-sub">Get a nudge for streaks, FinStars and new lessons. No spam.</p>
+      </div>
+      <div className="app-push-actions">
+        <button type="button" className="app-push-yes" onClick={() => enable().finally(close)}>
+          Turn on
+        </button>
+        <button type="button" className="app-push-no" onClick={close}>
+          Not now
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -185,7 +224,10 @@ export default function AppLayout() {
           </Suspense>
         </div>
       </main>
+      {pathname === '/dashboard' && <PushPrompt />}
       <TabBar pathname={pathname} />
+      {/* the website never mounts one, so the app's toasts (and the site's) need this to show */}
+      <Toaster position="top-center" containerStyle={{ top: 68 }} toastOptions={{ style: { fontFamily: 'Manrope, sans-serif', fontWeight: 600 } }} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { setupOfflineBanner } from './offline';
 import { setupShareAndSave } from './shareAndSave';
 import { setupHaptics } from './haptics';
 import { setupLiveUpdates } from './liveUpdate';
+import { setupPushListeners } from './push';
 import './appFonts.css';
 import './appOverrides.css';
 
@@ -26,6 +27,7 @@ setupAppLinks();
 setupKeyboard();
 setupOfflineBanner();
 setupHaptics();
+setupPushListeners();
 
 // Keep the branded splash up until React has drawn the first screen, so there's no white flash.
 // While switching to a live update the splash stays: the app is about to reload.
