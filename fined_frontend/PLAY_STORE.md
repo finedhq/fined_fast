@@ -11,6 +11,12 @@ Companion to `MOBILE_APP.md`. Everything here is a draft for the owner to check:
 | 3 | **Developer account type** | An **organisation** account skips the personal-account rule of a 14-day closed test with 12+ testers before production. It needs a D-U-N-S number, which needs a registered business. The privacy policy says FinEd isn't incorporated yet. | If not incorporated: personal account, and recruit 12+ testers for 14 days (team, friends, WhatsApp community). |
 | 4 | **Privacy policy update** (section 5 below) | Google checks that the policy covers what the app collects: push tokens, Firebase. | Approve the wording below, then it goes on the website. |
 
+**Owner's decisions (2026-10-23):**
+1. Target age: **18+**.
+2. Data sharing: **not shared** (service providers only). Revisit before any partner data deal.
+3. Account type: **personal** (chosen at signup). So a closed test with **12+ testers for 14 days in a row** is needed before production.
+4. Privacy policy: approved with the app paragraphs and self-serve account deletion. Now in `src/pages/StaticPages/PrivacyPolicy.jsx` on this branch, so it goes live in the same website deploy as `/delete-account`. Set `LAST_UPDATED` to that day.
+
 ## 2. Accounts and keys (owner)
 
 1. **Google Play developer account**: play.google.com/console, one-time US$25. Use a shared FinEd Google account, not a personal one.

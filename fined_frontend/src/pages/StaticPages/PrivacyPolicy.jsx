@@ -1,6 +1,7 @@
 import LegalPage, { Section, Bullets, Callout } from './LegalPage';
 
-const LAST_UPDATED = '4 October 2026';
+// Set to the day this version goes live on myfined.com (with the /delete-account page).
+const LAST_UPDATED = '23 October 2026';
 const CONTACT = 'support@myfined.com';
 
 export default function PrivacyPolicy() {
@@ -94,6 +95,22 @@ export default function PrivacyPolicy() {
             'Answers you give to Personal Lens (see section 5).',
           ]}
         />
+
+        <p className="font-semibold text-[#171321] pt-2">If you use the FinEd Android app</p>
+        <p>
+          The app uses the same account as the website, so we collect the same account and learning
+          data described above. In addition:
+        </p>
+        <Bullets
+          items={[
+            "If you turn on notifications, a notification token for your phone, issued by Google Firebase, so we can send you reminders and updates. We delete it when you sign out of the app or delete your account. You can switch notifications off at any time in your phone's settings.",
+            'Crash reports (via Sentry) if the app runs into an error, so we can fix it.',
+          ]}
+        />
+        <p>
+          The app does not use Google Analytics, and it does not collect advertising IDs, your
+          contacts, photos, location or other files on your phone.
+        </p>
       </Section>
 
       <Section heading="4. Why we use it">
@@ -141,6 +158,10 @@ export default function PrivacyPolicy() {
           You can block or delete cookies in your browser settings. If you block the essential ones,
           signing in will not work.
         </p>
+        <p>
+          In the Android app, Google Analytics is not used, and your sign-in is kept in the app's own
+          private storage on your phone rather than in browser cookies.
+        </p>
       </Section>
 
       <Section heading="7. Who we share data with">
@@ -157,6 +178,7 @@ export default function PrivacyPolicy() {
             'Google Analytics — usage analytics.',
             'Google Gemini API — generates Personal Lens explanations.',
             'Sentry — error reporting, to help us find and fix crashes.',
+            'Google Firebase Cloud Messaging — delivers notifications to the Android app.',
             'Zoho Mail — handles our email.',
           ]}
         />
@@ -209,6 +231,15 @@ export default function PrivacyPolicy() {
             'Withdraw a consent you previously gave, such as newsletter emails.',
           ]}
         />
+        <p>
+          You can also delete your account yourself at any time: in the app (Profile → Delete
+          account) or at{' '}
+          <a href="/delete-account" className="text-[#4100BC] font-semibold hover:underline">
+            myfined.com/delete-account
+          </a>
+          . This removes your learning data and your FinEd login straight away, except anything we
+          are required to keep by law.
+        </p>
         <p>
           Write to{' '}
           <a href={`mailto:${CONTACT}`} className="text-[#4100BC] font-semibold hover:underline">
