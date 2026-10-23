@@ -577,3 +577,80 @@ textarea,
 .app-main .ap-row-title {
   font-size: 13.5px;
 }
+
+/* Profile, one place for each action (plan fix 3, 2026-10-23). The settings list below the page
+   already has Edit profile, Rewards and Leaderboard, so the orange Edit Profile button and the four
+   stat-card buttons go; the stats become plain tiles; the avatar is round and gold like Home's.
+   The pp-* names are hooks added to ProfilePage.jsx; only this app file styles them. */
+.app-main .pp-header {
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 18px;
+}
+.app-main .pp-avatar {
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 4px #f3d9a0;
+}
+.app-main .pp-avatar-initial {
+  background: #ffb600;
+  color: #241600;
+  font-size: 24px;
+}
+.app-main .pp-meta {
+  gap: 4px;
+  margin-top: 6px;
+}
+.app-main .pp-meta > .text-slate-300 {
+  display: none;
+}
+.app-main .pp-meta > span {
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #f2f0f9;
+  font-size: 11px;
+}
+.app-main .pp-edit-btn {
+  display: none;
+}
+.app-main .pp-actions {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+.app-main .pp-share-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: 12px;
+}
+.app-main .pp-stats {
+  margin-bottom: 14px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.app-main .pp-stats > div {
+  gap: 8px;
+}
+.app-main .pp-stat {
+  justify-content: flex-start;
+  padding: 10px 12px;
+  border: 1px solid #e5e7ef;
+  border-radius: 14px;
+  background: #fff;
+}
+.app-main .pp-stat .mt-3 {
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+.app-main .pp-stat .text-3xl {
+  font-size: 22px;
+  line-height: 1.2;
+}
+.app-main .pp-stat-desc,
+.app-main .pp-stat-action {
+  display: none;
+}

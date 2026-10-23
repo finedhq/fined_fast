@@ -12,9 +12,9 @@ import { publicOrigin } from "../lib/publicUrl";
 
 const COLOR_LEVELS = {
   0: "bg-slate-100",
-  1: "bg-emerald-200",
-  2: "bg-emerald-400",
-  3: "bg-[#10B981]",
+  1: "bg-[#E4D9FF]",
+  2: "bg-[#9F84FF]",
+  3: "bg-[#4100BC]",
 };
 
 /**
@@ -345,7 +345,7 @@ export default function ProfilePage() {
         )}
 
         {/* 1. Header Card */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-8 mb-5 sm:mb-6 relative">
+        <div className="pp-header bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-8 mb-5 sm:mb-6 relative">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
             <div className="flex flex-row items-start gap-3.5 sm:gap-6 flex-1 w-full">
               {/* Avatar: Auth0 picture or deep navy initial box */}
@@ -354,10 +354,10 @@ export default function ProfilePage() {
                   src={user.picture}
                   alt={displayName}
                   onError={() => setAvatarError(true)}
-                  className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl object-cover shadow-md flex-shrink-0 border-2 border-slate-100"
+                  className="pp-avatar w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl object-cover shadow-md flex-shrink-0 border-2 border-slate-100"
                 />
               ) : (
-                <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-[#0047AB] text-white flex items-center justify-center text-3xl sm:text-5xl font-black shadow-md flex-shrink-0 select-none">
+                <div className="pp-avatar pp-avatar-initial w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-[#FFB600] text-[#171321] flex items-center justify-center text-3xl sm:text-5xl font-black shadow-md flex-shrink-0 select-none">
                   {userInitial}
                 </div>
               )}
@@ -374,12 +374,12 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Badges / Sub-meta */}
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 text-xs sm:text-sm font-bold text-slate-600">
+                <div className="pp-meta flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 text-xs sm:text-sm font-bold text-slate-600">
                   <span className="flex items-center gap-1 text-slate-700">
                     🎓 {careerStage}
                   </span>
                   <span className="text-slate-300">•</span>
-                  <span className="text-[#0047AB]">
+                  <span className="text-[#4100BC]">
                     {levelInfo.label}
                   </span>
                   <span className="text-slate-300">•</span>
@@ -400,11 +400,11 @@ export default function ProfilePage() {
             </div>
 
             {/* Action Buttons Top Right */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 self-start sm:self-start justify-end flex-shrink-0 mt-3 sm:mt-0">
+            <div className="pp-actions flex flex-wrap sm:flex-nowrap items-center gap-2 self-start sm:self-start justify-end flex-shrink-0 mt-3 sm:mt-0">
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm shrink-0 transition cursor-pointer"
+                className="pp-share-btn flex items-center justify-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-sm shrink-0 transition cursor-pointer"
                 title="Share profile link"
               >
                 <FiShare2 size={14} />
@@ -414,7 +414,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-[#FA7516] hover:bg-[#e0650f] text-white shadow-sm shrink-0 transition cursor-pointer"
+                className="pp-edit-btn flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-[#4100BC] hover:bg-[#32009A] text-white shadow-sm shrink-0 transition cursor-pointer"
               >
                 <FiSettings size={14} />
                 <span>Edit Profile</span>
@@ -424,10 +424,10 @@ export default function ProfilePage() {
         </div>
 
         {/* 2. Unified Rewards Metric Banner (White Theme) */}
-        <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 mb-6">
+        <div className="pp-stats bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-slate-100 mb-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-100">
             {/* Card 1: FinScore */}
-            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+            <div className="pp-stat px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="pp-stat-desc text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Overall financial knowledge &amp; consistency score.
                 </p>
               </div>
@@ -461,7 +461,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/courses"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="pp-stat-action inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
                 >
                   Boost Score &rarr;
                 </Link>
@@ -469,7 +469,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Card 2: FinStars Balance */}
-            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+            <div className="pp-stat px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -490,7 +490,7 @@ export default function ProfilePage() {
                   <span className="text-3xl font-black text-slate-900 tracking-tight">{finStars}</span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="pp-stat-desc text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Exchange your FinStars for rewards and coupons.
                 </p>
               </div>
@@ -498,7 +498,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/rewards"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="pp-stat-action inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
                 >
                   Redeem Now &rarr;
                 </Link>
@@ -506,7 +506,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Card 3: Rank */}
-            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+            <div className="pp-stat px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -527,7 +527,7 @@ export default function ProfilePage() {
                   <span className="text-3xl font-black text-slate-900 tracking-tight">#{rank}</span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="pp-stat-desc text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Your current standing among all active learners!
                 </p>
               </div>
@@ -535,7 +535,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/leaderboard"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="pp-stat-action inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
                 >
                   View Leaderboard &rarr;
                 </Link>
@@ -543,7 +543,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Card 4: Current Streak */}
-            <div className="px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
+            <div className="pp-stat px-0 lg:px-6 first:lg:pl-0 last:lg:pr-0 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-semibold text-slate-500 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -566,7 +566,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="pp-stat-desc text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Personal Best: <strong className="font-bold text-slate-700">{personalBest || streak} Days</strong>. Keep learning daily!
                 </p>
               </div>
@@ -574,7 +574,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/courses"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="pp-stat-action inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
                 >
                   Keep Streak &rarr;
                 </Link>
@@ -599,9 +599,9 @@ export default function ProfilePage() {
             <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium select-none self-end sm:self-center">
               <span>Less</span>
               <span className="w-2.5 h-2.5 rounded-[2px] bg-slate-100 inline-block border border-slate-200/50" />
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-emerald-200 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-emerald-400 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-[2px] bg-[#10B981] inline-block" />
+              <span className="w-2.5 h-2.5 rounded-[2px] bg-[#E4D9FF] inline-block" />
+              <span className="w-2.5 h-2.5 rounded-[2px] bg-[#9F84FF] inline-block" />
+              <span className="w-2.5 h-2.5 rounded-[2px] bg-[#4100BC] inline-block" />
               <span>More</span>
             </div>
           </div>
@@ -666,7 +666,7 @@ export default function ProfilePage() {
               ONGOING LEARNING TRACK
             </span>
             {ongoingCourse && (
-              <span className="text-sm font-bold text-[#FA7516]">
+              <span className="text-sm font-bold text-[#4100BC]">
                 {ongoingCourse.progress_pct ?? 0}% Completed
               </span>
             )}
@@ -686,7 +686,7 @@ export default function ProfilePage() {
               <div className="w-full sm:w-1/2">
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-[#FA7516] h-full rounded-full transition-all duration-500"
+                    className="bg-[#4100BC] h-full rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(0, ongoingCourse.progress_pct ?? 0))}%` }}
                   />
                 </div>
@@ -704,7 +704,7 @@ export default function ProfilePage() {
               </div>
               <Link
                 to="/courses"
-                className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#FA7516] hover:bg-[#EA580C] text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer self-start sm:self-center"
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#4100BC] hover:bg-[#32009A] text-white text-xs sm:text-sm font-bold shadow-sm transition cursor-pointer self-start sm:self-center"
               >
                 Explore Courses →
               </Link>
