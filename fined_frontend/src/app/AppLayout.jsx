@@ -65,11 +65,17 @@ function TopBar({ pathname }) {
   }
 
   const stars = profile?.fin_stars ?? profile?.finstars ?? 0;
+  // Home shows the FinEd wordmark; the other tabs name themselves, so you always know where you are.
+  const tabTitle = pathname === '/dashboard' ? null : tabForPath(pathname)?.label;
   return (
     <header className="app-topbar">
-      <span className="app-wordmark" aria-label="FinEd">
-        Fin<b>Ed</b>
-      </span>
+      {tabTitle ? (
+        <h1 className="app-tab-title">{tabTitle}</h1>
+      ) : (
+        <span className="app-wordmark" aria-label="FinEd">
+          Fin<b>Ed</b>
+        </span>
+      )}
       <div className="app-topbar-actions">
         <button type="button" className="app-stars" onClick={() => navigate('/rewards')} aria-label={`${stars} FinStars, open rewards`}>
           <PiStarFill aria-hidden="true" />

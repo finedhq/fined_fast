@@ -358,3 +358,222 @@ textarea,
 .app-main .dh-read:first-child:hover {
   border-top-color: transparent;
 }
+
+/* Courses tab, course first (plan fix 1, 2026-10-23). The top bar names the tab, so the website's
+   "Master Finance in 15-Minute Lessons" banner and feature badges go; the course you're taking
+   opens the screen, and the course list becomes compact rows. */
+.app-main .courses-hero-section {
+  display: none;
+}
+.app-main .courses-main-wrapper {
+  padding: 16px 14px 32px;
+  gap: 18px;
+}
+.app-main .courses-main-wrapper > div {
+  gap: 20px;
+}
+.app-main .courses-resume-card {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e6e1ec;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px -18px rgba(65, 0, 188, 0.45);
+}
+.app-main .courses-resume-image-wrap {
+  aspect-ratio: auto;
+  height: 120px;
+  border-radius: 0;
+}
+.app-main .courses-resume-badge {
+  top: 10px;
+  left: 10px;
+  padding: 4px 9px;
+  font-size: 10px;
+}
+.app-main .courses-resume-content {
+  gap: 8px;
+  padding: 12px 14px 14px;
+}
+.app-main .courses-resume-title {
+  font-size: 17px;
+}
+.app-main .courses-resume-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.5;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.app-main .courses-resume-actions {
+  margin-top: 2px;
+}
+.app-main .courses-primary-btn {
+  padding: 10px 18px;
+  font-size: 13.5px;
+  box-shadow: none;
+}
+/* A course without a picture yet: FinEd's purple instead of a grey "No Image" box */
+.app-main .courses-resume-image-wrap .bg-gray-200,
+.app-main .course-card-img-wrap .bg-gray-200 {
+  background: radial-gradient(circle at 75% 30%, #8f7bff 0, #4100bc 55%, #2a0080 100%);
+}
+.app-main .courses-resume-image-wrap .bg-gray-200 > span,
+.app-main .course-card-img-wrap .bg-gray-200 > span {
+  display: none;
+}
+.app-main .courses-grid-section {
+  gap: 10px;
+}
+.app-main .courses-grid-header {
+  padding-bottom: 0;
+  margin: 0;
+  border-bottom: none;
+}
+.app-main .courses-section-title {
+  font-size: 17px;
+}
+.app-main .courses-section-subtitle {
+  margin-top: 2px;
+  font-size: 12.5px;
+}
+.app-main .courses-cards-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.app-main .course-card-modern {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  height: auto;
+  padding: 10px;
+  border: 1px solid #e6e1ec;
+  border-radius: 14px;
+  box-shadow: none;
+}
+.app-main .course-card-modern:hover {
+  border-color: #e6e1ec;
+  box-shadow: none;
+  transform: none;
+}
+.app-main .course-card-img-wrap {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+.app-main .course-card-body {
+  min-width: 0;
+  padding: 0;
+}
+.app-main .course-card-title {
+  order: 1;
+  margin: 0 0 4px;
+  font-size: 14.5px;
+}
+.app-main .course-card-meta-row {
+  order: 2;
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+.app-main .course-card-desc {
+  order: 3;
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  -webkit-line-clamp: 2;
+}
+.app-main .course-card-footer {
+  display: none;
+}
+
+/* Articles tab, content first (plan fix 1). The top bar names the tab, so the masthead heading and
+   description go (search stays at the top), and the Personal Lens promo card goes: articles that
+   support it still carry the "AI Lens" tag. The feature story and trending list come first, compact. */
+.app-main .ap-masthead-section {
+  padding: 14px 0 10px;
+}
+.app-main .ap-masthead-text {
+  display: none;
+}
+.app-main .ap-search-wrapper {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.app-main .ap-search-input {
+  padding: 11px 34px 11px 38px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.app-main .ap-spotlight-section {
+  display: none;
+}
+.app-main .ap-hero-section {
+  padding-bottom: 20px;
+}
+.app-main .ap-section-label-row {
+  margin-bottom: 8px;
+}
+.app-main .ap-hero-grid {
+  gap: 14px;
+}
+.app-main .ap-lead-img-wrap {
+  height: 150px;
+}
+.app-main .ap-lead-body {
+  padding: 10px 12px 12px;
+}
+.app-main .ap-lead-title {
+  font-size: 16px;
+}
+.app-main .ap-lead-excerpt {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-line-clamp: 3;
+}
+.app-main .ap-trending-stack {
+  gap: 0;
+  padding: 2px 12px;
+  border: 1px solid #e6e1ec;
+  border-radius: 16px;
+  background: #fff;
+}
+.app-main .ap-row {
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border: none;
+  border-top: 1px solid #e6e1ec;
+  border-radius: 0;
+  box-shadow: none;
+}
+.app-main .ap-row:first-child {
+  border-top: none;
+}
+.app-main .ap-row:hover {
+  border-color: transparent;
+  border-top-color: #e6e1ec;
+  box-shadow: none;
+  transform: none;
+}
+.app-main .ap-row:first-child:hover {
+  border-top-color: transparent;
+}
+.app-main .ap-row-img-wrap {
+  width: 64px;
+  border-radius: 10px;
+}
+.app-main .ap-row-excerpt,
+.app-main .ap-row-footer {
+  display: none;
+}
+.app-main .ap-row-title {
+  font-size: 13.5px;
+}
