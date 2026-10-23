@@ -293,7 +293,7 @@ async def spa_fallback(fallback_path: str):
                 author = article_service.get_author_by_slug(slug)
                 if author:
                     author_name = html.escape(author.get("name") or "FinEd Author")
-                    author_title = f"{author_name} – Author at FinEd"
+                    author_title = f"{author_name} – Expert at FinEd"
                     bio = author.get("bio") or ""
                     description_full = author.get("description") or bio or f"Financial insights and analysis by {author_name} on FinEd."
                     meta_desc = html.escape((bio or description_full)[:160].strip())
