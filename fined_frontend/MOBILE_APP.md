@@ -20,7 +20,7 @@ The app is the existing React site wrapped with **Capacitor 8**, Android first. 
 
 ## How the app differs from the website (and stays out of it)
 
-- **`vite.config.app.js`** is the app build. It removes GTM + Google Fonts from the app's `index.html`, turns off pinch-zoom, adds `src/app/appEntry.js` (start-up code), sets `import.meta.env.VITE_NATIVE_APP`, and swaps `src/app/appShell.js` (empty on the website) for `appShell.app.js` (the tab-bar layout).
+- **`vite.config.app.js`** is the app build. It removes GTM + Google Fonts from the app's `index.html`, turns off pinch-zoom, adds `src/app/appEntry.js` (start-up code), sets `import.meta.env.VITE_NATIVE_APP`, and swaps `src/app/appShell.js` (empty on the website) for `appShell.app.js` (the tab-bar layout). Production app builds (`npm run app:release` and the live-update package) always use the live API `https://api.myfined.com`, not the laptop's `.env`; set `FINED_APP_API_URL` to point one elsewhere (e.g. staging). Phone test builds keep `.env.apptest`.
 - **All app code lives in `src/app/`.** The website never imports it, except `MainLayout.jsx`, which imports `appShell.js` (`null` on the website).
 - **Shared files touched** (website behaviour unchanged):
   - `MainLayout.jsx` (the app-shell switch)

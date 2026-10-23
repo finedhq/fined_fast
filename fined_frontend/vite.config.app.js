@@ -6,6 +6,7 @@
 //  - import.meta.env.VITE_NATIVE_APP is 'true', for app-only code paths
 //  - src/app/appShell.js (empty on the website) becomes the tab bar + top bar layout
 //  - '@auth0/auth0-react' becomes src/app/auth0Native.jsx: sign-in in a browser tab that returns to the app
+//  - production builds (Play Store release, live updates) always use the live API; see liveApi()
 import { existsSync } from 'node:fs';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -44,8 +45,23 @@ function appHtml() {
   };
 }
 
+// Production app builds (`npm run app:release` and the live-update package built on Vercel) talk to
+// the live API, whatever the laptop's .env says (locally it points at localhost for development).
+// FINED_APP_API_URL overrides it, e.g. for a staging backend. Phone test builds run with
+// `--mode apptest` and keep the address from .env.apptest.
+const LIVE_API = 'https://api.myfined.com';
+function liveApi() {
+  return {
+    name: 'fined-app-live-api',
+    config(_, { mode }) {
+      if (mode !== 'production') return undefined;
+      return { define: { 'import.meta.env.VITE_API_URL': JSON.stringify(process.env.FINED_APP_API_URL || LIVE_API) } };
+    },
+  };
+}
+
 export default mergeConfig(base, {
-  plugins: [appHtml()],
+  plugins: [appHtml(), liveApi()],
   // the website imports an empty src/app/appShell.js; the app gets the real tab bar layout
   resolve: {
     alias: [
