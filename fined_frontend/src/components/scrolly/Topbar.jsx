@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { scrollToElement } from "./scroll";
 
-export default function Topbar({ rootRef, moduleNumber, title, chapters, questions = [], stars, backTo }) {
+// `onHelp` adds a "?" button that replays the module tour (ModuleTour.jsx).
+export default function Topbar({ rootRef, moduleNumber, title, chapters, questions = [], stars, backTo, onHelp }) {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [chapterProgress, setChapterProgress] = useState(() => chapters.map(() => 0));
@@ -134,6 +135,11 @@ export default function Topbar({ rootRef, moduleNumber, title, chapters, questio
       </div>
 
       <div className="nc-nav-right">
+        {onHelp && (
+          <button type="button" className="nc-help" onClick={onHelp} aria-label="How this module works" title="How this module works">
+            ?
+          </button>
+        )}
         <div
           key={pulses}
           className={`finstars-pill${pulses > 0 ? " pulse" : ""}`}
