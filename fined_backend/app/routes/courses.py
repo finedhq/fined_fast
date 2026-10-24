@@ -754,9 +754,17 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             "completion_date": today_iso if body.status == "completed" else None
         }
         
+        # First saved progress anywhere in this course? The browser uses it to send
+        # a one-time "course_start" analytics event
+        first_in_course = False
         if existing_progress:
             await asyncio.to_thread(lambda: supabase.from_("userCourses").update(payload).eq("id", existing_progress["id"]).execute())
         else:
+            any_in_course = await asyncio.to_thread(lambda: supabase.from_("userCourses").select("id").match({
+                "email": user.email,
+                "course_id": course_id,
+            }).limit(1).execute())
+            first_in_course = not (any_in_course and any_in_course.data)
             payload_insert = {
                 "email": user.email,
                 "course_id": course_id,
@@ -908,7 +916,9 @@ async def update_a_card(course_id: str, module_id: str, card_id: str, body: Upda
             "prevCardId": prev_card_id,
             "nextCardId": next_card_id,
             "module_progress": module_progress,
-            "module_total_cards": module_total_cards
+            "module_total_cards": module_total_cards,
+            "first_in_course": first_in_course,
+            "course_slug": (course_row or {}).get("slug"),
         }
     except HTTPException:
         raise
