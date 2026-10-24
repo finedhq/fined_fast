@@ -71,7 +71,7 @@ function AuthorPage() {
         setHasMore(data.has_more ?? (incoming.length < total));
         setOffset(incoming.length);
       })
-      .catch((err) => setError(err.message || "Failed to load author profile."))
+      .catch((err) => setError(err.message || "Failed to load expert profile."))
       .finally(() => setFetching(false));
   }, [slug]);
 
@@ -112,7 +112,7 @@ function AuthorPage() {
 
     const prevTitle = document.title;
     const authorName = author.name;
-    const authorTitle = `${authorName} – Author at FinEd`;
+    const authorTitle = `${authorName} – Expert at FinEd`;
     document.title = authorTitle;
 
     const bioText = author.bio || author.description || `Read articles and market insights by ${authorName} on FinEd.`;

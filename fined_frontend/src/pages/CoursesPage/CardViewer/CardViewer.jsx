@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import CardRenderer from "./CardRenderer";
 import ModuleLoader from "./ModuleLoader";
 import { getBundleByCardSlug, updateCardBySlug } from "../../../services/api";
+import { trackCourseStart } from "../../../utils/analytics";
 import { useAuth0 } from "@auth0/auth0-react";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import "./CardViewer.css";
@@ -190,12 +191,13 @@ function CardViewer() {
     // 3. Fire background save with silent auto-retry on network glitches
     const saveToBackend = async (retries = 2) => {
       try {
-        await updateCardBySlug(currentCardSlug, {
+        const res = await updateCardBySlug(currentCardSlug, {
           status: "completed",
           email,
           finStars: finStarsEarned || 0,
           userAnswer: userAnswer || null,
         });
+        if (res?.first_in_course) trackCourseStart(res.course_slug);
       } catch (err) {
         if (retries > 0) {
           setTimeout(() => saveToBackend(retries - 1), 1500);

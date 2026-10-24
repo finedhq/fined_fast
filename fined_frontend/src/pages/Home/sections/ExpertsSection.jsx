@@ -6,29 +6,15 @@
 import { useNavigate } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { PiArrowUpRightBold, PiLinkedinLogoFill } from "react-icons/pi";
+import { AUTHOR_TITLES, DEFAULT_AUTHOR_TITLE, FOUNDER_SLUGS, authorBlurb } from "../../../lib/authorTitles";
 import "./ExpertsSection.css";
 
 const EASE = [0.16, 1, 0.3, 1];
 
-// Co-founders are left out of this section (owner's call).
-const EXCLUDED = new Set(["anish-pujari", "shravan-mutha"]);
-
-// Titles as written for the old landing page's authors strip.
-const TITLES = {
-  "shishir-bhartia": "Directional Strategy Consultant, Ex Head Times Group Alliances and Brand Capital West",
-  "deepan-datta": "Investment Writer",
-  "dharsana-gandhi-r": "Finance Professional",
-  madhvendra: "Finance Writer",
-  "puja-tayal": "Financial Writer & Equity Analyst",
-};
-
-const clean = (s) => (s || "").replace(/\s+/g, " ").trim();
-const same = (a, b) => clean(a).replace(/[^a-z]/gi, "").toLowerCase() === clean(b).replace(/[^a-z]/gi, "").toLowerCase();
-
 export default function ExpertsSection({ authors }) {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
-  const experts = (authors || []).filter((a) => a?.name && !EXCLUDED.has(a.slug));
+  const experts = (authors || []).filter((a) => a?.name && !FOUNDER_SLUGS.has(a.slug));
   if (!experts.length) return null;
 
   return (
@@ -56,9 +42,8 @@ export default function ExpertsSection({ authors }) {
           viewport={{ once: true, amount: 0.2 }}
         >
           {experts.map((a, i) => {
-            const title = TITLES[a.slug] || "Writer at FinEd";
-            // Some bios just repeat the title; then the longer description reads better.
-            const text = clean(a.bio && !same(a.bio, title.replace(",", "")) ? a.bio : a.description);
+            const title = AUTHOR_TITLES[a.slug] || DEFAULT_AUTHOR_TITLE;
+            const text = authorBlurb(a, title);
             return (
               <motion.li
                 key={a.id || a.slug}
