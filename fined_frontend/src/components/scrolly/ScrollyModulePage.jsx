@@ -22,6 +22,8 @@ import Chapter from "./Chapter";
 import Checkpoint from "./Checkpoint";
 import Completion from "./Completion";
 import GlossaryTooltip from "./GlossaryTooltip";
+import ModuleTour from "./ModuleTour";
+import { tourSeen, tourSteps } from "./tourSteps";
 import useStepObserver from "./useStepObserver";
 import { EMPTY_PAGE_STATE, clearPageState, loadPageState, savePageState } from "./pageState";
 import { mergePages, pageFromSaved } from "./savedAnswers";
@@ -35,6 +37,7 @@ import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
 import "./scrolly-reels.css";
+import "./scrolly-tour.css";
 
 export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride, onSignup }) {
   const rootRef = useRef(null);
@@ -134,6 +137,19 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
     }
   }, [moduleId, hero?.slug]);
 
+  // First-visit tour (ModuleTour.jsx): opens by itself once per browser when
+  // the page opens at the top; the top bar's "?" replays it.
+  // The open tour: its steps and the layout they were picked for (a phone
+  // turned sideways into the desktop layout simply drops it).
+  const [tour, setTour] = useState(null);
+  const openTour = () => setTour({ reels, steps: tourSteps(rootRef.current, reels) });
+  const openedAtTop = !focusSlug || focusSlug === hero?.slug;
+  useEffect(() => {
+    if (embedded || !openedAtTop || !hero || tourSeen()) return undefined;
+    const t = setTimeout(() => setTour({ reels, steps: tourSteps(rootRef.current, reels) }), 900); // let the page settle first
+    return () => clearTimeout(t);
+  }, [embedded, openedAtTop, hero, moduleId, reels]);
+
   const backTo = backToOverride || (bundle.course_slug ? `/courses/${bundle.course_slug}` : "/courses");
   const firstSection = chapters[0] ? `#section-${CSS.escape(chapters[0].slug)}` : ".scrolly-section, .checkpoint-section";
   const nextSlug = bundle.nextModuleFirstCard?.cardSlug || bundle.nextModuleFirstCard?.cardId;
@@ -225,10 +241,12 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
           questions={questions}
           stars={stars}
           backTo={backTo}
+          onHelp={openTour}
         />
       )}
       <main>{cards.map(part)}</main>
       <GlossaryTooltip scopeRef={rootRef} />
+      {tour?.reels === reels && <ModuleTour rootRef={rootRef} reels={reels} steps={tour.steps} onClose={() => setTour(null)} />}
     </div>
   );
 }

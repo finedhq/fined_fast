@@ -1,0 +1,230 @@
+/* First-visit tour of the module page (ModuleTour.jsx) */
+
+.module-tour {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+}
+
+/* Catches every click; dims the page when nothing is lit up (welcome step) */
+.module-tour .tour-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 19, 33, 0.62);
+  transition: background-color 0.25s ease;
+}
+
+.module-tour .tour-shade.has-spot {
+  background: transparent;
+}
+
+/* The lit-up part: a clear window, with the rest of the screen dimmed by its shadow */
+.module-tour .tour-spot {
+  position: absolute;
+  border-radius: 18px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 0 200vmax rgba(23, 19, 33, 0.62);
+  pointer-events: none;
+  opacity: 0;
+  transition: top 0.35s ease, left 0.35s ease, width 0.35s ease, height 0.35s ease, opacity 0.2s ease;
+}
+
+.module-tour .tour-spot.is-on {
+  opacity: 1;
+}
+
+.module-tour .tour-card {
+  position: absolute;
+  width: min(340px, calc(100vw - 24px));
+  padding: 18px 20px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 6px 6px 0 0 var(--ink);
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.module-tour .tour-card.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.module-tour.is-reels .tour-card {
+  width: calc(100vw - 24px);
+  max-width: 420px;
+}
+
+.module-tour .tour-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.module-tour .tour-count {
+  color: var(--purple);
+  font-family: var(--font-action);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.module-tour .tour-skip {
+  padding: 4px 2px;
+  border: none;
+  background: none;
+  color: var(--ink-3);
+  font-family: var(--font-action);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.module-tour .tour-skip:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.module-tour .tour-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.module-tour .tour-text {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.module-tour .tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.module-tour .tour-dots {
+  display: flex;
+  gap: 5px;
+  margin-right: auto;
+}
+
+.module-tour .tour-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--purple-border);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.module-tour .tour-dots span.is-done {
+  background: var(--purple);
+}
+
+.module-tour .tour-dots span.is-current {
+  width: 18px;
+  border-radius: 999px;
+  background: var(--purple);
+}
+
+.module-tour .tour-back,
+.module-tour .tour-next {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-action);
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.module-tour .tour-back {
+  border: none;
+  background: none;
+  color: var(--ink-3);
+}
+
+.module-tour .tour-back:hover {
+  color: var(--ink);
+}
+
+.module-tour .tour-next {
+  border: 2px solid var(--ink);
+  background: var(--amber);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.module-tour .tour-next:hover {
+  background: var(--gold-hover);
+}
+
+.module-tour .tour-next:active {
+  box-shadow: 1px 1px 0 0 var(--ink);
+  transform: translate(2px, 2px);
+}
+
+.module-tour button:focus-visible {
+  outline: 3px solid var(--electric);
+  outline-offset: 2px;
+}
+
+/* After the tour: a glow on the warm-up, "start here" */
+.nc-root .hero-warmup.tour-nudge {
+  animation: tourNudge 1.3s ease-out 2;
+}
+
+@keyframes tourNudge {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 58, 255, 0.45); }
+  100% { box-shadow: 0 0 0 18px rgba(74, 58, 255, 0); }
+}
+
+/* "?" in the top bar: replay the tour */
+.nc-topbar .nc-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: var(--font-action);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.nc-topbar .nc-help:hover {
+  border-color: var(--purple-border);
+  background: var(--purple-surface);
+  color: var(--purple);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .module-tour .tour-spot,
+  .module-tour .tour-card,
+  .module-tour .tour-shade,
+  .module-tour .tour-dots span {
+    transition: none;
+  }
+
+  .nc-root .hero-warmup.tour-nudge {
+    animation: none;
+    outline: 3px solid var(--electric);
+    outline-offset: 4px;
+  }
+}
