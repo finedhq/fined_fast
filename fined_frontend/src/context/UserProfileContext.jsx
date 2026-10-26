@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { fetchUserProfile, updateUserProfile } from "../services/api";
+import { trackSignUp } from "../utils/analytics";
 
 const UserProfileContext = createContext(null);
 
@@ -71,6 +72,11 @@ export const UserProfileProvider = ({ children }) => {
         console.warn("Could not get access token silently:", tokErr);
       }
       const data = await fetchUserProfile(token);
+      // Every new account must finish onboarding, so "required but not done" means
+      // this person just signed up (sent once per user in this browser)
+      if (data?.onboarding_required && !data.onboarding_completed) {
+        trackSignUp(user?.sub);
+      }
       if (data) {
         setProfile((prev) => {
           const next = {

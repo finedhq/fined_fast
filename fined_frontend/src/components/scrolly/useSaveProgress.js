@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { updateCardBySlug } from "../../services/api";
 import { pendingSaves } from "./savedAnswers";
+import { trackCourseStart } from "../../utils/analytics";
 
 const RESAVE_DELAY_MS = 1200;
 const RETRY_DELAY_MS = 1500;
@@ -42,16 +43,20 @@ export default function useSaveProgress({ cards, page, reached, email, enabled }
           const id = card.card_id;
           delete failed.current[id];
           setSaved((m) => ({ ...m, [id]: { status: "completed", userAnswer: answer } }));
-          send(card.slug, { status: "completed", email, finStars, userAnswer: answer }).catch((err) => {
-            console.warn("Module page: progress save failed", card.slug, err);
-            failed.current[id] = answer;
-            setSaved((m) => {
-              if (m[id]?.userAnswer !== answer) return m; // a newer answer went out since
-              const next = { ...m };
-              delete next[id];
-              return next;
+          send(card.slug, { status: "completed", email, finStars, userAnswer: answer })
+            .then((res) => {
+              if (res?.first_in_course) trackCourseStart(res.course_slug);
+            })
+            .catch((err) => {
+              console.warn("Module page: progress save failed", card.slug, err);
+              failed.current[id] = answer;
+              setSaved((m) => {
+                if (m[id]?.userAnswer !== answer) return m; // a newer answer went out since
+                const next = { ...m };
+                delete next[id];
+                return next;
+              });
             });
-          });
         });
       },
       todo.some((s) => !s.resave) ? 0 : RESAVE_DELAY_MS
