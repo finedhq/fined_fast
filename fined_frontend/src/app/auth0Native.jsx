@@ -16,6 +16,7 @@ import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import * as Auth0 from '@fined/auth0-react-original';
 import { navigateInApp } from './appNavigate';
+import { trackAuthLogin } from '../utils/analytics';
 
 // Everything else (useAuth0, withAuthenticationRequired…) is the original library's.
 // eslint-disable-next-line react-refresh/only-export-components -- library shim, not a hot-reloaded component file
@@ -75,6 +76,7 @@ function NativeLoginBridge({ callbackUrl, children }) {
       if (!query.has('state') || !(query.has('code') || query.has('error'))) return; // back from sign-out
       try {
         const result = await handleRedirectCallback(url);
+        trackAuthLogin('auth0'); // the website sends this from its own callback, which the app skips
         navigateInApp(result?.appState?.returnTo || '/dashboard', { replace: true });
       } catch {
         // Cancelled, expired, or the app restarted mid-login: back to the welcome screen to try again.

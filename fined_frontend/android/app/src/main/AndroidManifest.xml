@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="false"
@@ -66,6 +67,21 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="fined_updates" />
 
+        <!-- Google Analytics (src/app/analytics.js): off until the app turns it on (production builds
+             only), no advertising ID, no ad personalisation; the app reports its own screen names. -->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -82,4 +98,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Android 13+: asked for, with a FinEd explanation first, before showing notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- FinEd shows no ads: drop the advertising-ID permission the Analytics library would add -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
 </manifest>

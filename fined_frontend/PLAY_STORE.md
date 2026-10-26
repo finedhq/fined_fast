@@ -83,10 +83,12 @@ Companion to `MOBILE_APP.md`. Everything here is a draft for the owner to check:
 ## 5. Privacy policy additions (draft, for the owner to approve)
 
 Add to *3. What we collect*, a new paragraph:
-> **If you use the FinEd Android app.** We collect the same account and learning data as on the website. If you turn on notifications, we also store a notification token for your phone (from Google Firebase), so we can send you reminders and updates. We delete it when you sign out or delete your account. The app also sends crash reports (Sentry) so we can fix problems. It doesn't use Google Analytics or advertising IDs.
+> **If you use the FinEd Android app.** We collect the same account and learning data as on the website. If you turn on notifications, we also store a notification token for your phone (from Google Firebase), so we can send you reminders and updates. We delete it when you sign out or delete your account. The app also sends crash reports (Sentry) so we can fix problems, and usage analytics via Google Analytics for Firebase (screens opened, actions such as sharing an article), linked to an app-installation ID rather than your name or email. It doesn't collect advertising IDs, and ad personalisation is off.
 
 Add to *7. Who we share data with*, in the list:
-> Google Firebase Cloud Messaging: delivering app notifications.
+> Google Firebase: delivering app notifications (Cloud Messaging) and measuring app usage (Google Analytics for Firebase).
+
+(Done in `PrivacyPolicy.jsx`, 2026-10-25: the app uses Google Analytics for Firebase, linked to the website's GA4 property. Sentry session replays are off in the app.)
 
 Add to *10. Your rights*, after the list:
 > You can delete your account yourself at any time, in the app (Profile → Delete account) or at myfined.com/delete-account.
@@ -105,10 +107,10 @@ Collection and security:
 | Personal info → Name | Yes | Account management, app functionality | Required |
 | Personal info → Email address | Yes | Account management, app functionality, developer communications | Required |
 | Personal info → User IDs (Auth0 account id) | Yes | Account management | Required |
-| App activity → App interactions (course progress, quiz answers, streaks) | Yes | App functionality, analytics (internal, aggregated) | Required |
+| App activity → App interactions (course progress, quiz answers, streaks; screens viewed and actions such as sharing, via Google Analytics for Firebase) | Yes | App functionality, Analytics | Required |
 | App activity → Other user-generated content (feedback, contact messages, ratings) | Yes | App functionality | Optional |
 | App info and performance → Crash logs, Diagnostics (Sentry) | Yes | App functionality (fixing crashes) | Required |
-| Device or other IDs (notification token) | Yes | App functionality (notifications) | Optional (only if notifications are allowed) |
+| Device or other IDs (notification token; Firebase app-installation ID for analytics) | Yes | App functionality (notifications), Analytics | Required (the analytics ID); the notification token only if notifications are allowed |
 | Location, contacts, photos, files, messages, health, financial info | **No** | | |
 
 Check before submitting: whether profile fields (career stage, financial level, onboarding answers) should be listed as "Other info". They are optional, used for personalisation.
@@ -116,6 +118,7 @@ Check before submitting: whether profile fields (career stage, financial level, 
 ## 7. Declarations in Play Console
 
 - **Ads**: no ads.
+- **Advertising ID**: the app does **not** use it. The `AD_ID` permission is removed in `AndroidManifest.xml` and ad-ID collection is off, so answer "No" to "Does your app use advertising ID?".
 - **App access**: features need sign-in. Give reviewers a test account (email/password login on Auth0) with a few modules done. Without one, review often fails.
 - **Content rating** (IARC questionnaire): Education; no violence, sexuality, gambling or user-to-user chat. Expected: Everyone / 3+.
 - **Target audience**: 18+ (see decision 1).

@@ -10,6 +10,7 @@ import { setupShareAndSave } from './shareAndSave';
 import { setupHaptics } from './haptics';
 import { setupLiveUpdates } from './liveUpdate';
 import { setupPushListeners } from './push';
+import { setupAnalytics } from './analytics';
 import './appFonts.css';
 import './appOverrides.css';
 
@@ -20,7 +21,8 @@ const switchingToUpdate = setupLiveUpdates();
 // Dark status/navigation bar icons on the app's white bars, even when the phone is in dark mode.
 SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(() => {});
 
-setupShareAndSave(); // first, before the site checks navigator.share
+setupAnalytics(); // early, so the first screen and any early website events are counted
+setupShareAndSave(); // before the site checks navigator.share
 setupBackButton();
 setupExternalLinks();
 setupAppLinks();

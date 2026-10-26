@@ -27,6 +27,8 @@ const checks = [
   ['no app sign-in (Auth0 in a browser tab)', !assets.some((f) => /auth0Native/.test(f)) && assetText(/in\.fined\.app/).length === 0],
   ['no app live updates', assetText(/app-update\/manifest\.json|fined\.update\.ready/).length === 0],
   ['no app push notifications', assetText(/fined\.push\.|pushNotificationActionPerformed/).length === 0],
+  // the website's Google Analytics comes from Google Tag Manager; the app's Firebase Analytics stays out
+  ['no app analytics (Firebase Analytics)', assetText(/[`"']FirebaseAnalytics[`"']|firebase\/analytics|setCurrentScreen/).length === 0],
   ['no app-only style overrides', assetText(/hero-device-tip\{display:none!important|overscroll-behavior-y:none|layout-reels .scrolly-step{transition:none!important/).length === 0],
 ];
 

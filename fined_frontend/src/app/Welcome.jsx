@@ -1,14 +1,17 @@
 // App start screen for logged-out users (app build only), in place of the website's landing page.
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { PiArrowRightBold } from 'react-icons/pi';
 import logo from '../../resources/app-logo.png';
+import { reportWelcomeShown } from './analytics';
 import './Welcome.css';
 
 export default function Welcome() {
   const navigate = useNavigate();
   const { loginWithRedirect } = useAuth0();
   const returnHome = { appState: { returnTo: '/dashboard' } };
+  useEffect(() => reportWelcomeShown(), []); // counts the welcome screen only when it's really shown
 
   return (
     <div className="app-welcome">

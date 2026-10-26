@@ -17,6 +17,9 @@ const appShell = fileURLToPath(new URL('./src/app/appShell.app.js', import.meta.
 // Real Auth0 login for the app (src/app/auth0Native.jsx wraps the original library)
 const auth0Native = fileURLToPath(new URL('./src/app/auth0Native.jsx', import.meta.url));
 const auth0Original = fileURLToPath(new URL('./node_modules/@auth0/auth0-react/dist/auth0-react.esm.js', import.meta.url));
+// The Firebase Analytics plugin's browser version needs Google's Firebase JS SDK; the app only runs
+// its native version, so a small stand-in replaces that SDK (src/app/firebaseAnalyticsWebStub.js).
+const firebaseAnalyticsWebStub = fileURLToPath(new URL('./src/app/firebaseAnalyticsWebStub.js', import.meta.url));
 
 const GTM_HEAD = /[ \t]*<!-- Google Tag Manager -->[\s\S]*?<!-- End Google Tag Manager -->\n?/;
 const GTM_BODY = /[ \t]*<!-- Google Tag Manager \(noscript\) -->[\s\S]*?<!-- End Google Tag Manager \(noscript\) -->\n?/;
@@ -60,20 +63,36 @@ function liveApi() {
   };
 }
 
+// Google Analytics (src/app/analytics.js) runs in production app builds only, so phone tests on
+// practice data don't land in the real GA4 reports. FINED_ANALYTICS_TEST=1 turns it on in a test
+// build, to check events in GA4's DebugView.
+function analyticsSwitch() {
+  return {
+    name: 'fined-app-analytics',
+    config(_, { mode }) {
+      const on = mode === 'production' || process.env.FINED_ANALYTICS_TEST === '1';
+      return { define: { 'import.meta.env.VITE_ANALYTICS_ENABLED': JSON.stringify(String(on)) } };
+    },
+  };
+}
+
 export default mergeConfig(base, {
-  plugins: [appHtml(), liveApi()],
+  plugins: [appHtml(), liveApi(), analyticsSwitch()],
   // the website imports an empty src/app/appShell.js; the app gets the real tab bar layout
   resolve: {
     alias: [
       { find: /^\.\.\/app\/appShell$/, replacement: appShell },
       { find: /^@auth0\/auth0-react$/, replacement: auth0Native },
       { find: /^@fined\/auth0-react-original$/, replacement: auth0Original },
+      { find: /^firebase\/analytics$/, replacement: firebaseAnalyticsWebStub },
     ],
   },
   define: {
     'import.meta.env.VITE_NATIVE_APP': JSON.stringify('true'),
     // push notifications only with Firebase configured; registering without it crashes the app (src/app/push.js)
     'import.meta.env.VITE_PUSH_ENABLED': JSON.stringify(String(existsSync(fileURLToPath(new URL('./android/app/google-services.json', import.meta.url))))),
+    // Google Analytics (src/app/analytics.js) also needs Firebase configured
+    'import.meta.env.VITE_FIREBASE_CONFIGURED': JSON.stringify(String(existsSync(fileURLToPath(new URL('./android/app/google-services.json', import.meta.url))))),
     // identifies this web code for live updates (src/app/liveUpdate.js); set by scripts/build-app-update.mjs
     'import.meta.env.VITE_APP_BUILD': JSON.stringify(process.env.FINED_APP_BUILD || `builtin-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}`),
   },

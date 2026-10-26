@@ -105,11 +105,12 @@ export default function PrivacyPolicy() {
           items={[
             "If you turn on notifications, a notification token for your phone, issued by Google Firebase, so we can send you reminders and updates. We delete it when you sign out of the app or delete your account. You can switch notifications off at any time in your phone's settings.",
             'Crash reports (via Sentry) if the app runs into an error, so we can fix it.',
+            'Usage analytics via Google Analytics for Firebase: which screens are opened and actions such as sharing an article, linked to an app-installation ID rather than your name or email. We use it in aggregate to see how the app is used, alongside the website (see section 6).',
           ]}
         />
         <p>
-          The app does not use Google Analytics, and it does not collect advertising IDs, your
-          contacts, photos, location or other files on your phone.
+          The app does not collect advertising IDs, ad personalisation is turned off, and it does not
+          collect your contacts, photos, location or other files on your phone.
         </p>
       </Section>
 
@@ -159,8 +160,8 @@ export default function PrivacyPolicy() {
           signing in will not work.
         </p>
         <p>
-          In the Android app, Google Analytics is not used, and your sign-in is kept in the app's own
-          private storage on your phone rather than in browser cookies.
+          In the Android app, usage is measured with Google Analytics for Firebase instead of cookies,
+          and your sign-in is kept in the app's own private storage on your phone.
         </p>
       </Section>
 
@@ -178,7 +179,7 @@ export default function PrivacyPolicy() {
             'Google Analytics — usage analytics.',
             'Google Gemini API — generates Personal Lens explanations.',
             'Sentry — error reporting, to help us find and fix crashes.',
-            'Google Firebase Cloud Messaging — delivers notifications to the Android app.',
+            'Google Firebase — delivers notifications to the Android app (Cloud Messaging) and measures how the app is used (Google Analytics for Firebase).',
             'Zoho Mail — handles our email.',
           ]}
         />
