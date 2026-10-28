@@ -163,6 +163,16 @@ class ArticleService:
         self.clear_cache()
         return article_repo.delete(article_id)
         
+    def get_published_tags(self) -> list:
+        """Tag names that have at least one published article (60s memory cache)."""
+        now = time.time()
+        cached = self._all_articles_cache.get("__tags__")
+        if cached and now - cached[1] < self._all_articles_cache_ttl:
+            return cached[0]
+        tags = article_repo.get_published_tags()
+        self._all_articles_cache["__tags__"] = (tags, now)
+        return tags
+
     def get_all_authors(self) -> list:
         return article_repo.get_all_authors()
 
