@@ -3,6 +3,72 @@
     { "source": "/home", "destination": "/", "permanent": true }
   ],
   "rewrites": [
+    {
+      "source": "/articles",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/articles"
+    },
+    {
+      "source": "/articles/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/articles"
+    },
+    {
+      "source": "/tags/:tag",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/tags/:tag"
+    },
+    {
+      "source": "/tags/:tag/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/tags/:tag"
+    },
+    {
+      "source": "/courses/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/courses/:slug"
+    },
+    {
+      "source": "/courses/:slug/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/courses/:slug"
+    },
     { "source": "/articles", "destination": "/articles.html" },
     { "source": "/articles/", "destination": "/articles.html" },
     { "source": "/courses", "destination": "/courses.html" },

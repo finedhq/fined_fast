@@ -108,9 +108,106 @@ if os.path.exists(FRONTEND_DIST_DIR):
         app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 import html
-import json
+import re
+import uuid
 from app.services.page_shell import get_shell_html, strip_replaced_tags
+from app.services import crawler_pages as cp
+from app.repositories.course_repo import course_repo
+from app.services.course_visibility import course_status, is_released
 from app.routes.certificates import find_public as find_public_certificate
+
+_TAG_PATH = re.compile(r"^tags/([^/]+)/?$")
+_COURSE_PATH = re.compile(r"^courses/([^/]+)/?$")
+_ARTICLES_INDEX_DESCRIPTION = (
+    "Plain-English explainers on investing, IPOs, UPI, taxes and the Indian economy, "
+    "from quick reads to deep dives by the FinEd team."
+)  # same as /articles in fined_frontend/src/config/pageTitles.js
+_LIST_LIMIT = 200
+
+
+def _item_list(articles: list) -> dict:
+    return {
+        "@type": "ItemList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": i, "url": f"{cp.SITE}/articles/{a['slug']}", "name": a.get("title")}
+            for i, a in enumerate((a for a in articles if a.get("slug")), start=1)
+        ],
+    }
+
+
+def _articles_index_page():
+    """(head, body) for /articles."""
+    articles = article_service.get_all(limit=_LIST_LIMIT, offset=0)  # blogs left out, like the page
+    tags = article_service.get_published_tags()
+    url = f"{cp.SITE}/articles"
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Articles & Insights",
+        "url": url,
+        "mainEntity": _item_list(articles),
+    }
+    head = cp.head_tags(title="Articles | FinEd", description=_ARTICLES_INDEX_DESCRIPTION, url=url, schema=schema)
+    return head, cp.articles_index_body(articles, tags)
+
+
+def _tag_page(tag_slug: str):
+    """(head, body) for /tags/<slug>, or None when no published article has that tag."""
+    tag = next((t for t in article_service.get_published_tags() if cp.slugify_tag(t) == tag_slug.lower()), None)
+    if not tag:
+        return None
+    articles = article_service.get_all(limit=_LIST_LIMIT, offset=0, tag=tag)
+    url = f"{cp.SITE}/tags/{cp.slugify_tag(tag)}"
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": f"Articles tagged {tag}",
+        "url": url,
+        "mainEntity": _item_list(articles),
+    }
+    head = cp.head_tags(
+        title=f'Articles tagged "{tag}" | FinEd',
+        # same wording as the tag pages' build-time head tags (pageTitles.js)
+        description=f"{tag} explainers and guides from FinEd: clear, practical finance articles for India.",
+        url=url,
+        schema=schema,
+    )
+    return head, cp.tag_page_body(tag, articles)
+
+
+def _course_page(course_slug: str):
+    """(head, body) for /courses/<slug>, or None for a missing or draft course."""
+    course = course_repo.get_by_slug(course_slug)
+    if not course:
+        try:
+            course = course_repo.get_by_id(str(uuid.UUID(course_slug)))
+        except ValueError:
+            course = None
+    if not course or course_status(course) == "draft":
+        return None
+    modules = [m for m in course_repo.get_modules(course["id"]) if is_released(m)]
+    title = course.get("title") or "Course"
+    url = f"{cp.SITE}/courses/{course.get('slug') or course['id']}"
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": title,
+        "description": course.get("description") or title,
+        "url": url,
+        "provider": {"@type": "Organization", "name": "FinEd", "url": cp.SITE},
+    }
+    if course.get("thumbnail_url"):
+        schema["image"] = course["thumbnail_url"]
+    head = cp.head_tags(
+        title=f"{title} | FinEd",
+        description=cp.short(course.get("description") or title),
+        url=url,
+        image=course.get("thumbnail_url") or cp.DEFAULT_IMAGE,
+        # an archived course still opens by its link but has been replaced, so keep it out of search
+        robots="noindex, follow" if course_status(course) == "archived" else "index, follow, max-image-preview:large",
+        schema=schema,
+    )
+    return head, cp.course_page_body(course, modules)
 
 @app.api_route("/{fallback_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
 async def spa_fallback(fallback_path: str):
@@ -136,11 +233,31 @@ async def spa_fallback(fallback_path: str):
     # The built index.html: local dist/dev copy, or fetched from the frontend host
     # when the API runs without the frontend on disk (cached in page_shell).
     shell_html = await get_shell_html()
+    lookup_failed = False
+
+    # Article list, tag and course pages for crawlers: the page's own head tags plus its text
+    tag_match = _TAG_PATH.match(fallback_path)
+    course_match = _COURSE_PATH.match(fallback_path)
+    is_listing_path = fallback_path.rstrip("/") == "articles" or bool(tag_match) or bool(course_match)
+    listing_missing = False
+    if is_listing_path:
+        try:
+            if tag_match:
+                page = await asyncio.to_thread(_tag_page, tag_match.group(1))
+            elif course_match:
+                page = await asyncio.to_thread(_course_page, course_match.group(1))
+            else:
+                page = await asyncio.to_thread(_articles_index_page)
+            if page:
+                head, body = page
+                return Response(content=cp.build_page(shell_html, head, body, strip_replaced_tags), media_type="text/html")
+            listing_missing = True
+        except Exception:
+            lookup_failed = True  # Fall back to the standard index.html below
 
     # Check if request is for a single article or author page (for social crawler preview generation)
     is_article_path = fallback_path.startswith("articles/")
     is_author_path = fallback_path.startswith("authors/")
-    lookup_failed = False
     article_missing = False
     author_missing = False
     if is_article_path:
@@ -268,17 +385,8 @@ async def spa_fallback(fallback_path: str):
   <!-- Structured Data JSON-LD -->
   <script type="application/ld+json">{schema_json}</script>
 """
-                    if shell_html and "</head>" in shell_html:
-                        # Drop the shell's generic title/description/OG tags so the page has one of each
-                        page_html = strip_replaced_tags(shell_html).replace("</head>", f"{seo_meta_tags}\n</head>", 1)
-                    else:
-                        # No shell available: still answer with the tags rather than redirecting
-                        page_html = (
-                            '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
-                            '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
-                            f'{seo_meta_tags}</head><body><div id="root"></div>'
-                            f'<p><a href="{article_url}">{display_title}</a></p></body></html>'
-                        )
+                    # The shell (minus its generic title/description/OG tags) with this article's tags and text
+                    page_html = cp.build_page(shell_html, seo_meta_tags, cp.article_page_body(article), strip_replaced_tags)
                     return Response(content=page_html, media_type="text/html")
                 article_missing = True
             except Exception:
@@ -323,7 +431,7 @@ async def spa_fallback(fallback_path: str):
                     if linkedin_url:
                         schema_data["sameAs"] = [linkedin_url]
 
-                    schema_json = json.dumps(schema_data, ensure_ascii=False)
+                    schema_json = cp.json_ld(schema_data)
 
                     seo_meta_tags = f"""
   <title>{author_title}</title>
@@ -349,41 +457,10 @@ async def spa_fallback(fallback_path: str):
   <!-- Person Structured Data JSON-LD -->
   <script type="application/ld+json">{schema_json}</script>
 """
-                    bio_html = f"<p><strong>{html.escape(bio)}</strong></p>" if bio else ""
-                    desc_html = f"<p>{html.escape(author.get('description') or '')}</p>" if author.get('description') else ""
-                    linkedin_html = f'<p><a href="{html.escape(linkedin_url)}" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a></p>' if linkedin_url else ""
-
-                    # Fetch a few articles by author for crawlable links
-                    author_articles_res = article_service.get_articles_by_author(author.get("id"), limit=10)
+                    # Plain visible text inside #root (Google mostly ignores <noscript>)
+                    author_articles_res = article_service.get_articles_by_author(author.get("id"), limit=_LIST_LIMIT)
                     author_articles = author_articles_res.get("articles", []) if author_articles_res else []
-                    articles_html = "".join(
-                        f'<li><a href="https://myfined.com/articles/{html.escape(a.get("slug") or "")}">{html.escape(a.get("title") or "")}</a></li>'
-                        for a in author_articles if a.get("title")
-                    )
-                    articles_list_html = f"<h3>Articles by {author_name}</h3><ul>{articles_html}</ul>" if articles_html else ""
-
-                    crawler_noscript = f"""
-  <noscript>
-    <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6;">
-      <h1>{author_name}</h1>
-      {bio_html}
-      {desc_html}
-      {linkedin_html}
-      {articles_list_html}
-    </div>
-  </noscript>
-"""
-                    if shell_html and "</head>" in shell_html:
-                        page_html = strip_replaced_tags(shell_html).replace("</head>", f"{seo_meta_tags}\n</head>", 1)
-                        if '<div id="root"></div>' in page_html:
-                            page_html = page_html.replace('<div id="root"></div>', f'<div id="root">{crawler_noscript}</div>', 1)
-                    else:
-                        page_html = (
-                            '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
-                            '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
-                            f'{seo_meta_tags}</head><body><div id="root">{crawler_noscript}</div>'
-                            f'<p><a href="{author_url}">{author_name}</a></p></body></html>'
-                        )
+                    page_html = cp.build_page(shell_html, seo_meta_tags, cp.author_page_body(author, author_articles), strip_replaced_tags)
                     return Response(content=page_html, media_type="text/html")
                 author_missing = True
             except Exception:
@@ -424,12 +501,12 @@ async def spa_fallback(fallback_path: str):
 
     # Serve index.html for SPA routes (e.g., /about, /courses, etc.)
     if shell_html:
-        # Unknown article or author slug: keep the SPA's own "not found" page but tell crawlers it is a 404
-        return Response(content=shell_html, media_type="text/html", status_code=404 if (article_missing or author_missing) else 200)
+        # Unknown article, author, tag or course: keep the SPA's own "not found" page but tell crawlers it is a 404
+        return Response(content=shell_html, media_type="text/html", status_code=404 if (article_missing or author_missing or listing_missing) else 200)
 
-    # No shell available. Never redirect article or author URLs: the frontend host sends crawlers
+    # No shell available. Never redirect article, author, tag or course URLs: the frontend host sends crawlers
     # straight back here, which makes a redirect loop.
-    if is_article_path or is_author_path:
+    if is_article_path or is_author_path or is_listing_path:
         if lookup_failed:
             return Response(content="Temporarily unavailable", status_code=503, headers={"Retry-After": "60"})
         return Response(content="Not found", status_code=404, media_type="text/plain")

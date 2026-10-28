@@ -243,6 +243,10 @@ class ArticleRepository:
             .order("created_at", desc=True).execute()
         return res.data or []
 
+    def get_published_tags(self) -> list:
+        res = supabase.from_("articles").select("tag").eq("status", "published").execute()
+        return sorted({r["tag"] for r in (res.data or []) if r.get("tag")})
+
     def get_all_authors(self) -> list:
         res = supabase.from_("authors").select("*").order("name").execute()
         return res.data or []
