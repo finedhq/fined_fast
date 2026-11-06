@@ -79,7 +79,14 @@ function Seal() {
 }
 
 const CertificateDesign = forwardRef(function CertificateDesign(
-  { name, courseTitle, modulesCount, completedAt, code, verifyUrl, sample = false },
+  {
+    name, courseTitle, modulesCount, completedAt, code, verifyUrl, sample = false,
+    // Optional wording overrides (WinterArc uses these); defaults are the course certificate
+    leadText = 'This certifies that',
+    actionText = 'has successfully completed the course',
+    bandLabel = 'Course complete',
+    bandStat = null,
+  },
   ref
 ) {
   const displayName = (name || '').trim() || 'Your Name';
@@ -97,8 +104,12 @@ const CertificateDesign = forwardRef(function CertificateDesign(
         <div className="fcert-band-mid">
           <div className="fcert-rings" style={{ backgroundImage: RINGS_URL }} aria-hidden="true" />
           <Seal />
-          <div className="fcert-band-label">Course complete</div>
-          {modulesCount ? (
+          <div className="fcert-band-label">{bandLabel}</div>
+          {bandStat ? (
+            <div className="fcert-band-stat">
+              <span className="fcert-band-dot" />{bandStat}<span className="fcert-band-dot" />
+            </div>
+          ) : modulesCount ? (
             <div className="fcert-band-stat">
               <span className="fcert-band-dot" />{modulesCount} modules<span className="fcert-band-dot" />
             </div>
@@ -127,11 +138,11 @@ const CertificateDesign = forwardRef(function CertificateDesign(
             <span className="fcert-eyebrow-rule" />
           </div>
 
-          <p className="fcert-lead">This certifies that</p>
+          <p className="fcert-lead">{leadText}</p>
           <h1 className="fcert-name" style={{ fontSize: nameSize(displayName) }}>{displayName}</h1>
           <div className="fcert-name-rule" aria-hidden="true"><span /></div>
 
-          <p className="fcert-lead">has successfully completed the course</p>
+          <p className="fcert-lead">{actionText}</p>
           <h2 className="fcert-course">{courseTitle || 'Course name'}</h2>
         </div>
 

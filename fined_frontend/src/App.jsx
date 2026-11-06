@@ -46,6 +46,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard/Leaderboard"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
+const WinterArcLanding = lazy(() => import("./pages/WinterArc/WinterArcLanding"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -83,6 +84,7 @@ function App() {
                     <Route path="feedback" element={<FeedbackPage />} />
 
                     <Route path="about" element={<AboutPage />} />
+                    <Route path="winterarc" element={<WinterArcLanding />} />
                     <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
                     <Route path="profile" element={<AuthenticationGuard component={ProfilePage} />} />
 
