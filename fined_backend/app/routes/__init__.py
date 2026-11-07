@@ -15,6 +15,7 @@ from app.routes.personal_lens import router as personal_lens_router
 from app.routes.users import router as users_router
 from app.routes.sources import router as sources_router
 from app.routes.certificates import router as certificates_router
+from app.routes.winterarc import router as winterarc_router
 
 api_router = APIRouter()
 
@@ -31,6 +32,7 @@ api_router.include_router(cards_router)
 api_router.include_router(users_router)
 api_router.include_router(sources_router)
 api_router.include_router(certificates_router)
+api_router.include_router(winterarc_router)
 
 
 

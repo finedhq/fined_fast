@@ -524,3 +524,13 @@ export const fetchUserProfile = getUserProfile;
 export { API_BASE_URL };
 
 
+
+// WinterArc waitlist (public, no login). `form` holds the sign-up fields plus
+// the first-touch source from utils/attribution.
+export function joinWinterArcWaitlist(form) {
+  return request("/winterarc/waitlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(form),
+  });
+}
