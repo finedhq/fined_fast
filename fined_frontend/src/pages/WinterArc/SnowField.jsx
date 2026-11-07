@@ -73,6 +73,17 @@ export default function SnowField({ hostRef }) {
       l.heights.fill(0);
     };
 
+    // A surface only collects snow once it (and everything around it) has
+    // finished fading in, so piles never float over invisible content
+    const shown = (el) => {
+      let op = 1;
+      for (let n = el; n && n !== host.parentElement; n = n.parentElement) {
+        op *= parseFloat(getComputedStyle(n).opacity) || 0;
+        if (op < 0.98) return false;
+      }
+      return true;
+    };
+
     const scanLedges = () => {
       const hr = host.getBoundingClientRect();
       const next = [];
@@ -92,6 +103,7 @@ export default function SnowField({ hostRef }) {
           cols,
           max: Number(el.dataset.snowLedge) || 10,
           heights: old && old.cols === cols ? old.heights : new Float32Array(cols),
+          hidden: !shown(el),
         };
         if (!old) {
           for (let i = 0; i < cols; i += 1) {
@@ -125,6 +137,7 @@ export default function SnowField({ hostRef }) {
 
     const drawPiles = () => {
       ledges.forEach((l) => {
+        if (l.hidden) return;
         let any = false;
         for (let i = 0; i < l.cols; i += 1) if (l.heights[i] > 0.4) { any = true; break; }
         if (!any) return;
@@ -199,7 +212,7 @@ export default function SnowField({ hostRef }) {
       raf = requestAnimationFrame(step);
       const dt = last ? Math.min(3, (now - last) / 16.67) : 1;
       last = now;
-      if (now - lastScan > 900) {
+      if (now - lastScan > 500) {
         scanLedges();
         lastScan = now;
       }
@@ -224,7 +237,7 @@ export default function SnowField({ hostRef }) {
         let landed = false;
         for (let k = 0; k < ledges.length && !f.extra; k += 1) {
           const l = ledges[k];
-          if (f.x < l.left || f.x > l.left + l.width) continue;
+          if (l.hidden || f.x < l.left || f.x > l.left + l.width) continue;
           const i = Math.min(l.cols - 1, Math.floor(((f.x - l.left) / l.width) * l.cols));
           const surface = l.top - l.heights[i];
           if (prevY <= surface && f.y >= surface) {

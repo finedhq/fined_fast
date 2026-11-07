@@ -1,0 +1,25 @@
+/* Gold prize ticket: brand gold, ink border and offset shadow like the
+   brand's buttons, notched sides, tilted FREE ENTRY stamp. */
+.pt-ticket {
+  --ticket-notch: #F7F4FF;
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px; border-radius: 16px; border: 2px solid #171321;
+  background:
+    radial-gradient(circle at 0 50%, var(--ticket-notch) 9px, transparent 10px),
+    radial-gradient(circle at 100% 50%, var(--ticket-notch) 9px, transparent 10px),
+    linear-gradient(135deg, #FFD15C 0%, #FFB600 60%, #F5A623 100%);
+  box-shadow: 4px 4px 0 0 #171321;
+}
+.pt-icon { flex: none; font-size: 2rem; color: #171321; }
+.pt-text { display: grid; line-height: 1; }
+.pt-num {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 9vw, 2.7rem);
+  letter-spacing: -0.04em; color: #171321; font-variant-numeric: tabular-nums;
+}
+.pt-label { margin-top: 4px; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.9rem; color: #3A2A00; }
+.pt-stamp {
+  margin-left: auto; flex: none; padding: 6px 10px; border: 2px dashed #4100BC; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85); color: #4100BC; transform: rotate(8deg);
+  font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.78rem; line-height: 1.05;
+  text-transform: uppercase; letter-spacing: 0.04em; text-align: center;
+}

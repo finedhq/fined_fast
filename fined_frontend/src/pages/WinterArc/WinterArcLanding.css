@@ -560,3 +560,7 @@
   .wa-doc-body h2 { font-size: 1.2rem; }
   .wa-doc-body ul { padding-left: 18px; }
 }
+
+/* Prize ticket in the hero (component: PrizeTicket.jsx) */
+.wa-hero-ticket { margin-top: 20px; }
+.wa-hero-ticket .pt-ticket { --ticket-notch: var(--wa-sky); }
