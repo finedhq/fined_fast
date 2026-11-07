@@ -14,7 +14,7 @@ router = APIRouter(prefix="/winterarc", tags=["WinterArc"])
 
 TABLE = "winterarc_waitlist"
 # Bump when the consent wording on the landing page changes
-CONSENT_VERSION = "waitlist-2026-11-06"
+CONSENT_VERSION = "rules-2026-11-07"
 # No 0/O/1/I/L, so codes survive being read aloud or typed from a poster
 CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 CODE_LENGTH = 6
@@ -74,9 +74,9 @@ async def join_waitlist(body: WaitlistRequest):
     if not EMAIL_RE.match(email):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please enter a valid email address.")
     if not body.age_confirmed:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "WinterArc is open to people aged 18 or over.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "WinterArc is open to residents of India aged 18 or over.")
     if not body.consent:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please agree to the terms and the privacy policy to join.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please agree to the WinterArc rules and the privacy policy to join.")
 
     # Already on the list: keep the first-touch source, just return their code
     existing = _find_by_email(email)

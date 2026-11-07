@@ -47,6 +47,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
 const WinterArcLanding = lazy(() => import("./pages/WinterArc/WinterArcLanding"));
+const WinterArcRules = lazy(() => import("./pages/WinterArc/WinterArcRules"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -85,6 +86,7 @@ function App() {
 
                     <Route path="about" element={<AboutPage />} />
                     <Route path="winterarc" element={<WinterArcLanding />} />
+                    <Route path="winterarc/rules" element={<WinterArcRules />} />
                     <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
                     <Route path="profile" element={<AuthenticationGuard component={ProfilePage} />} />
 

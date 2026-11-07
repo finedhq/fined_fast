@@ -111,8 +111,8 @@ export default function SignupForm() {
   const submit = async (e) => {
     e.preventDefault();
     if (state.status === "sending") return;
-    if (!form.age_confirmed) return setState((s) => ({ ...s, error: `WinterArc is for people aged ${W.minAge} or over.` }));
-    if (!form.consent) return setState((s) => ({ ...s, error: "Please agree to the terms and the privacy policy to join." }));
+    if (!form.age_confirmed) return setState((s) => ({ ...s, error: `WinterArc is for residents of ${W.residency} aged ${W.minAge} or over.` }));
+    if (!form.consent) return setState((s) => ({ ...s, error: "Please agree to the WinterArc rules and the privacy policy to join." }));
     setState((s) => ({ ...s, status: "sending", error: "" }));
     try {
       const res = await joinWinterArcWaitlist({ ...form, ...getAttribution() });
@@ -157,13 +157,13 @@ export default function SignupForm() {
       </label>
       <label className="wa-check">
         <input type="checkbox" checked={form.age_confirmed} onChange={set("age_confirmed")} />
-        <span>I am {W.minAge} or older.</span>
+        <span>I am {W.minAge} or older and live in {W.residency}.</span>
       </label>
       <label className="wa-check">
         <input type="checkbox" checked={form.consent} onChange={set("consent")} />
         <span>
           I agree to the{" "}
-          <Link to="/termsofservice" target="_blank">terms and conditions</Link> and the{" "}
+          <Link to="/winterarc/rules" target="_blank">WinterArc rules</Link> and the{" "}
           <Link to="/privacy-policy" target="_blank">privacy policy</Link>.
         </span>
       </label>

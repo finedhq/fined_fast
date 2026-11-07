@@ -1,6 +1,6 @@
 import LegalPage, { Section, Bullets, Callout } from './LegalPage';
 
-const LAST_UPDATED = '4 October 2026';
+const LAST_UPDATED = '7 November 2026';
 const CONTACT = 'support@myfined.com';
 
 export default function PrivacyPolicy() {
@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
             and contact you about the service. We do not use Google user data for advertising, we do
             not sell it, and we do not share it with anyone other than the service providers listed in
             section 7 who help us run FinEd. We no longer request access to your Gmail or any other
-            Google service (see section 8). You can revoke FinEd's access at any time from your Google
+            Google service (see section 9). You can revoke FinEd's access at any time from your Google
             Account permissions page, and you can ask us to delete the data we hold.
           </p>
         </Callout>
@@ -166,7 +166,46 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="8. The retired expense tracker">
+      <Section heading="8. The WinterArc challenge">
+        <p>
+          WinterArc is FinEd's free 30-day money challenge (1 to 30 December 2026), open to residents
+          of India aged 18 and over. If you join it, this section applies on top of the rest of this
+          policy.
+        </p>
+        <p className="font-semibold text-[#171321]">What we collect</p>
+        <Bullets
+          items={[
+            'When you join the waitlist: your name, email address, college (optional), how you heard about WinterArc, and when you agreed to the terms and this policy.',
+            'How you reached the page: the campaign tags, referral code or link you arrived through. We use this to count each person once and to know which channels work.',
+            'During the challenge: your answers, points, streaks, resets, leaderboard positions and referrals.',
+            'If you win: the UPI ID you give us to receive your prize. We ask for it only from winners, only with their consent, and use it only to pay the prize.',
+          ]}
+        />
+        <p className="font-semibold text-[#171321] pt-2">Why we use it</p>
+        <Bullets
+          items={[
+            'To run the challenge, score your answers and show leaderboards.',
+            'To send you emails about WinterArc, such as the Day 1 reminder and results.',
+            'To check referrals and winners, and to stop multiple accounts or other cheating.',
+            'To pay prizes and issue completion certificates.',
+            'To measure how many people take part and where they came from.',
+          ]}
+        />
+        <p className="font-semibold text-[#171321] pt-2">What others can see</p>
+        <p>
+          Leaderboards show your display name and score. Reports we share with partner colleges or
+          other partners only contain combined numbers, such as how many students took part. They
+          never include your email address or UPI ID.
+        </p>
+        <p className="font-semibold text-[#171321] pt-2">How long we keep it</p>
+        <p>
+          WinterArc data is kept like the rest of your account data (see section 10). UPI IDs are
+          deleted once your prize has been paid, unless the law requires us to keep a record of the
+          payment.
+        </p>
+      </Section>
+
+      <Section heading="9. The retired expense tracker">
         <Callout>
           <p className="font-semibold mb-2">A feature we have removed</p>
           <p>
@@ -187,7 +226,7 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="9. How long we keep it">
+      <Section heading="10. How long we keep it">
         <p>
           We keep your account data for as long as your account exists. If you ask us to delete your
           account, we will remove your personal data, except where we are required to keep something
@@ -199,7 +238,7 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="10. Your rights">
+      <Section heading="11. Your rights">
         <p>You can ask us to:</p>
         <Bullets
           items={[
@@ -220,7 +259,7 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="11. Security">
+      <Section heading="12. Security">
         <p>
           Sign-in is handled by Auth0 so we never hold your password. Traffic to FinEd is encrypted in
           transit, and access to our systems is limited to the people who need it.
@@ -231,7 +270,7 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="12. Changes to this policy">
+      <Section heading="13. Changes to this policy">
         <p>
           We will update this page when our practices change, and we will change the "last updated"
           date at the top. If a change materially affects you, we will make a greater effort to bring
@@ -239,7 +278,7 @@ export default function PrivacyPolicy() {
         </p>
       </Section>
 
-      <Section heading="13. Contact us">
+      <Section heading="14. Contact us">
         <p>
           Questions, requests or complaints about privacy:{' '}
           <a href={`mailto:${CONTACT}`} className="text-[#4100BC] font-semibold hover:underline">

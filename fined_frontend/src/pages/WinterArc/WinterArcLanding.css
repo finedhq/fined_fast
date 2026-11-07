@@ -508,3 +508,55 @@
 
 .wa-door-inside { padding-left: 9%; }
 .wa-door-label { font-size: 0.6rem; letter-spacing: -0.01em; }
+
+/* ---------- Rules page (draft) ---------- */
+.wa-doc-page { padding: 120px 0 96px; }
+.wa-doc { max-width: 1000px; }
+.wa-doc h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 800; letter-spacing: -0.035em; margin-top: 22px; }
+.wa-draft {
+  display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 12px;
+  background: var(--wa-gold-tint); border: 1px solid var(--wa-amber); color: #6B4A00;
+}
+.wa-draft svg { flex: none; font-size: 1.2rem; margin-top: 2px; }
+.wa-doc-grid { display: grid; gap: 32px; margin-top: 36px; }
+.wa-doc-toc ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-family: var(--wa-action); font-weight: 700; font-size: 0.9rem; }
+.wa-doc-toc a { color: var(--wa-purple); text-decoration: none; }
+.wa-doc-toc a:hover { text-decoration: underline; }
+.wa-doc-body section { scroll-margin-top: 100px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--wa-border); }
+.wa-doc-body section:last-child { border-bottom: 0; }
+.wa-doc-body h2 { font-size: 1.35rem; margin-bottom: 12px; }
+.wa-doc-body ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--wa-ink-2); line-height: 1.6; }
+.wa-doc-body a { color: var(--wa-purple); font-weight: 700; }
+.wa-tbc { background: #FFF3D6; color: #8A5A00; padding: 1px 6px; border-radius: 6px; font-weight: 700; font-size: 0.92em; }
+@media (min-width: 900px) {
+  .wa-doc-grid { grid-template-columns: 220px 1fr; gap: 48px; }
+  .wa-doc-toc { position: sticky; top: 110px; align-self: start; }
+}
+
+.wa-doc-note { margin-bottom: 12px !important; padding: 10px 14px; border-radius: 12px; background: var(--wa-purple-surface); border: 1px solid var(--wa-purple-border); color: var(--wa-ink-2); font-size: 0.95rem; line-height: 1.5; }
+
+/* Rules page on phones: the contents list becomes one sticky row of
+   swipeable chips under the navbar, so the rules start on the first screen */
+@media (max-width: 899px) {
+  .wa-doc-page { padding-top: 104px; }
+  .wa-doc-grid { margin-top: 20px; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+  .wa-doc-toc, .wa-doc-body { min-width: 0; }
+  .wa-doc-toc {
+    position: sticky; top: 76px; z-index: 5; margin: 0 -16px; padding: 10px 16px;
+    background: rgba(250, 251, 255, 0.94); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--wa-border);
+  }
+  .wa-doc-toc ol {
+    list-style: none; padding: 0; display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .wa-doc-toc ol::-webkit-scrollbar { display: none; }
+  .wa-doc-toc li { flex: none; scroll-snap-align: start; }
+  .wa-doc-toc a {
+    display: inline-block; padding: 8px 14px; border-radius: 9999px; white-space: nowrap;
+    background: var(--wa-white); border: 1px solid var(--wa-purple-border); font-size: 0.85rem;
+  }
+  .wa-doc-body section { scroll-margin-top: 150px; padding-bottom: 22px; margin-bottom: 22px; }
+  .wa-doc-body h2 { font-size: 1.2rem; }
+  .wa-doc-body ul { padding-left: 18px; }
+}

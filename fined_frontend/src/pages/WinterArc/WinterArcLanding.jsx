@@ -219,7 +219,7 @@ function Scoring() {
 function PrizesAndRules() {
   const rules = [
     "Free to enter, always. You never pay to take part or to win.",
-    `Open to people aged ${W.minAge} and over.`,
+    `Open to residents of ${W.residency} aged ${W.minAge} and over.`,
     "Learning only. WinterArc never tells you what to buy or sell.",
   ];
   return (
