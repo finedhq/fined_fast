@@ -19,6 +19,7 @@ import ExpertsSection from "./sections/ExpertsSection";
 import TestimonialsSection from "./sections/TestimonialsSection";
 import FinalCta from "./sections/FinalCta";
 import FloatingWhatsAppButton from "../../components/Community/FloatingWhatsAppButton";
+import WinterArcPopup from "../WinterArc/WinterArcPopup";
 import "./landing.css";
 
 export default function Hero() {
@@ -51,6 +52,7 @@ export default function Hero() {
   return (
     <div className="lp">
       <HeroSection bundle={sampleModule} />
+      {!isAuthenticated && <WinterArcPopup />}
       <LearnersStrip />
       <StorySection />
       <FeaturesSection />

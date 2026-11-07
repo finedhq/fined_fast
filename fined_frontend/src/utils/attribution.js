@@ -75,3 +75,19 @@ export function getAttribution() {
   delete value.tagged;
   return value;
 }
+
+/**
+ * Record an on-site source (e.g. the home page WinterArc popup) for a visitor
+ * who arrived with no tags. Tagged first visits are never overwritten.
+ */
+export function tagSourceIfUntagged(tags) {
+  const existing = read();
+  if (existing?.tagged) return;
+  write({
+    ...(existing || {}),
+    ...tags,
+    landing_path: existing?.landing_path || cut(window.location.pathname, 300),
+    first_seen_at: existing?.first_seen_at || new Date().toISOString(),
+    tagged: true,
+  });
+}

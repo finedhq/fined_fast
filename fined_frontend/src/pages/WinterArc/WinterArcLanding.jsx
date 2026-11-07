@@ -15,6 +15,7 @@ import SnowField from "./SnowField";
 import AdventCalendar from "./AdventCalendar";
 import SnowballStreak from "./SnowballStreak";
 import FrostWindow from "./FrostWindow";
+import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
 import SignupForm, { Countdown } from "./WinterArcSignup";
@@ -80,14 +81,7 @@ function Hero() {
             </span>
           </motion.h1>
           <motion.p className="wa-hero-sub" {...rise(0.16)}>
-            {W.show.prizes ? (
-              <>
-                One short money task a day for {W.totalDays} days. Free to enter, with{" "}
-                <strong className="wa-cash">{W.prizePool} in cash prizes</strong> to win.
-              </>
-            ) : (
-              <>One short money task a day for {W.totalDays} days. Free to enter, with weekly leaderboards.</>
-            )}
+            One short money task a day for {W.totalDays} days. Free to enter, free to win.
           </motion.p>
           <motion.div className="wa-hero-ctas" {...rise(0.24)}>
             <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={() => scrollTo("join")}>
@@ -111,14 +105,15 @@ function Hero() {
             <Countdown />
             <ul className="wa-hero-facts">
               <li><strong>{W.totalDays}</strong> days</li>
-              {W.show.prizes ? (
-                <li className="wa-hero-fact-prize"><strong>{W.prizePool}</strong> cash prizes</li>
-              ) : (
-                <li><strong>{W.questionsPerDay}</strong> questions a day</li>
-              )}
+              <li><strong>{W.questionsPerDay}</strong> questions a day</li>
               <li><strong>₹0</strong> to enter</li>
             </ul>
           </div>
+          {W.show.prizes && (
+            <div className="wa-hero-ticket">
+              <PrizeTicket amount={W.prizePool} delay={0.9} data-snow-ledge="12" />
+            </div>
+          )}
         </motion.div>
       </div>
 

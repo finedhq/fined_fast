@@ -1,0 +1,74 @@
+/* WinterArc popup on the home page. Same brand tokens as the WinterArc page;
+   kept in its own small file so the home page doesn't load the whole
+   WinterArc stylesheet. Phones get a bottom sheet. */
+.wap-backdrop {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px;
+  background: rgba(23, 19, 33, 0.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.wap-card {
+  position: relative; overflow: hidden; width: 100%; max-width: 460px; padding: 30px 28px 26px;
+  border-radius: 24px; background:
+    radial-gradient(90% 60% at 100% 0%, rgba(106, 60, 240, 0.10), transparent 60%),
+    linear-gradient(180deg, #FFFFFF, #F7F4FF);
+  border: 1px solid #E6E1EC;
+  box-shadow: 0 30px 80px -24px rgba(65, 0, 188, 0.45), 0 2px 8px rgba(23, 19, 33, 0.08);
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #171321;
+}
+.wap-card .wa-snow { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.wap-close {
+  position: absolute; top: 14px; right: 14px; z-index: 4; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid #E6E1EC; background: #fff; color: #625D6D; cursor: pointer;
+}
+.wap-close:hover { color: #4100BC; border-color: #DCD3F7; }
+.wap-eyebrow {
+  position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 7px; margin: 0 0 16px;
+  padding: 6px 12px; border-radius: 9999px; background: #fff; border: 1px solid #DCD3F7;
+  font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.8rem; color: #4100BC;
+}
+.wap-eyebrow svg { color: #4A3AFF; }
+.wap-card h2 {
+  position: relative; z-index: 2; margin: 0; padding-right: 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(1.7rem, 6vw, 2.1rem);
+  line-height: 1.12; letter-spacing: -0.03em; color: #171321;
+}
+.wap-hl {
+  color: #4100BC; white-space: nowrap;
+  background: linear-gradient(180deg, transparent 72%, rgba(255, 182, 0, 0.55) 72%);
+}
+.wap-sub { position: relative; z-index: 2; margin: 14px 0 0; font-size: 1.02rem; line-height: 1.6; color: #3E3A4A; }
+.wap-sub strong { color: #171321; }
+.wap-ticket { margin-top: 18px; --ticket-notch: #F8F6FF; }
+.wap-chips {
+  position: relative; z-index: 2; list-style: none; margin: 16px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.wap-chips li {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9999px;
+  background: #fff; border: 1px solid #DCD3F7; font-family: 'Manrope', sans-serif; font-weight: 800;
+  font-size: 0.82rem; color: #3E3A4A;
+}
+.wap-chips svg { color: #4A3AFF; }
+.wap-chips li:nth-child(2) svg { color: #E6A200; }
+.wap-actions { position: relative; z-index: 2; display: grid; gap: 8px; margin-top: 22px; }
+.wap-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px;
+  border-radius: 9999px; border: 2px solid transparent; cursor: pointer; white-space: nowrap;
+  font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1rem;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s, border-color 0.2s;
+}
+.wap-btn svg { width: 18px; height: 18px; }
+.wap-btn-primary { background: #FFB600; color: #171321; box-shadow: 4px 4px 0 0 #171321; }
+.wap-btn-primary:hover { background: #E6A200; box-shadow: 6px 6px 0 0 #171321; transform: translate(-1px, -1px); }
+.wap-btn-primary:active { box-shadow: 1px 1px 0 0 #171321; transform: translate(3px, 3px); }
+.wap-btn-ghost { background: transparent; color: #625D6D; padding: 10px 20px; }
+.wap-btn-ghost:hover { color: #4100BC; }
+.wap-card :focus-visible { outline: 3px solid #4A3AFF; outline-offset: 3px; }
+
+@media (max-width: 560px) {
+  .wap-backdrop { place-items: end center; padding: 0; }
+  .wap-card { max-width: none; border-radius: 24px 24px 0 0; padding: 26px 20px calc(20px + env(safe-area-inset-bottom)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wap-btn { transition: none; }
+}
