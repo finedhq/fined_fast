@@ -6,6 +6,7 @@ import { WINTERARC as W } from "./winterarcConfig";
 import { joinWinterArcWaitlist } from "../../services/api";
 import { getAttribution } from "../../utils/attribution";
 import { trackEvent } from "../../utils/analytics";
+import { markJoined } from "./winterarcVisitor";
 
 const SITE = "https://myfined.com";
 
@@ -117,6 +118,7 @@ export default function SignupForm() {
     try {
       const res = await joinWinterArcWaitlist({ ...form, ...getAttribution() });
       setState({ status: "done", error: "", code: res.referral_code, already: res.already_joined });
+      markJoined();
       if (!res.already_joined) {
         const src = getAttribution();
         trackEvent("generate_lead", {

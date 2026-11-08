@@ -1,5 +1,5 @@
-// Home page popup introducing WinterArc. Shows once per visitor, a few
-// seconds after landing, until the challenge ends. Snow from the WinterArc
+// Home page popup introducing WinterArc. Shows a few seconds after landing,
+// once per visit, until the visitor joins the waitlist or the challenge ends. Snow from the WinterArc
 // page falls inside it and piles up on its button. Clicking through tags the
 // visitor's source as the popup (unless they already arrived with tags).
 import { useEffect, useRef, useState } from "react";
@@ -11,27 +11,12 @@ import SnowField from "./SnowField";
 import PrizeTicket from "./PrizeTicket";
 import { trackEvent } from "../../utils/analytics";
 import { tagSourceIfUntagged } from "../../utils/attribution";
+import { hasJoined, popupShownThisVisit, markPopupShown } from "./winterarcVisitor";
 import "./WinterArcPopup.css";
 
-const SEEN_KEY = "fined_winterarc_popup_v1";
 const SHOW_AFTER_MS = 3500;
 // Last moment to show it: the end of the final day, IST
 const SHOW_UNTIL = new Date("2026-12-30T23:59:59+05:30").getTime();
-
-const alreadySeen = () => {
-  try {
-    return !!localStorage.getItem(SEEN_KEY);
-  } catch {
-    return false;
-  }
-};
-const markSeen = (how) => {
-  try {
-    localStorage.setItem(SEEN_KEY, how);
-  } catch {
-    // storage blocked: it may show again next visit, which is fine
-  }
-};
 
 export default function WinterArcPopup() {
   const navigate = useNavigate();
@@ -42,10 +27,12 @@ export default function WinterArcPopup() {
   const [live, setLive] = useState(false);
 
   useEffect(() => {
-    if (alreadySeen() || Date.now() > SHOW_UNTIL) return undefined;
+    // Every visit to the home page, once per visit, until people join
+    if (hasJoined() || popupShownThisVisit() || Date.now() > SHOW_UNTIL) return undefined;
     const id = setTimeout(() => {
       setLive(Date.now() >= new Date(W.startsAt).getTime());
       setOpen(true);
+      markPopupShown();
       trackEvent("winterarc_popup_view");
     }, SHOW_AFTER_MS);
     return () => clearTimeout(id);
@@ -53,7 +40,6 @@ export default function WinterArcPopup() {
 
   const close = (how = "dismissed") => {
     setOpen(false);
-    markSeen(how);
     if (how === "dismissed") trackEvent("winterarc_popup_close");
   };
 
