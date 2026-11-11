@@ -16,6 +16,9 @@ from app.routes.users import router as users_router
 from app.routes.sources import router as sources_router
 from app.routes.certificates import router as certificates_router
 from app.routes.winterarc import router as winterarc_router
+from app.routes.winterarc_days import router as winterarc_days_router
+from app.routes.winterarc_metrics import router as winterarc_metrics_router
+from app.routes.winterarc_admin import router as winterarc_admin_router
 
 api_router = APIRouter()
 
@@ -33,6 +36,9 @@ api_router.include_router(users_router)
 api_router.include_router(sources_router)
 api_router.include_router(certificates_router)
 api_router.include_router(winterarc_router)
+api_router.include_router(winterarc_days_router)
+api_router.include_router(winterarc_metrics_router)
+api_router.include_router(winterarc_admin_router)
 
 
 

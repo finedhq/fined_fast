@@ -5,7 +5,7 @@ const API_BASE_URL = rawBase.endsWith("/api")
   ? rawBase
   : `${rawBase.replace(/\/+$/, "")}/api`;
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   const fallbackToken = await getAuthToken();
   const headers = {
     ...(options.headers || {}),
@@ -24,7 +24,9 @@ async function request(path, options = {}) {
 
   if (!response.ok) {
     const detail = typeof data === "object" ? data.detail || JSON.stringify(data) : data;
-    throw new Error(detail || `Request failed with status ${response.status}`);
+    const err = new Error(detail || `Request failed with status ${response.status}`);
+    err.status = response.status;
+    throw err;
   }
 
   return data;
@@ -533,4 +535,46 @@ export function joinWinterArcWaitlist(form) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(form),
   });
+}
+
+// WinterArc daily engine (routes/winterarc_days.py). Errors carry `status`:
+// 403 = not on the WinterArc list, 423 = that day isn't open yet.
+export function getWinterArcMe() {
+  return request("/winterarc/me");
+}
+
+export function getWinterArcDay(day) {
+  return request(`/winterarc/days/${day}`);
+}
+
+export function answerWinterArcQuestion(day, cardId, answer) {
+  return request(`/winterarc/days/${day}/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ card_id: cardId, answer }),
+  });
+}
+
+export function getWinterArcCalendar() {
+  return request("/winterarc/admin/calendar");
+}
+
+export function getWinterArcMetrics() {
+  return request("/winterarc/admin/metrics");
+}
+
+export function getWinterArcReferralContest() {
+  return request("/winterarc/admin/referral-contest");
+}
+
+export function spendWinterArcReset(day) {
+  return request("/winterarc/resets", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ day }),
+  });
+}
+
+export function getWinterArcLeaderboard(week) {
+  return request(`/winterarc/leaderboard${week ? `?week=${week}` : ""}`);
 }

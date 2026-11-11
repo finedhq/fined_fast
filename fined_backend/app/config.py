@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     SENTRY_DSN: str | None = None
 
+    # WinterArc: Day 1 opens at this moment; day n opens n-1 days later.
+    # Set an earlier start on the practice/staging backend to rehearse.
+    WINTERARC_START: str = "2026-12-01T00:00:00+05:30"
+    # The (draft) course whose modules are the 30 days, order_index = day
+    WINTERARC_COURSE_SLUG: str = "winterarc"
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

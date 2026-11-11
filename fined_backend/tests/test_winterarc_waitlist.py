@@ -104,3 +104,10 @@ def test_rejects_bad_input(db, kw):
 def test_unknown_heard_from_becomes_other(db):
     join(heard_from="tiktok")
     assert db.rows[0]["heard_from"] == "other"
+
+
+def test_gmail_variants_count_as_one_person(db):
+    first = join(email="a.b@gmail.com")
+    again = join(email="ab+winterarc@gmail.com")
+    assert again == {"referral_code": first["referral_code"], "already_joined": True}
+    assert db.rows[0]["email_canonical"] == "ab@gmail.com" and len(db.rows) == 1

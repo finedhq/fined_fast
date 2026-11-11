@@ -1,0 +1,130 @@
+/* WinterArc challenge pages: the hub, the sign-in / join messages, and the
+   end-of-day box on a day page. Uses the landing page's tokens (.wa). */
+
+/* Messages (sign in, join first, day not open) */
+.wa-msg-card {
+  margin: 0 auto;
+  padding: 40px 28px;
+  max-width: 560px;
+  background: var(--wa-white);
+  border: 1px solid var(--wa-border);
+  border-radius: 20px;
+  box-shadow: var(--wa-shadow);
+}
+.wa-msg-card h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; }
+.wa-msg-card .wa-lede { margin: 12px auto 0; }
+.wa-msg-actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+/* Hub */
+.wa-hub h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; }
+.wa-hub-today {
+  margin-top: 24px;
+  padding: 28px;
+  background: var(--wa-white);
+  border: 1px solid var(--wa-border);
+  border-radius: 20px;
+  box-shadow: var(--wa-shadow);
+}
+.wa-hub-today h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); margin-top: 6px; }
+.wa-hub-kicker { font-family: var(--wa-action); font-weight: 800; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--wa-purple); }
+.wa-hub-sub { margin: 8px 0 20px !important; color: var(--wa-ink-3); }
+
+.wa-hub-score {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+}
+.wa-hub-total, .wa-hub-week {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--wa-purple-surface);
+  border: 1px solid var(--wa-purple-border);
+}
+.wa-hub-total { background: var(--wa-gold-tint); border-color: #F6DFA6; }
+.wa-hub-total strong, .wa-hub-week strong { font-family: var(--wa-display); font-size: 1.4rem; font-weight: 800; }
+.wa-hub-total span, .wa-hub-week span { font-size: 0.82rem; color: var(--wa-ink-3); }
+
+.wa-hub-days { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 8px; }
+.wa-hub-day > a, .wa-hub-day > div {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--wa-border);
+  background: var(--wa-white);
+  color: var(--wa-ink);
+  text-decoration: none;
+}
+.wa-hub-day > a:hover { border-color: var(--wa-purple); background: var(--wa-purple-surface); }
+.wa-hub-day.is-locked > div { color: var(--wa-muted); background: var(--wa-sky); }
+.wa-hub-day-no {
+  flex: none; width: 38px; height: 38px; border-radius: 12px;
+  display: grid; place-items: center;
+  font-family: var(--wa-display); font-weight: 800;
+  background: var(--wa-ice); color: var(--wa-purple);
+}
+.wa-hub-day.is-done .wa-hub-day-no { background: var(--wa-green-tint); color: var(--wa-green); }
+.wa-hub-day-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wa-hub-day-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wa-hub-day-meta { font-size: 0.82rem; color: var(--wa-ink-3); }
+.wa-hub-day-mark { flex: none; display: grid; place-items: center; }
+.wa-hub-day.is-done .wa-hub-day-mark { color: var(--wa-green); }
+
+.wa-hub-panels { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.wa-hub-panel { padding: 20px; background: var(--wa-white); border: 1px solid var(--wa-border); border-radius: 20px; }
+.wa-hub-panel .wa-small { margin-top: 8px; }
+.wa-hub-panel-title { display: flex; align-items: center; gap: 6px; font-family: var(--wa-action); font-weight: 800; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--wa-purple); }
+.wa-hub-big { margin-top: 6px !important; font-family: var(--wa-display); font-size: 2rem; font-weight: 800; }
+.wa-hub-big span { font-size: 1rem; font-weight: 700; color: var(--wa-ink-3); }
+.wa-hub-panel .wa-hub-sub { margin: 4px 0 0 !important; }
+.wa-hub-repair { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.wa-hub-repair .wa-hub-sub { flex-basis: 100%; }
+.wa-btn-small { padding: 8px 16px; font-size: 0.9rem; }
+.wa-hub-note { margin-top: 10px !important; font-size: 0.9rem; color: var(--wa-green); }
+.wa-hub-note.is-error { color: var(--wa-red); }
+.wa-hub-links { display: flex; justify-content: center; gap: 20px; }
+.wa-hub-links a { display: inline-flex; align-items: center; gap: 6px; }
+.wa-hub-day.is-locked .wa-hub-day-meta, .wa-hub-day .wa-hub-day-meta { white-space: normal; }
+
+.wa-hub-invite { margin-top: 12px; }
+.wa-hub-invite .wa-link-row { margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.wa-hub-invite .wa-ref-link { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; padding: 10px 12px; border-radius: 12px; background: var(--wa-purple-surface); font-size: 0.88rem; }
+
+/* Leaderboard */
+.wa-board-tabs { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.wa-board-tab { padding: 8px 14px; border-radius: 9999px; border: 2px solid var(--wa-purple-border); background: var(--wa-white); color: var(--wa-purple); font-family: var(--wa-action); font-weight: 800; cursor: pointer; }
+.wa-board-tab[aria-pressed="true"] { background: var(--wa-purple); border-color: var(--wa-purple); color: var(--wa-white); }
+.wa-board { margin-top: 18px; background: var(--wa-white); border: 1px solid var(--wa-border); border-radius: 20px; overflow: hidden; }
+.wa-board-row { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--wa-border); }
+.wa-board-row:first-child { border-top: 0; }
+.wa-board-row.is-me { background: var(--wa-gold-tint); }
+.wa-board-rank { font-family: var(--wa-display); font-weight: 800; color: var(--wa-purple); }
+.wa-board-name { font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wa-board-points { font-family: var(--wa-display); font-weight: 800; }
+.wa-board-me { margin-top: 12px; }
+
+/* End of a day page (inside the module page) */
+.wa-day-done { padding: 48px 16px 96px; display: flex; justify-content: center; }
+.wa-day-done-card {
+  width: 100%; max-width: 560px; text-align: center;
+  padding: 32px 24px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  border: 1px solid #E6E1EC;
+  box-shadow: 0 24px 60px -24px rgba(65, 0, 188, 0.28);
+}
+.wa-day-done-card h2 { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: #171321; }
+.wa-day-done-card p { margin: 10px 0 22px; color: #625D6D; }
+.wa-day-done-btn {
+  display: inline-flex; padding: 13px 26px; border-radius: 9999px;
+  background: #FFB600; color: #171321; font-family: 'Manrope', sans-serif; font-weight: 800;
+  text-decoration: none; box-shadow: 4px 4px 0 0 #171321;
+}
+.wa-day-done-btn:hover { background: #E6A200; }
+
+.wa-preview-bar {
+  position: sticky; top: 0; z-index: 60;
+  padding: 8px 16px; text-align: center;
+  background: #171321; color: #FFFFFF; font-size: 0.88rem;
+}
