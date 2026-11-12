@@ -4,18 +4,26 @@
 // same thing on every request (routes/winterarc_days.py).
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link, useLocation } from "react-router-dom";
+import { PiCalendarBlankBold, PiKeyBold, PiTicketBold, PiWarningCircleBold } from "react-icons/pi";
 import { WINTERARC as W } from "./winterarcConfig";
 import "./WinterArcLanding.css";
 import "./WinterArcChallenge.css";
 
-export function WinterArcMessage({ title, children, actions }) {
+const ICONS = { signin: PiKeyBold, join: PiTicketBold, wait: PiCalendarBlankBold, error: PiWarningCircleBold };
+
+/** A full-page message: text and actions beside an icon tile. */
+export function WinterArcMessage({ title, children, actions, icon = "wait" }) {
+  const Icon = ICONS[icon] || PiCalendarBlankBold;
   return (
     <div className="wa wa-doc-page wa-msg-page">
-      <div className="wa-wrap wa-narrow wa-center">
-        <div className="wa-msg-card">
-          <h1>{title}</h1>
-          <div className="wa-lede">{children}</div>
-          <div className="wa-msg-actions">{actions}</div>
+      <div className="wa-wrap">
+        <div className={`wa-msg-card is-${icon}`}>
+          <div className="wa-msg-text">
+            <h1>{title}</h1>
+            <div className="wa-msg-body">{children}</div>
+            {actions && <div className="wa-msg-actions">{actions}</div>}
+          </div>
+          <span className="wa-msg-art" aria-hidden="true"><Icon /></span>
         </div>
       </div>
     </div>
@@ -25,10 +33,12 @@ export function WinterArcMessage({ title, children, actions }) {
 export function JoinFirst() {
   return (
     <WinterArcMessage
+      icon="join"
       title={`Join ${W.name} first`}
       actions={<Link className="wa-btn wa-btn-primary" to="/winterarc#join">Join the waitlist</Link>}
     >
-      The challenge is open to people on the {W.name} list. It's free to join and takes a minute.
+      The challenge is open to people on the {W.name} list. Joining is free and takes a minute. Use the same email you
+      signed in with.
     </WinterArcMessage>
   );
 }
@@ -41,6 +51,7 @@ export default function WinterArcGate({ children }) {
   if (!isAuthenticated) {
     return (
       <WinterArcMessage
+        icon="signin"
         title={`Sign in to open ${W.name}`}
         actions={
           <>

@@ -49,18 +49,45 @@ function DayAction({ day, action, onChange }) {
   );
 }
 
-function DayDone({ day, questions, action, onAction }) {
+// The end of a day: points earned and what's next once every question is
+// finished; question pips until then. The optional action sits in between.
+function DayDone({ day, opensAt, questions, action, onAction }) {
   const list = Object.values(questions);
   const finished = list.filter((q) => q.finished).length;
   const points = list.reduce((s, q) => s + (q.points || 0), 0);
   const done = list.length > 0 && finished === list.length;
+  const nextOpens = opensAt ? new Date(new Date(opensAt).getTime() + 24 * 3600 * 1000) : null;
+  const next = day >= W.totalDays
+    ? "That was the finale. Final results come after the checks."
+    : nextOpens
+      ? `Day ${day + 1} opens ${nextOpens.toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST.`
+      : null;
   return (
-    <section className="wa-day-done" data-part="winterarc-done">
+    <section className={`wa-day-done${done ? " is-done" : ""}`} data-part="winterarc-done">
       <div className="wa-day-done-card">
-        <h2>{done ? `Day ${day} done` : `Day ${day}: ${finished} of ${list.length} questions done`}</h2>
-        <p>{done ? `You earned ${points} points today.` : "Answer every question to finish the day."}</p>
+        {done ? (
+          <>
+            <p className="wa-done-points" aria-label={`${points} points today`}>
+              <span>+{points}</span>
+              <small>points</small>
+            </p>
+            <h2>Day {day} done</h2>
+            {next && <p className="wa-done-next">{next}</p>}
+          </>
+        ) : (
+          <>
+            <div className="wa-done-pips" aria-hidden="true">
+              {list.map((q, i) => <span key={i} className={q.finished ? "is-on" : ""} />)}
+            </div>
+            <h2>{finished} of {list.length} questions done</h2>
+            <p className="wa-done-next">Answer every question to finish Day {day}.</p>
+          </>
+        )}
         {action && <DayAction day={day} action={action} onChange={onAction} />}
-        <Link className="wa-day-done-btn" to="/winterarc/challenge">Back to {W.name}</Link>
+        <div className="wa-done-actions">
+          <Link className="wa-day-done-btn" to="/winterarc/challenge">Back to {W.name}</Link>
+          <Link className="wa-done-link" to="/winterarc/leaderboard">See the leaderboard</Link>
+        </div>
       </div>
     </section>
   );
@@ -125,15 +152,16 @@ function Day() {
       onAnswer,
       points: list.reduce((s, q) => s + (q.points || 0), 0),
       maxPoints: list.reduce((s, q) => s + (q.finished ? q.points || 0 : q.on_offer || 0), 0),
-      done: <DayDone day={n} questions={questions} action={action} onAction={onAction} />,
+      done: <DayDone day={n} opensAt={bundle?.opens_at} questions={questions} action={action} onAction={onAction} />,
     };
-  }, [questions, onAnswer, n, action, onAction]);
+  }, [questions, onAnswer, n, action, onAction, bundle?.opens_at]);
 
   if (error?.status === 403) return <JoinFirst />;
   if (error?.status === 423 || error?.status === 404) {
     const opens = /opens at (.+)\.$/.exec(error.message || "")?.[1];
     return (
       <WinterArcMessage
+        icon="wait"
         title={error.status === 404 ? "There's no such day" : `Day ${n} isn't open yet`}
         actions={<Link className="wa-btn wa-btn-primary" to="/winterarc/challenge">Back to {W.name}</Link>}
       >
@@ -143,7 +171,7 @@ function Day() {
   }
   if (error) {
     return (
-      <WinterArcMessage title="Something went wrong" actions={<Link className="wa-btn wa-btn-ghost" to="/winterarc/challenge">Back to {W.name}</Link>}>
+      <WinterArcMessage icon="error" title="Something went wrong" actions={<Link className="wa-btn wa-btn-ghost" to="/winterarc/challenge">Back to {W.name}</Link>}>
         {error.message || "Couldn't load this day."}
       </WinterArcMessage>
     );
