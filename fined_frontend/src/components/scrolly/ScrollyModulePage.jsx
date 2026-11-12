@@ -15,6 +15,10 @@
 // `embedded` (admin card preview): no top bar, and the window isn't scrolled.
 // `onSignup` (visitor trying a module, used with `preview`): the completion's
 // "Up next" box asks them to sign up.
+// `challenge` (a WinterArc day, pages/WinterArc/WinterArcDay.jsx): questions
+// are marked by the server through challenge.onAnswer, nothing is saved
+// through the course endpoint, the page counts points instead of FinStars,
+// and challenge.done replaces the completion screen.
 import { useEffect, useMemo, useRef, useState } from "react";
 import Topbar from "./Topbar";
 import Hero from "./Hero";
@@ -39,7 +43,7 @@ import "./scrolly-blocks.css";
 import "./scrolly-reels.css";
 import "./scrolly-tour.css";
 
-export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride, onSignup }) {
+export default function ScrollyModulePage({ bundle, focusSlug, email, preview = false, embedded = false, backTo: backToOverride, onSignup, challenge }) {
   const rootRef = useRef(null);
   const moduleId = bundle.module_id;
   // Phones get the Reels layout (scrolly-reels.css): the whole page snaps a
@@ -55,11 +59,14 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   const hero = cards.find((c) => c.card_template === "hero");
   const chapters = useMemo(() => cards.filter((c) => c.card_template === "narrative"), [cards]);
   const chapterLinks = useMemo(() => chapters.map((c) => ({ slug: c.slug, title: c.card_data?.title || c.title })), [chapters]);
-  const maxStars = moduleMaxStars(cards);
+  const maxStars = challenge ? challenge.maxPoints : moduleMaxStars(cards);
+  const unit = challenge ? "points" : "FinStars";
 
   // The learner's saved answers, with this tab's in-progress state on top.
+  // (A WinterArc day never restores quick-check picks from this tab: only
+  // the server says which questions are finished.)
   const [page, setPage] = useState(() =>
-    preview ? { ...EMPTY_PAGE_STATE } : mergePages(pageFromSaved(cards), loadPageState(moduleId))
+    preview ? { ...EMPTY_PAGE_STATE } : mergePages(pageFromSaved(cards), challenge ? { ...loadPageState(moduleId), checks: {} } : loadPageState(moduleId))
   );
   useEffect(() => {
     if (!preview) savePageState(moduleId, page);
@@ -77,8 +84,8 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   const heroByQuestion = !chapters.length && hero && Object.keys(page.checks || {}).length > 0;
   const heroSlug = heroByQuestion ? hero.slug : null;
   const reachedNow = useMemo(() => (heroSlug && !reached[heroSlug] ? { ...reached, [heroSlug]: true } : reached), [reached, heroSlug]);
-  const saved = useSaveProgress({ cards, page, reached: reachedNow, email, enabled: !preview });
-  const stars = earnedStars(saved, page);
+  const saved = useSaveProgress({ cards, page, reached: reachedNow, email, enabled: !preview && !challenge });
+  const stars = challenge ? challenge.points : earnedStars(saved, page);
   const open = openParts(saved, page);
   const test = testScore(saved, page);
 
@@ -167,6 +174,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             onAnswer={(a) => setPage((p) => ({ ...p, hero: { ...p.hero, ...a } }))}
             firstSectionSelector={firstSection}
             rootRef={rootRef}
+            unit={unit}
           />
         );
       case "narrative":
@@ -194,6 +202,17 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
         );
       }
       case "quiz":
+        if (challenge) {
+          return (
+            <Checkpoint
+              key={card.card_id}
+              card={card}
+              picked={card.status === "completed" ? card.userAnswer : null}
+              onPick={(answer) => challenge.onAnswer(card, answer)}
+              challenge={challenge.questions[card.card_id]}
+            />
+          );
+        }
         return (
           <Checkpoint
             key={card.card_id}
@@ -203,6 +222,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
           />
         );
       case "completion":
+        if (challenge) return null; // challenge.done is shown at the end instead
         return (
           <Completion
             key={card.card_id}
@@ -242,9 +262,13 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
           stars={stars}
           backTo={backTo}
           onHelp={openTour}
+          unit={unit}
         />
       )}
-      <main>{cards.map(part)}</main>
+      <main>
+        {cards.map(part)}
+        {challenge?.done}
+      </main>
       <GlossaryTooltip scopeRef={rootRef} />
       {tour?.reels === reels && <ModuleTour rootRef={rootRef} reels={reels} steps={tour.steps} onClose={() => setTour(null)} />}
     </div>

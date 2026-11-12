@@ -54,11 +54,27 @@ def normalize_code(code: Optional[str]) -> Optional[str]:
     return code or None
 
 
+def canonical_email(email: str) -> str:
+    """The inbox an email really reaches, so variants count as one person:
+    lower case, anything after "+" dropped, and Gmail's dots dropped.
+    Same rule as migration 012."""
+    email = (email or "").strip().lower()
+    local, _, domain = email.partition("@")
+    local = local.split("+", 1)[0]
+    if domain in ("gmail.com", "googlemail.com"):
+        return local.replace(".", "") + "@gmail.com"
+    return f"{local}@{domain}"
+
+
 def new_code() -> str:
     return "".join(secrets.choice(CODE_ALPHABET) for _ in range(CODE_LENGTH))
 
 
 def _find_by_email(email: str):
+    """This person's row: the same email, or another spelling of the same inbox."""
+    res = supabase.from_(TABLE).select("referral_code").eq("email_canonical", canonical_email(email)).limit(1).execute()
+    if res and res.data:
+        return res.data[0]
     res = supabase.from_(TABLE).select("referral_code").ilike("email", email).limit(1).execute()
     return res.data[0] if res and res.data else None
 
@@ -93,6 +109,7 @@ async def join_waitlist(body: WaitlistRequest):
 
     row = {
         "email": email,
+        "email_canonical": canonical_email(email),
         "name": _clean(body.name),
         "college": _clean(body.college),
         "heard_from": heard,

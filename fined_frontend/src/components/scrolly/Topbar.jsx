@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { scrollToElement } from "./scroll";
 
 // `onHelp` adds a "?" button that replays the module tour (ModuleTour.jsx).
-export default function Topbar({ rootRef, moduleNumber, title, chapters, questions = [], stars, backTo, onHelp }) {
+export default function Topbar({ rootRef, moduleNumber, title, chapters, questions = [], stars, backTo, onHelp, unit = "FinStars" }) {
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [chapterProgress, setChapterProgress] = useState(() => chapters.map(() => 0));
@@ -143,10 +143,10 @@ export default function Topbar({ rootRef, moduleNumber, title, chapters, questio
         <div
           key={pulses}
           className={`finstars-pill${pulses > 0 ? " pulse" : ""}`}
-          title="Earn FinStars from quick checks and the hands-on tool"
+          title={unit === "FinStars" ? "Earn FinStars from quick checks and the hands-on tool" : `Your ${unit} for today`}
         >
           <span className="nc-fs-display">{stars}</span>
-          <span className="fs-label">FinStars</span>
+          <span className="fs-label">{unit}</span>
         </div>
       </div>
 

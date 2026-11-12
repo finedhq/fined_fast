@@ -12,6 +12,12 @@
 //   sort        tap an item, then its place (the Money Sorter screen), then Check
 //   order_book  set Arjun's limit on the order book, then "Lock it in"; the
 //               book shows what happens only once it's locked
+//
+// WinterArc (`challenge`): the server marks each try. Until the question is
+// finished the card has no answer key, `picked` stays empty and a wrong try
+// shows how many tries and points are left; `challenge` is
+// { finished, points, on_offer, tries_left, feedback, busy, error, tried }
+// (`tried` = wrong answers so far: a single-choice option is greyed out).
 import { Suspense, lazy, useState } from "react";
 import SafeText from "./SafeText";
 import { getCardFinstars } from "../../utils/finstars";
@@ -21,14 +27,15 @@ const OrderBook = lazy(() => import("./figures/OrderBook"));
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
 const letter = (i) => String.fromCharCode(65 + i);
 
-function ChoiceAnswer({ d, picked, onPick }) {
+function ChoiceAnswer({ d, picked, onPick, tried = [] }) {
   const answered = picked != null;
   return (
     <div className="checkpoint-options-grid">
       {(d.options || []).map((o, i) => {
-        const mark = !answered ? "" : o.is_correct ? " correct" : o.id === picked ? " wrong" : "";
+        const wasTried = !answered && tried.includes(o.id); // a wrong WinterArc try
+        const mark = wasTried ? " wrong" : !answered ? "" : o.is_correct ? " correct" : o.id === picked ? " wrong" : "";
         return (
-          <button key={o.id ?? i} type="button" className={`checkpoint-option-btn${mark}`} disabled={answered} onClick={() => onPick(o.id)}>
+          <button key={o.id ?? i} type="button" className={`checkpoint-option-btn${mark}`} disabled={answered || wasTried} onClick={() => onPick(o.id)}>
             <span className="option-badge-letter">{letter(i)}</span>
             <span>{o.text}</span>
           </button>
@@ -272,9 +279,15 @@ function BookAnswer({ d, picked, onPick }) {
   );
 }
 
+function challengeReward(c) {
+  if (c.finished) return c.points ? `+${c.points} points` : "No points";
+  if (!c.on_offer) return "No points left";
+  return `Worth ${c.on_offer} points`;
+}
+
 const ANSWERS = { choice: ChoiceAnswer, multi: MultiAnswer, order: OrderAnswer, sort: SortAnswer, order_book: BookAnswer };
 
-export default function Checkpoint({ card, picked, onPick }) {
+export default function Checkpoint({ card, picked, onPick, challenge }) {
   const d = card.card_data || {};
   const format = quizFormat(d);
   const Answer = ANSWERS[format] || ChoiceAnswer;
@@ -286,11 +299,18 @@ export default function Checkpoint({ card, picked, onPick }) {
       <div className="checkpoint-container">
         <div className="checkpoint-badge">
           <span>{d.badge_label || "Quick check"}</span>
-          <span className="checkpoint-reward">+{getCardFinstars(d, "quiz")} FinStars</span>
+          <span className="checkpoint-reward">{challenge ? challengeReward(challenge) : `+${getCardFinstars(d, "quiz")} FinStars`}</span>
         </div>
         <h2 className="checkpoint-question">{d.question}</h2>
         {d.instruction && <p className="checkpoint-instruction">{d.instruction}</p>}
-        <Answer d={d} picked={answered ? picked : null} onPick={onPick} />
+        <fieldset className="checkpoint-fieldset" disabled={!!challenge?.busy}>
+          <Answer d={d} picked={answered ? picked : null} onPick={onPick} tried={challenge?.tried} />
+        </fieldset>
+        {challenge && !answered && (challenge.feedback || challenge.error) && (
+          <p className={`checkpoint-try${challenge.error ? " is-error" : ""}`} role="status">
+            {challenge.error || challenge.feedback}
+          </p>
+        )}
         <div className={`checkpoint-explanation-box${answered ? ` visible ${isCorrect ? "is-correct" : "is-wrong"}` : ""}`}>
           <div className="exp-header">{answered ? (isCorrect ? "Correct" : "Not quite — here's why") : ""}</div>
           <div className="exp-body">
