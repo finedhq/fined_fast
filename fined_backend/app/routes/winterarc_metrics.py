@@ -93,7 +93,7 @@ PEOPLE_COLUMNS = (
 async def winterarc_metrics(user: AuthUser = Depends(require_admin)):
     people, days = await asyncio.gather(
         asyncio.to_thread(_all_rows, "winterarc_people", PEOPLE_COLUMNS),
-        asyncio.to_thread(_all_rows, "winterarc_day_stats", "day_no, started, done, avg_points"),
+        asyncio.to_thread(_all_rows, "winterarc_day_stats", "day_no, started, done, avg_points, actions_done"),
     )
     return summarize(people, days)
 

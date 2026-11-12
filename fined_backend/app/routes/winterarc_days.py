@@ -317,8 +317,10 @@ async def open_day(day: int, user: AuthUser = Depends(get_current_user)):
         asyncio.to_thread(_my_answers, email),
     )
     rows = {a["card_id"]: a for a in answers if a.get("module_id") == module["id"]}
-    repaired = day in _repaired(await asyncio.to_thread(_my_points, email))
+    extra = await asyncio.to_thread(_my_points, email)
+    repaired = day in _repaired(extra)
     questions = {c["card_id"]: _question_state(rows.get(c["card_id"]), day, now, repaired) for c in cards if R.is_quiz(c)}
+    action = _day_action(cards)
     return {
         "day": day,
         "module_id": module["id"],
@@ -328,8 +330,50 @@ async def open_day(day: int, user: AuthUser = Depends(get_current_user)):
         "opens_at": R.opens_at(day).isoformat(),
         "cards": [_package(c, rows.get(c["card_id"])) for c in cards],
         "questions": questions,
+        "action": {
+            "text": action,
+            "done": any(p.get("kind") == "action_done" and p.get("ref") == f"action:{day}" for p in extra),
+        } if action else None,
         "preview": not _day_open(module, day, now),
     }
+
+
+def _day_action(cards: list) -> Optional[str]:
+    """The day's optional real-life action, from its completion card."""
+    for c in cards:
+        cd = c.get("card_data") or {}
+        if (c.get("card_template") or cd.get("card_type")) == "completion" and (cd.get("winterarc_action") or "").strip():
+            return cd["winterarc_action"].strip()
+    return None
+
+
+class ActionRequest(BaseModel):
+    done: bool
+
+
+@router.post("/days/{day}/action")
+async def tick_action(day: int, body: ActionRequest, user: AuthUser = Depends(get_current_user)):
+    """Tick (or untick) "I did this" on the day's optional action. No points."""
+    email = _email(user)
+    now = _now()
+    await asyncio.to_thread(_require_member, user, email)
+    module = await asyncio.to_thread(_day_module, day, user, now)
+    cards = await asyncio.to_thread(_cards, module["id"])
+    if not _day_action(cards):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This day has no action.")
+    ref = f"action:{day}"
+    if body.done:
+        try:
+            await asyncio.to_thread(lambda: supabase.from_(POINTS).insert([{
+                "email": email, "kind": "action_done", "ref": ref, "points": 0, "week_no": R.week_at(now),
+                "day_no": day, "reason": f"Did Day {day}'s action", "created_by": "winterarc", "created_at": now.isoformat(),
+            }]).execute())
+        except Exception:
+            pass  # already ticked
+    else:
+        await asyncio.to_thread(lambda: supabase.from_(POINTS).delete()
+                                .eq("email", email).eq("kind", "action_done").eq("ref", ref).execute())
+    return {"ok": True, "done": body.done}
 
 
 def _get_row(email: str, card_id: str) -> Optional[dict]:

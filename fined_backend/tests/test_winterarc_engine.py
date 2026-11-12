@@ -59,6 +59,10 @@ class Query:
         self.mode, self.payload = "update", change
         return self
 
+    def delete(self):
+        self.mode = "delete"
+        return self
+
     def execute(self):
         rows = self.db.tables.setdefault(self.table, [])
         if self.mode == "insert":
@@ -77,6 +81,10 @@ class Query:
                 out.append(dict(row))
             return Res(out)
         hits = [r for r in rows if all(f(r) for f in self.filters)]
+        if self.mode == "delete":
+            for r in hits:
+                rows.remove(r)
+            return Res([dict(r) for r in hits])
         if self.mode == "update":
             for r in hits:
                 r.update(self.payload)
@@ -416,3 +424,27 @@ def test_answer_rows_record_on_time_and_week(db, monkeypatch):
     rows = {r["card_id"]: r for r in db.tables["winterarc_answers"]}
     assert rows["c11"]["on_time"] is True and rows["c12"]["on_time"] is False
     assert rows["c12"]["week_no"] == 1
+
+
+# --- The optional daily action ----------------------------------------------
+
+def test_daily_action_tick_and_untick(db, monkeypatch):
+    db.tables["cards"].append({"card_id": "done1", "module_id": "m1", "order_index": 9, "slug": "d1", "card_template": "completion",
+                               "card_data": {"card_type": "completion", "winterarc_action": "  Check your savings rate.  "}})
+    at(monkeypatch, ist(1, 9))
+    day = run(wd.open_day(1, MEMBER))
+    assert day["action"] == {"text": "Check your savings rate.", "done": False}
+    run(wd.tick_action(1, wd.ActionRequest(done=True), MEMBER))
+    run(wd.tick_action(1, wd.ActionRequest(done=True), MEMBER))     # twice is still once
+    assert len([p for p in db.tables["winterarc_points"] if p["kind"] == "action_done"]) == 1
+    assert run(wd.open_day(1, MEMBER))["action"]["done"] is True
+    run(wd.tick_action(1, wd.ActionRequest(done=False), MEMBER))
+    assert run(wd.open_day(1, MEMBER))["action"]["done"] is False
+    # Ticking adds no points
+    assert run(wd.my_challenge(MEMBER))["total_points"] == 0
+
+
+def test_day_without_action(db, monkeypatch):
+    at(monkeypatch, ist(1, 9))
+    assert run(wd.open_day(1, MEMBER))["action"] is None
+    assert status_of(lambda: run(wd.tick_action(1, wd.ActionRequest(done=True), MEMBER))) == 404

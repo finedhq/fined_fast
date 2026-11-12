@@ -164,7 +164,7 @@ export default function AdminWinterArcMetrics() {
             <button
               type="button"
               className="af-btn"
-              onClick={() => download(`winterarc-days-${stamp}.csv`, ["Day", "Started", "Finished", "Average points"], data.days.map((d) => [d.day_no, d.started, d.done, d.avg_points]))}
+              onClick={() => download(`winterarc-days-${stamp}.csv`, ["Day", "Started", "Finished", "Average points", "Did the action"], data.days.map((d) => [d.day_no, d.started, d.done, d.avg_points, d.actions_done ?? 0]))}
             >
               Download CSV
             </button>
@@ -175,10 +175,10 @@ export default function AdminWinterArcMetrics() {
         ) : (
           <div className="wa-metrics-scroll">
             <table className="wa-metrics-table">
-              <thead><tr><th>Day</th><th>Started</th><th>Finished</th><th>Average points</th></tr></thead>
+              <thead><tr><th>Day</th><th>Started</th><th>Finished</th><th>Average points</th><th>Did the action</th></tr></thead>
               <tbody>
                 {data.days.map((d) => (
-                  <tr key={d.day_no}><td>{d.day_no}</td><td>{d.started}</td><td>{d.done}</td><td>{d.avg_points}</td></tr>
+                  <tr key={d.day_no}><td>{d.day_no}</td><td>{d.started}</td><td>{d.done}</td><td>{d.avg_points ?? ""}</td><td>{d.actions_done ?? 0}</td></tr>
                 ))}
               </tbody>
             </table>

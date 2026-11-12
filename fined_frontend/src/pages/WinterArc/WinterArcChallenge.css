@@ -105,8 +105,17 @@
 .wa-board-me { margin-top: 12px; }
 
 /* End of a day page (inside the module page) */
-.wa-day-done { padding: 48px 16px 96px; display: flex; justify-content: center; }
-.wa-day-done-card {
+.nc-root .wa-day-done { padding: 48px 16px 96px; display: flex; justify-content: center; }
+/* Phones (Reels layout): the end box is a full screen of its own that the
+   page can stop on, like a question screen. */
+.nc-root.layout-reels .wa-day-done {
+  min-height: var(--reel-h, 100svh);
+  align-items: center;
+  padding: 24px 16px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.nc-root .wa-day-done-card {
   width: 100%; max-width: 560px; text-align: center;
   padding: 32px 24px;
   border-radius: 20px;
@@ -114,14 +123,30 @@
   border: 1px solid #E6E1EC;
   box-shadow: 0 24px 60px -24px rgba(65, 0, 188, 0.28);
 }
-.wa-day-done-card h2 { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: #171321; }
-.wa-day-done-card p { margin: 10px 0 22px; color: #625D6D; }
-.wa-day-done-btn {
+.nc-root .wa-day-done-card h2 { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: #171321; }
+.nc-root .wa-day-done-card p { margin: 10px 0 22px; color: #625D6D; }
+.nc-root .wa-day-done-btn {
   display: inline-flex; padding: 13px 26px; border-radius: 9999px;
   background: #FFB600; color: #171321; font-family: 'Manrope', sans-serif; font-weight: 800;
   text-decoration: none; box-shadow: 4px 4px 0 0 #171321;
 }
-.wa-day-done-btn:hover { background: #E6A200; }
+.nc-root .wa-day-done-btn:hover { background: #E6A200; }
+
+.nc-root .wa-day-action {
+  margin: 0 0 22px;
+  padding: 16px 18px;
+  text-align: left;
+  border-radius: 16px;
+  background: #EEF1FF;
+  border: 1px solid #DCD3F7;
+}
+.nc-root .wa-day-action.is-done { background: #ECFDF5; border-color: #A7F3D0; }
+.nc-root .wa-day-action-label { margin: 0 !important; font-family: 'Manrope', sans-serif; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #4100BC; }
+.nc-root .wa-day-action.is-done .wa-day-action-label { color: #059669; }
+.nc-root .wa-day-action-text { margin: 6px 0 12px !important; color: #171321 !important; font-weight: 700; line-height: 1.45; }
+.nc-root .wa-day-action-check { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; color: #171321; }
+.nc-root .wa-day-action-check input { width: 20px; height: 20px; accent-color: #059669; cursor: pointer; }
+.nc-root .wa-day-action-error { margin: 8px 0 0 !important; color: #B91C1C !important; font-size: 0.9rem; }
 
 .wa-preview-bar {
   position: sticky; top: 0; z-index: 60;

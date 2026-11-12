@@ -555,6 +555,14 @@ export function answerWinterArcQuestion(day, cardId, answer) {
   });
 }
 
+export function tickWinterArcAction(day, done) {
+  return request(`/winterarc/days/${day}/action`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ done }),
+  });
+}
+
 export function getWinterArcCalendar() {
   return request("/winterarc/admin/calendar");
 }

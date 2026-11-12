@@ -6,7 +6,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react
 import { Link, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { WINTERARC as W } from "./winterarcConfig";
-import { answerWinterArcQuestion, getWinterArcDay } from "../../services/api";
+import { answerWinterArcQuestion, getWinterArcDay, tickWinterArcAction } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 
 const ScrollyModulePage = lazy(() => import("../../components/scrolly/ScrollyModulePage"));
@@ -19,7 +19,37 @@ const tryAgain = (q) =>
     ? `Not quite. ${q.tries_left} ${q.tries_left === 1 ? "try" : "tries"} left. A right answer now earns ${q.on_offer} points.`
     : `Not quite. ${q.tries_left} ${q.tries_left === 1 ? "try" : "tries"} left.`;
 
-function DayDone({ day, questions }) {
+// The day's optional real-life action: an "I did this" tick-box, no points.
+function DayAction({ day, action, onChange }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const toggle = async (e) => {
+    const done = e.target.checked;
+    setBusy(true);
+    setError("");
+    try {
+      await tickWinterArcAction(day, done);
+      onChange(done);
+    } catch (err) {
+      setError(err.message || "Couldn't save that. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className={`wa-day-action${action.done ? " is-done" : ""}`}>
+      <p className="wa-day-action-label">Today's action (optional)</p>
+      <p className="wa-day-action-text">{action.text}</p>
+      <label className="wa-day-action-check">
+        <input type="checkbox" checked={action.done} disabled={busy} onChange={toggle} />
+        <span>{action.done ? "Done. Nice one." : "I did this"}</span>
+      </label>
+      {error && <p className="wa-day-action-error" role="alert">{error}</p>}
+    </div>
+  );
+}
+
+function DayDone({ day, questions, action, onAction }) {
   const list = Object.values(questions);
   const finished = list.filter((q) => q.finished).length;
   const points = list.reduce((s, q) => s + (q.points || 0), 0);
@@ -29,6 +59,7 @@ function DayDone({ day, questions }) {
       <div className="wa-day-done-card">
         <h2>{done ? `Day ${day} done` : `Day ${day}: ${finished} of ${list.length} questions done`}</h2>
         <p>{done ? `You earned ${points} points today.` : "Answer every question to finish the day."}</p>
+        {action && <DayAction day={day} action={action} onChange={onAction} />}
         <Link className="wa-day-done-btn" to="/winterarc/challenge">Back to {W.name}</Link>
       </div>
     </section>
@@ -84,6 +115,9 @@ function Day() {
     [n]
   );
 
+  const action = bundle?.action;
+  const onAction = useCallback((done) => setBundle((b) => ({ ...b, action: { ...b.action, done } })), []);
+
   const challenge = useMemo(() => {
     const list = Object.values(questions);
     return {
@@ -91,9 +125,9 @@ function Day() {
       onAnswer,
       points: list.reduce((s, q) => s + (q.points || 0), 0),
       maxPoints: list.reduce((s, q) => s + (q.finished ? q.points || 0 : q.on_offer || 0), 0),
-      done: <DayDone day={n} questions={questions} />,
+      done: <DayDone day={n} questions={questions} action={action} onAction={onAction} />,
     };
-  }, [questions, onAnswer, n]);
+  }, [questions, onAnswer, n, action, onAction]);
 
   if (error?.status === 403) return <JoinFirst />;
   if (error?.status === 423 || error?.status === 404) {
