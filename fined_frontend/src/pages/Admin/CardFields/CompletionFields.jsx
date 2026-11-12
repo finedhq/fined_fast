@@ -94,6 +94,20 @@ function CompletionFields({ data, onChange }) {
         )}
       </Section>
 
+      <Section
+        title="WinterArc daily action (WinterArc days only, optional)"
+        hint="One small real-life money step for today, shown at the end of the day with an “I did this” tick-box. It earns no points. Leave empty for normal course modules."
+      >
+        <Area
+          label="Today's action"
+          value={data.winterarc_action}
+          onChange={(v) => setField("winterarc_action", v || undefined)}
+          rows={2}
+          placeholder="Check what interest rate your savings account pays you."
+        />
+        {(data.winterarc_action || "").length > 200 && <div className="af-warn">Keep it under 200 characters.</div>}
+      </Section>
+
       <Section title="Finish" hint="Completion cards never award stars; they show the total the learner earned in the module.">
         <Text label="Button text" value={data.cta_text} onChange={(v) => setField("cta_text", v)} required />
       </Section>

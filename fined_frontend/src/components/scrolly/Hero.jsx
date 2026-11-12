@@ -33,7 +33,7 @@ function PollGroup({ kind, num, prompt, options, picked, ack, onPick }) {
   );
 }
 
-export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSelector, rootRef }) {
+export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSelector, rootRef, unit = "FinStars" }) {
   const d = card.card_data || {};
   const meta = [d.read_time ? `${String(d.read_time).replace(/^~/, "")} read` : null, ...(d.meta_chips || [])].filter(Boolean);
   const chip = d.chip;
@@ -54,7 +54,7 @@ export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSe
             ))}
           </ul>
           <div className="hero-reward">
-            Earn up to <strong>{maxStars} FinStars</strong> along the way
+            Earn up to <strong>{maxStars} {unit}</strong> along the way
           </div>
           {/* Owner's request (2026-10-03): phones and tablets only, hidden on desktop by CSS */}
           <p className="hero-device-tip">

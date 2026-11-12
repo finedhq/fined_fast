@@ -385,6 +385,9 @@ class CompletionCardData(BaseModel):
     # Optional full replacement line for specific poll option ids, e.g.
     # {"dont_know": "At the start you weren't sure. The fuller answer: …"}
     poll_replay_by_choice: dict[str, str] = Field(default_factory=dict)
+    # WinterArc only: one small real-life money action for the day, shown with
+    # an "I did this" tick-box at the end of the day page. Earns no points.
+    winterarc_action: Optional[str] = Field(default=None, max_length=200)
     cta_text: str = "Continue"
 
 

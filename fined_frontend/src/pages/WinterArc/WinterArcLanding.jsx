@@ -315,6 +315,8 @@ function Faqs() {
           <Faq q="How do referrals work?">
             After you join, you get your own link. When a friend joins with it and finishes Day 3, you earn{" "}
             {W.referralPoints} points (up to {W.referralCap} friends), once a quick check is done.
+            {W.show.referralContest &&
+              ` Before launch, whoever brings in the most friends (joined with the link and made a FinEd account) by ${W.referralContestCloses} wins ${W.referralContestPrize}.`}
           </Faq>
         )}
         {W.show.certificate && (

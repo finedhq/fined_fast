@@ -35,6 +35,9 @@ export const WINTERARC = {
   residency: "India",
   referralPoints: 10,
   referralCap: 20,
+  // Pre-launch referral contest (DECIDED 2026-11-11)
+  referralContestPrize: "₹500",
+  referralContestCloses: "30 Nov 2026, 11:59 pm IST",
   certificateMinDays: 21,
   // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
   // hidden (show.certificatePrice) until that is confirmed.
@@ -100,6 +103,7 @@ export const WINTERARC = {
   // On/off switches for features the legal check may change
   show: {
     prizes: true,
+    referralContest: true,
     streakBonuses: true,
     resets: true,
     referrals: true,

@@ -88,16 +88,19 @@ export default function WinterArcRules() {
               <section id="streaks">
                 <h2>5. Streaks and resets</h2>
                 <ul>
-                  <li>A day counts towards your streak if you finish its task by {W.streakGrace}.</li>
+                  <li>A day counts towards your streak if you answer all of its questions by {W.streakGrace}.</li>
+                  <li>A day that did not open (for example, if it is delayed) does not break your streak.</li>
                   {W.show.streakBonuses && (
-                    <li>Streak bonuses: {W.streakBonuses.map((b) => `+${b.points} at ${b.days} days`).join(", ")}.</li>
+                    <>
+                      <li>Streak bonuses: {W.streakBonuses.map((b) => `+${b.points} at ${b.days} days`).join(", ")}.</li>
+                      <li>If your streak breaks, start again: a new streak earns these bonuses again when it reaches each length.</li>
+                    </>
                   )}
                   {W.show.resets && (
                     <>
-                      <li>Everyone starts with {W.startingResets} resets. One reset repairs one missed day and restores your streak only.</li>
-                      <li>You choose when to use a reset. A task done late after a reset earns {W.lateResetPercent}% of its points.</li>
-                      <li>One extra reset is given to each weekly top-3 finisher, and to everyone who completes every task in a leaderboard week.</li>
-                      <li>Bonus points from a reset count in the week the reset is used, never in a week that has already closed.</li>
+                      <li>Everyone starts with {W.startingResets} resets. You choose when to use one. A reset repairs one missed day, so your streak counts that day again.</li>
+                      <li>After a reset, that day's task can be done for {W.lateResetPercent}% of its points until {W.resetsExpire}, even after its week has closed. Those points count in the week you earn them, never in a week that has already closed.</li>
+                      <li>You earn one extra reset for every leaderboard week (except the final stretch) in which you finish every task before that week closes, including tasks done late.</li>
                       <li>Unused resets expire at {W.resetsExpire}.</li>
                     </>
                   )}
@@ -115,6 +118,18 @@ export default function WinterArcRules() {
                   <li>Referral points show as pending until checked. They count in the week the check passes, never in a closed week.</li>
                   <li>You cannot refer yourself, and each person can only be referred once.</li>
                 </ul>
+                {W.show.referralContest && (
+                  <>
+                    <h3>Pre-launch referral contest</h3>
+                    <ul>
+                      <li>The person whose invite link brings in the most friends by {W.referralContestCloses} wins {W.referralContestPrize}.</li>
+                      <li>A friend counts when they have joined the {W.name} waitlist with your link and created a FinEd account with the same email, both before the contest closes. They do not need to finish Day 3 for this contest.</li>
+                      <li>If two people bring in the same number, the one who reached that number first wins.</li>
+                      <li>Every referral is checked before the prize is paid. Fake, duplicate or self-made sign-ups do not count.</li>
+                      <li>The winner is contacted after the check and paid by UPI. This contest is separate from referral points during the challenge.</li>
+                    </ul>
+                  </>
+                )}
               </section>
             )}
 
@@ -124,7 +139,7 @@ export default function WinterArcRules() {
                 <li>Weekly leaderboards: {weeks}.</li>
                 <li>Each weekly board closes on Sunday night and winners are announced on Monday.</li>
                 <li>A final leaderboard adds up all {W.totalDays} days and closes at the end of {W.endDate}. All late windows end then too.</li>
-                <li>Ties are broken in this order: higher score; then more tasks completed on time; then whoever reached that score first. If still tied, the prize is split equally.</li>
+                <li>Ties are broken in this order: higher score; then more days finished within {W.lateFullHours} hours of opening; then whoever reached that score first. If still tied, the prize is split equally.</li>
               </ul>
             </section>
 

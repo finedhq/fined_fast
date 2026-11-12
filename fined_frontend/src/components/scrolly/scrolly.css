@@ -2762,3 +2762,16 @@
   }
 }
 
+
+/* WinterArc: the server marks each try (Checkpoint `challenge`) */
+.nc-root .checkpoint-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.nc-root .checkpoint-fieldset:disabled { opacity: 0.7; }
+.nc-root .checkpoint-try {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--warn);
+  border-radius: 8px;
+  background: var(--warn-bg);
+  color: var(--warn-dark);
+  font-size: 0.95rem;
+}

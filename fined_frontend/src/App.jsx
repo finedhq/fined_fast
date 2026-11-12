@@ -48,6 +48,13 @@ const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
 const WinterArcLanding = lazy(() => import("./pages/WinterArc/WinterArcLanding"));
 const WinterArcRules = lazy(() => import("./pages/WinterArc/WinterArcRules"));
+const WinterArcHub = lazy(() => import("./pages/WinterArc/WinterArcHub"));
+const WinterArcDay = lazy(() => import("./pages/WinterArc/WinterArcDay"));
+const WinterArcLeaderboard = lazy(() => import("./pages/WinterArc/WinterArcLeaderboard"));
+const AdminWinterArc = lazy(() => import("./pages/Admin/AdminWinterArc"));
+const AdminWinterArcMetrics = lazy(() => import("./pages/Admin/AdminWinterArcMetrics"));
+const AdminWinterArcReferrals = lazy(() => import("./pages/Admin/AdminWinterArcReferrals"));
+const AdminWinterArcPeople = lazy(() => import("./pages/Admin/AdminWinterArcPeople"));
 import { UserProfileProvider } from "./context/UserProfileContext";
 import EditProfileModal from "./components/EditProfileModal";
 
@@ -70,6 +77,8 @@ function App() {
                   <Route path="/onboarding" element={<AuthenticationGuard component={OnboardingPage} />} />
                   <Route path="/cards/:cardSlug" element={<AuthenticationGuard component={CardViewer} />} />
                   <Route path="/try" element={<TryModule />} />
+                  {/* A WinterArc day: full window like /cards; signed-in members only (WinterArcGate) */}
+                  <Route path="/winterarc/day/:day" element={<WinterArcDay />} />
                   {/* Admin preview of a new-course module page: full window, like /cards (no site navbar) */}
                   <Route path="/admin/courses/:courseId/modules/:moduleId/preview" element={<AdminGuard><ModulePagePreview /></AdminGuard>} />
                   <Route path="/personal-lens" element={<Navigate to="/articles" replace />} />
@@ -87,6 +96,8 @@ function App() {
                     <Route path="about" element={<AboutPage />} />
                     <Route path="winterarc" element={<WinterArcLanding />} />
                     <Route path="winterarc/rules" element={<WinterArcRules />} />
+                    <Route path="winterarc/challenge" element={<WinterArcHub />} />
+                    <Route path="winterarc/leaderboard" element={<WinterArcLeaderboard />} />
                     <Route path="rewards" element={<AuthenticationGuard component={RewardsPage} />} />
                     <Route path="profile" element={<AuthenticationGuard component={ProfilePage} />} />
 
@@ -105,6 +116,10 @@ function App() {
                   <Route path="admin/courses/:courseId/modules/:moduleId/cards" element={<AdminGuard><AdminModuleCards /></AdminGuard>} />
                   <Route path="admin/courses/:courseId/modules/:moduleId/cards/:cardId/edit" element={<AdminGuard><EditCardForm /></AdminGuard>} />
                   <Route path="admin/sources" element={<AdminGuard><AdminSources /></AdminGuard>} />
+                  <Route path="admin/winterarc" element={<AdminGuard><AdminWinterArc /></AdminGuard>} />
+                  <Route path="admin/winterarc/metrics" element={<AdminGuard><AdminWinterArcMetrics /></AdminGuard>} />
+                  <Route path="admin/winterarc/referrals" element={<AdminGuard><AdminWinterArcReferrals /></AdminGuard>} />
+                  <Route path="admin/winterarc/people" element={<AdminGuard><AdminWinterArcPeople /></AdminGuard>} />
                   <Route path="dashboard" element={<AuthenticationGuard component={Dashboard} />} />
                   <Route path="courses/:courseSlug" element={<CourseOverview />} />
                   <Route path="certificate/:code" element={<VerifyCertificatePage />} />

@@ -34,6 +34,26 @@ function AdminDashboard() {
       action: () => navigate("/admin/sources"),
     },
     {
+      label: "WinterArc Calendar",
+      icon: "❄",
+      action: () => navigate("/admin/winterarc"),
+    },
+    {
+      label: "WinterArc Numbers",
+      icon: "📊",
+      action: () => navigate("/admin/winterarc/metrics"),
+    },
+    {
+      label: "WinterArc People",
+      icon: "🧑‍🤝‍🧑",
+      action: () => navigate("/admin/winterarc/people"),
+    },
+    {
+      label: "WinterArc Referral Checks",
+      icon: "🔎",
+      action: () => navigate("/admin/winterarc/referrals"),
+    },
+    {
       label: "Settings (Coming Soon)",
       icon: "⚙",
       action: null,
