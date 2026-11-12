@@ -114,7 +114,20 @@ def _my_referrals(email: str, extra: list) -> dict:
     counted = sum(1 for p in extra if p.get("kind") == "referral")
     rejected = sum(1 for p in extra if p.get("kind") == "referral_rejected")
     return {"code": code, "joined": joined, "counted": counted, "pending": max(0, joined - counted - rejected),
-            "points_each": 10, "cap": 20}
+            "points_each": 10, "cap": 20, "contest": _my_contest(code)}
+
+
+def _my_contest(code: Optional[str]) -> dict:
+    """My standing in the pre-launch referral contest (migration 011): friends
+    who count so far and my rank, before the manual checks."""
+    if not code:
+        return {"friends": 0, "rank": None}
+    try:
+        res = supabase.from_("winterarc_referral_contest").select("referrals, rank").eq("code", code).limit(1).execute()
+    except Exception:
+        return {"friends": 0, "rank": None}
+    row = res.data[0] if res and res.data else None
+    return {"friends": row["referrals"] if row else 0, "rank": row["rank"] if row else None}
 
 
 def _repaired(extra: list) -> dict:

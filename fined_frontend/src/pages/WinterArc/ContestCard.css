@@ -1,0 +1,54 @@
+/* Referral contest card (ContestCard.jsx): ink background, gold prize,
+   the brand's offset shadow in gold. Plain colours so it works inside any
+   page (landing thank-you card, hub). */
+.wa-race {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  text-align: left;
+  background: #171321;
+  color: #FFFFFF;
+  box-shadow: 4px 4px 0 0 #FFB600;
+}
+.wa-race-prize { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-right: 18px; border-right: 1.5px dashed rgba(255, 255, 255, 0.28); }
+.wa-race-amount {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 7vw, 2.9rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #FFB600;
+}
+.wa-race-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #FFB600;
+  color: #171321;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+.wa-race p { margin: 0; }
+.wa-race .wa-race-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.12rem; line-height: 1.25; color: #FFFFFF; }
+.wa-race .wa-race-rule { margin-top: 6px; font-size: 0.86rem; line-height: 1.5; color: rgba(255, 255, 255, 0.74); }
+.wa-race .wa-race-standing { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.14); font-weight: 700; font-size: 0.9rem; color: #FFE08A; }
+
+/* Compact (hub side column): stacked, prize and days-left on one line */
+.wa-race.is-compact { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px 16px; margin-top: 12px; }
+.wa-race.is-compact .wa-race-prize { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 10px; border-right: 0; border-bottom: 1.5px dashed rgba(255, 255, 255, 0.28); }
+.wa-race.is-compact .wa-race-amount { font-size: 2.1rem; }
+.wa-race.is-compact .wa-race-title { font-size: 0.98rem; }
+.wa-race.is-compact .wa-race-rule { font-size: 0.8rem; }
+
+@media (max-width: 420px) {
+  .wa-race { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .wa-race-prize { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 12px; border-right: 0; border-bottom: 1.5px dashed rgba(255, 255, 255, 0.28); }
+}
