@@ -13,6 +13,7 @@ import {
   PiGraduationCapBold,
   PiListBold,
   PiSignOutBold,
+  PiSnowflakeBold,
   PiStarFill,
   PiUserBold,
   PiXBold,
@@ -46,7 +47,9 @@ export default function Navbar() {
 
   const links = [
     { to: homePath, label: "Home", end: true },
-    { to: "/courses", label: "Courses", badge: "New" },
+    { to: "/courses", label: "Courses" },
+    // Featured: an icy pill with a snowflake and a gentle shimmer (Navbar.css)
+    { to: "/winterarc", label: "WinterArc", badge: "Free", featured: true },
     { to: "/articles", label: "Articles" },
     { to: "/contact", label: "Contact Us" },
   ];
@@ -117,14 +120,15 @@ export default function Navbar() {
         <ul className="fn-links" onMouseLeave={() => setHovered(null)}>
           {links.map((l, i) => (
             <li key={l.label} onMouseEnter={() => setHovered(i)}>
-              <NavLink to={l.to} end={l.end} className={() => `fn-link${isActive(l) ? " is-active" : ""}`}>
-                {highlight === i && (
+              <NavLink to={l.to} end={l.end} className={() => `fn-link${isActive(l) ? " is-active" : ""}${l.featured ? " fn-link--featured" : ""}`}>
+                {highlight === i && !l.featured && (
                   <motion.span
                     layoutId="fn-nav-highlight"
                     className="fn-link-bg"
                     transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
                   />
                 )}
+                {l.featured && <PiSnowflakeBold className="fn-flake" aria-hidden="true" />}
                 <span className="fn-link-text">{l.label}</span>
                 {l.badge && <span className="fn-new">{l.badge}</span>}
               </NavLink>
@@ -269,7 +273,13 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.06 + i * 0.05, ease: EASE }}
                 >
-                  <NavLink to={l.to} end={l.end} onClick={closeMenu} className={() => (isActive(l) ? "is-active" : "")}>
+                  <NavLink
+                    to={l.to}
+                    end={l.end}
+                    onClick={closeMenu}
+                    className={() => `${isActive(l) ? "is-active" : ""}${l.featured ? " fn-sheet-featured" : ""}`.trim()}
+                  >
+                    {l.featured && <PiSnowflakeBold className="fn-flake" aria-hidden="true" />}
                     {l.label}
                     {l.badge && <span className="fn-new">{l.badge}</span>}
                   </NavLink>
