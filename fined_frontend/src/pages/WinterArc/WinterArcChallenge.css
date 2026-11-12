@@ -6,7 +6,9 @@
    day numeral, week strips, a streak ladder, reset tokens, a podium.
    Shapes: cards 20px, chips and tiles 12-14px, buttons are pills. */
 
-/* ---------- Page ---------- */
+/* ---------- Page ----------
+   Headings here are written ".wa .x h2" so they beat the landing's general
+   ".wa h2" rule whatever order the stylesheets load in. */
 .wa-app {
   background: linear-gradient(180deg, var(--wa-ice) 0, var(--wa-bg) 420px);
   min-height: 100dvh;
@@ -18,7 +20,7 @@
   justify-content: space-between;
   gap: 16px;
 }
-.wa-app-head h1 { font-size: clamp(1.8rem, 4.6vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
+.wa .wa-app-head h1 { font-size: clamp(1.8rem, 4.6vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; }
 .wa-app-sub { margin-top: 8px !important; color: var(--wa-ink-3); font-size: 1rem; }
 .wa-app-sub strong { color: var(--wa-ink); font-family: var(--wa-display); }
 .wa-btn-small { padding: 9px 16px; font-size: 0.9rem; gap: 8px; }
@@ -72,7 +74,7 @@
   user-select: none;
 }
 .wa-today-kicker { font-family: var(--wa-action); font-weight: 800; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wa-purple); }
-.wa-today h2 { margin: 8px 0 14px; font-size: clamp(1.5rem, 3.4vw, 2.1rem); max-width: 22ch; line-height: 1.15; }
+.wa .wa-today h2 { margin: 8px 0 14px; font-size: clamp(1.5rem, 3.4vw, 2.1rem); max-width: 22ch; line-height: 1.15; }
 .wa-pips { display: flex; gap: 6px; }
 .wa-pip { width: 34px; height: 8px; border-radius: 9999px; background: var(--wa-ice-2); }
 .wa-pip.is-on { background: var(--wa-green); }
@@ -90,7 +92,7 @@
   border-radius: 20px;
 }
 .wa-month-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 8px; }
-.wa-month-head h2 { font-size: 1.15rem; letter-spacing: -0.01em; }
+.wa .wa-month-head h2 { font-size: 1.15rem; letter-spacing: -0.01em; }
 .wa-month-head p { font-size: 0.86rem; color: var(--wa-muted); }
 
 .wa-weeks { display: grid; }
@@ -154,7 +156,7 @@
 
 /* ---------- Side cards: streak, resets ---------- */
 .wa-side-card { padding: 20px; background: var(--wa-white); border: 1px solid var(--wa-border); border-radius: 20px; }
-.wa-side-card h3 { font-size: 1rem; margin-bottom: 6px; }
+.wa .wa-side-card h3 { font-size: 1rem; margin-bottom: 6px; }
 .wa-side-note { font-size: 0.9rem; line-height: 1.5; color: var(--wa-ink-3); }
 .wa-side-msg { margin-top: 10px !important; font-size: 0.9rem; color: var(--wa-green); font-weight: 700; }
 .wa-side-msg.is-error { color: var(--wa-red); }
@@ -177,35 +179,27 @@
 .wa-tokens-count { margin-left: 4px; font-weight: 800; font-family: var(--wa-display); }
 .wa-repair { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-/* ---------- Invite: the one deep-purple block ---------- */
-.wa-invite {
-  position: relative;
-  overflow: hidden;
-  padding: 22px;
-  border-radius: 20px;
-  color: var(--wa-white);
-  background:
-    radial-gradient(circle at 110% -10%, rgba(255, 182, 0, 0.28), transparent 45%),
-    linear-gradient(150deg, var(--wa-purple), var(--wa-purple-hover));
-}
-.wa-invite h3 { color: var(--wa-white); font-size: 1.1rem; }
-.wa-invite > p { margin-top: 6px !important; color: rgba(255, 255, 255, 0.82); font-size: 0.92rem; line-height: 1.5; }
-.wa-invite-stats { margin: 14px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.wa-invite-stats div { padding: 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.09); }
-.wa-invite-stats dt { font-size: 0.74rem; color: rgba(255, 255, 255, 0.72); }
-.wa-invite-stats dd { margin: 0; font-family: var(--wa-display); font-weight: 800; font-size: 1.35rem; }
-.wa-invite-link { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* ---------- Invite: a plain side card; the contest card inside it is the
+   one dark, high-contrast block on the page ---------- */
+.wa-invite-note { margin-top: 12px !important; }
+.wa-invite-link { margin-top: 12px; display: grid; gap: 8px; }
 .wa-invite-link code {
-  flex: 1 1 180px;
+  display: block;
   min-width: 0;
   overflow-wrap: anywhere;
   padding: 10px 12px;
   border-radius: 12px;
-  font-size: 0.8rem;
-  color: var(--wa-white);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.82rem;
+  color: var(--wa-ink);
+  background: var(--wa-ice);
+  border: 1px solid var(--wa-ice-2);
 }
+.wa-invite-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.wa-invite-stats { margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed var(--wa-border); display: grid; grid-template-columns: repeat(3, 1fr); }
+.wa-invite-stats div { text-align: center; }
+.wa-invite-stats div + div { border-left: 1px solid var(--wa-border); }
+.wa-invite-stats dt { font-size: 0.76rem; color: var(--wa-muted); font-weight: 700; }
+.wa-invite-stats dd { margin: 2px 0 0; font-family: var(--wa-display); font-weight: 800; font-size: 1.3rem; color: var(--wa-ink); }
 
 /* ---------- Leaderboards ---------- */
 .wa-tabs { margin-top: 24px; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity; }
@@ -294,7 +288,7 @@
   border: 1px solid var(--wa-border);
   border-radius: 20px;
 }
-.wa-board-empty h2 { font-size: 1.2rem; }
+.wa .wa-board-empty h2 { font-size: 1.2rem; }
 .wa-board-empty p { margin: 6px 0 14px; color: var(--wa-ink-3); }
 .wa-icon-tile { width: 96px; height: 96px; border-radius: 20px; display: grid; place-items: center; font-size: 2.6rem; color: var(--wa-purple); background: linear-gradient(150deg, var(--wa-ice), var(--wa-ice-2)); }
 
@@ -314,7 +308,7 @@
   box-shadow: var(--wa-shadow);
   animation: wa-rise 0.6s var(--wa-ease) both;
 }
-.wa-msg-card h1 { font-size: clamp(1.6rem, 4.4vw, 2.3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+.wa .wa-msg-card h1 { font-size: clamp(1.6rem, 4.4vw, 2.3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
 .wa-msg-body { margin-top: 12px; color: var(--wa-ink-3); font-size: 1.05rem; line-height: 1.6; max-width: 46ch; }
 .wa-msg-actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
 .wa-msg-art {

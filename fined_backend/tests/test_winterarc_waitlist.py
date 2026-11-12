@@ -83,11 +83,21 @@ def test_same_email_counted_once_and_source_kept(db):
 
 def test_referral_code_stored_only_if_real(db):
     friend = join(email="f@x.com")["referral_code"]
-    join(email="b@x.com", ref=friend.lower())
-    join(email="c@x.com", ref="NOPE99")
+    join(email="b@x.com", ref=f" {friend.lower()[:3]}-{friend.lower()[3:]} ")   # typed loosely
+    with pytest.raises(HTTPException) as e:
+        join(email="c@x.com", ref="NOPE99")
+    assert e.value.status_code == 400 and "couldn't find" in e.value.detail
     by_email = {r["email"]: r for r in db.rows}
     assert by_email["b@x.com"]["referred_by_code"] == friend
-    assert by_email["c@x.com"]["referred_by_code"] is None
+    assert "c@x.com" not in by_email                                 # nothing saved
+    join(email="c@x.com", ref="")                                     # box left empty: joins
+    assert {r["email"] for r in db.rows} >= {"c@x.com"}
+
+
+def test_rejoining_ignores_the_code_box(db):
+    first = join(email="a@x.com")
+    again = join(email="a@x.com", ref="NOPE99")
+    assert again == {"referral_code": first["referral_code"], "already_joined": True}
 
 
 @pytest.mark.parametrize("kw", [

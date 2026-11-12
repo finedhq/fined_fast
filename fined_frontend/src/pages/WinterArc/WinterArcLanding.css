@@ -396,6 +396,14 @@
 .wa-thanks > p { color: var(--wa-ink-3); }
 .wa-thanks-tick { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem; color: var(--wa-green); background: var(--wa-green-tint); border: 1px solid #A7F3D0; margin-bottom: 8px; }
 .wa-thanks-lead { margin-top: 14px !important; font-family: var(--wa-display); font-weight: 800; color: var(--wa-ink) !important; }
+/* Join form: referral code box; thank-you card: "not you?" */
+.wa-field-code input { font-family: var(--wa-action); font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.wa-field-code input::placeholder { letter-spacing: normal; text-transform: none; font-weight: 600; color: var(--wa-muted); }
+.wa-field-code small { display: block; margin-top: 0; font-size: 0.82rem; line-height: 1.4; }
+.wa-field-code .wa-field-hint { color: var(--wa-ink-3); }
+.wa-field-code .wa-field-error { color: var(--wa-red); font-weight: 700; }
+.wa-field-code.has-error input { border-color: var(--wa-red); background: var(--wa-red-tint); }
+.wa-thanks-other { margin-top: 14px; border: 0; background: none; padding: 4px; font-family: var(--wa-action); font-weight: 700; font-size: 0.88rem; color: var(--wa-purple); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .wa-link-row { display: flex; gap: 8px; width: 100%; margin-top: 6px; }
 .wa-ref-link { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 12px; text-align: left; overflow-wrap: anywhere; font-size: 0.88rem; color: var(--wa-ink); background: var(--wa-purple-surface); border: 1px solid var(--wa-purple-border); }
 .wa-thanks .wa-btn-ghost { padding: 10px 16px; }
