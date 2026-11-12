@@ -179,35 +179,27 @@
 .wa-tokens-count { margin-left: 4px; font-weight: 800; font-family: var(--wa-display); }
 .wa-repair { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-/* ---------- Invite: the one deep-purple block ---------- */
-.wa-invite {
-  position: relative;
-  overflow: hidden;
-  padding: 22px;
-  border-radius: 20px;
-  color: var(--wa-white);
-  background:
-    radial-gradient(circle at 110% -10%, rgba(255, 182, 0, 0.28), transparent 45%),
-    linear-gradient(150deg, var(--wa-purple), var(--wa-purple-hover));
-}
-.wa .wa-invite h3 { color: var(--wa-white); font-size: 1.1rem; }
-.wa-invite > p { margin-top: 6px !important; color: rgba(255, 255, 255, 0.82); font-size: 0.92rem; line-height: 1.5; }
-.wa-invite-stats { margin: 14px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.wa-invite-stats div { padding: 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.09); }
-.wa-invite-stats dt { font-size: 0.74rem; color: rgba(255, 255, 255, 0.72); }
-.wa-invite-stats dd { margin: 0; font-family: var(--wa-display); font-weight: 800; font-size: 1.35rem; }
-.wa-invite-link { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* ---------- Invite: a plain side card; the contest card inside it is the
+   one dark, high-contrast block on the page ---------- */
+.wa-invite-note { margin-top: 12px !important; }
+.wa-invite-link { margin-top: 12px; display: grid; gap: 8px; }
 .wa-invite-link code {
-  flex: 1 1 180px;
+  display: block;
   min-width: 0;
   overflow-wrap: anywhere;
   padding: 10px 12px;
   border-radius: 12px;
-  font-size: 0.8rem;
-  color: var(--wa-white);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.82rem;
+  color: var(--wa-ink);
+  background: var(--wa-ice);
+  border: 1px solid var(--wa-ice-2);
 }
+.wa-invite-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.wa-invite-stats { margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed var(--wa-border); display: grid; grid-template-columns: repeat(3, 1fr); }
+.wa-invite-stats div { text-align: center; }
+.wa-invite-stats div + div { border-left: 1px solid var(--wa-border); }
+.wa-invite-stats dt { font-size: 0.76rem; color: var(--wa-muted); font-weight: 700; }
+.wa-invite-stats dd { margin: 2px 0 0; font-family: var(--wa-display); font-weight: 800; font-size: 1.3rem; color: var(--wa-ink); }
 
 /* ---------- Leaderboards ---------- */
 .wa-tabs { margin-top: 24px; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity; }

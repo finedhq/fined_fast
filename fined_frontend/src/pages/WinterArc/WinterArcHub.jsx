@@ -9,8 +9,10 @@ import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   PiArrowCounterClockwiseBold, PiArrowRightBold, PiCheckBold, PiClockBold, PiCopyBold, PiLockSimpleBold, PiTrophyBold,
+  PiWhatsappLogoBold,
 } from "react-icons/pi";
 import { WINTERARC as W, dayInfo } from "./winterarcConfig";
+import ContestCard from "./ContestCard";
 import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 import { Countdown } from "./WinterArcSignup";
@@ -228,21 +230,35 @@ function Invite({ r }) {
       // clipboard blocked: the link is on screen
     }
   };
+  const shareText = `I'm doing WinterArc: 30 Days of Money with FinEd, 1 to 30 Dec. One short money task a day, free to join. Join with my link: ${link}`;
   return (
-    <section className="wa-invite" aria-labelledby="wa-invite-title">
-      <h3 id="wa-invite-title">Bring a friend along</h3>
-      <p>+{r.points_each} points for each friend who finishes Day 3 (up to {r.cap}).</p>
+    <section className="wa-side-card wa-invite" aria-labelledby="wa-invite-title">
+      <h3 id="wa-invite-title">Invite friends</h3>
+      <ContestCard compact standing={r.contest} />
+      <p className="wa-side-note wa-invite-note">
+        In the challenge, each friend who finishes Day 3 earns you +{r.points_each} points (up to {r.cap} friends).
+      </p>
+      <div className="wa-invite-link">
+        <code>{link}</code>
+        <div className="wa-invite-actions">
+          <button type="button" className="wa-btn wa-btn-primary wa-btn-small" onClick={copy}>
+            <PiCopyBold aria-hidden="true" /> {copied ? "Copied" : "Copy link"}
+          </button>
+          <a
+            className="wa-btn wa-btn-ghost wa-btn-small"
+            href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <PiWhatsappLogoBold aria-hidden="true" /> WhatsApp
+          </a>
+        </div>
+      </div>
       <dl className="wa-invite-stats">
         <div><dt>Joined</dt><dd>{r.joined}</dd></div>
         <div><dt>Counted</dt><dd>{r.counted}</dd></div>
         <div><dt>Pending</dt><dd>{r.pending}</dd></div>
       </dl>
-      <div className="wa-invite-link">
-        <code>{link}</code>
-        <button type="button" className="wa-btn wa-btn-primary wa-btn-small" onClick={copy}>
-          <PiCopyBold aria-hidden="true" /> {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
     </section>
   );
 }

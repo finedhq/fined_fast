@@ -103,9 +103,13 @@ async def join_waitlist(body: WaitlistRequest):
     if heard and heard not in HEARD_FROM:
         heard = "other"
 
+    # The referral code box (filled in from a friend's link, or typed): a code
+    # that belongs to nobody is refused, so nobody thinks they were referred
+    # when they weren't. Nothing is saved until it's fixed or left empty.
     ref = normalize_code(body.ref)
     if ref and not _code_exists(ref):
-        ref = None  # unknown codes are not stored as referrals
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                            "We couldn't find that referral code. Check it with your friend, or leave the box empty.")
 
     row = {
         "email": email,

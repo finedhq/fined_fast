@@ -38,6 +38,7 @@ export const WINTERARC = {
   // Pre-launch referral contest (DECIDED 2026-11-11)
   referralContestPrize: "₹500",
   referralContestCloses: "30 Nov 2026, 11:59 pm IST",
+  referralContestEndsAt: "2026-11-30T23:59:59+05:30",
   certificateMinDays: 21,
   // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
   // hidden (show.certificatePrice) until that is confirmed.
@@ -111,6 +112,10 @@ export const WINTERARC = {
     certificatePrice: false,
   },
 };
+
+// Is the pre-launch referral contest still running? (checked when the page loads)
+export const REFERRAL_CONTEST_OPEN =
+  WINTERARC.show.referralContest && Date.now() < Date.parse(WINTERARC.referralContestEndsAt);
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
