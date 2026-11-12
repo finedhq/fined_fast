@@ -9,6 +9,7 @@ import { hasAiLens } from "../../utils/textFormatters";
 import { getUserLevel } from "../../utils/level";
 import { useUserProfile } from "../../context/UserProfileContext";
 import CommunityBanner from "../../components/Community/CommunityBanner";
+import WinterArcPopup from "../WinterArc/WinterArcPopup";
 import {
   PiArrowRightBold,
   PiBookOpenTextBold,
@@ -314,6 +315,8 @@ const Dashboard = () => {
 
   return (
     <div className="dh-page">
+      {/* WinterArc invite: once per visit until they join (home screen in the app too) */}
+      <WinterArcPopup />
       <div className="dh-grid">
         {/* Greeting */}
         <div className="dh-area-greet">

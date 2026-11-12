@@ -1,5 +1,6 @@
 // Waitlist form, the thank-you card with the referral link, and the countdown.
 import { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
 import { PiCheckBold, PiCopyBold, PiWhatsappLogoBold } from "react-icons/pi";
 import { WINTERARC as W } from "./winterarcConfig";
@@ -105,6 +106,14 @@ export default function SignupForm() {
     name: "", email: "", college: "", heard_from: "", age_confirmed: false, consent: false,
   });
   const [state, setState] = useState({ status: "idle", error: "", code: "", already: false });
+
+  // Signed-in learners: fill in their name and email (only into empty fields)
+  const { user } = useAuth0();
+  const [prefilled, setPrefilled] = useState(false);
+  if (user && !prefilled) {
+    setPrefilled(true);
+    setForm((f) => ({ ...f, name: f.name || user.name || "", email: f.email || user.email || "" }));
+  }
 
   const set = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
