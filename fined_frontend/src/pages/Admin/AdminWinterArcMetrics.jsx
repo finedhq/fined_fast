@@ -75,12 +75,22 @@ function Table({ title, firstCol, rows, file, extra = [] }) {
 export default function AdminWinterArcMetrics() {
   const [data, setData] = useState(null);
   const [contest, setContest] = useState(null);
+  // Which contest to show: the one running now (null) or a chosen one
+  const [contestKey, setContestKey] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     getWinterArcMetrics().then(setData).catch((e) => setError(e.message || "Couldn't load the numbers."));
-    getWinterArcReferralContest().then(setContest).catch(() => setContest({ rows: [], failed: true }));
   }, []);
+  useEffect(() => {
+    let live = true;
+    getWinterArcReferralContest(contestKey)
+      .then((c) => live && setContest(c))
+      .catch(() => live && setContest({ rows: [], failed: true, contest: contestKey }));
+    return () => {
+      live = false;
+    };
+  }, [contestKey]);
 
   if (error) return <main className="af-page"><div className="af-error">{error}</div></main>;
   if (!data) return null;
@@ -116,32 +126,41 @@ export default function AdminWinterArcMetrics() {
 
       <section className="wa-metrics-block">
         <div className="wa-metrics-head">
-          <h2>Referral contest (₹500, closes 30 Nov 11:59 pm IST)</h2>
+          <h2>Avalanche Award (₹500 each contest)</h2>
           {contest?.rows?.length > 0 && (
             <button
               type="button"
               className="af-btn"
-              onClick={() => download(`winterarc-referral-contest-${stamp}.csv`, ["Rank", "Code", "Referrer", "Counted referrals", "Reached that count at"], contest.rows.map((r) => [r.rank, r.code, r.referrer_name, r.referrals, r.reached_at]))}
+              onClick={() => download(`winterarc-referral-contest-${contest.contest}-${stamp}.csv`, ["Rank", "Code", "Referrer", "Counted referrals", "Eligible (5+)", "Leading", "Reached that count at"], contest.rows.map((r) => [r.rank, r.code, r.referrer_name, r.referrals, r.eligible ? "yes" : "no", r.leading ? "yes" : "", r.reached_at]))}
             >
               Download CSV
             </button>
           )}
         </div>
+        <div className="wa-admin-filters" style={{ display: "flex", gap: 8, margin: "8px 0" }}>
+          {[["nov", "By 30 Nov"], ["dec", "1-30 Dec"]].map(([k, l]) => (
+            <button key={k} type="button" className={`af-btn${contest?.contest === k ? " af-btn--primary" : ""}`} onClick={() => setContestKey(k)}>{l}</button>
+          ))}
+        </div>
         <p className="af-hint">
-          Counts a friend who joined with the referral link AND has a FinEd account with the same email, both by the close.
-          Ties go to whoever reached the count first. Check the winner by hand before paying.
+          Counts a friend who joined with the referral link inside the contest's dates and has a FinEd account with the same
+          email by its close. Only referrers with at least {contest?.minimum ?? 5} friends can win; the leader among them is
+          marked. Ties go to whoever reached the count first. Check the winner by hand before paying.
         </p>
         {!contest ? null : contest.failed ? (
-          <p className="af-hint">Couldn't load the contest (has migration 011 run?).</p>
+          <p className="af-hint">Couldn't load the contest (has migration 014 run?).</p>
         ) : contest.rows.length === 0 ? (
           <p className="af-hint">No counted referrals yet.</p>
         ) : (
           <div className="wa-metrics-scroll">
             <table className="wa-metrics-table">
-              <thead><tr><th>Rank</th><th>Code</th><th>Referrer</th><th>Counted referrals</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Code</th><th>Referrer</th><th>Counted referrals</th><th>Eligible</th></tr></thead>
               <tbody>
                 {contest.rows.map((r) => (
-                  <tr key={r.code}><td>{r.rank}</td><td>{r.code}</td><td>{r.referrer_name || "(unknown)"}</td><td>{r.referrals}</td></tr>
+                  <tr key={r.code} style={r.leading ? { fontWeight: 800 } : undefined}>
+                    <td>{r.rank}</td><td>{r.code}</td><td>{r.referrer_name || "(unknown)"}</td><td>{r.referrals}</td>
+                    <td>{r.leading ? "Winner if checks pass" : r.eligible ? "Yes" : `Needs ${(contest.minimum ?? 5) - r.referrals} more`}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>

@@ -10,11 +10,14 @@ import { getUserLevel } from "../../utils/level";
 import { useUserProfile } from "../../context/UserProfileContext";
 import CommunityBanner from "../../components/Community/CommunityBanner";
 import WinterArcPopup from "../WinterArc/WinterArcPopup";
+import useWinterArcStatus from "../WinterArc/useWinterArcStatus";
+import { WINTERARC as WA } from "../WinterArc/winterarcConfig";
 import {
   PiArrowRightBold,
   PiBookOpenTextBold,
   PiCaretRightBold,
   PiFireFill,
+  PiSnowflakeBold,
   PiInfoBold,
   PiSparkleFill,
   PiStarFill,
@@ -148,6 +151,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const { profile, saveProfile } = useUserProfile();
+  const winterArc = useWinterArcStatus();
 
   const [userData, setUserData] = useState(() => {
     const c = getCachedDashboard();
@@ -330,6 +334,36 @@ const Dashboard = () => {
               {streak > 0 ? `You're on a ${streak} day streak!` : "Start your streak today"}
             </button>
           </header>
+
+          {winterArc.joined && (
+            <section className="dh-panel dh-setup dh-wa" aria-labelledby="dh-wa-title">
+              <PiSnowflakeBold className="dh-wa-flake" aria-hidden="true" />
+              <div className="dh-wa-body">
+                <p className="dh-wa-tag">
+                  <PiSnowflakeBold aria-hidden="true" /> {WA.name} · 30 Days of Money
+                </p>
+                <h2 id="dh-wa-title" className="dh-setup-title">
+                  {!winterArc.today
+                    ? `${WA.name} starts ${WA.startDate}`
+                    : winterArc.today_done
+                      ? `Day ${winterArc.today} done. Nice work.`
+                      : `Day ${winterArc.today} of ${WA.name} is open`}
+                </h2>
+                <p className="dh-setup-sub">
+                  {!winterArc.today
+                    ? "You're in. Your hub has the countdown, your invite link and the 30 days."
+                    : winterArc.today_done
+                      ? "Check your streak and the leaderboard in your hub."
+                      : `${WA.questionsPerDay} questions, a few minutes. Keep your streak going.`}
+                </p>
+              </div>
+              <div className="dh-setup-actions">
+                <Link to={winterArc.today && !winterArc.today_done ? `/winterarc/day/${winterArc.today}` : "/winterarc/challenge"} className="dh-btn dh-setup-btn">
+                  {winterArc.today && !winterArc.today_done ? `Start Day ${winterArc.today}` : "Open your hub"}
+                </Link>
+              </div>
+            </section>
+          )}
 
           {offerOnboarding && (
             <section className="dh-panel dh-setup" aria-labelledby="dh-setup-title">

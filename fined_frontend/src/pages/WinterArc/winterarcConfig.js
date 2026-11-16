@@ -35,18 +35,31 @@ export const WINTERARC = {
   residency: "India",
   referralPoints: 10,
   referralCap: 20,
-  // Pre-launch referral contest (DECIDED 2026-11-11)
+  // Referral contests (DECIDED: Nov one 2026-11-11, Dec one 2026-11-15). Each
+  // counts friends brought in during its own window; the top referrer wins.
+  referralContests: [
+    { key: "nov", name: "Pre-launch referral contest", prize: "₹500", closes: "30 Nov 2026, 11:59 pm IST", endsAt: "2026-11-30T23:59:59+05:30" },
+    { key: "dec", name: "December referral contest", prize: "₹500", opens: "1 Dec 2026", closes: "30 Dec 2026, 11:59 pm IST", endsAt: "2026-12-30T23:59:59+05:30" },
+  ],
   referralContestPrize: "₹500",
-  referralContestCloses: "30 Nov 2026, 11:59 pm IST",
-  referralContestEndsAt: "2026-11-30T23:59:59+05:30",
+  // The referral prize's name, and the fewest friends needed to win it
+  referralAwardName: "Avalanche Award",
+  referralAwardMin: 5,
   certificateMinDays: 21,
   // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
   // hidden (show.certificatePrice) until that is confirmed.
   certificatePrice: "₹149",
 
-  // Prize pool shown on the page. Breakdown is not final, so only the pool shows.
+  // Prize pool and its split (DECIDED 2026-11-15). The parts add up to the pool.
   prizePool: "₹10,000",
-  prizeNote: "Shared between weekly winners and the final top scorers. Full prize table published before 1 Dec.",
+  prizeNote: "Final top 3, a winner every day, and two referral contests.",
+  finalPrizes: [
+    { place: "1st", amount: "₹3,000" },
+    { place: "2nd", amount: "₹2,000" },
+    { place: "3rd", amount: "₹1,000" },
+  ],
+  dailyPrizeTotal: "₹3,000",
+  dailyPrizeEach: "₹100", // shown on the rules page only; the landing says "a winner every day"
 
   // Leaderboard weeks (DECIDED). Days are December dates; Sundays close each week.
   weeks: [
@@ -113,9 +126,11 @@ export const WINTERARC = {
   },
 };
 
-// Is the pre-launch referral contest still running? (checked when the page loads)
-export const REFERRAL_CONTEST_OPEN =
-  WINTERARC.show.referralContest && Date.now() < Date.parse(WINTERARC.referralContestEndsAt);
+// The referral contest running right now, if any (checked when the page loads)
+export const CURRENT_REFERRAL_CONTEST = WINTERARC.show.referralContest
+  ? WINTERARC.referralContests.find((c) => Date.now() < Date.parse(c.endsAt)) || null
+  : null;
+export const REFERRAL_CONTEST_OPEN = !!CURRENT_REFERRAL_CONTEST;
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 

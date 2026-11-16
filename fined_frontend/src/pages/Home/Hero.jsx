@@ -30,7 +30,15 @@ export default function Hero() {
   const [authors, setAuthors] = useState([]);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) navigate("/dashboard", { replace: true });
+    // Signed-in visitors skip the home page. But not while Auth0 is finishing a
+    // sign-in here: Auth0ProviderWithNavigate is sending them back to where they
+    // started (returnTo). React Router renders that move a beat later than the
+    // address bar changes, so this page can still be showing; redirecting now
+    // would win the race and drop them on the dashboard instead.
+    const params = new URLSearchParams(window.location.search);
+    const finishingSignIn = params.has("code") && params.has("state");
+    const leaving = window.location.pathname !== "/";
+    if (!isLoading && isAuthenticated && !finishingSignIn && !leaving) navigate("/dashboard", { replace: true });
   }, [isAuthenticated, isLoading, navigate]);
 
   useEffect(() => {

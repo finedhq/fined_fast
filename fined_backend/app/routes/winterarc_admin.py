@@ -350,15 +350,24 @@ async def reinstate(person_id: str, user: AuthUser = Depends(require_admin)):
 # --- Winners -----------------------------------------------------------------
 
 @router.get("/winners")
-async def winners(week: Optional[int] = None, user: AuthUser = Depends(require_admin)):
-    """A board's top 10 with email, college and account, for verifying."""
+async def winners(week: Optional[int] = None, day: Optional[int] = None, user: AuthUser = Depends(require_admin)):
+    """A board's top 10 with email, college and account, for verifying:
+    a day's board (day=1..30, migration 014), a week's, or the final board."""
     if week is not None and week not in [w for w, _, _ in R.WEEKS]:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "There is no such week.")
-    view = "winterarc_board_week" if week else "winterarc_board_final"
+    if day is not None and not R.valid_day(day):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There is no such day.")
+    if day:
+        view, cols = "winterarc_board_day", "email, display_name, points, questions, rank, reached_at"
+    else:
+        view = "winterarc_board_week" if week else "winterarc_board_final"
+        cols = "email, display_name, points, on_time_days, rank, reached_at"
 
     def top():
-        q = supabase.from_(view).select("email, display_name, points, on_time_days, rank, reached_at")
-        if week:
+        q = supabase.from_(view).select(cols)
+        if day:
+            q = q.eq("day_no", day)
+        elif week:
             q = q.eq("week_no", week)
         return q.order("rank").order("reached_at").limit(10).execute().data or []
 
@@ -367,11 +376,13 @@ async def winners(week: Optional[int] = None, user: AuthUser = Depends(require_a
     people = await asyncio.to_thread(lambda: supabase.from_(WAITLIST).select(WAITLIST_COLUMNS).in_("email", emails).execute().data or []) if emails else []
     by_email = {p["email"].lower(): p for p in people}
     now = days_api._now()
-    closes = R.week_closes(week) if week else R.ends_at()
+    closes = R.day_closes(day) if day else R.week_closes(week) if week else R.ends_at()
     return {
         "week": week,
+        "day": day,
         "closed": now >= closes,
         "closes_at": closes.isoformat(),
+        "prize": R.DAILY_PRIZE if day else None,
         "rows": [{**r, "person_id": (by_email.get(r["email"]) or {}).get("id"),
                   "name": (by_email.get(r["email"]) or {}).get("name"),
                   "college": (by_email.get(r["email"]) or {}).get("college")} for r in rows],

@@ -524,6 +524,44 @@
   border-color: var(--dh-violet-100);
 }
 
+/* WinterArc card for people who joined: icy and branded, so it reads as
+   WinterArc at a glance and not as another course card */
+.dh-wa {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #E6EEFF 0%, #EFE6FF 60%, #F8F4FF 100%);
+  border: 2px solid #4100BC;
+  box-shadow: 4px 4px 0 0 #4100BC;
+}
+
+.dh-wa-body { position: relative; z-index: 1; }
+
+.dh-wa .dh-setup-actions { position: relative; z-index: 1; }
+
+.dh-wa-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #4100BC;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dh-wa-flake {
+  position: absolute;
+  right: -18px;
+  top: -22px;
+  font-size: 120px;
+  color: rgba(65, 0, 188, 0.08);
+  pointer-events: none;
+}
+
 .dh-setup-title {
   margin: 0 0 4px;
   font-size: 18px;

@@ -1,9 +1,11 @@
-// WinterArc: 30 Days of Money. Public landing page + waitlist (live 6 Nov 2026).
+// WinterArc: 30 Days of Money. Public landing page + join form (live 6 Nov 2026).
 // The FinEd world in winter: the home page's illustrated hills with snow
 // falling and piling up on the buttons, a 30-door advent calendar, a snowball
 // that grows with your streak, and a frosted window hiding the prizes.
 // All challenge values come from winterarcConfig.js.
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   PiArrowRightBold, PiSnowflakeBold, PiBookOpenTextBold, PiChatCircleDotsBold,
@@ -19,6 +21,7 @@ import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
 import SignupForm, { Countdown } from "./WinterArcSignup";
+import useWinterArcStatus from "./useWinterArcStatus";
 import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
 import planeImg from "../../assets/newnewplane.webp";
 import "./WinterArcLanding.css";
@@ -44,6 +47,8 @@ const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior:
 
 function Hero() {
   const reduce = useReducedMotion();
+  const { joined } = useWinterArcStatus();
+  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
   const heroRef = useRef(null);
   const rise = (delay) => ({
     initial: reduce ? false : { opacity: 0, y: 24 },
@@ -84,13 +89,30 @@ function Hero() {
             One short money task a day for {W.totalDays} days. Free to enter, free to win.
           </motion.p>
           <motion.div className="wa-hero-ctas" {...rise(0.24)}>
-            <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={() => scrollTo("join")}>
-              Join the waitlist <PiArrowRightBold aria-hidden="true" />
-            </button>
+            {joined ? (
+              <Link className="wa-btn wa-btn-primary" data-snow-ledge="11" to="/winterarc/challenge">
+                Go to your hub <PiArrowRightBold aria-hidden="true" />
+              </Link>
+            ) : (
+              <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={() => scrollTo("join")}>
+                Join WinterArc <PiArrowRightBold aria-hidden="true" />
+              </button>
+            )}
             <button type="button" className="wa-btn wa-btn-ghost" data-snow-ledge="9" onClick={() => scrollTo("calendar")}>
               See the 30 days
             </button>
           </motion.div>
+          {!isAuthenticated && !isLoading && (
+            <motion.p className="wa-hero-login" {...rise(0.3)}>
+              Already joined?{" "}
+              <button
+                type="button"
+                onClick={() => loginWithRedirect({ appState: { returnTo: "/winterarc/challenge" } })}
+              >
+                Log in to go to your hub
+              </button>
+            </motion.p>
+          )}
         </div>
 
         <motion.div
@@ -161,7 +183,7 @@ function Calendar() {
         <Reveal className="wa-head">
           <h2>30 doors. One for every day.</h2>
           <p className="wa-lede">
-            Each row is a leaderboard week: boards close on Sunday night and winners are named on Monday. The coloured stripes show the four learning themes.
+            Each row is a leaderboard week, and every day has its own winner. The coloured stripes show the four learning themes.
           </p>
         </Reveal>
         <Reveal delay={0.1}>
@@ -190,8 +212,8 @@ function Scoring() {
           )}
           {W.show.prizes && (
             <p className="wa-prize-tie">
-              Every bonus point lifts you up the leaderboard, and the top scorers get{" "}
-              <strong className="wa-cash">{W.prizePool} in cash prizes</strong>.
+              Every bonus point lifts you up the leaderboard. The top 3 overall win{" "}
+              <strong className="wa-cash">{W.finalPrizes.map((p) => p.amount).join(", ")}</strong>.
             </p>
           )}
         </Reveal>
@@ -234,8 +256,19 @@ function PrizesAndRules() {
               <div className="wa-prize">
                 <PiGiftBold className="wa-prize-icon" aria-hidden="true" />
                 <p className="wa-prize-amount">{W.prizePool}</p>
-                <p className="wa-prize-label">prize pool</p>
-                <p className="wa-prize-note">{W.prizeNote}</p>
+                <p className="wa-prize-label">in cash prizes</p>
+                <ol className="wa-prize-podium" aria-label="Final leaderboard prizes">
+                  {W.finalPrizes.map((p) => (
+                    <li key={p.place}><span>{p.place}</span><strong>{p.amount}</strong></li>
+                  ))}
+                </ol>
+                <ul className="wa-prize-more">
+                  <li><strong>{W.dailyPrizeTotal}</strong> in daily prizes: a winner every day</li>
+                  {W.show.referralContest && W.referralContests.map((c) => (
+                    <li key={c.key}><strong>{c.prize}</strong> {W.referralAwardName}: top referrer by {c.closes.split(",")[0]}</li>
+                  ))}
+                </ul>
+                <Link className="wa-prize-link" to="/winterarc/rules#prizes">Full prize rules</Link>
               </div>
             </FrostWindow>
           </Reveal>
@@ -265,13 +298,13 @@ function Certificate() {
 }
 
 function Join() {
-  const perks = ["A reminder before Day 1", "Your own invite link for friends", "Free to enter, always"];
+  const perks = ["Your own challenge hub", "Your own invite link for friends", "Free to enter, always"];
   return (
     <section className="wa-section wa-section-join" id="join">
       <div className="wa-wrap wa-split">
         <Reveal>
-          <h2>Save your spot.</h2>
-          <p className="wa-lede">Day 1 is {W.startDate}. Join the waitlist and we'll make sure you're there for it.</p>
+          <h2>Join WinterArc.</h2>
+          <p className="wa-lede">Day 1 is {W.startDate}. Make your free FinEd account, join, and you're in.</p>
           <ul className="wa-ticks">
             {perks.map((p) => (
               <li key={p}><span className="wa-tick"><PiCheckBold aria-hidden="true" /></span>{p}</li>
@@ -316,7 +349,7 @@ function Faqs() {
             After you join, you get your own link. When a friend joins with it and finishes Day 3, you earn{" "}
             {W.referralPoints} points (up to {W.referralCap} friends), once a quick check is done.
             {W.show.referralContest &&
-              ` Before launch, whoever brings in the most friends (joined with the link and made a FinEd account) by ${W.referralContestCloses} wins ${W.referralContestPrize}.`}
+              ` On top of that, the ${W.referralAwardName} gives ${W.referralContestPrize} to whoever brings in the most friends (at least ${W.referralAwardMin}), twice: once for friends who join by 30 Nov, and again for friends who join from 1 to 30 Dec.`}
           </Faq>
         )}
         {W.show.certificate && (
@@ -335,6 +368,11 @@ function Faqs() {
 export default function WinterArcLanding() {
   useEffect(() => {
     document.title = `${W.name}: ${W.tagline} | FinEd`;
+    // Coming back from sign-in (or a "Join" link) lands on /winterarc#join: go there
+    const id = window.location.hash.slice(1);
+    if (!id) return undefined;
+    const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: "start" }), 300);
+    return () => clearTimeout(t);
   }, []);
 
   return (

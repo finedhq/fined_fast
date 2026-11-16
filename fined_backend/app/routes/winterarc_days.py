@@ -177,16 +177,19 @@ def _my_referrals(email: str, extra: list) -> dict:
 
 
 def _my_contest(code: Optional[str]) -> dict:
-    """My standing in the pre-launch referral contest (migration 011): friends
-    who count so far and my rank, before the manual checks."""
+    """My standing in the referral contest running now (migration 014):
+    friends who count so far and my rank, before the manual checks."""
+    key = R.contest_at(_now())
+    empty = {"key": key, "friends": 0, "rank": None, "minimum": R.REFERRAL_AWARD_MIN}
     if not code:
-        return {"friends": 0, "rank": None}
+        return empty
     try:
-        res = supabase.from_("winterarc_referral_contest").select("referrals, rank").eq("code", code).limit(1).execute()
+        res = (supabase.from_("winterarc_referral_contests").select("referrals, rank")
+               .eq("contest", key).eq("code", code).limit(1).execute())
     except Exception:
-        return {"friends": 0, "rank": None}
+        return empty
     row = res.data[0] if res and res.data else None
-    return {"friends": row["referrals"] if row else 0, "rank": row["rank"] if row else None}
+    return {**empty, "friends": row["referrals"] if row else 0, "rank": row["rank"] if row else None}
 
 
 def _repaired(extra: list) -> dict:
@@ -305,6 +308,34 @@ def _package(card: dict, row: Optional[dict]) -> dict:
 
 
 # --- Routes ----------------------------------------------------------------
+
+@router.get("/status")
+async def my_status(user: AuthUser = Depends(get_current_user)):
+    """A light check for the navbar, landing page and dashboard: have I joined,
+    which day is open now, and have I finished it. Cheap (cached lookups and
+    one small query), unlike /me, so it can run on every dashboard visit."""
+    email = _email(user)
+    now = _now()
+    joined = await asyncio.to_thread(_joined, email)
+    out = {"joined": joined, "starts_at": R.start().isoformat(), "today": None, "today_done": False}
+    if not joined:
+        return out
+
+    def today_info():
+        course = _course()
+        modules = _modules(course["id"]) if course else {}
+        today = next((n for n in range(R.TOTAL_DAYS, 0, -1) if _day_open(modules.get(n), n, now)), None)
+        if not today:
+            return None, False
+        module = modules[today]
+        total = _question_counts([module["id"]]).get(module["id"], 0)
+        res = (supabase.from_(ANSWERS).select("finished").eq("email", email).eq("day_no", today)
+               .eq("finished", True).execute())
+        return today, bool(total) and len(res.data or []) >= total
+
+    out["today"], out["today_done"] = await asyncio.to_thread(today_info)
+    return out
+
 
 @router.get("/me")
 async def my_challenge(user: AuthUser = Depends(get_current_user)):

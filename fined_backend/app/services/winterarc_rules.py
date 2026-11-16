@@ -45,6 +45,39 @@ WEEKS = (
 )
 
 
+# Prizes (decided 2026-11-15). The referral award goes to the top referrer of
+# each contest who has brought in at least REFERRAL_AWARD_MIN friends.
+DAILY_PRIZE = 100
+REFERRAL_AWARD_MIN = 5
+REFERRAL_CONTESTS = (
+    # key, closes (IST)
+    ("nov", "2026-11-30T23:59:59+05:30"),
+    ("dec", "2026-12-30T23:59:59+05:30"),
+)
+
+
+def contest_closes(key: str) -> datetime:
+    return datetime.fromisoformat(dict(REFERRAL_CONTESTS)[key])
+
+
+def contest_at(now: datetime) -> str:
+    """The referral contest running at this moment (the last one after the end)."""
+    return next((k for k, c in REFERRAL_CONTESTS if now <= datetime.fromisoformat(c)), REFERRAL_CONTESTS[-1][0])
+
+
+def contest_standings(rows: list) -> list:
+    """Contest rows ranked, each marked eligible (5+ friends); the winner is the
+    best-ranked eligible row (ties on count go to whoever got there first)."""
+    rows = sorted(rows, key=lambda r: (r["rank"], r.get("reached_at") or "", r["code"]))
+    winner = next((r["code"] for r in rows if r["referrals"] >= REFERRAL_AWARD_MIN), None)
+    return [{**r, "eligible": r["referrals"] >= REFERRAL_AWARD_MIN, "leading": r["code"] == winner} for r in rows]
+
+
+def day_closes(day: int) -> datetime:
+    """The end of a day's full-points window: its daily board is final then."""
+    return opens_at(day) + timedelta(hours=LATE_FULL_HOURS)
+
+
 def start() -> datetime:
     return datetime.fromisoformat(settings.WINTERARC_START)
 
