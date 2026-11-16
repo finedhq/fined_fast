@@ -51,7 +51,9 @@ function DayAction({ day, action, onChange }) {
 
 // The end of a day: points earned and what's next once every question is
 // finished; question pips until then. The optional action sits in between.
-function DayDone({ day, opensAt, questions, action, onAction }) {
+// `inside`: drawn inside the completion card (a day with one), which already
+// shows the title and points: just the progress line, the action and links.
+function DayDone({ day, opensAt, questions, action, onAction, inside = false }) {
   const list = Object.values(questions);
   const finished = list.filter((q) => q.finished).length;
   const points = list.reduce((s, q) => s + (q.points || 0), 0);
@@ -62,6 +64,32 @@ function DayDone({ day, opensAt, questions, action, onAction }) {
     : nextOpens
       ? `Day ${day + 1} opens ${nextOpens.toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST.`
       : null;
+  const links = (
+    <div className="wa-done-actions">
+      <Link className="wa-day-done-btn" to="/winterarc/challenge">Back to {W.name}</Link>
+      <Link className="wa-done-link" to="/winterarc/leaderboard">See the leaderboard</Link>
+    </div>
+  );
+  if (inside) {
+    return (
+      <div className={`wa-day-end${done ? " is-done" : ""}`} data-part="winterarc-done">
+        {done ? (
+          next && <p className="wa-done-next">Day {day} done. {next}</p>
+        ) : (
+          <div className="wa-day-end-todo">
+            <div className="wa-done-pips" aria-hidden="true">
+              {list.map((q, i) => <span key={i} className={q.finished ? "is-on" : ""} />)}
+            </div>
+            <p className="wa-done-next">
+              {finished} of {list.length} questions done. Answer every question to finish Day {day}.
+            </p>
+          </div>
+        )}
+        {action && <DayAction day={day} action={action} onChange={onAction} />}
+        {links}
+      </div>
+    );
+  }
   return (
     <section className={`wa-day-done${done ? " is-done" : ""}`} data-part="winterarc-done">
       <div className="wa-day-done-card">
@@ -145,6 +173,7 @@ function Day() {
   const action = bundle?.action;
   const onAction = useCallback((done) => setBundle((b) => ({ ...b, action: { ...b.action, done } })), []);
 
+  const inside = !!bundle?.cards?.some((c) => c.card_template === "completion");
   const challenge = useMemo(() => {
     const list = Object.values(questions);
     return {
@@ -152,9 +181,9 @@ function Day() {
       onAnswer,
       points: list.reduce((s, q) => s + (q.points || 0), 0),
       maxPoints: list.reduce((s, q) => s + (q.finished ? q.points || 0 : q.on_offer || 0), 0),
-      done: <DayDone day={n} opensAt={bundle?.opens_at} questions={questions} action={action} onAction={onAction} />,
+      done: <DayDone day={n} opensAt={bundle?.opens_at} questions={questions} action={action} onAction={onAction} inside={inside} />,
     };
-  }, [questions, onAnswer, n, action, onAction, bundle?.opens_at]);
+  }, [questions, onAnswer, n, action, onAction, bundle?.opens_at, inside]);
 
   if (error?.status === 403) return <JoinFirst />;
   if (error?.status === 423 || error?.status === 404) {
