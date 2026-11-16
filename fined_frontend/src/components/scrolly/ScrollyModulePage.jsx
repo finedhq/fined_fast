@@ -40,6 +40,7 @@ import useReelsLayout from "./useReelsLayout";
 import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
+import "./scrolly-winterarc.css";
 import "./scrolly-reels.css";
 import "./scrolly-tour.css";
 
@@ -189,6 +190,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             figureState={page.steps[card.slug]}
             onFigureState={patchPart("steps", card.slug)}
             reels={reels}
+            hero={{ answers: page.hero || {}, poll: hero?.card_data?.poll }}
           />
         );
       case "model": {
@@ -222,7 +224,32 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
           />
         );
       case "completion":
-        if (challenge) return null; // challenge.done is shown at the end instead
+        // A WinterArc day: the same completion screen, in points, with the
+        // day's own end (challenge.done: progress, action, back links) inside.
+        if (challenge) {
+          return (
+            <Completion
+              key={card.card_id}
+              card={card}
+              moduleNumber={bundle.module_order_index}
+              heroPoll={hero?.card_data?.poll}
+              pollChoice={page.hero?.poll}
+              chipAmount={page.hero?.amount}
+              stars={stars}
+              maxStars={maxStars}
+              unit="Points"
+              open={[]}
+              nextHref={null}
+              comingSoon={false}
+              certificate={null}
+              onReached={() => markReached(card.slug)}
+              onGoTo={goToPart}
+              onReviewTop={() => scrollToElement(rootRef.current?.querySelector(".nc-hero"))}
+            >
+              {challenge.done}
+            </Completion>
+          );
+        }
         return (
           <Completion
             key={card.card_id}
@@ -267,7 +294,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
       )}
       <main>
         {cards.map(part)}
-        {challenge?.done}
+        {challenge && !cards.some((c) => c.card_template === "completion") && challenge.done}
       </main>
       <GlossaryTooltip scopeRef={rootRef} />
       {tour?.reels === reels && <ModuleTour rootRef={rootRef} reels={reels} steps={tour.steps} onClose={() => setTour(null)} />}

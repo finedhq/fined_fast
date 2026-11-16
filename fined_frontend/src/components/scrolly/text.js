@@ -160,3 +160,14 @@ export function replayText(cardData, poll, pollChoice) {
   const option = (poll?.options || []).find((o) => o.id === pollChoice);
   return cardData.poll_replay.replace("{choice}", option ? option.label.toLowerCase() : "…");
 }
+
+/**
+ * The completion card's `chip_replay` line for the amount picked in the
+ * hero's chip ("" if none or skipped): {amount} is the amount, {20%} is that
+ * share of it, in rupees.
+ */
+export function chipReplayText(cardData, amount) {
+  if (!cardData?.chip_replay || amount === undefined || amount === null || !(amount > 0)) return "";
+  const rupees = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+  return cardData.chip_replay.replace(/\{(amount|\d{1,3}%)\}/g, (_, t) => (t === "amount" ? rupees(amount) : rupees((amount * parseInt(t, 10)) / 100)));
+}

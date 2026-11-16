@@ -10,6 +10,9 @@
 # Streak bonuses and extra resets are written to winterarc_points (once each,
 # by `ref`) whenever an answer or a reset could have earned one.
 import asyncio
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -46,46 +49,99 @@ class ResetRequest(BaseModel):
     day: int
 
 
+# --- A short in-memory cache --------------------------------------------------
+# The course, its 30 days and their cards are the same for everyone, so on the
+# Day 1 rush they are read from the database at most once a minute per server
+# process instead of on every request. A day an admin publishes (or a card they
+# edit) reaches learners within CACHE_SECONDS; the admin calendar always reads
+# fresh. Someone's own WinterArc membership is cached only once found (so a
+# person who has just joined is let in at once).
+CACHE_SECONDS = 60
+_cache: dict = {}
+_cache_lock = threading.Lock()
+# Runs a person's own reads side by side (separate from the server's main pool)
+_io = ThreadPoolExecutor(max_workers=16, thread_name_prefix="winterarc-io")
+
+
+def _cached(key, load, fresh: bool = False, keep=lambda value: True):
+    now = time.monotonic()
+    if not fresh:
+        with _cache_lock:
+            hit = _cache.get(key)
+        if hit and hit[0] > now:
+            return hit[1]
+    value = load()
+    if keep(value):
+        with _cache_lock:
+            _cache[key] = (now + CACHE_SECONDS, value)
+    return value
+
+
+def clear_cache():
+    """Forget everything cached (tests; or after a bulk content change)."""
+    with _cache_lock:
+        _cache.clear()
+
+
 # --- Lookups ---------------------------------------------------------------
 
 def _email(user: AuthUser) -> str:
     return (user.email or "").strip().lower()
 
 
+def _member(email: str) -> Optional[dict]:
+    """This person's WinterArc list row (any spelling of the same inbox): id,
+    invite code, disqualified. Cached for a minute once found."""
+    def load():
+        cols = "id, referral_code, disqualified_at"
+        res = supabase.from_(WAITLIST).select(cols).eq("email_canonical", canonical_email(email)).limit(1).execute()
+        if not (res and res.data):
+            res = supabase.from_(WAITLIST).select(cols).ilike("email", email).limit(1).execute()
+        return res.data[0] if res and res.data else None
+    return _cached(("member", email), load, keep=lambda row: row is not None)
+
+
 def _joined(email: str) -> bool:
     """On the WinterArc list (any spelling of the same inbox) and not disqualified."""
-    res = supabase.from_(WAITLIST).select("id, disqualified_at").eq("email_canonical", canonical_email(email)).limit(1).execute()
-    if not (res and res.data):
-        res = supabase.from_(WAITLIST).select("id, disqualified_at").ilike("email", email).limit(1).execute()
-    return bool(res and res.data) and not res.data[0].get("disqualified_at")
+    row = _member(email)
+    return bool(row) and not row.get("disqualified_at")
 
 
-def _course() -> Optional[dict]:
-    res = supabase.from_("courses").select("id, slug").eq("slug", settings.WINTERARC_COURSE_SLUG).limit(1).execute()
-    return res.data[0] if res and res.data else None
+def _course(fresh: bool = False) -> Optional[dict]:
+    def load():
+        res = supabase.from_("courses").select("id, slug").eq("slug", settings.WINTERARC_COURSE_SLUG).limit(1).execute()
+        return res.data[0] if res and res.data else None
+    return _cached(("course",), load, fresh)
 
 
-def _modules(course_id: str) -> dict:
+def _modules(course_id: str, fresh: bool = False) -> dict:
     """Day number -> module row."""
-    res = supabase.from_("modules").select("id, title, slug, order_index, status").eq("course_id", course_id).execute()
-    return {m["order_index"]: m for m in (res.data or []) if R.valid_day(m.get("order_index"))}
+    def load():
+        res = supabase.from_("modules").select("id, title, slug, order_index, status").eq("course_id", course_id).execute()
+        return {m["order_index"]: m for m in (res.data or []) if R.valid_day(m.get("order_index"))}
+    return _cached(("modules", course_id), load, fresh)
 
 
-def _cards(module_id: str) -> list:
-    res = supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute()
-    return res.data or []
+def _cards(module_id: str, fresh: bool = False) -> list:
+    def load():
+        res = supabase.from_("cards").select("*").eq("module_id", module_id).order("order_index").execute()
+        return res.data or []
+    return _cached(("cards", module_id), load, fresh)
 
 
 def _question_counts(module_ids: list) -> dict:
     """Module id -> number of questions, for the given modules (one query)."""
     if not module_ids:
         return {}
-    res = supabase.from_("cards").select("module_id, card_template").in_("module_id", module_ids).execute()
-    counts = {}
-    for c in res.data or []:
-        if R.is_quiz(c):
-            counts[c["module_id"]] = counts.get(c["module_id"], 0) + 1
-    return counts
+
+    def load():
+        res = supabase.from_("cards").select("module_id, card_template").in_("module_id", list(module_ids)).execute()
+        counts = {}
+        for c in res.data or []:
+            if R.is_quiz(c):
+                counts[c["module_id"]] = counts.get(c["module_id"], 0) + 1
+        return counts
+    return _cached(("counts", tuple(sorted(module_ids))), load)
 
 
 def _my_answers(email: str) -> list:
@@ -104,17 +160,20 @@ def _when(value) -> Optional[datetime]:
 
 def _my_referrals(email: str, extra: list) -> dict:
     """My invite code and how my referrals stand (joined / counted / pending)."""
-    res = supabase.from_(WAITLIST).select("referral_code").eq("email_canonical", canonical_email(email)).limit(1).execute()
-    if not (res and res.data):
-        res = supabase.from_(WAITLIST).select("referral_code").ilike("email", email).limit(1).execute()
-    code = res.data[0].get("referral_code") if res and res.data else None
-    joined = 0
-    if code:
-        joined = len(supabase.from_(WAITLIST).select("id").eq("referred_by_code", code).execute().data or [])
+    code = (_member(email) or {}).get("referral_code")
+
+    def friends_joined():
+        if not code:
+            return 0
+        return len(supabase.from_(WAITLIST).select("id").eq("referred_by_code", code).execute().data or [])
+
+    joined_f = _io.submit(friends_joined)
+    contest_f = _io.submit(_my_contest, code)
+    joined = joined_f.result()
     counted = sum(1 for p in extra if p.get("kind") == "referral")
     rejected = sum(1 for p in extra if p.get("kind") == "referral_rejected")
     return {"code": code, "joined": joined, "counted": counted, "pending": max(0, joined - counted - rejected),
-            "points_each": 10, "cap": 20, "contest": _my_contest(code)}
+            "points_each": 10, "cap": 20, "contest": contest_f.result()}
 
 
 def _my_contest(code: Optional[str]) -> dict:
@@ -140,9 +199,11 @@ def _progress(email: str, now: datetime) -> dict:
     course = _course()
     modules = _modules(course["id"]) if course else {}
     open_days = {n: m for n, m in modules.items() if _day_open(m, n, now)}
+    # This person's own rows, read side by side with the (cached) question counts
+    answers_f = _io.submit(_my_answers, email)
+    extra_f = _io.submit(_my_points, email)
     totals = _question_counts([m["id"] for m in open_days.values()])
-    answers = _my_answers(email)
-    extra = _my_points(email)
+    answers, extra = answers_f.result(), extra_f.result()
     repaired = _repaired(extra)
 
     by_day = {}
@@ -537,10 +598,10 @@ async def leaderboard(week: Optional[int] = None, user: AuthUser = Depends(get_c
 @router.get("/admin/calendar")
 async def admin_calendar(user: AuthUser = Depends(require_admin)):
     """Each day: its module, open time, release status, and anything missing."""
-    course = await asyncio.to_thread(_course)
+    course = await asyncio.to_thread(_course, True)
     if not course:
         return {"course": None, "course_slug": settings.WINTERARC_COURSE_SLUG, "days": []}
-    modules = await asyncio.to_thread(_modules, course["id"])
+    modules = await asyncio.to_thread(_modules, course["id"], True)
     now = _now()
 
     async def one(n: int) -> dict:
@@ -557,7 +618,7 @@ async def admin_calendar(user: AuthUser = Depends(require_admin)):
         if not module:
             info["problems"].append("No module for this day yet.")
             return info
-        cards = await asyncio.to_thread(_cards, module["id"])
+        cards = await asyncio.to_thread(_cards, module["id"], True)
         quizzes = [c for c in cards if R.is_quiz(c)]
         info.update(
             module={"id": module["id"], "title": module.get("title"), "slug": module.get("slug")},

@@ -85,7 +85,7 @@ function Step({ step, index, chapterNum, chapterSlug, active, figureNote, guess,
   );
 }
 
-export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, reels = false }) {
+export default function Chapter({ card, chapterNum, chapterCount, activeStep, direction, figureState, onFigureState, reels = false, hero }) {
   const sectionRef = useRef(null);
   useReelsFit(sectionRef, reels, activeStep);
   const d = card.card_data || {};
@@ -145,7 +145,7 @@ export default function Chapter({ card, chapterNum, chapterCount, activeStep, di
           <div className="viz-content">
             {Figure && (
               <Suspense fallback={null}>
-                <Figure step={activeStep} direction={direction} steps={steps} state={state} onState={onFigureState} config={figure.config} />
+                <Figure step={activeStep} direction={direction} steps={steps} state={state} onState={onFigureState} config={figure.config} hero={hero} />
               </Suspense>
             )}
           </div>

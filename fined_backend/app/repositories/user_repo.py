@@ -3,6 +3,10 @@
 from app.integrations.supabase_client import supabase
 from app.services.course_visibility import course_status, is_released
 
+# Runs the profile's independent reads side by side (get_profile)
+from concurrent.futures import ThreadPoolExecutor as _ThreadPoolExecutor
+_PROFILE_IO = _ThreadPoolExecutor(max_workers=16, thread_name_prefix="profile-io")
+
 class UserRepository:
 
     def get_by_sub(self, user_sub: str):
@@ -236,7 +240,20 @@ class UserRepository:
         # Base fin_stars directly from users table
         fin_stars = int(user.get("fin_stars") or user.get("finstars") or 0)
 
-        rank = self.get_rank(email) or 1
+        # The reads below don't depend on each other: run them side by side
+        # (one round trip instead of four on every page load).
+        ongoing_course_id = user.get("ongoing_course_id")
+        rank_f = _PROFILE_IO.submit(self.get_rank, email, user)
+        logs_f = _PROFILE_IO.submit(
+            lambda: supabase.from_("finScoreLogs").select("change, description, created_at").eq("email", email).execute())
+        uc_f = _PROFILE_IO.submit(
+            lambda: supabase.from_("userCourses").select("module_id, card_id, course_id, progress_type, status, completion_date, created_at")
+            .eq("email", email).eq("status", "completed").execute())
+        recent_f = None if ongoing_course_id else _PROFILE_IO.submit(
+            lambda: supabase.from_("userCourses").select("course_id").eq("email", email).not_.is_("course_id", "null")
+            .order("created_at", desc=True).limit(1).execute())
+
+        rank = rank_f.result() or 1
 
         # Derive display name / full name
         if name:
@@ -256,7 +273,7 @@ class UserRepository:
 
         stars_from_logs = 0
         try:
-            logs_res = supabase.from_("finScoreLogs").select("change, description, created_at").eq("email", email).execute()
+            logs_res = logs_f.result()
             for log in (logs_res.data or []):
                 created_at = log.get("created_at")
                 if created_at and str(created_at) >= one_year_ago_iso:
@@ -270,8 +287,9 @@ class UserRepository:
             print(f"Notice: finScoreLogs query: {e}")
 
         stars_from_courses = 0
+        completed_rows = []
         try:
-            uc_res = supabase.from_("userCourses").select("module_id, card_id, progress_type, status, completion_date, created_at").eq("email", email).eq("status", "completed").execute()
+            uc_res = uc_f.result()
             completed_rows = uc_res.data or []
             completed_modules_set = set()
             completed_cards_count = 0
@@ -319,10 +337,9 @@ class UserRepository:
             fin_stars = stars_from_logs
 
         # Ongoing course calculation - Real course progress from userCourses / users
-        ongoing_course_id = user.get("ongoing_course_id")
         if not ongoing_course_id:
             try:
-                recent_uc = supabase.from_("userCourses").select("course_id").eq("email", email).not_.is_("course_id", "null").order("created_at", desc=True).limit(1).execute()
+                recent_uc = recent_f.result()
                 if recent_uc.data and recent_uc.data[0].get("course_id"):
                     ongoing_course_id = recent_uc.data[0]["course_id"]
             except Exception as e:
@@ -331,22 +348,23 @@ class UserRepository:
         ongoing_course = None
         if ongoing_course_id:
             try:
-                c_res = supabase.from_("courses").select("*").eq("id", ongoing_course_id).limit(1).execute()
+                # The course and its modules, side by side
+                c_f = _PROFILE_IO.submit(lambda: supabase.from_("courses").select("*").eq("id", ongoing_course_id).limit(1).execute())
+                m_f = _PROFILE_IO.submit(lambda: supabase.from_("modules").select("*").eq("course_id", ongoing_course_id).order("order_index").execute())
+                c_res = c_f.result()
                 # only a published course is shown as "ongoing" on the profile
                 # (never a draft, nor an archived course that was replaced)
                 if c_res.data and course_status(c_res.data[0]) == "published":
                     course_row = c_res.data[0]
-                    m_res = supabase.from_("modules").select("*").eq("course_id", ongoing_course_id).order("order_index").execute()
+                    m_res = m_f.result()
                     modules = [m for m in (m_res.data or []) if is_released(m)]  # learners' view: released modules only
                     total_modules = len(modules)
 
-                    completed_modules_count = 0
-                    try:
-                        uc_progress = supabase.from_("userCourses").select("module_id, progress_type, status").eq("email", email).eq("course_id", ongoing_course_id).eq("status", "completed").execute()
-                        completed_mod_ids = {p["module_id"] for p in (uc_progress.data or []) if p.get("module_id")}
-                        completed_modules_count = len(completed_mod_ids)
-                    except Exception as e:
-                        print(f"Notice: counting completed course modules: {e}")
+                    # From the completed rows already read above (same filter: this
+                    # email, status completed), narrowed to the ongoing course
+                    completed_mod_ids = {r["module_id"] for r in completed_rows
+                                         if r.get("module_id") and r.get("course_id") == ongoing_course_id}
+                    completed_modules_count = len(completed_mod_ids)
 
                     current_lesson = min(completed_modules_count + 1, total_modules) if total_modules > 0 else 0
                     # measured against the whole planned course, not just the modules released so far

@@ -48,8 +48,12 @@ export function chartGeometry(config, s, { w, h, pad }) {
   const shown = values.slice(from, to + 1);
   const log = s.scale === "log";
   const f = log ? (v) => Math.log10(v) : (v) => v;
-  let lo = Math.min(...shown);
-  let hi = Math.max(...shown);
+  // More lines (WinterArc Day 1 on): series after the first are drawn only
+  // when the step's `show` lists them, and count toward the y range.
+  const extras = config.series.slice(1).filter((x) => (s.show || []).includes(x.id));
+  const all = [...shown, ...extras.flatMap((x) => x.values.slice(from, to + 1))];
+  let lo = Math.min(...all);
+  let hi = Math.max(...all);
   for (const m of config.markers || []) {
     if (m.at >= from && m.at <= to && (s.show || []).includes(m.id)) {
       lo = Math.min(lo, m.value);
@@ -61,7 +65,7 @@ export function chartGeometry(config, s, { w, h, pad }) {
     hi *= 1.1;
   } else {
     const padV = (hi - lo || hi || 1) * 0.12;
-    lo = Math.max(0, lo - padV);
+    lo = config.fromZero ? 0 : Math.max(0, lo - padV);
     hi += padV;
   }
   const plotW = w - pad.l - pad.r;
@@ -70,7 +74,13 @@ export function chartGeometry(config, s, { w, h, pad }) {
   const x = (i) => pad.l + ((i - from) / span) * plotW;
   const y = (v) => pad.t + (1 - (f(v) - f(lo)) / (f(hi) - f(lo))) * plotH;
   const point = (i, v) => ({ x: x(i), y: y(v) });
-  const path = shown.map((v, k) => `${k ? "L" : "M"}${x(from + k).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const pathOf = (vals) => vals.map((v, k) => `${k ? "L" : "M"}${x(from + k).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const path = pathOf(shown);
+  const lines = [config.series[0], ...extras].map((ser, n) => {
+    const vals = ser.values.slice(from, to + 1);
+    const last = vals[vals.length - 1];
+    return { id: ser.id, n, path: n ? pathOf(vals) : path, end: { x: x(to), y: y(last), value: last, label: formatValue(last, config.format) } };
+  });
 
   const yTicks = axisTicks(lo, hi, s.scale).map((v) => ({ v, y: y(v), label: formatValue(v, config.format) }));
   const xTicks = [];
@@ -95,7 +105,23 @@ export function chartGeometry(config, s, { w, h, pad }) {
   const futureFrom = s.futureFrom ?? s.future?.from;
   const future = futureFrom != null && futureFrom <= to ? { x: x(Math.max(from, futureFrom)) } : null;
   const baseline = s.baseline ? { y: y(s.baseline.value), label: s.baseline.label } : null;
-  return { path, point, inRange: (i) => i >= from && i <= to, yTicks, xTicks, volume, future, baseline };
+  return { path, lines, point, inRange: (i) => i >= from && i <= to, yTicks, xTicks, volume, future, baseline };
+}
+
+/**
+ * End-of-line value labels that don't overlap: sorted top to bottom, each at
+ * least `gap` px below the one above. Returns {id: y}.
+ */
+export function spreadLabels(ends, gap = 14) {
+  const sorted = [...ends].sort((a, b) => a.y - b.y);
+  const out = {};
+  let prev = -Infinity;
+  for (const e of sorted) {
+    const y = Math.max(e.y, prev + gap);
+    out[e.id] = y;
+    prev = y;
+  }
+  return out;
 }
 
 /**
@@ -116,6 +142,9 @@ export function chartSummary(config, s) {
   const end = s.future ? Math.max(from, s.future.from - 1) : to;
   const v = (i) => formatValue(line.values[i], config.format);
   const parts = [`${line.label}: ${v(from)} in ${config.x[from]}, ${v(end)} in ${config.x[end]}.`];
+  for (const x of config.series.slice(1)) {
+    if ((s.show || []).includes(x.id)) parts.push(`${x.label}: ${formatValue(x.values[from], config.format)} in ${config.x[from]}, ${formatValue(x.values[to], config.format)} in ${config.x[to]}.`);
+  }
   for (const m of config.markers || []) if ((s.show || []).includes(m.id) && m.at >= from && m.at <= to) parts.push(`${m.label}: ${formatValue(m.value, config.format)} in ${config.x[m.at]}.`);
   if (config.volume && (s.show || []).includes("volume")) parts.push(`${config.volume.label} shown underneath.`);
   if (s.future) parts.push(`After ${config.x[end]}: hidden. ${s.future.label || ""}`.trim());

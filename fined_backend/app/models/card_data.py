@@ -388,7 +388,19 @@ class CompletionCardData(BaseModel):
     # WinterArc only: one small real-life money action for the day, shown with
     # an "I did this" tick-box at the end of the day page. Earns no points.
     winterarc_action: Optional[str] = Field(default=None, max_length=200)
+    # Optional line using the amount picked in the hero's warm-up chip:
+    # "{amount}" is that amount, "{20%}" (any whole number) is that share of
+    # it. Omitted when the reader skipped the chip. Stays on the page.
+    chip_replay: Optional[str] = Field(default=None, max_length=300)
     cta_text: str = "Continue"
+
+    @model_validator(mode="after")
+    def _check_chip_replay(self):
+        if self.chip_replay:
+            for token in re.findall(r"\{([^{}]*)\}", self.chip_replay):
+                if token != "amount" and not re.fullmatch(r"\d{1,3}%", token):
+                    raise ValueError(f"chip_replay: unknown placeholder {{{token}}} (use {{amount}} or e.g. {{20%}})")
+        return self
 
 
 # ── Scrollytelling card types (course v2 onward) ─────────────────────────────
@@ -408,8 +420,9 @@ FigureKind = Literal[
     "trade_map_rbi_ripple", "trade_map_budget", "trade_map_world",  # Module 9
     "line_chart_nifty_ride", "line_chart_end_of_2007", "trade_map_money_homes",  # Module 10
     "bars_two_questions", "bars_fair_yardstick", "trade_map_course_parts",  # Module 11
+    "stack_bars_arjun_month", "line_chart_save_first", "stack_bars_needs_wants",  # WinterArc Day 1
 ]
-ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder"]
+ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder", "month_happens"]
 
 # Each figure reacts to the step's position (1st, 2nd, …), so a chapter must
 # have exactly as many steps as its figure has states. The trade maps take
@@ -451,6 +464,9 @@ FIGURE_STEP_COUNTS = {
     "bars_two_questions": 4,
     "bars_fair_yardstick": 4,
     "trade_map_course_parts": 4,
+    "stack_bars_arjun_month": 4,
+    "line_chart_save_first": 4,
+    "stack_bars_needs_wants": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")
@@ -685,12 +701,89 @@ class AllocationBuilderConfig(BaseModel):
     footnote: Optional[str] = None  # may use {steady_return_pct}
     min_controls_to_complete: int = Field(ge=1, le=2, default=2)
 
+# ── "The Month Happens" (month_happens, WinterArc Day 1): a month's budget as
+# pots; unplanned events arrive one at a time and the reader picks where the
+# money comes from. A `forced` event (a need that just costs more) takes its
+# amount from the pots in `order`. Never scored; no choice is "right".
+class MonthPot(BaseModel):
+    id: str
+    label: str
+    amount: int = Field(ge=0)
+    note: Optional[str] = None
+
+class MonthChoice(BaseModel):
+    id: str
+    label: str
+    take: dict[str, int] = Field(default_factory=dict)  # pot id -> rupees
+    outcome: Optional[str] = None  # an end-of-month line when this was picked
+
+class MonthForced(BaseModel):
+    amount: int = Field(gt=0)
+    order: list[str] = Field(min_length=1)
+    text: str
+    button: str
+
+class MonthEvent(BaseModel):
+    id: str
+    sender: str
+    when: str
+    text: str
+    short: str  # "the wedding" — used in the end-of-month lines
+    choices: list[MonthChoice] = Field(default_factory=list, max_length=4)
+    forced: Optional[MonthForced] = None
+
+    @model_validator(mode="after")
+    def _check_shape(self):
+        if bool(self.forced) == bool(self.choices):
+            raise ValueError(f"event '{self.id}' needs either choices or `forced`, not both")
+        if self.choices:
+            _require_unique([c.id for c in self.choices], "choice")
+        return self
+
+class MonthEndings(BaseModel):
+    kept_all: str
+    kept_some: str
+    kept_none: str
+    from_wants: Optional[str] = None
+
+class MonthHappensConfig(BaseModel):
+    pots: list[MonthPot] = Field(min_length=2, max_length=4)
+    savings_pot: str = "savings"
+    wants_pot: str = "wants"
+    start_label: str
+    end_label: Optional[str] = None
+    events: list[MonthEvent] = Field(min_length=2, max_length=6)
+    endings: MonthEndings
+    compare: Optional[str] = None
+    closing: Optional[str] = None
+    neutrality_note: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _check_pots(self):
+        pots = [p.id for p in self.pots]
+        _require_unique(pots, "pot")
+        _require_unique([e.id for e in self.events], "event")
+        for name in (self.savings_pot, self.wants_pot):
+            if name not in pots:
+                raise ValueError(f"no pot '{name}'")
+        for i, e in enumerate(self.events):
+            # After the first event the pots may be low, so a choice event
+            # needs one free option to stay answerable.
+            if i and e.choices and not any(all(v == 0 for v in c.take.values()) for c in e.choices):
+                raise ValueError(f"event '{e.id}' needs one choice that costs nothing, so it can always be answered")
+            used = [p for c in e.choices for p in c.take] + (e.forced.order if e.forced else [])
+            for p in used:
+                if p not in pots:
+                    raise ValueError(f"event '{e.id}' uses unknown pot '{p}'")
+        return self
+
 # Which settings shape each tool takes.
 MODEL_CONFIGS = {
     "leak_lab": LeakLabConfig,
     "slice_calculator": SliceCalculatorConfig,
     "money_sorter": MoneySorterConfig,
     "allocation_builder": AllocationBuilderConfig,
+    "month_happens": MonthHappensConfig,
 }
 
 class ModelCardData(BaseModel):
@@ -699,7 +792,7 @@ class ModelCardData(BaseModel):
     title: str
     concept: Optional[str] = None
     model_kind: ModelKind
-    config: LeakLabConfig | SliceCalculatorConfig | MoneySorterConfig | AllocationBuilderConfig
+    config: LeakLabConfig | SliceCalculatorConfig | MoneySorterConfig | AllocationBuilderConfig | MonthHappensConfig
     as_of: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")  # month the rates were checked, e.g. "2026-09"
     rate_source: Optional[str] = None
     reward_rule: Optional[str] = None  # e.g. "Move at least two controls." (shown next to the stars)

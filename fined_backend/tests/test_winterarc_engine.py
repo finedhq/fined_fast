@@ -117,6 +117,7 @@ def quiz(card_id, module_id, right="b", order=1):
 def db(monkeypatch):
     fake = DB()
     monkeypatch.setattr(wd, "supabase", fake)
+    wd.clear_cache()
     monkeypatch.setattr(R.settings, "WINTERARC_START", "2026-12-01T00:00:00+05:30")
     fake.tables["courses"] = [{"id": "course", "slug": R.settings.WINTERARC_COURSE_SLUG}]
     fake.tables["modules"] = [
@@ -393,6 +394,7 @@ def test_reset_route_and_bonus_written_once(db, monkeypatch):
     for m in db.tables["modules"]:
         if m["order_index"] in (4, 5, 6, 7):
             m["status"] = "published"
+    wd.clear_cache()                                   # days published mid-test
     at(monkeypatch, ist(5, 13))
     hub = run(wd.my_challenge(MEMBER))
     assert hub["resets"]["missed_days"] == [4] and hub["resets"]["left"] == 2
@@ -448,3 +450,24 @@ def test_day_without_action(db, monkeypatch):
     at(monkeypatch, ist(1, 9))
     assert run(wd.open_day(1, MEMBER))["action"] is None
     assert status_of(lambda: run(wd.tick_action(1, wd.ActionRequest(done=True), MEMBER))) == 404
+
+
+def test_shared_content_is_cached_but_membership_waits_until_found(db, monkeypatch):
+    at(monkeypatch, ist(1, 9))
+    calls = {"courses": 0, "waitlist": 0}
+    real = db.from_
+
+    def counting(table):
+        if table in calls:
+            calls[table] += 1
+        return real(table)
+
+    monkeypatch.setattr(db, "from_", counting)
+    run(wd.open_day(1, MEMBER))
+    run(wd.open_day(1, MEMBER))
+    assert calls["courses"] == 1                       # course read once, then cached
+    assert calls["waitlist"] <= 2                      # member row found once, then cached
+    # Someone not yet on the list is checked again each time (so joining lets them in at once)
+    assert status_of(lambda: run(wd.open_day(1, STRANGER))) == 403
+    db.tables["winterarc_waitlist"].append({"id": "w2", "email": "new@x.com"})
+    assert run(wd.open_day(1, STRANGER))["day"] == 1

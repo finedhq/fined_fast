@@ -48,7 +48,7 @@
 .wa-race.is-compact .wa-race-title { font-size: 0.98rem; }
 .wa-race.is-compact .wa-race-rule { font-size: 0.8rem; }
 
-@media (max-width: 420px) {
+@media (max-width: 600px) {
   .wa-race { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .wa-race-prize { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 12px; border-right: 0; border-bottom: 1.5px dashed rgba(255, 255, 255, 0.28); }
 }

@@ -30,6 +30,12 @@ async def run_scheduler():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Database calls run in background threads (asyncio.to_thread). Python's
+    # default pool is small (CPU count + 4), so under a rush requests queue
+    # behind each other; a bigger pool lets more of them wait on the database
+    # at once.
+    from concurrent.futures import ThreadPoolExecutor
+    asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=64, thread_name_prefix="db"))
     # Startup: Start the background scheduler
     scheduler_task = asyncio.create_task(run_scheduler())
     yield
