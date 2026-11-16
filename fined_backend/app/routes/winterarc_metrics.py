@@ -4,12 +4,15 @@
 # file only fetches the rows and counts them. No emails leave this endpoint.
 import asyncio
 from collections import defaultdict
+from datetime import datetime, timezone
+from typing import Optional
 
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.dependencies import AuthUser, require_admin
 from app.integrations.supabase_client import supabase
+from app.services import winterarc_rules as R
 
 router = APIRouter(prefix="/winterarc/admin", tags=["WinterArc"])
 
@@ -99,11 +102,21 @@ async def winterarc_metrics(user: AuthUser = Depends(require_admin)):
 
 
 @router.get("/referral-contest")
-async def referral_contest(user: AuthUser = Depends(require_admin)):
-    """The pre-launch top-referrer contest (migration 011): referrals whose
-    friend joined with the link and has a FinEd account with the same email,
-    both by 30 Nov 2026 23:59 IST. Ranked by count, then who got there first.
-    The winner is still checked by hand before payment."""
-    rows = await asyncio.to_thread(_all_rows, "winterarc_referral_contest", "code, referrer_name, referrals, reached_at, rank")
-    rows.sort(key=lambda r: (r["rank"], r["code"]))
-    return {"closes_at": "2026-11-30T23:59:59+05:30", "rows": rows[:50]}
+async def referral_contest(contest: Optional[str] = None, user: AuthUser = Depends(require_admin)):
+    """A top-referrer contest (migration 014): 'nov' (by 30 Nov) or 'dec'
+    (1-30 Dec); the one running now if not given. A friend counts when they
+    joined with the link inside the contest's dates and have a FinEd account
+    (same email) by its close. Ranked by count, then who got there first; only
+    referrers with at least 5 friends can win. Checked by hand before payment."""
+    key = contest or R.contest_at(datetime.now(timezone.utc))
+    if key not in dict(R.REFERRAL_CONTESTS):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There is no such contest.")
+
+    def load():
+        res = (supabase.from_("winterarc_referral_contests")
+               .select("code, referrer_name, referrals, reached_at, rank").eq("contest", key).execute())
+        return res.data or []
+
+    rows = R.contest_standings(await asyncio.to_thread(load))
+    return {"contest": key, "closes_at": R.contest_closes(key).isoformat(), "minimum": R.REFERRAL_AWARD_MIN,
+            "rows": rows[:50]}

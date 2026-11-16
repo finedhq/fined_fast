@@ -131,6 +131,12 @@
 }
 .wa-hero-fact-prize strong { color: #B7791F; }
 .wa-hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+.wa-hero-login { margin-top: 14px !important; font-size: 0.95rem; color: var(--wa-ink-2); }
+.wa-hero-login button {
+  background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-weight: 800;
+  color: var(--wa-purple); text-decoration: underline; text-underline-offset: 3px;
+}
+.wa-hero-login button:hover { color: var(--wa-ink); }
 
 .wa-hero-side { position: relative; max-width: 440px; width: 100%; padding-top: 34px; }
 .wa-plane {
@@ -259,6 +265,16 @@
 .wa-door.is-selected .wa-door-inside { box-shadow: 0 0 0 3px rgba(74, 58, 255, 0.25); }
 
 .wa-cal-info { margin-top: 14px; padding: 14px 6px 2px; border-top: 1px dashed var(--wa-border); min-height: 64px; }
+.wa-cal-info.is-filled {
+  border: 2px solid var(--wa-purple); border-radius: 14px; padding: 14px 16px 10px;
+  background: #FFFFFF; animation: wa-info-pop 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes wa-info-pop {
+  0% { transform: translateY(8px) scale(0.98); box-shadow: 0 0 0 0 rgba(108, 59, 255, 0.45); }
+  60% { transform: none; box-shadow: 0 0 0 10px rgba(108, 59, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(108, 59, 255, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .wa-cal-info.is-filled { animation: none; } }
 .wa-cal-info p { color: var(--wa-ink-3); line-height: 1.5; }
 .wa-cal-info-day { font-family: var(--wa-display); font-weight: 800; color: var(--wa-ink) !important; font-size: 1.05rem; }
 .wa-cal-info-day span { font-family: var(--wa-body); font-weight: 600; font-size: 0.88rem; color: var(--wa-muted); margin-left: 6px; }
@@ -349,6 +365,13 @@
 .wa-prize-icon { font-size: 2.4rem; color: var(--wa-ink); }
 .wa-prize-amount { font-family: var(--wa-display); font-weight: 800; font-size: clamp(3rem, 11vw, 4.6rem); letter-spacing: -0.04em; line-height: 1; margin-top: 10px !important; }
 .wa-prize-label { font-family: var(--wa-action); font-weight: 800; font-size: 1rem; margin-top: 4px !important; }
+.wa-prize-podium { list-style: none; padding: 0; margin: 16px 0 0 !important; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.wa-prize-podium li { background: rgba(255, 255, 255, 0.65); border: 1.5px solid var(--wa-ink); border-radius: 12px; padding: 8px 12px; min-width: 76px; display: flex; flex-direction: column; }
+.wa-prize-podium span { font-family: var(--wa-action); font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #4A3A10; }
+.wa-prize-podium strong { font-family: var(--wa-display); font-weight: 800; font-size: 1.25rem; color: var(--wa-ink); }
+.wa-prize-more { list-style: none; padding: 0; margin: 14px 0 0 !important; color: #4A3A10; font-size: 0.93rem; line-height: 1.6; }
+.wa-prize-more strong { color: var(--wa-ink); }
+.wa-prize-link { margin-top: 12px; font-family: var(--wa-action); font-weight: 800; font-size: 0.9rem; color: var(--wa-ink); text-decoration: underline; text-underline-offset: 3px; }
 .wa-prize-note { margin-top: 14px !important; max-width: 36ch; color: #4A3A10; line-height: 1.5; font-size: 0.95rem; }
 
 /* ---------- Certificate ---------- */

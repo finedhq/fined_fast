@@ -16,7 +16,8 @@ export const giftReset = (id, reason) => post(`/winterarc/admin/people/${id}/gif
 export const disqualifyPerson = (id, reason) => post(`/winterarc/admin/people/${id}/disqualify`, { reason });
 export const reinstatePerson = (id) => post(`/winterarc/admin/people/${id}/reinstate`);
 
-export const getWinners = (week) => request(`/winterarc/admin/winners${week ? `?week=${week}` : ""}`);
+export const getWinners = (week, day) =>
+  request(`/winterarc/admin/winners${day ? `?day=${day}` : week ? `?week=${week}` : ""}`);
 
 export const when = (iso) =>
   iso ? new Date(iso).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }) : "";
