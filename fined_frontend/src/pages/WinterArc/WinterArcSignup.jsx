@@ -1,14 +1,15 @@
-// Waitlist form, the thank-you card with the referral link, and the countdown.
+// Join form (sign-in first), the thank-you card with the referral link, and the countdown.
 import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
-import { PiCheckBold, PiCopyBold, PiWhatsappLogoBold } from "react-icons/pi";
+import { PiArrowRightBold, PiCheckBold, PiCopyBold, PiUserCirclePlusBold, PiWhatsappLogoBold } from "react-icons/pi";
 import { WINTERARC as W } from "./winterarcConfig";
 import ContestCard from "./ContestCard";
 import { joinWinterArcWaitlist } from "../../services/api";
 import { getAttribution } from "../../utils/attribution";
 import { trackEvent } from "../../utils/analytics";
 import { forgetJoined, joinedCode, markJoined } from "./winterarcVisitor";
+import { refreshWinterArcStatus } from "./useWinterArcStatus";
 
 const SITE = "https://myfined.com";
 
@@ -73,8 +74,11 @@ function ThankYou({ code, already, remembered, onNotYou }) {
   return (
     <div className="wa-form wa-thanks" role="status">
       <div className="wa-thanks-tick"><PiCheckBold aria-hidden="true" /></div>
-      <h3>{already && !remembered ? "You're already on the list" : "You're on the list"}</h3>
-      <p>We'll email you before Day 1 on {W.startDate}.</p>
+      <h3>{already && !remembered ? "You've already joined" : "You're in"}</h3>
+      <p>Day 1 opens on {W.startDate}. Your hub is ready now.</p>
+      <Link className="wa-btn wa-btn-primary" to="/winterarc/challenge">
+        Go to your hub <PiArrowRightBold aria-hidden="true" />
+      </Link>
       {W.show.referrals && (
         <>
           <ContestCard />
@@ -131,11 +135,11 @@ export default function SignupForm() {
   };
 
   // Signed-in learners: fill in their name and email (only into empty fields)
-  const { user } = useAuth0();
+  const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
   const [prefilled, setPrefilled] = useState(false);
   if (user && !prefilled) {
     setPrefilled(true);
-    setForm((f) => ({ ...f, name: f.name || user.name || "", email: f.email || user.email || "" }));
+    setForm((f) => ({ ...f, name: f.name || user.name || "", email: user.email || f.email || "" }));
   }
 
   const set = (key) => (e) =>
@@ -153,6 +157,7 @@ export default function SignupForm() {
       const res = await joinWinterArcWaitlist({ ...getAttribution(), ...form, ref: form.ref || null });
       setState({ status: "done", error: "", code: res.referral_code, already: res.already_joined });
       markJoined(res.referral_code);
+      refreshWinterArcStatus();
       if (!res.already_joined) {
         const src = getAttribution();
         trackEvent("generate_lead", {
@@ -173,6 +178,30 @@ export default function SignupForm() {
     }
   };
 
+  // Joining needs a FinEd account, so the hub can find you with the same email.
+  // A friend's referral code survives the sign-in trip (it is kept in this browser).
+  if (state.status !== "done" && !isAuthenticated) {
+    const goSignIn = (signup) =>
+      loginWithRedirect({
+        appState: { returnTo: "/winterarc#join" },
+        authorizationParams: signup ? { screen_hint: "signup" } : undefined,
+      });
+    return (
+      <div className="wa-form wa-signin-first">
+        <div className="wa-thanks-tick"><PiUserCirclePlusBold aria-hidden="true" /></div>
+        <h3>First, make your free FinEd account</h3>
+        <p>You'll use it to open each day's task and track your streak. Then you'll come straight back here to join.</p>
+        {linkCode && <p className="wa-small">Your friend's code <strong>{linkCode}</strong> is saved and will be filled in.</p>}
+        <button type="button" className="wa-btn wa-btn-primary wa-btn-block" disabled={isLoading} onClick={() => goSignIn(true)}>
+          Sign up for free <PiArrowRightBold aria-hidden="true" />
+        </button>
+        <button type="button" className="wa-thanks-other" disabled={isLoading} onClick={() => goSignIn(false)}>
+          Already have an account? Log in
+        </button>
+      </div>
+    );
+  }
+
   if (state.status === "done") {
     return <ThankYou code={state.code} already={state.already} remembered={state.remembered} onNotYou={notYou} />;
   }
@@ -186,7 +215,11 @@ export default function SignupForm() {
         </label>
         <label className="wa-field">
           <span>Email</span>
-          <input type="email" required autoComplete="email" inputMode="email" maxLength={254} value={form.email} onChange={set("email")} />
+          <input
+            type="email" required autoComplete="email" inputMode="email" maxLength={254}
+            value={form.email} onChange={set("email")}
+            readOnly={!!user?.email} title={user?.email ? "The email on your FinEd account" : undefined}
+          />
         </label>
       </div>
       <label className="wa-field">
@@ -239,7 +272,7 @@ export default function SignupForm() {
       </label>
       {state.error && <p className="wa-error" role="alert">{state.error}</p>}
       <button type="submit" className="wa-btn wa-btn-primary wa-btn-block" disabled={state.status === "sending"}>
-        {state.status === "sending" ? "Joining..." : "Join the waitlist"}
+        {state.status === "sending" ? "Joining..." : "Join WinterArc"}
       </button>
       <p className="wa-small wa-center">Entry is always free. No payment is needed to take part or to win.</p>
     </form>

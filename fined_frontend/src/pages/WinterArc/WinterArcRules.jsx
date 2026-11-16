@@ -120,13 +120,19 @@ export default function WinterArcRules() {
                 </ul>
                 {W.show.referralContest && (
                   <>
-                    <h3>Pre-launch referral contest</h3>
+                    <h3>The {W.referralAwardName}</h3>
                     <ul>
-                      <li>The person whose invite link brings in the most friends by {W.referralContestCloses} wins {W.referralContestPrize}.</li>
-                      <li>A friend counts when they have joined the {W.name} waitlist with your link and created a FinEd account with the same email, both before the contest closes. They do not need to finish Day 3 for this contest.</li>
+                      <li>The {W.referralAwardName} is given twice, once for each referral contest below.</li>
+                      {W.referralContests.map((c) => (
+                        <li key={c.key}>
+                          {c.name}: the person whose invite link brings in the most friends{c.opens ? ` from ${c.opens}` : ""} until {c.closes} wins {c.prize}.
+                        </li>
+                      ))}
+                      <li>To be eligible, you need at least {W.referralAwardMin} counted friends in that contest. If nobody reaches {W.referralAwardMin}, that contest's award is not given.</li>
+                      <li>A friend counts in a contest when they join {W.name} with your link, using their FinEd account, inside that contest's dates. They do not need to finish Day 3 for these contests.</li>
                       <li>If two people bring in the same number, the one who reached that number first wins.</li>
                       <li>Every referral is checked before the prize is paid. Fake, duplicate or self-made sign-ups do not count.</li>
-                      <li>The winner is contacted after the check and paid by UPI. This contest is separate from referral points during the challenge.</li>
+                      <li>Winners are contacted after the check and paid by UPI. These contests are separate from referral points during the challenge.</li>
                     </ul>
                   </>
                 )}
@@ -137,7 +143,8 @@ export default function WinterArcRules() {
               <h2>7. Leaderboards and ties</h2>
               <ul>
                 <li>Weekly leaderboards: {weeks}.</li>
-                <li>Each weekly board closes on Sunday night and winners are announced on Monday.</li>
+                <li>Each weekly board closes on Sunday night.</li>
+                <li>Each day also has its own board: the highest score on that day's task within its {W.lateFullHours}-hour full-points window.</li>
                 <li>A final leaderboard adds up all {W.totalDays} days and closes at the end of {W.endDate}. All late windows end then too.</li>
                 <li>Ties are broken in this order: higher score; then more days finished within {W.lateFullHours} hours of opening; then whoever reached that score first. If still tied, the prize is split equally.</li>
               </ul>
@@ -147,10 +154,14 @@ export default function WinterArcRules() {
               <section id="prizes">
                 <h2>8. Prizes</h2>
                 <ul>
-                  <li>Total prize pool: {W.prizePool} in cash, for weekly winners and final top scorers.</li>
-                  <li>Winners are decided by score only.</li>
+                  <li>Total prize pool: {W.prizePool} in cash.</li>
+                  <li>Final leaderboard: {W.finalPrizes.map((p) => `${p.place} place ${p.amount}`).join(", ")}.</li>
+                  <li>Daily prizes: {W.dailyPrizeTotal} in total, {W.dailyPrizeEach} to the top scorer of each of the {W.totalDays} days.</li>
+                  {W.show.referralContest && (
+                    <li>{W.referralAwardName}: {W.referralContests.map((c) => `${c.prize} to the top referrer until ${c.closes.split(",")[0]}`).join(", and ")}, with at least {W.referralAwardMin} friends (see section 6).</li>
+                  )}
+                  <li>Leaderboard winners are decided by score only.</li>
                   <li>Prizes are paid by UPI to verified winners, using details they choose to share after winning.</li>
-                  <li>The exact split of the prize pool between places and weeks will be announced before {W.startDate}.</li>
                   <li>FinEd does not deduct tax from prizes. Any tax due on winnings is the winner's own responsibility.</li>
                   <li>Winners are contacted after verification. If a winner does not reply within {W.winnerResponseHours} hours, the prize may pass to the next eligible person.</li>
                 </ul>

@@ -6,6 +6,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import useWinterArcStatus from "../pages/WinterArc/useWinterArcStatus";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import {
   PiCaretDownBold,
@@ -44,16 +45,18 @@ export default function Navbar() {
   const userInitial = (firstName[0] || "L").toUpperCase();
   const levelLabel = getUserLevel(profile).label;
   const homePath = isAuthenticated ? "/dashboard" : "/";
+  // People who joined WinterArc go straight to their hub; everyone else to the landing page
+  const winterArc = useWinterArcStatus();
 
   const links = [
     { to: homePath, label: "Home", end: true },
     { to: "/courses", label: "Courses" },
     // Featured: an icy pill with a snowflake and a gentle shimmer (Navbar.css)
-    { to: "/winterarc", label: "WinterArc", badge: "Free", featured: true },
+    { to: winterArc.joined ? "/winterarc/challenge" : "/winterarc", match: "/winterarc", label: "WinterArc", badge: "Free", featured: true },
     { to: "/articles", label: "Articles" },
     { to: "/contact", label: "Contact Us" },
   ];
-  const isActive = (l) => (l.end ? pathname === l.to : pathname.startsWith(l.to));
+  const isActive = (l) => (l.end ? pathname === l.to : pathname.startsWith(l.match || l.to));
   const activeIndex = links.findIndex(isActive);
   const highlight = hovered ?? (activeIndex >= 0 ? activeIndex : null);
 

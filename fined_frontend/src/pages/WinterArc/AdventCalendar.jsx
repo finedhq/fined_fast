@@ -3,7 +3,7 @@
 // leaderboard week. Each door carries a colour stripe for its learning theme
 // (themes are separate from leaderboard weeks). Tap a door to swing it open
 // and see that day's topic.
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PiTrophyFill, PiMegaphoneFill, PiBookOpenTextFill, PiFlagCheckeredFill, PiSnowflakeBold,
   PiWalletFill, PiBankFill, PiChartLineUpFill, PiCreditCardFill, PiUmbrellaFill, PiTargetFill,
@@ -25,7 +25,7 @@ function eventNote(info) {
   if (info.n === 1) return "Day 1. Your arc begins.";
   if (info.finale) return `Worth ${W.finalePoints} points. The final leaderboard closes tonight.`;
   if (info.cutoff) return `The ${info.week} leaderboard closes tonight.`;
-  if (info.weekday === "Mon") return "Last week's winners are announced today.";
+  if (info.weekday === "Mon") return "A new leaderboard week starts today.";
   return null;
 }
 
@@ -57,9 +57,24 @@ function DoorInside({ info, topic }) {
 export default function AdventCalendar() {
   const [open, setOpen] = useState(() => new Set());
   const [selected, setSelected] = useState(null);
+  const [opened, setOpened] = useState(0); // bumps on every tap, to replay the panel's pulse
+  const infoRef = useRef(null);
+
+  // The topic shows in the panel under the grid. Bring it into view after a tap
+  // (phones often have it below the fold) and pulse it so the eye goes there.
+  useEffect(() => {
+    if (!opened || !infoRef.current) return;
+    const el = infoRef.current;
+    const r = el.getBoundingClientRect();
+    if (r.bottom > window.innerHeight - 12 || r.top < 0) {
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+    }
+  }, [opened]);
 
   const toggle = (n) => {
     setSelected(n);
+    setOpened((c) => c + 1);
     setOpen((prev) => {
       const next = new Set(prev);
       if (next.has(n)) next.delete(n);
@@ -140,7 +155,13 @@ export default function AdventCalendar() {
         ))}
       </ul>
 
-      <div className="wa-cal-info" aria-live="polite">
+      <div
+        key={opened}
+        ref={infoRef}
+        className={`wa-cal-info ${info ? "is-filled" : ""}`}
+        aria-live="polite"
+        style={{ scrollMarginBottom: 16 }}
+      >
         {info ? (
           <>
             <p className="wa-cal-info-day">

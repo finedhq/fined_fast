@@ -539,6 +539,11 @@ export function joinWinterArcWaitlist(form) {
 
 // WinterArc daily engine (routes/winterarc_days.py). Errors carry `status`:
 // 403 = not on the WinterArc list, 423 = that day isn't open yet.
+// Light: joined?, today's day and whether it's done (navbar, landing, dashboard)
+export function getWinterArcStatus() {
+  return request("/winterarc/status");
+}
+
 export function getWinterArcMe() {
   return request("/winterarc/me");
 }
@@ -571,8 +576,8 @@ export function getWinterArcMetrics() {
   return request("/winterarc/admin/metrics");
 }
 
-export function getWinterArcReferralContest() {
-  return request("/winterarc/admin/referral-contest");
+export function getWinterArcReferralContest(contest) {
+  return request(`/winterarc/admin/referral-contest${contest ? `?contest=${contest}` : ""}`);
 }
 
 export function spendWinterArcReset(day) {

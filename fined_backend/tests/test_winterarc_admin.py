@@ -55,3 +55,39 @@ def test_burst_and_cap_flags():
     out = build_referrals([owner, *friends], approved, set())
     assert all(any("within an hour" in f for f in r["flags"]) for r in out)
     assert all(any("cap" in f for f in r["flags"]) for r in out)
+
+
+# --- Prizes (2026-11-15): referral award minimum, contest windows, daily boards ---
+
+from datetime import datetime
+
+from app.services import winterarc_rules as R
+
+
+def contest_row(code, referrals, rank, at="2026-11-20T10:00:00+05:30"):
+    return {"code": code, "referrer_name": code, "referrals": referrals, "rank": rank, "reached_at": at}
+
+
+def test_award_needs_five_friends():
+    rows = R.contest_standings([contest_row("A", 4, 1), contest_row("B", 3, 2)])
+    assert not any(r["eligible"] for r in rows)
+    assert not any(r["leading"] for r in rows)
+
+
+def test_award_goes_to_best_eligible():
+    rows = R.contest_standings([contest_row("B", 5, 2), contest_row("A", 9, 1), contest_row("C", 2, 3)])
+    assert [r["code"] for r in rows] == ["A", "B", "C"]
+    assert [r["leading"] for r in rows] == [True, False, False]
+    assert [r["eligible"] for r in rows] == [True, True, False]
+
+
+def test_contest_windows():
+    ist = lambda s: datetime.fromisoformat(s)
+    assert R.contest_at(ist("2026-11-15T12:00:00+05:30")) == "nov"
+    assert R.contest_at(ist("2026-11-30T23:59:00+05:30")) == "nov"
+    assert R.contest_at(ist("2026-12-01T00:00:01+05:30")) == "dec"
+    assert R.contest_at(ist("2027-01-05T00:00:00+05:30")) == "dec"
+
+
+def test_day_board_closes_after_full_window():
+    assert R.day_closes(3) - R.opens_at(3) == (R.opens_at(2) - R.opens_at(1)) * 1.5

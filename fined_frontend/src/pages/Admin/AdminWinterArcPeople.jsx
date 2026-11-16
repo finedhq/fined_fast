@@ -129,25 +129,41 @@ function Person({ id, onChanged }) {
 }
 
 function Winners() {
+  // board: a week number, null for overall, or "day" for the daily boards
   const [week, setWeek] = useState(1);
+  const [day, setDay] = useState(1);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const daily = week === "day";
   useEffect(() => {
     let live = true;
-    getWinners(week).then((d) => live && setData(d)).catch((e) => live && setError(e.message));
+    getWinners(daily ? null : week, daily ? day : null)
+      .then((d) => { if (live) { setData(d); setError(""); } })
+      .catch((e) => live && setError(e.message));
     return () => {
       live = false;
     };
-  }, [week]);
-  const shown = data && (data.week ?? null) === week ? data : null;
+  }, [week, day, daily]);
+  const shown = data && (daily ? data.day === day : !data.day && (data.week ?? null) === week) ? data : null;
   return (
     <section>
       <h2>Winners to verify</h2>
       <div className="wa-admin-filters">
-        {[...W.weeks.map((w, i) => [i + 1, w.label]), [null, "Overall"]].map(([w, l]) => (
+        {[["day", "Daily"], ...W.weeks.map((w, i) => [i + 1, w.label]), [null, "Overall"]].map(([w, l]) => (
           <button key={l} type="button" className={`af-btn${week === w ? " af-btn--primary" : ""}`} onClick={() => setWeek(w)}>{l}</button>
         ))}
+        {daily && (
+          <select value={day} onChange={(e) => setDay(Number(e.target.value))} aria-label="Day">
+            {Array.from({ length: W.totalDays }, (_, i) => i + 1).map((n) => <option key={n} value={n}>Day {n}</option>)}
+          </select>
+        )}
       </div>
+      {daily && (
+        <p className="af-hint">
+          Daily prize: ₹{shown?.prize ?? 100} to rank 1. A day's score counts only questions finished inside its {W.lateFullHours}-hour
+          full-points window; ties go to whoever finished first.
+        </p>
+      )}
       {error && <div className="af-error">{error}</div>}
       {shown && (
         <>
@@ -155,12 +171,12 @@ function Winners() {
           {shown.rows.length === 0 ? <p className="af-hint">No points on this board yet.</p> : (
             <div className="wa-admin-scroll">
               <table className="wa-admin-table">
-                <thead><tr><th>Rank</th><th>Name</th><th>Email</th><th>College</th><th>Points</th><th>Days on time</th><th></th></tr></thead>
+                <thead><tr><th>Rank</th><th>Name</th><th>Email</th><th>College</th><th>Points</th><th>{daily ? "Finished at" : "Days on time"}</th><th></th></tr></thead>
                 <tbody>
                   {shown.rows.map((r) => (
                     <tr key={r.email}>
                       <td>{r.rank}</td><td>{r.name || r.display_name}</td><td>{r.email}</td><td>{r.college || ""}</td>
-                      <td>{r.points}</td><td>{r.on_time_days}</td>
+                      <td>{r.points}</td><td>{daily ? when(r.reached_at) : r.on_time_days}</td>
                       <td>{r.person_id && <Link to={`/admin/winterarc/people?id=${r.person_id}`}>Open</Link>}</td>
                     </tr>
                   ))}

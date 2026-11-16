@@ -35,9 +35,9 @@ export function JoinFirst() {
     <WinterArcMessage
       icon="join"
       title={`Join ${W.name} first`}
-      actions={<Link className="wa-btn wa-btn-primary" to="/winterarc#join">Join the waitlist</Link>}
+      actions={<Link className="wa-btn wa-btn-primary" to="/winterarc#join">Join WinterArc</Link>}
     >
-      The challenge is open to people on the {W.name} list. Joining is free and takes a minute. Use the same email you
+      The challenge is open to people who have joined {W.name}. Joining is free and takes a minute. Use the same email you
       signed in with.
     </WinterArcMessage>
   );
