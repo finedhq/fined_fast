@@ -153,12 +153,95 @@ export function mixDone(cardData, state) {
   return (state?.touchedControls?.length || 0) >= need;
 }
 
+// ── The Month Happens (month_happens, WinterArc Day 1) ─────────────────
+// Saved tool state: { choices: {eventId: choiceId} }. A month's budget as
+// pots; unplanned events arrive one at a time and the reader picks where the
+// money comes from. A choice a pot can't cover is unavailable (never goes
+// below zero). A `forced` event has no choice: it takes its amount from the
+// pots in `order`, as far as they go. No choice is right or wrong.
+const rupees = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+
+/** Why a choice can't be picked with these pots, or "" if it can. */
+export function monthBlocked(config, pots, choice) {
+  for (const [pot, amount] of Object.entries(choice.take || {})) {
+    if (amount > (pots[pot] ?? 0) + 1e-9) {
+      const label = config.pots.find((p) => p.id === pot)?.label || pot;
+      return `${label} has ${rupees(pots[pot] ?? 0)} left.`;
+    }
+  }
+  return "";
+}
+
+/** Play the reader's choices through: pots left, what each event took, what comes next. */
+export function monthRun(config, choices = {}) {
+  const pots = Object.fromEntries(config.pots.map((p) => [p.id, p.amount]));
+  const log = [];
+  let next = null;
+  for (const ev of config.events) {
+    if (ev.forced) {
+      if (!choices[ev.id]) {
+        next = ev;
+        break;
+      }
+      let need = ev.forced.amount;
+      const takes = {};
+      for (const pot of ev.forced.order) {
+        const t = Math.min(need, pots[pot] ?? 0);
+        if (t > 0) {
+          takes[pot] = t;
+          pots[pot] -= t;
+          need -= t;
+        }
+      }
+      log.push({ event: ev, choice: null, takes, short: need });
+      continue;
+    }
+    const choice = ev.choices.find((c) => c.id === choices[ev.id]);
+    if (!choice || monthBlocked(config, pots, choice)) {
+      next = ev;
+      break;
+    }
+    for (const [pot, amount] of Object.entries(choice.take || {})) pots[pot] -= amount;
+    log.push({ event: ev, choice, takes: { ...(choice.take || {}) }, short: 0 });
+  }
+  return { pots, log, next, done: next === null };
+}
+
+const joinNames = (names) => (names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`);
+const capital = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+
+/** The end-of-month lines, written from what this reader chose. */
+export function monthEnding(config, run) {
+  const e = config.endings || {};
+  const savingsPot = config.savings_pot || "savings";
+  const wantsPot = config.wants_pot || "wants";
+  const start = config.pots.find((p) => p.id === savingsPot)?.amount ?? 0;
+  const left = run.pots[savingsPot] ?? 0;
+  const fromSavings = run.log.filter((l) => l.takes[savingsPot] > 0).map((l) => l.event.short);
+  const fromWants = run.log.filter((l) => l.takes[wantsPot] > 0).map((l) => l.event.short);
+  const wantsUsed = run.log.reduce((s, l) => s + (l.takes[wantsPot] || 0), 0);
+  const fill = (t) =>
+    (t || "")
+      .replace("{left}", rupees(left))
+      .replace("{start}", rupees(start))
+      .replace("{from_savings}", capital(joinNames(fromSavings)))
+      .replace("{from_wants}", joinNames(fromWants))
+      .replace("{wants_used}", rupees(wantsUsed));
+  const lines = [fill(left >= start ? e.kept_all : left > 0 ? e.kept_some : e.kept_none)];
+  if (fromWants.length && e.from_wants) lines.push(fill(e.from_wants));
+  for (const l of run.log) if (l.choice?.outcome) lines.push(l.choice.outcome);
+  return lines.filter(Boolean);
+}
+
+export const monthDone = (cardData, state) => monthRun(cardData?.config || { pots: [], events: [] }, state?.choices).done;
+
 // ── Registry of completion rules by model_kind ─────────────────────────
 export const TOOL_DONE = {
   leak_lab: leakLabDone,
   slice_calculator: sliceDone,
   money_sorter: sorterDone,
   allocation_builder: mixDone,
+  month_happens: monthDone,
 };
 
 // What each tool saves to the learner's account (savedAnswers.js).
@@ -167,6 +250,7 @@ export const TOOL_SAVED_KEYS = {
   slice_calculator: ["amount", "company", "change", "touchedControls"],
   money_sorter: ["placements"],
   allocation_builder: ["shares", "limit", "touchedControls"],
+  month_happens: ["choices"],
 };
 
 export function toolDone(cardData, state) {

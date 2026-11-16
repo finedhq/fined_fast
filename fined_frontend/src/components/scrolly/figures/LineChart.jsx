@@ -21,10 +21,14 @@
 // the chart and shows its one-line meaning. `horizon` reveals the line up to
 // the chosen number of years after `start` and shows what `amount` put in at
 // `start` was worth then. Neither is saved.
+// WinterArc Day 1 on: series after the first are extra lines, drawn when a
+// step's `show` lists them; `endLabels` puts each line's last value at its
+// right end; config `fromZero` starts the y axis at 0; `choose.prompt` /
+// `choose.label` give the buttons a visible prompt and a screen-reader name.
 // Pixel geometry comes from the measured width (as TradeMap), so labels keep
 // their size on phones. Maths in chartMath.js.
 import { useLayoutEffect, useRef, useState } from "react";
-import { chartGeometry, chartSummary, horizonValue, roughRupees } from "./chartMath";
+import { chartGeometry, chartSummary, horizonValue, roughRupees, spreadLabels } from "./chartMath";
 import SliderControl from "./SliderControl";
 
 const H = 200; // line plot height, px
@@ -66,7 +70,7 @@ export default function LineChart({ step, steps, state = {}, config }) {
   const markers = config.markers.filter((m) => show.has(m.id));
   if (hz) markers.push({ id: "hz", label: `After ${years} ${years === 1 ? "year" : "years"}`, at: hzEnd, value: line.values[hzEnd] });
   const rows = markers.length ? Math.max(...markers.map((m) => m.row || 0)) + 1 : 0;
-  const pad = { l: 48, r: 16, t: 14 + rows * ROW_H, b: 22 };
+  const pad = { l: 48, r: s.endLabels ? 58 : 16, t: 14 + rows * ROW_H, b: 22 };
   const plotH = H + rows * ROW_H; // label rows add height; the plot itself keeps its size
   const hasVol = config.volume && show.has("volume");
   const g = w ? chartGeometry(config, { ...view, show: [...show, ...(hz ? ["hz"] : [])] }, { w, h: plotH, pad }) : null;
@@ -103,7 +107,19 @@ export default function LineChart({ step, steps, state = {}, config }) {
                 </text>
               </g>
             )}
-            <path className={`lc-line${dim(line.id)}`} d={g.path} />
+            {g.lines.map((l) => (
+              <path key={l.id} className={`lc-line${l.n ? ` lc-line--alt lc-line--alt${l.n}` : ""}${dim(l.id)}`} d={l.path} />
+            ))}
+            {s.endLabels &&
+              (() => {
+                const ends = g.lines.filter((l) => !dim(l.id) && !(g.future && g.future.x <= l.end.x)).map((l) => ({ id: l.id, y: l.end.y, l }));
+                const ys = spreadLabels(ends);
+                return ends.map(({ id, l }) => (
+                  <text key={`end-${id}`} className={`lc-end-label${l.n ? ` lc-end-label--alt${l.n}` : ""}`} x={l.end.x + 6} y={ys[id] + 4} textAnchor="start">
+                    {l.end.label}
+                  </text>
+                ));
+              })()}
             {markers
               .filter((m) => g.inRange(m.at))
               .map((m) => {
@@ -121,7 +137,7 @@ export default function LineChart({ step, steps, state = {}, config }) {
                 );
               })}
             {g.future && (
-              <g className="lc-future">
+              <g className={`lc-future${config.futureSolid ? " is-solid" : ""}`}>
                 <rect x={g.future.x} y={pad.t - 6} width={Math.max(0, w - pad.r - g.future.x + 2)} height={plotH - pad.t - pad.b + 8} />
                 {w - pad.r - g.future.x > 40 && (
                   <text className="lc-future-q" x={(g.future.x + w - pad.r) / 2} y={(plotH - pad.b + pad.t) / 2 + 10} textAnchor="middle">
@@ -145,7 +161,8 @@ export default function LineChart({ step, steps, state = {}, config }) {
       {s.future?.label && <p className="lc-future-label">{s.future.label}</p>}
       {s.choose && (
         <>
-          <div className="lc-choose" role="group" aria-label="Parts of the chart">
+          {s.choose.prompt && <p className="lc-choose-prompt">{s.choose.prompt}</p>}
+          <div className="lc-choose" role="group" aria-label={s.choose.label || "Parts of the chart"}>
             {s.choose.options.map((o) => (
               <button key={o.id} type="button" className={`og-hold-btn${choice?.id === o.id ? " active" : ""}`} aria-pressed={choice?.id === o.id} onClick={() => setPicked(o.id)}>
                 {o.label}

@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import CertificateModal from "../Certificate/CertificateModal";
 import SafeText from "./SafeText";
-import { replayText } from "./text";
+import { chipReplayText, replayText } from "./text";
 
 const CONFETTI_COLORS = ["#4100BC", "#4A3AFF", "#F5A623", "#FFB600", "#10B981"];
 
@@ -64,7 +64,11 @@ function SkippedLine({ open, onGoTo }) {
 // `certificate`: { courseSlug, courseTitle } on the course's final module — the
 // "Up next" box becomes the course certificate (the window checks the whole
 // course is done before issuing it).
-export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, test, onRetake, retakeError, onGoTo, onReviewTop, onReached }) {
+// WinterArc days (owner, 2026-11-15): the same screen, counting `unit`
+// ("points") instead of FinStars, with the warm-up chip's line under the poll
+// replay (`chipAmount`, completion `chip_replay`) and the day's own end
+// (`children`: progress, the day's action, back links) in place of "Up next".
+export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, test, onRetake, retakeError, onGoTo, onReviewTop, onReached, unit = "FinStars", chipAmount, children }) {
   const d = card.card_data || {};
   const sectionRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
@@ -102,6 +106,7 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
   }, []);
 
   const replay = revealed ? replayText(d, heroPoll, pollChoice) : "";
+  const chipLine = revealed ? chipReplayText(d, chipAmount) : "";
   const teaser = d.next_module_teaser;
   const teaserBody = teaser && (
     <>
@@ -127,12 +132,13 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
           <SkippedLine open={open} onGoTo={onGoTo} />
 
           <div className="completion-grid">
-            <div className="completion-replay-card" style={{ display: replay ? "block" : "none" }}>
-              <div className="card-label">Your first answer, revisited</div>
-              <p className="completion-replay">{replay}</p>
+            <div className="completion-replay-card" style={{ display: replay || chipLine ? "block" : "none" }}>
+              <div className="card-label">{chipLine ? "Your answers, revisited" : "Your first answer, revisited"}</div>
+              {replay && <p className="completion-replay">{replay}</p>}
+              {chipLine && <p className="completion-replay completion-chip-line">{chipLine}</p>}
             </div>
             <div className="total-finstars-card">
-              <div className="card-label">FinStars earned</div>
+              <div className="card-label">{unit} earned</div>
               <div className="total-finstars-num">
                 <span className="nc-final-fs-display">{stars}</span>
                 <span className="total-finstars-of">/ {maxStars}</span>
@@ -212,6 +218,8 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
                 {comingSoon && <span className="nc-coming-soon-pill">Coming soon</span>}
               </div>
             ))}
+
+          {children}
 
           <a
             href="#hero"

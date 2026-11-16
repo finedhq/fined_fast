@@ -11,6 +11,7 @@ import LeakLab from "./LeakLab";
 import SliceCalculator from "./SliceCalculator";
 import MoneySorter from "./MoneySorter";
 import AllocationBuilder from "./AllocationBuilder";
+import MonthHappens from "./MonthHappens";
 
 export const TOOLS = {
   leak_lab: {
@@ -28,5 +29,9 @@ export const TOOLS = {
   allocation_builder: {
     label: "Try a Mix — a share of money in shares, three kinds of year",
     component: AllocationBuilder,
+  },
+  month_happens: {
+    label: "The Month Happens — a budget meets four unplanned messages (WinterArc)",
+    component: MonthHappens,
   },
 };

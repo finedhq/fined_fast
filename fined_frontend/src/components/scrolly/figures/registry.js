@@ -35,6 +35,7 @@ import { M8_CH1_BARS, M8_CH2_GRID, M8_CH3_CHART } from "./module8Figures";
 import { M9_CH1_MAP, M9_CH1_ORDER, M9_CH2_MAP, M9_CH3_MAP } from "./module9Figures";
 import { M10_CH1_CHART, M10_CH2_CHART, M10_CH3_MAP } from "./module10Figures";
 import { M11_CH1_BARS, M11_CH2_BARS, M11_CH3_MAP } from "./module11Figures";
+import { WA1_CH1_STACK, WA1_CH2_CHART, WA1_CH3_STACK } from "./winterarcDay01Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -241,5 +242,24 @@ export const FIGURES = {
     steps: M11_CH3_MAP.steps.length,
     component: lazy(() => import("./TradeMap")),
     config: M11_CH3_MAP,
+  },
+  // WinterArc Day 1 (StackBars: stacked pieces, the reader's own sort)
+  stack_bars_arjun_month: {
+    label: "Stacked bars: money in, money out, left over — WinterArc Day 1 §1",
+    steps: WA1_CH1_STACK.views.length,
+    component: lazy(() => import("./StackBars")),
+    config: WA1_CH1_STACK,
+  },
+  line_chart_save_first: {
+    label: "Line chart: save what's left vs save first (choose an amount) — WinterArc Day 1 §2",
+    steps: WA1_CH2_CHART.steps.length,
+    component: lazy(() => import("./LineChart")),
+    config: WA1_CH2_CHART,
+  },
+  stack_bars_needs_wants: {
+    label: "Stacked bars: sort needs and wants, then 50/30/20 — WinterArc Day 1 §3",
+    steps: WA1_CH3_STACK.views.length,
+    component: lazy(() => import("./StackBars")),
+    config: WA1_CH3_STACK,
   },
 };
