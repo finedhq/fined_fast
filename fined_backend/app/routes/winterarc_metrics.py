@@ -106,7 +106,8 @@ async def referral_contest(contest: Optional[str] = None, user: AuthUser = Depen
     """A top-referrer contest (migration 014): 'nov' (by 30 Nov) or 'dec'
     (1-30 Dec); the one running now if not given. A friend counts when they
     joined with the link inside the contest's dates and have a FinEd account
-    (same email) by its close. Ranked by count, then who got there first; only
+    (same email) by its close, and has finished 3 days of the challenge
+    (migration 015: Days 1-3 by 3 Dec for 'nov', any 3 by 30 Dec for 'dec'). Ranked by count, then who got there first; only
     referrers with at least 5 friends can win. Checked by hand before payment."""
     key = contest or R.contest_at(datetime.now(timezone.utc))
     if key not in dict(R.REFERRAL_CONTESTS):
@@ -114,9 +115,9 @@ async def referral_contest(contest: Optional[str] = None, user: AuthUser = Depen
 
     def load():
         res = (supabase.from_("winterarc_referral_contests")
-               .select("code, referrer_name, referrals, reached_at, rank").eq("contest", key).execute())
+               .select("code, referrer_name, referrals, reached_at, rank, joined").eq("contest", key).execute())
         return res.data or []
 
     rows = R.contest_standings(await asyncio.to_thread(load))
     return {"contest": key, "closes_at": R.contest_closes(key).isoformat(), "minimum": R.REFERRAL_AWARD_MIN,
-            "rows": rows[:50]}
+            "friend_days": R.REFERRAL_FRIEND_DAYS, "results_on": R.contest_results_on(key), "rows": rows[:50]}

@@ -38,13 +38,13 @@ export const WINTERARC = {
   // Referral contests (DECIDED: Nov one 2026-11-11, Dec one 2026-11-15). Each
   // counts friends brought in during its own window; the top referrer wins.
   referralContests: [
-    { key: "nov", name: "Pre-launch referral contest", prize: "₹500", closes: "30 Nov 2026, 11:59 pm IST", endsAt: "2026-11-30T23:59:59+05:30" },
-    { key: "dec", name: "December referral contest", prize: "₹500", opens: "1 Dec 2026", closes: "30 Dec 2026, 11:59 pm IST", endsAt: "2026-12-30T23:59:59+05:30" },
+    { key: "nov", name: "Pre-launch referral contest", prize: "₹500", closes: "30 Nov 2026, 11:59 pm IST", endsAt: "2026-11-30T23:59:59+05:30", friendDays: "Days 1, 2 and 3 by 3 Dec", results: "4 Dec 2026" },
+    { key: "dec", name: "December referral contest", prize: "₹500", opens: "1 Dec 2026", closes: "30 Dec 2026, 11:59 pm IST", endsAt: "2026-12-30T23:59:59+05:30", friendDays: "any 3 days by 30 Dec", results: "31 Dec 2026" },
   ],
   referralContestPrize: "₹500",
   // The referral prize's name, and the fewest friends needed to win it
   referralAwardName: "Avalanche Award",
-  referralAwardMin: 5,
+  referralAwardMin: 3,
   certificateMinDays: 21,
   // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
   // hidden (show.certificatePrice) until that is confirmed.

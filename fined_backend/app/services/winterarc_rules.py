@@ -47,8 +47,13 @@ WEEKS = (
 
 # Prizes (decided 2026-11-15). The referral award goes to the top referrer of
 # each contest who has brought in at least REFERRAL_AWARD_MIN friends.
+# A friend counts only once THEY have finished REFERRAL_FRIEND_DAYS days of the
+# challenge (2026-11-17; the view in migration 015 applies it): nov = Days 1-3
+# by the end of 3 Dec, results 4 Dec; dec = any 3 days by 30 Dec.
 DAILY_PRIZE = 100
-REFERRAL_AWARD_MIN = 5
+REFERRAL_AWARD_MIN = 3   # was 5; lowered 2026-11-17
+REFERRAL_FRIEND_DAYS = 3
+REFERRAL_RESULTS_ON = {"nov": "2026-12-04", "dec": "2026-12-31"}
 REFERRAL_CONTESTS = (
     # key, closes (IST)
     ("nov", "2026-11-30T23:59:59+05:30"),
@@ -60,13 +65,17 @@ def contest_closes(key: str) -> datetime:
     return datetime.fromisoformat(dict(REFERRAL_CONTESTS)[key])
 
 
+def contest_results_on(key: str) -> str:
+    return REFERRAL_RESULTS_ON[key]
+
+
 def contest_at(now: datetime) -> str:
     """The referral contest running at this moment (the last one after the end)."""
     return next((k for k, c in REFERRAL_CONTESTS if now <= datetime.fromisoformat(c)), REFERRAL_CONTESTS[-1][0])
 
 
 def contest_standings(rows: list) -> list:
-    """Contest rows ranked, each marked eligible (5+ friends); the winner is the
+    """Contest rows ranked, each marked eligible (3+ friends); the winner is the
     best-ranked eligible row (ties on count go to whoever got there first)."""
     rows = sorted(rows, key=lambda r: (r["rank"], r.get("reached_at") or "", r["code"]))
     winner = next((r["code"] for r in rows if r["referrals"] >= REFERRAL_AWARD_MIN), None)

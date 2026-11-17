@@ -125,12 +125,12 @@ export default function WinterArcRules() {
                       <li>The {W.referralAwardName} is given twice, once for each referral contest below.</li>
                       {W.referralContests.map((c) => (
                         <li key={c.key}>
-                          {c.name}: the person whose invite link brings in the most friends{c.opens ? ` from ${c.opens}` : ""} until {c.closes} wins {c.prize}.
+                          {c.name}: the person whose invite link brings in the most friends{c.opens ? ` from ${c.opens}` : ""} until {c.closes} wins {c.prize}. A friend counts once they finish {c.friendDays}. Results on {c.results}.
                         </li>
                       ))}
                       <li>To be eligible, you need at least {W.referralAwardMin} counted friends in that contest. If nobody reaches {W.referralAwardMin}, that contest's award is not given.</li>
-                      <li>A friend counts in a contest when they join {W.name} with your link, using their FinEd account, inside that contest's dates. They do not need to finish Day 3 for these contests.</li>
-                      <li>If two people bring in the same number, the one who reached that number first wins.</li>
+                      <li>A friend counts in a contest when they join {W.name} with your link, using their FinEd account, inside that contest's dates, and then finish 3 full days of the challenge (every question of the day). You do not need to.</li>
+                      <li>If two people have the same number, the one whose friends reached it first wins.</li>
                       <li>Every referral is checked before the prize is paid. Fake, duplicate or self-made sign-ups do not count.</li>
                       <li>Winners are contacted after the check and paid by UPI. These contests are separate from referral points during the challenge.</li>
                     </ul>

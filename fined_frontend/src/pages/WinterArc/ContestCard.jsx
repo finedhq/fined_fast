@@ -23,13 +23,13 @@ export default function ContestCard({ compact = false, standing = null }) {
       <div className="wa-race-text">
         <p className="wa-race-title">The {W.referralAwardName}: bring the most friends, win {C.prize}</p>
         <p className="wa-race-rule">
-          Closes {C.closes}. A friend counts once they join with your link using their FinEd account. You need at
-          least {W.referralAwardMin} friends to win.
+          Closes {C.closes}. A friend counts once they join with your link using their FinEd account and
+          finish {C.friendDays}. You need at least {W.referralAwardMin} such friends to win. Results {C.results}.
         </p>
         {standing && (
           <p className="wa-race-standing">
-            {standing.friends
-              ? `You: ${standing.friends} ${standing.friends === 1 ? "friend" : "friends"} so far${standing.rank ? `, #${standing.rank} right now` : ""}.`
+            {standing.joined
+              ? `You: ${standing.joined} ${standing.joined === 1 ? "friend" : "friends"} joined, ${standing.friends} finished 3 days${standing.friends && standing.rank ? `, #${standing.rank} right now` : ""}.`
               : "You haven't brought anyone in yet. Your link is below."}
           </p>
         )}
