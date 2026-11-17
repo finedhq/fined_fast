@@ -131,7 +131,7 @@ export default function AdminWinterArcMetrics() {
             <button
               type="button"
               className="af-btn"
-              onClick={() => download(`winterarc-referral-contest-${contest.contest}-${stamp}.csv`, ["Rank", "Code", "Referrer", "Counted referrals", "Eligible (5+)", "Leading", "Reached that count at"], contest.rows.map((r) => [r.rank, r.code, r.referrer_name, r.referrals, r.eligible ? "yes" : "no", r.leading ? "yes" : "", r.reached_at]))}
+              onClick={() => download(`winterarc-referral-contest-${contest.contest}-${stamp}.csv`, ["Rank", "Code", "Referrer", "Joined", "Counted (3 days)", "Eligible (3+)", "Leading", "Reached that count at"], contest.rows.map((r) => [r.rank, r.code, r.referrer_name, r.joined, r.referrals, r.eligible ? "yes" : "no", r.leading ? "yes" : "", r.reached_at]))}
             >
               Download CSV
             </button>
@@ -144,7 +144,7 @@ export default function AdminWinterArcMetrics() {
         </div>
         <p className="af-hint">
           Counts a friend who joined with the referral link inside the contest's dates and has a FinEd account with the same
-          email by its close. Only referrers with at least {contest?.minimum ?? 5} friends can win; the leader among them is
+          email by its close, and has then finished 3 full days ({contest?.contest === "dec" ? "any 3 by 30 Dec" : "Days 1-3 by 3 Dec"}; results {contest?.results_on}). "Joined" is everyone who signed up with the link. Only referrers with at least {contest?.minimum ?? 5} friends can win; the leader among them is
           marked. Ties go to whoever reached the count first. Check the winner by hand before paying.
         </p>
         {!contest ? null : contest.failed ? (
@@ -154,12 +154,12 @@ export default function AdminWinterArcMetrics() {
         ) : (
           <div className="wa-metrics-scroll">
             <table className="wa-metrics-table">
-              <thead><tr><th>Rank</th><th>Code</th><th>Referrer</th><th>Counted referrals</th><th>Eligible</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Code</th><th>Referrer</th><th>Joined</th><th>Counted (3 days)</th><th>Eligible</th></tr></thead>
               <tbody>
                 {contest.rows.map((r) => (
                   <tr key={r.code} style={r.leading ? { fontWeight: 800 } : undefined}>
-                    <td>{r.rank}</td><td>{r.code}</td><td>{r.referrer_name || "(unknown)"}</td><td>{r.referrals}</td>
-                    <td>{r.leading ? "Winner if checks pass" : r.eligible ? "Yes" : `Needs ${(contest.minimum ?? 5) - r.referrals} more`}</td>
+                    <td>{r.rank}</td><td>{r.code}</td><td>{r.referrer_name || "(unknown)"}</td><td>{r.joined ?? ""}</td><td>{r.referrals}</td>
+                    <td>{r.leading ? "Winner if checks pass" : r.eligible ? "Yes" : `Needs ${(contest.minimum ?? 3) - r.referrals} more`}</td>
                   </tr>
                 ))}
               </tbody>

@@ -178,18 +178,21 @@ def _my_referrals(email: str, extra: list) -> dict:
 
 def _my_contest(code: Optional[str]) -> dict:
     """My standing in the referral contest running now (migration 014):
-    friends who count so far and my rank, before the manual checks."""
+    friends who count so far (finished 3 days, migration 015), friends who
+    joined, and my rank, before the manual checks."""
     key = R.contest_at(_now())
-    empty = {"key": key, "friends": 0, "rank": None, "minimum": R.REFERRAL_AWARD_MIN}
+    empty = {"key": key, "friends": 0, "joined": 0, "rank": None, "minimum": R.REFERRAL_AWARD_MIN,
+             "days_needed": R.REFERRAL_FRIEND_DAYS}
     if not code:
         return empty
     try:
-        res = (supabase.from_("winterarc_referral_contests").select("referrals, rank")
+        res = (supabase.from_("winterarc_referral_contests").select("referrals, rank, joined")
                .eq("contest", key).eq("code", code).limit(1).execute())
     except Exception:
         return empty
     row = res.data[0] if res and res.data else None
-    return {**empty, "friends": row["referrals"] if row else 0, "rank": row["rank"] if row else None}
+    return {**empty, "friends": row["referrals"] if row else 0,
+            "joined": row.get("joined", 0) if row else 0, "rank": row["rank"] if row else None}
 
 
 def _repaired(extra: list) -> dict:
