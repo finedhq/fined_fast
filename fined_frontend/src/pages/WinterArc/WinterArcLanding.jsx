@@ -3,7 +3,7 @@
 // falling and piling up on the buttons, a 30-door advent calendar, a snowball
 // that grows with your streak, and a frosted window hiding the prizes.
 // All challenge values come from winterarcConfig.js.
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { motion, useReducedMotion } from "motion/react";
@@ -43,12 +43,40 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
+// A hand-drawn note pointing at the countdown card, so people find out the
+// snow piling on it can be knocked off. Shows once snow has had time to
+// build up, and fades away as soon as they touch the card.
+const CAN_HOVER = typeof window !== "undefined" && window.matchMedia?.("(hover: hover)").matches;
+
+function SnowHint({ hidden }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className="wa-snow-hint"
+      aria-hidden="true"
+      initial={{ opacity: 0, y: 6 }}
+      animate={hidden ? { opacity: 0, y: -4 } : { opacity: 1, y: 0 }}
+      transition={{ duration: hidden ? 0.4 : 0.7, delay: hidden || reduce ? 0 : 4, ease: EASE }}
+    >
+      <span className="wa-snow-hint-text">
+        {CAN_HOVER ? "Hover to see the winter magic" : "Tap the snow for some winter magic"}{" "}
+        <PiSnowflakeBold />
+      </span>
+      <svg className="wa-snow-hint-arrow" viewBox="0 0 60 48" fill="none">
+        <path d="M52 4 C 50 22, 36 34, 12 38" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path d="M20 30 L 10 38 L 21 44" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </motion.div>
+  );
+}
+
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
 function Hero() {
   const reduce = useReducedMotion();
   const { joined } = useWinterArcStatus();
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const [triedSnow, setTriedSnow] = useState(false);
   const heroRef = useRef(null);
   const rise = (delay) => ({
     initial: reduce ? false : { opacity: 0, y: 24 },
@@ -122,7 +150,13 @@ function Hero() {
           transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
         >
           <img className="wa-plane" src={planeImg} alt="" aria-hidden="true" />
-          <div className="wa-hero-card" data-snow-ledge="16">
+          <SnowHint hidden={triedSnow} />
+          <div
+            className="wa-hero-card"
+            data-snow-ledge="16"
+            onPointerEnter={() => setTriedSnow(true)}
+            onPointerDown={() => setTriedSnow(true)}
+          >
             <p className="wa-hero-card-label">Day 1 unlocks in</p>
             <Countdown />
             <ul className="wa-hero-facts">

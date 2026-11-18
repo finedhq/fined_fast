@@ -143,6 +143,22 @@
   position: absolute; top: -18px; left: -26px; width: 92px; height: auto; transform: rotate(-6deg);
   filter: drop-shadow(0 10px 14px rgba(65, 0, 188, 0.18));
 }
+/* "Hover to see the winter magic": a handwritten-style note above the card */
+.wa-snow-hint {
+  position: absolute; right: 4px; top: -30px; z-index: 3; pointer-events: none;
+  display: flex; align-items: flex-start; gap: 2px; color: var(--wa-purple);
+}
+.wa-snow-hint-text {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 9999px;
+  background: var(--wa-white); border: 1.5px dashed var(--wa-purple-border);
+  font-family: var(--wa-action); font-weight: 800; font-size: 0.85rem; white-space: nowrap;
+  box-shadow: 0 6px 16px -10px rgba(65, 0, 188, 0.5); transform: rotate(-2deg);
+}
+.wa-snow-hint-arrow { width: 46px; height: 38px; margin-top: 14px; order: -1; }
+@media (prefers-reduced-motion: no-preference) {
+  .wa-snow-hint-text svg { animation: wa-hint-spin 4s linear infinite; }
+}
+@keyframes wa-hint-spin { to { transform: rotate(360deg); } }
 .wa-hero-card {
   position: relative; border-radius: 20px; padding: 24px; background: var(--wa-white);
   border: 1px solid var(--wa-border); box-shadow: var(--wa-shadow);
@@ -469,7 +485,11 @@
 }
 
 @media (max-width: 959px) {
-  .wa-hero-side { justify-self: start; }
+  .wa-hero-side { justify-self: start; padding-top: 70px; }
+  /* Phones: the note sits on the left, clear of the plane and the text above */
+  .wa-snow-hint { left: 0; right: auto; top: 12px; }
+  .wa-snow-hint-text { font-size: 0.78rem; padding: 5px 10px; }
+  .wa-snow-hint-arrow { width: 36px; height: 30px; margin-top: 16px; }
 }
 
 @media (max-width: 480px) {
