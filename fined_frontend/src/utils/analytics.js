@@ -1,6 +1,16 @@
 /**
  * Google Tag Manager & Google Analytics 4 event tracking helper
  */
+import posthog, { isPostHogEnabled } from "../lib/posthog";
+
+const capturePostHog = (event, properties) => {
+  if (!isPostHogEnabled) return;
+  try {
+    posthog.capture(event, properties);
+  } catch {
+    // Analytics must not interrupt the learner's action.
+  }
+};
 
 export const trackEvent = (eventName, params = {}) => {
   if (typeof window !== "undefined") {
@@ -47,7 +57,9 @@ export const signupMethod = (userSub = "") => {
  */
 export const trackSignUp = (userSub) => {
   if (!userSub || sentOnce(`fined_ga_sign_up_${userSub}`)) return;
-  trackEvent("sign_up", { method: signupMethod(userSub) });
+  const method = signupMethod(userSub);
+  trackEvent("sign_up", { method });
+  capturePostHog("account_created", { method });
 };
 
 /**
@@ -58,6 +70,7 @@ export const trackSignUp = (userSub) => {
 export const trackCourseStart = (courseSlug) => {
   if (!courseSlug || sentOnce(`fined_ga_course_start_${courseSlug}`)) return;
   trackEvent("course_start", { course_slug: courseSlug });
+  capturePostHog("course_started", { course_slug: courseSlug });
 };
 
 /**
@@ -70,6 +83,7 @@ export const trackFormSubmission = (formType, extra = {}) => {
     form_type: formType,
     ...extra,
   });
+  capturePostHog("form_submitted", { form_type: formType });
 };
 
 /**
@@ -82,4 +96,5 @@ export const trackArticleShare = (platform, articleTitle) => {
     platform,
     article_title: articleTitle,
   });
+  capturePostHog("article_shared", { platform });
 };

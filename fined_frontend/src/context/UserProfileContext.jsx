@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { fetchUserProfile, updateUserProfile } from "../services/api";
 import { trackSignUp } from "../utils/analytics";
+import posthog, { isPostHogEnabled, posthogLogger } from "../lib/posthog";
 
 const UserProfileContext = createContext(null);
 
@@ -60,6 +61,31 @@ export const UserProfileProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const identifiedUserIdRef = useRef(null);
+
+  // Auth0's immutable subject is the analytics distinct id. Identifying here
+  // merges pre-login activity and lets all subsequent captures inherit it.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated || !user?.sub) {
+      identifiedUserIdRef.current = null;
+      return;
+    }
+    if (!isPostHogEnabled || identifiedUserIdRef.current === user.sub) return;
+
+    try {
+      if (identifiedUserIdRef.current) posthog.reset();
+
+      const personProperties = {};
+      if (user.email) personProperties.email = user.email;
+      if (user.name) personProperties.name = user.name;
+      posthog.identify(user.sub, personProperties);
+      posthogLogger.info("authenticated session identified", { auth_provider: "auth0" });
+      identifiedUserIdRef.current = user.sub;
+    } catch {
+      // Analytics must not interrupt a successful sign-in.
+    }
+  }, [isAuthenticated, isLoading, user?.email, user?.name, user?.sub]);
 
   const refreshProfile = useCallback(async () => {
     if (!isAuthenticated) return;
