@@ -10,6 +10,7 @@ import { getAttribution } from "../../utils/attribution";
 import { trackEvent } from "../../utils/analytics";
 import { forgetJoined, joinedCode, markJoined } from "./winterarcVisitor";
 import { refreshWinterArcStatus } from "./useWinterArcStatus";
+import posthog, { isPostHogEnabled } from "../../lib/posthog";
 
 const SITE = "https://myfined.com";
 
@@ -160,6 +161,16 @@ export default function SignupForm() {
       refreshWinterArcStatus();
       if (!res.already_joined) {
         const src = getAttribution();
+        if (isPostHogEnabled) {
+          try {
+            posthog.capture("winterarc_joined", {
+              heard_from: form.heard_from || "unknown",
+              referred: form.ref ? "yes" : "no",
+            });
+          } catch {
+            // Analytics must not interrupt joining the challenge.
+          }
+        }
         trackEvent("generate_lead", {
           form_type: "winterarc_waitlist",
           heard_from: form.heard_from || "unknown",

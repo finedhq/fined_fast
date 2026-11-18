@@ -22,6 +22,7 @@ import {
 import { isAdminUser } from "../services/auth";
 import { useUserProfile } from "../context/UserProfileContext";
 import { getUserLevel } from "../utils/level";
+import posthog, { isPostHogEnabled } from "../lib/posthog";
 import "./Navbar.css";
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -111,7 +112,14 @@ export default function Navbar() {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
-  const signOut = () => logout({ logoutParams: { returnTo: window.location.origin } });
+  const signOut = () => {
+    try {
+      if (isPostHogEnabled) posthog.reset();
+    } catch {
+      // Analytics must not interrupt sign-out.
+    }
+    logout({ logoutParams: { returnTo: window.location.origin } });
+  };
 
   return (
     <>

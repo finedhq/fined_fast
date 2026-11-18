@@ -17,6 +17,7 @@ import {
 import instance from '../../lib/axios';
 import CertificateDesign from './CertificateDesign';
 import CertificatePreview from './CertificatePreview';
+import posthog, { isPostHogEnabled } from '../../lib/posthog';
 import {
   certificateFileName,
   certificatePngBlob,
@@ -118,7 +119,16 @@ export default function CertificateModal({ courseSlug, courseTitle, onClose }) {
       const res = await instance.post(`/certificates/course/${courseSlug}`, { name: clean });
       setState((s) => ({ ...s, eligible: true, certificate: res.data.certificate }));
       setName(res.data.certificate.recipient_name);
-      if (!cert) toast.success('Your certificate is ready!');
+      if (!cert) {
+        if (isPostHogEnabled) {
+          try {
+            posthog.capture('certificate_created', { course_slug: courseSlug });
+          } catch {
+            // Analytics must not interrupt certificate creation.
+          }
+        }
+        toast.success('Your certificate is ready!');
+      }
       setEditing(false);
     } catch (err) {
       setNameError(errorText(err, "Couldn't save your name. Please try again."));
@@ -132,6 +142,13 @@ export default function CertificateModal({ courseSlug, courseTitle, onClose }) {
     setBusy(kind);
     try {
       await fn();
+      if ((kind === 'pdf' || kind === 'png') && isPostHogEnabled) {
+        try {
+          posthog.capture('certificate_downloaded', { format: kind });
+        } catch {
+          // Analytics must not interrupt certificate downloads.
+        }
+      }
     } catch (err) {
       if (err?.name !== 'AbortError') toast.error('Something went wrong. Please try again.');
     } finally {

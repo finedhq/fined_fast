@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/react"
 import './index.css'
 import App from './App.jsx'
 import { captureAttribution } from './utils/attribution'
+import './lib/posthog'
 
 // Remember UTM tags / referral code from the first visit, before any login redirect
 captureAttribution()

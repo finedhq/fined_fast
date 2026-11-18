@@ -10,6 +10,7 @@ import "./CardViewer.css";
 // Fallback FinStar defaults per card type — mirrors the backend DEFAULT_FINSTARS map
 import { getCardFinstars } from "../../../utils/finstars";
 import { isScrollyModule } from "../../../components/scrolly/templates";
+import posthog, { isPostHogEnabled } from "../../../lib/posthog";
 
 // New-course modules are drawn as one long page, like the prototype (loaded only when needed).
 // The module page's code is fetched alongside the module's data (below), not
@@ -197,6 +198,17 @@ function CardViewer() {
           finStars: finStarsEarned || 0,
           userAnswer: userAnswer || null,
         });
+        if (isPostHogEnabled) {
+          try {
+            posthog.capture("lesson_card_completed", {
+              course_slug: bundle?.course_slug,
+              module_order_index: activeCard.module_order_index,
+              card_template: activeCard.card_template,
+            });
+          } catch {
+            // Analytics must not interrupt progress saving.
+          }
+        }
         if (res?.first_in_course) trackCourseStart(res.course_slug);
       } catch (err) {
         if (retries > 0) {

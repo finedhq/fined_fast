@@ -11,6 +11,7 @@ import { useUserProfile } from "../../context/UserProfileContext";
 import { getCourses } from "../../services/api";
 import finedMark from "../../assets/fined-mark.png";
 import stockMarketBanner from "../../assets/basics-of-stock-market-banner.jpeg";
+import posthog, { isPostHogEnabled, posthogLogger } from "../../lib/posthog";
 import "./OnboardingPage.css";
 
 // Values must match the Edit Profile modal's lists
@@ -116,6 +117,22 @@ function OnboardingWizard({ profile, saveProfile }) {
         financial_level: level,
         learning_interests: interests,
         onboarding_completed: true,
+      }).then((result) => {
+        if (isPostHogEnabled) {
+          try {
+            posthog.capture("onboarding_completed", {
+              interest_count: interests.length,
+              optional_onboarding: isOptional,
+            });
+            posthogLogger.info("onboarding profile saved", {
+              interest_count: interests.length,
+              optional_onboarding: isOptional,
+            });
+          } catch {
+            // Analytics must not interrupt profile saving.
+          }
+        }
+        return result;
       }).finally(() => setSaving(false));
     }
     return saveRef.current;
