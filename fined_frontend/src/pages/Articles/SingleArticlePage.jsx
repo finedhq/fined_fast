@@ -4,6 +4,7 @@ import ArticleReader from "../../components/ArticleReader";
 import { fetchArticleBySlug, fetchAdjacentArticles, getCachedArticle, prefetchArticle } from "../../services/api";
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
 import NotFoundPage from "../NotFound/NotFoundPage";
+import { ArticleReadBonus } from "../WinterArc/CrossSell";
 
 function isEtfDemo(slug) {
   return slug === "understanding-etfs-exchange-traded-funds" || slug === "etf-101-guide";
@@ -115,6 +116,7 @@ function SingleArticlePage() {
         onClose={closeArticle}
         footer={
           <div className="ap-reader-footer">
+            <ArticleReadBonus key={slug} slug={slug} />
             <button
               className={`ap-nav-btn ${adjacent.previous ? "active" : ""}`}
               onClick={() => {

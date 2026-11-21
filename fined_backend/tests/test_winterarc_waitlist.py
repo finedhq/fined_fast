@@ -121,3 +121,21 @@ def test_gmail_variants_count_as_one_person(db):
     again = join(email="ab+winterarc@gmail.com")
     assert again == {"referral_code": first["referral_code"], "already_joined": True}
     assert db.rows[0]["email_canonical"] == "ab@gmail.com" and len(db.rows) == 1
+
+
+def test_newsletter_tick_box_subscribes_only_when_ticked(db, monkeypatch):
+    subscribed = []
+    monkeypatch.setattr(wa, "_subscribe", subscribed.append)
+    join(email="a@x.com")
+    assert subscribed == []
+    join(email="b@x.com", newsletter=True)
+    assert subscribed == ["b@x.com"]
+    # Already joined and ticking it now: still subscribed
+    join(email="a@x.com", newsletter=True)
+    assert subscribed == ["b@x.com", "a@x.com"]
+
+
+def test_newsletter_failure_never_stops_the_join(db):
+    # The fake has no upsert, so the subscribe fails; the join still works
+    res = join(email="c@x.com", newsletter=True)
+    assert res["already_joined"] is False

@@ -471,3 +471,52 @@ def test_shared_content_is_cached_but_membership_waits_until_found(db, monkeypat
     assert status_of(lambda: run(wd.open_day(1, STRANGER))) == 403
     db.tables["winterarc_waitlist"].append({"id": "w2", "email": "new@x.com"})
     assert run(wd.open_day(1, STRANGER))["day"] == 1
+
+
+# --- Content bonus (article / course module) ---------------------------------
+
+def bonus(kind, ref, user=MEMBER):
+    return run(wd.content_bonus(wd.BonusRequest(kind=kind, ref=ref), user))
+
+
+@pytest.fixture
+def content(db):
+    db.tables["articles"] = [{"id": "a1", "slug": "read-me", "status": "published"},
+                             {"id": "a2", "slug": "draft-one", "status": "draft"}]
+    db.tables["modules"].append({"id": "cm1", "course_id": "other-course", "order_index": 1, "status": "published"})
+    return db
+
+
+def test_bonus_once_per_day_for_members(content, monkeypatch):
+    at(monkeypatch, ist(2, 10))
+    assert bonus("article", "read-me") == {"awarded": True, "points": R.CONTENT_BONUS, "day": 2}
+    assert bonus("module", "cm1")["awarded"] is False          # one a day
+    at(monkeypatch, ist(3, 9))
+    assert bonus("module", "cm1")["awarded"] is True           # a new day
+    rows = [p for p in content.tables["winterarc_points"] if p["kind"] == "content_bonus"]
+    assert [(p["ref"], p["points"], p["day_no"]) for p in rows] == [("content:2", 3, 2), ("content:3", 3, 3)]
+
+
+def test_bonus_counts_in_the_hub_total(content, monkeypatch):
+    at(monkeypatch, ist(2, 10))
+    bonus("article", "read-me")
+    me = run(wd.my_challenge(MEMBER))
+    assert me["total_points"] == R.CONTENT_BONUS
+
+
+def test_bonus_refused_quietly(content, monkeypatch):
+    at(monkeypatch, ist(2, 10))
+    assert bonus("article", "read-me", user=STRANGER) == {"awarded": False}   # not on WinterArc
+    assert bonus("article", "draft-one")["awarded"] is False                  # not published
+    assert bonus("article", "nope")["awarded"] is False
+    assert bonus("module", "m2")["awarded"] is False                          # a WinterArc day itself
+    at(monkeypatch, ist(1) - timedelta(minutes=1))
+    assert bonus("article", "read-me")["awarded"] is False                    # before Day 1
+    at(monkeypatch, ist(30) + timedelta(days=1))
+    assert bonus("article", "read-me")["awarded"] is False                    # after Day 30
+    assert not [p for p in content.tables.get("winterarc_points", []) if p["kind"] == "content_bonus"]
+
+
+def test_bonus_kind_is_checked():
+    with pytest.raises(Exception):
+        wd.BonusRequest(kind="video", ref="x")

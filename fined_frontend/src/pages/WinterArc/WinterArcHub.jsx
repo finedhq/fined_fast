@@ -16,6 +16,8 @@ import ContestCard from "./ContestCard";
 import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 import { Countdown } from "./WinterArcSignup";
+import { ShareCard } from "./CrossSell";
+import { hideShare, shareHidden, shareMilestone } from "./crossSellUtils";
 
 const SITE = "https://myfined.com";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -269,6 +271,7 @@ function Hub() {
   const [error, setError] = useState("");
   const [resetMsg, setResetMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [, setHiddenTick] = useState(0);
 
   const load = useCallback(() => getWinterArcMe().then(setData).catch((e) => setError(e.message || "Couldn't load WinterArc.")), []);
   useEffect(() => {
@@ -298,6 +301,10 @@ function Hub() {
   const now = new Date(data.now); // the server's clock, so "today" and the hub agree
   const today = data.days.find((d) => d.day === data.today);
   const first = (user?.given_name || user?.name || "").split(" ")[0];
+  // Share card: the latest streak milestone (7/14/21) or the finish, until hidden
+  const finished = data.days.find((d) => d.day === W.totalDays)?.status === "done";
+  const milestone = shareMilestone(data.streak.best, finished);
+  const showShare = milestone && !shareHidden(milestone);
 
   return (
     <div className="wa wa-doc-page wa-app">
@@ -320,6 +327,18 @@ function Hub() {
             <Month days={data.days} weekPoints={data.week_points} today={data.today} />
           </div>
           <aside className="wa-app-side">
+            {showShare && (
+              <ShareCard
+                milestone={milestone}
+                points={data.total_points}
+                name={first}
+                code={data.referrals?.code}
+                onClose={() => {
+                  hideShare(milestone);
+                  setHiddenTick((t) => t + 1);
+                }}
+              />
+            )}
             <Streak streak={data.streak} />
             <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
             <Invite r={data.referrals} />

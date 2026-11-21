@@ -7,7 +7,8 @@ import { WINTERARC as W } from "./winterarcConfig";
 import ContestCard from "./ContestCard";
 import { joinWinterArcWaitlist } from "../../services/api";
 import { getAttribution } from "../../utils/attribution";
-import { trackEvent } from "../../utils/analytics";
+import { trackCrossSell, trackEvent } from "../../utils/analytics";
+import { CROSS_SELL, isBeforeStart } from "./winterarcConfig";
 import { forgetJoined, joinedCode, markJoined } from "./winterarcVisitor";
 import { refreshWinterArcStatus } from "./useWinterArcStatus";
 
@@ -79,6 +80,18 @@ function ThankYou({ code, already, remembered, onNotYou }) {
       <Link className="wa-btn wa-btn-primary" to="/winterarc/challenge">
         Go to your hub <PiArrowRightBold aria-hidden="true" />
       </Link>
+      {isBeforeStart() && (
+        <p className="wa-small wa-thanks-headstart">
+          Want a head start?{" "}
+          <Link
+            to={CROSS_SELL.headStart.module.href}
+            onClick={() => trackCrossSell("winterarc_headstart_thanks", CROSS_SELL.headStart.module.href)}
+          >
+            Start Module 1 now
+          </Link>{" "}
+          so you're ahead on Day 1.
+        </p>
+      )}
       {W.show.referrals && (
         <>
           <ContestCard />
@@ -119,7 +132,7 @@ export default function SignupForm() {
   // The referral code box starts with the code from a friend's link, if any
   const [linkCode] = useState(() => cleanCode(getAttribution().ref));
   const [form, setForm] = useState(() => ({
-    name: "", email: "", college: "", heard_from: "", age_confirmed: false, consent: false, ref: linkCode,
+    name: "", email: "", college: "", heard_from: "", age_confirmed: false, consent: false, newsletter: false, ref: linkCode,
   }));
   const [refError, setRefError] = useState("");
   // A browser that already joined sees its invite link instead of the form
@@ -158,6 +171,7 @@ export default function SignupForm() {
       setState({ status: "done", error: "", code: res.referral_code, already: res.already_joined });
       markJoined(res.referral_code);
       refreshWinterArcStatus();
+      if (form.newsletter) trackEvent("newsletter_optin", { form_type: "winterarc_waitlist" });
       if (!res.already_joined) {
         const src = getAttribution();
         trackEvent("generate_lead", {
@@ -269,6 +283,10 @@ export default function SignupForm() {
           <Link to="/winterarc/rules" target="_blank">WinterArc rules</Link> and the{" "}
           <Link to="/privacy-policy" target="_blank">privacy policy</Link>.
         </span>
+      </label>
+      <label className="wa-check">
+        <input type="checkbox" checked={form.newsletter} onChange={set("newsletter")} />
+        <span>Email me a short money article each day during {W.name}. <em>Optional</em></span>
       </label>
       {state.error && <p className="wa-error" role="alert">{state.error}</p>}
       <button type="submit" className="wa-btn wa-btn-primary wa-btn-block" disabled={state.status === "sending"}>

@@ -21,6 +21,7 @@ import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
 import SignupForm, { Countdown } from "./WinterArcSignup";
+import { HeadStart } from "./CrossSell";
 import useWinterArcStatus from "./useWinterArcStatus";
 import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
 import planeImg from "../../assets/newnewplane.webp";
@@ -344,6 +345,7 @@ function Join() {
               <li key={p}><span className="wa-tick"><PiCheckBold aria-hidden="true" /></span>{p}</li>
             ))}
           </ul>
+          <HeadStart placement="landing" />
         </Reveal>
         <Reveal delay={0.1}>
           <div className="wa-form-wrap">

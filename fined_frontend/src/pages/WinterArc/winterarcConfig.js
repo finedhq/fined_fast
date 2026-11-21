@@ -126,6 +126,56 @@ export const WINTERARC = {
   },
 };
 
+// Cross-selling the course and articles (owner 2026-11-21). Links are site
+// paths; change them here and every placement follows. `src` tags each click
+// for GTM (winterarc_cross_sell event, and course_start carries it too).
+export const CROSS_SELL = {
+  bonusPoints: 3, // +3 once a day for an article or module; matches CONTENT_BONUS in winterarc_rules.py
+  course: { title: "Basics of Stock Market", href: "/courses/basics-of-stock-market" },
+  // "Get a head start" on the landing page and the You're in card
+  headStart: {
+    title: "Get a head start",
+    text: "Day 1 is on 1 Dec. Warm up now with a free module, or one of these short reads.",
+    module: { title: "Start Module 1 of Basics of Stock Market", href: "/courses/basics-of-stock-market" },
+    articles: [
+      { title: "What You Have at 25 That You Won't Have at 35", href: "/articles/what-you-have-at-25-that-you-wont-have-at-35" },
+      { title: "What Happens to Your Money When a Bank Fails?", href: "/articles/what-happens-to-your-money-when-a-bank-fails" },
+      { title: "TDS on Salary Explained: Why It's Not an Extra Tax", href: "/articles/why-your-payslip-tds-is-not-extra-tax" },
+    ],
+  },
+  // "Go deeper" after a day is finished. Only the days listed here get one.
+  goDeeper: {
+    2: { title: "What Happens to Your Money When a Bank Fails?", href: "/articles/what-happens-to-your-money-when-a-bank-fails" },
+    3: { title: "What You Have at 25 That You Won't Have at 35", href: "/articles/what-you-have-at-25-that-you-wont-have-at-35" },
+    4: { title: "Should You Always Prepay Your Loan?", href: "/articles/should-you-always-prepay-your-loan" },
+    7: { title: "Why Is the RBI Building a Digital Rupee When UPI Already Works?", href: "/articles/rbi-digital-rupee-vs-upi" },
+    8: { title: "Basics of Stock Market (course)", href: "/courses/basics-of-stock-market" },
+    10: { title: "What Do the Points in Nifty and Sensex Actually Mean?", href: "/articles/what-do-the-points-in-nifty-and-sensex-actually-mean" },
+    12: { title: "How Does a Company Actually Get Into the Nifty 50?", href: "/articles/how-nifty-50-selects-companies" },
+    16: { title: "How to Research a Company Before You Invest in Its Stock", href: "/articles/how-to-research-a-company-before-investing" },
+    17: { title: "How to Read a Company's Profit & Loss Statement", href: "/articles/how-to-read-a-profit-and-loss-statement" },
+    18: { title: "Why Is P/E Ratio Such an Important Metric for Investors?", href: "/articles/why-is-p-e-ratio-such-an-important-metric-for-investors" },
+    25: { title: "Basics of Stock Market (course)", href: "/courses/basics-of-stock-market" },
+    28: { title: "TDS on Salary Explained: Why It's Not an Extra Tax", href: "/articles/why-your-payslip-tds-is-not-extra-tax" },
+  },
+  // Day 30 finish screen
+  finale: {
+    title: "You finished WinterArc. You definitely have a finance spark.",
+    text: "Keep it going with these:",
+    links: [
+      { title: "Basics of Stock Market", note: "The full course, with a certificate at the end", href: "/courses/basics-of-stock-market" },
+      { title: "All FinEd articles", note: "Short reads on money in the news", href: "/articles" },
+    ],
+  },
+  // Share card milestones (streak lengths; 30 = finished WinterArc)
+  shareMilestones: [7, 14, 21, 30],
+};
+
+/** Before Day 1 opens. */
+export const isBeforeStart = () => Date.now() < Date.parse(WINTERARC.startsAt);
+/** After the end of Day 30. */
+export const isChallengeOver = () => Date.now() >= Date.parse(WINTERARC.startsAt) + WINTERARC.totalDays * 86400000;
+
 // The referral contest running right now, if any (checked when the page loads)
 export const CURRENT_REFERRAL_CONTEST = WINTERARC.show.referralContest
   ? WINTERARC.referralContests.find((c) => Date.now() < Date.parse(c.endsAt)) || null
