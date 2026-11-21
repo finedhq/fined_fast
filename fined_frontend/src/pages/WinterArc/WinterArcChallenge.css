@@ -441,3 +441,21 @@
   .nc-root .wa-day-done.is-done .wa-done-points { animation: none; }
   .wa-chip > a:hover { transform: none; }
 }
+
+/* One-time "You're in" note, right after joining (WinterArcHub Welcome) */
+.wa-welcome {
+  position: relative; margin-top: 22px; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start;
+  padding: 18px 52px 18px 18px; border-radius: 18px; background: var(--wa-white);
+  border: 2px solid var(--wa-ink); box-shadow: 4px 4px 0 0 var(--wa-ink);
+}
+.wa-welcome-tick {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--wa-amber); color: var(--wa-ink); font-size: 1.3rem; border: 2px solid var(--wa-ink);
+}
+.wa .wa-welcome h2 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.wa-welcome p { margin-top: 4px !important; color: var(--wa-ink-3); line-height: 1.5; }
+.wa-welcome-close {
+  position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--wa-border); background: var(--wa-white); color: var(--wa-ink-3); cursor: pointer;
+}
+.wa-welcome-close:focus-visible { outline: 3px solid var(--wa-electric); outline-offset: 2px; }

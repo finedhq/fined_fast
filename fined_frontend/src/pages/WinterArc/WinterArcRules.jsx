@@ -94,7 +94,7 @@ export default function WinterArcRules() {
                     <>
                       <li>Streak bonuses: {W.streakBonuses.map((b) => `+${b.points} at ${b.days} days`).join(", ")}.</li>
                       <li>If your streak breaks, start again: a new streak earns these bonuses again when it reaches each length.</li>
-                      <li>Reading bonus: read a FinEd article or finish a course module on any challenge day for +{CROSS_SELL.bonusPoints} points, once per day. It counts on the weekly and overall leaderboards, not the daily one.</li>
+                      <li>Reading bonus: read a FinEd article or finish a course module on any challenge day for +{CROSS_SELL.bonusPoints} points, once per day. It counts on the daily, weekly and overall leaderboards.</li>
                     </>
                   )}
                   {W.show.resets && (

@@ -35,8 +35,8 @@ STARTING_RESETS = 2
 STREAK_GRACE_HOURS = 36            # noon IST the day after a day opens
 STREAK_BONUSES = ((7, 10), (14, 20), (21, 30), (30, 40))
 # Reading an article or finishing a course module during the challenge
-# (owner 2026-11-21): +3, at most once per challenge day. Overall points only;
-# the daily ₹100 board counts that day's answers, so it is unaffected.
+# (owner 2026-11-21): +3, at most once per challenge day. Counts on every board:
+# the daily board adds it to that day's answers (view in migration 016).
 CONTENT_BONUS = 3
 
 # Leaderboard weeks, by day number (inclusive). Sunday closes each week.

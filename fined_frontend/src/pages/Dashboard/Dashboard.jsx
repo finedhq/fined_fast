@@ -382,7 +382,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="dh-setup-actions">
-                <Link to="/winterarc#join" className="dh-btn dh-setup-btn" onClick={() => trackCrossSell("dashboard_winterarc_join", "/winterarc")}>
+                <Link to="/winterarc/join" className="dh-btn dh-setup-btn" onClick={() => trackCrossSell("dashboard_winterarc_join", "/winterarc/join")}>
                   Join {WA.name}
                 </Link>
               </div>

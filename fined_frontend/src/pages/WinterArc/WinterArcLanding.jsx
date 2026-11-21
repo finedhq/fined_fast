@@ -20,8 +20,8 @@ import FrostWindow from "./FrostWindow";
 import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
-import SignupForm, { Countdown } from "./WinterArcSignup";
-import { HeadStart } from "./CrossSell";
+import { Countdown } from "./WinterArcSignup";
+import useJoinWinterArc from "./useJoinWinterArc";
 import useWinterArcStatus from "./useWinterArcStatus";
 import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
 import planeImg from "../../assets/newnewplane.webp";
@@ -77,6 +77,7 @@ function Hero() {
   const reduce = useReducedMotion();
   const { joined } = useWinterArcStatus();
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const join = useJoinWinterArc();
   const [triedSnow, setTriedSnow] = useState(false);
   const heroRef = useRef(null);
   const rise = (delay) => ({
@@ -123,7 +124,7 @@ function Hero() {
                 Go to your hub <PiArrowRightBold aria-hidden="true" />
               </Link>
             ) : (
-              <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={() => scrollTo("join")}>
+              <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={join}>
                 Join WinterArc <PiArrowRightBold aria-hidden="true" />
               </button>
             )}
@@ -333,6 +334,9 @@ function Certificate() {
 }
 
 function Join() {
+  const join = useJoinWinterArc();
+  const { joined } = useWinterArcStatus();
+  const { isAuthenticated, isLoading } = useAuth0();
   const perks = ["Your own challenge hub", "Your own invite link for friends", "Free to enter, always"];
   return (
     <section className="wa-section wa-section-join" id="join">
@@ -345,11 +349,22 @@ function Join() {
               <li key={p}><span className="wa-tick"><PiCheckBold aria-hidden="true" /></span>{p}</li>
             ))}
           </ul>
-          <HeadStart placement="landing" />
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="wa-form-wrap">
-            <SignupForm />
+          {/* The form has its own page (/winterarc/join): sign up -> form -> hub */}
+          <div className="wa-form wa-join-cta">
+            <h3>{joined ? "You're in" : "Takes a minute"}</h3>
+            <p>
+              {joined
+                ? "Your hub has your streak, your invite link and each day's task."
+                : isAuthenticated
+                ? "Fill in a few details and you're in."
+                : "Make your free FinEd account, fill in a few details, and you're in."}
+            </p>
+            <button type="button" className="wa-btn wa-btn-primary wa-btn-block" disabled={isLoading} onClick={join}>
+              {joined ? "Go to your hub" : "Join WinterArc"} <PiArrowRightBold aria-hidden="true" />
+            </button>
+            <p className="wa-small wa-center">Entry is always free. No payment is needed to take part or to win.</p>
           </div>
         </Reveal>
       </div>
@@ -409,7 +424,7 @@ function Faqs() {
 export default function WinterArcLanding() {
   useEffect(() => {
     document.title = `${W.name}: ${W.tagline} | FinEd`;
-    // Coming back from sign-in (or a "Join" link) lands on /winterarc#join: go there
+    // A link with a #section (e.g. old /winterarc#join links): scroll to it
     const id = window.location.hash.slice(1);
     if (!id) return undefined;
     const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: "start" }), 300);

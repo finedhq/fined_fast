@@ -132,17 +132,6 @@ export const WINTERARC = {
 export const CROSS_SELL = {
   bonusPoints: 3, // +3 once a day for an article or module; matches CONTENT_BONUS in winterarc_rules.py
   course: { title: "Basics of Stock Market", href: "/courses/basics-of-stock-market" },
-  // "Get a head start" on the landing page and the You're in card
-  headStart: {
-    title: "Get a head start",
-    text: "Day 1 is on 1 Dec. Warm up now with a free module, or one of these short reads.",
-    module: { title: "Start Module 1 of Basics of Stock Market", href: "/courses/basics-of-stock-market" },
-    articles: [
-      { title: "What You Have at 25 That You Won't Have at 35", href: "/articles/what-you-have-at-25-that-you-wont-have-at-35" },
-      { title: "What Happens to Your Money When a Bank Fails?", href: "/articles/what-happens-to-your-money-when-a-bank-fails" },
-      { title: "TDS on Salary Explained: Why It's Not an Extra Tax", href: "/articles/why-your-payslip-tds-is-not-extra-tax" },
-    ],
-  },
   // "Go deeper" after a day is finished. Only the days listed here get one.
   goDeeper: {
     2: { title: "What Happens to Your Money When a Bank Fails?", href: "/articles/what-happens-to-your-money-when-a-bank-fails" },

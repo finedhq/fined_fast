@@ -1,5 +1,4 @@
 // Cross-selling the FinEd course and articles from WinterArc (owner 2026-11-21):
-//   HeadStart     landing page + You're in card: a module and 3 warm-up reads
 //   GoDeeper      after a day is finished, on the days listed in CROSS_SELL.goDeeper
 //   FinaleNext    Day 30 finish: "you definitely have a finance spark" + courses
 //   ShareCard     a shareable image at 7/14/21-day streaks and at the finish
@@ -10,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { PiArrowRightBold, PiBookOpenTextBold, PiDownloadSimpleBold, PiShareNetworkBold, PiSparkleBold, PiWhatsappLogoBold, PiXBold } from "react-icons/pi";
-import { CROSS_SELL as X, WINTERARC as W, isBeforeStart } from "./winterarcConfig";
+import { CROSS_SELL as X, WINTERARC as W } from "./winterarcConfig";
 import { useContentBonus } from "./crossSellUtils";
 import { trackCrossSell, trackEvent } from "../../utils/analytics";
 import "./CrossSell.css";
@@ -22,32 +21,6 @@ function TrackedLink({ to, source, className, children }) {
     <Link to={to} className={className} onClick={() => trackCrossSell(source, to)}>
       {children}
     </Link>
-  );
-}
-
-export function HeadStart({ placement = "landing" }) {
-  // Only before Day 1: once the challenge is on, the days are the head start
-  if (!isBeforeStart()) return null;
-  const hs = X.headStart;
-  const source = `winterarc_headstart_${placement}`;
-  return (
-    <section className={`wax wax-head wax-head-${placement}`} aria-labelledby={`wax-head-${placement}`}>
-      <p className="wax-kicker"><PiSparkleBold aria-hidden="true" /> While you wait</p>
-      <h3 id={`wax-head-${placement}`}>{hs.title}</h3>
-      <p className="wax-text">{hs.text}</p>
-      <TrackedLink to={hs.module.href} source={source} className="wax-btn">
-        {hs.module.title} <PiArrowRightBold aria-hidden="true" />
-      </TrackedLink>
-      <ul className="wax-list">
-        {hs.articles.map((a) => (
-          <li key={a.href}>
-            <TrackedLink to={a.href} source={source} className="wax-row">
-              <PiBookOpenTextBold aria-hidden="true" /> <span>{a.title}</span>
-            </TrackedLink>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 

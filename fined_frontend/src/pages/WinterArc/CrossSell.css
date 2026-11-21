@@ -41,7 +41,6 @@
 .wax-btn-wa:hover { background: #3BE07A; }
 .wax :focus-visible { outline: 3px solid var(--x-electric); outline-offset: 3px; }
 
-.wax-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
 .wax-row {
   display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
   background: var(--x-surface); border: 1px solid var(--x-border); color: var(--x-ink); text-decoration: none;
@@ -52,12 +51,6 @@
 .wax-row span { flex: 1; min-width: 0; }
 .wax-row-strong { background: var(--x-white); }
 .wax-row-go { margin-left: auto; }
-
-/* Head start */
-.wax-head { background: var(--x-white); border: 1px solid var(--x-border); border-radius: 20px; padding: 22px; }
-.wax-head-landing { max-width: 640px; margin: 28px auto 0; box-shadow: 0 24px 60px -24px rgba(65, 0, 188, 0.28); }
-.wax-head-thanks { margin-top: 18px; padding: 18px; }
-.wax-head-thanks h3 { font-size: 1.1rem; }
 
 /* Go deeper (inside the day's end card) */
 .wax-deeper { margin-top: 16px; }
@@ -100,10 +93,9 @@
 .wax-dash-join .dh-wa-tag { margin: 0; }
 
 @media (max-width: 560px) {
-  .wax-head, .wax-share { padding: 16px; }
+  .wax-share { padding: 16px; }
   .wax-toast { border-radius: 16px; bottom: 16px; }
 }
 
 /* Small bits on existing WinterArc pages */
-.wa-thanks-headstart a { color: #4100BC; font-weight: 800; }
 .wa-check em { font-style: normal; color: #8E8A95; }
