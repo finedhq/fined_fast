@@ -2,7 +2,7 @@
 // referral values may still change; the final rules are published on 27 Nov.
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { WINTERARC as W } from "./winterarcConfig";
+import { CROSS_SELL, WINTERARC as W } from "./winterarcConfig";
 import "./WinterArcLanding.css";
 
 const SECTIONS = [
@@ -94,6 +94,7 @@ export default function WinterArcRules() {
                     <>
                       <li>Streak bonuses: {W.streakBonuses.map((b) => `+${b.points} at ${b.days} days`).join(", ")}.</li>
                       <li>If your streak breaks, start again: a new streak earns these bonuses again when it reaches each length.</li>
+                      <li>Reading bonus: read a FinEd article or finish a course module on any challenge day for +{CROSS_SELL.bonusPoints} points, once per day. It counts on the daily, weekly and overall leaderboards.</li>
                     </>
                   )}
                   {W.show.resets && (

@@ -20,7 +20,8 @@ import FrostWindow from "./FrostWindow";
 import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
-import SignupForm, { Countdown } from "./WinterArcSignup";
+import { Countdown } from "./WinterArcSignup";
+import useJoinWinterArc from "./useJoinWinterArc";
 import useWinterArcStatus from "./useWinterArcStatus";
 import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
 import planeImg from "../../assets/newnewplane.webp";
@@ -76,6 +77,7 @@ function Hero() {
   const reduce = useReducedMotion();
   const { joined } = useWinterArcStatus();
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+  const join = useJoinWinterArc();
   const [triedSnow, setTriedSnow] = useState(false);
   const heroRef = useRef(null);
   const rise = (delay) => ({
@@ -122,7 +124,7 @@ function Hero() {
                 Go to your hub <PiArrowRightBold aria-hidden="true" />
               </Link>
             ) : (
-              <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={() => scrollTo("join")}>
+              <button type="button" className="wa-btn wa-btn-primary" data-snow-ledge="11" onClick={join}>
                 Join WinterArc <PiArrowRightBold aria-hidden="true" />
               </button>
             )}
@@ -332,6 +334,9 @@ function Certificate() {
 }
 
 function Join() {
+  const join = useJoinWinterArc();
+  const { joined } = useWinterArcStatus();
+  const { isAuthenticated, isLoading } = useAuth0();
   const perks = ["Your own challenge hub", "Your own invite link for friends", "Free to enter, always"];
   return (
     <section className="wa-section wa-section-join" id="join">
@@ -346,8 +351,20 @@ function Join() {
           </ul>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="wa-form-wrap">
-            <SignupForm />
+          {/* The form has its own page (/winterarc/join): sign up -> form -> hub */}
+          <div className="wa-form wa-join-cta">
+            <h3>{joined ? "You're in" : "Takes a minute"}</h3>
+            <p>
+              {joined
+                ? "Your hub has your streak, your invite link and each day's task."
+                : isAuthenticated
+                ? "Fill in a few details and you're in."
+                : "Make your free FinEd account, fill in a few details, and you're in."}
+            </p>
+            <button type="button" className="wa-btn wa-btn-primary wa-btn-block" disabled={isLoading} onClick={join}>
+              {joined ? "Go to your hub" : "Join WinterArc"} <PiArrowRightBold aria-hidden="true" />
+            </button>
+            <p className="wa-small wa-center">Entry is always free. No payment is needed to take part or to win.</p>
           </div>
         </Reveal>
       </div>
@@ -371,7 +388,11 @@ function Faqs() {
         <Reveal className="wa-head">
           <h2>Questions</h2>
         </Reveal>
-        <Faq q="Does it cost anything?">No. Entry is free and you can win without paying anything.</Faq>
+        <Faq q="Does it cost anything?">
+          No. Entry is free and you can win without paying anything.
+          {W.show.certificatePrice &&
+            ` The only paid extra is the optional completion certificate (${W.certificatePrice}), which you can choose once you've finished.`}
+        </Faq>
         <Faq q="How long does a day take?">A few minutes: one short read and {W.questionsPerDay} questions.</Faq>
         <Faq q="What if I miss a day?">
           You can still do it later and earn points, within the late window in the full rules.
@@ -391,6 +412,7 @@ function Faqs() {
             If you complete at least {W.certificateMinDays} of the {W.totalDays} days, you can get a completion
             certificate after the challenge ends. It records that you finished WinterArc; it is not an accredited
             qualification, and getting one does not change your score, rank or prizes.
+            {W.show.certificatePrice && ` It's optional and costs ${W.certificatePrice}, paid only after the challenge ends.`}
           </Faq>
         )}
         <Faq q="Is this investment advice?">No. WinterArc teaches how money works. It does not tell you what to buy or sell.</Faq>
@@ -402,7 +424,7 @@ function Faqs() {
 export default function WinterArcLanding() {
   useEffect(() => {
     document.title = `${W.name}: ${W.tagline} | FinEd`;
-    // Coming back from sign-in (or a "Join" link) lands on /winterarc#join: go there
+    // A link with a #section (e.g. old /winterarc#join links): scroll to it
     const id = window.location.hash.slice(1);
     if (!id) return undefined;
     const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ block: "start" }), 300);

@@ -484,6 +484,47 @@ async def tick_action(day: int, body: ActionRequest, user: AuthUser = Depends(ge
     return {"ok": True, "done": body.done}
 
 
+class BonusRequest(BaseModel):
+    kind: str = Field(pattern="^(article|module)$")
+    ref: str = Field(min_length=1, max_length=120)
+
+
+def _content_exists(kind: str, ref: str) -> bool:
+    """A published article (by slug), or a module of a course other than the
+    WinterArc one (by id)."""
+    if kind == "article":
+        res = supabase.from_("articles").select("id").eq("slug", ref).eq("status", "published").limit(1).execute()
+        return bool(res and res.data)
+    course = _course()
+    res = supabase.from_("modules").select("id, course_id").eq("id", ref).limit(1).execute()
+    row = res.data[0] if res and res.data else None
+    return bool(row) and (not course or row.get("course_id") != course["id"])
+
+
+@router.post("/bonus")
+async def content_bonus(body: BonusRequest, user: AuthUser = Depends(get_current_user)):
+    """+R.CONTENT_BONUS for reading an article or finishing a course module,
+    once per challenge day (the `ref` content:<day> is unique per person).
+    The site calls this quietly; anyone not on WinterArc, or outside 1-30 Dec,
+    just gets awarded: false."""
+    email = _email(user)
+    now = _now()
+    day = R.challenge_day(now)
+    if not day or not await asyncio.to_thread(_joined, email):
+        return {"awarded": False}
+    if not await asyncio.to_thread(_content_exists, body.kind, body.ref):
+        return {"awarded": False}
+    try:
+        await asyncio.to_thread(lambda: supabase.from_(POINTS).insert([{
+            "email": email, "kind": "content_bonus", "ref": f"content:{day}", "points": R.CONTENT_BONUS,
+            "week_no": R.week_at(now), "day_no": day, "reason": f"{body.kind}:{body.ref}",
+            "created_by": "winterarc", "created_at": now.isoformat(),
+        }]).execute())
+    except Exception:
+        return {"awarded": False, "already": True}  # today's bonus already earned
+    return {"awarded": True, "points": R.CONTENT_BONUS, "day": day}
+
+
 def _get_row(email: str, card_id: str) -> Optional[dict]:
     res = supabase.from_(ANSWERS).select("*").eq("email", email).eq("card_id", card_id).limit(1).execute()
     return res.data[0] if res and res.data else None

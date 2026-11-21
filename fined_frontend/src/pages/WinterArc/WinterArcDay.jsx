@@ -6,7 +6,8 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react
 import { Link, useParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { WINTERARC as W } from "./winterarcConfig";
-import { answerWinterArcQuestion, getWinterArcDay, tickWinterArcAction } from "../../services/api";
+import { answerWinterArcQuestion, getWinterArcDay, getWinterArcMe, tickWinterArcAction } from "../../services/api";
+import { FinaleNext, GoDeeper, ShareCard } from "./CrossSell";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 
 const ScrollyModulePage = lazy(() => import("../../components/scrolly/ScrollyModulePage"));
@@ -49,6 +50,30 @@ function DayAction({ day, action, onChange }) {
   );
 }
 
+// Day 30 finished: the finale message, courses to go on with, and the share
+// card with the person's total (read from the hub once the day is done).
+function FinaleEnd() {
+  const { user } = useAuth0();
+  const [me, setMe] = useState(null);
+  useEffect(() => {
+    getWinterArcMe().then(setMe).catch(() => {});
+  }, []);
+  const first = (user?.given_name || user?.name || "").split(" ")[0];
+  return (
+    <>
+      <FinaleNext />
+      {me?.joined && (
+        <div className="wa-finale-share">
+          <ShareCard milestone={W.totalDays} points={me.total_points} name={first} code={me.referrals?.code} />
+        </div>
+      )}
+    </>
+  );
+}
+
+// After a finished day: Day 30's finale, or the day's "go deeper" link
+const AfterDay = ({ day }) => (day >= W.totalDays ? <FinaleEnd /> : <GoDeeper day={day} />);
+
 // The end of a day: points earned and what's next once every question is
 // finished; question pips until then. The optional action sits in between.
 // `inside`: drawn inside the completion card (a day with one), which already
@@ -86,6 +111,7 @@ function DayDone({ day, opensAt, questions, action, onAction, inside = false }) 
           </div>
         )}
         {action && <DayAction day={day} action={action} onChange={onAction} />}
+        {done && <AfterDay day={day} />}
         {links}
       </div>
     );
@@ -112,6 +138,7 @@ function DayDone({ day, opensAt, questions, action, onAction, inside = false }) 
           </>
         )}
         {action && <DayAction day={day} action={action} onChange={onAction} />}
+        {done && <AfterDay day={day} />}
         <div className="wa-done-actions">
           <Link className="wa-day-done-btn" to="/winterarc/challenge">Back to {W.name}</Link>
           <Link className="wa-done-link" to="/winterarc/leaderboard">See the leaderboard</Link>

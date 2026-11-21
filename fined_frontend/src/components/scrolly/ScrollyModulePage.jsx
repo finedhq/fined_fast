@@ -37,6 +37,8 @@ import { retakeTest } from "../../services/api";
 import { scrollToElement } from "./scroll";
 import { TOOLS } from "./tools/registry";
 import useReelsLayout from "./useReelsLayout";
+import { BonusToast } from "../../pages/WinterArc/CrossSell";
+import { useContentBonus } from "../../pages/WinterArc/crossSellUtils";
 import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
@@ -87,6 +89,11 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
   const reachedNow = useMemo(() => (heroSlug && !reached[heroSlug] ? { ...reached, [heroSlug]: true } : reached), [reached, heroSlug]);
   const saved = useSaveProgress({ cards, page, reached: reachedNow, email, enabled: !preview && !challenge });
   const stars = challenge ? challenge.points : earnedStars(saved, page);
+  // WinterArc +3 daily bonus for finishing a course module (not a WinterArc
+  // day, a preview or a visitor's try): claimed once the completion is reached
+  const completionSlug = cards.find((c) => c.card_template === "completion")?.slug;
+  const moduleFinished = !!completionSlug && !!reached[completionSlug];
+  const bonusAwarded = useContentBonus("module", moduleId, moduleFinished, !preview && !onSignup && !challenge && !!email);
   const open = openParts(saved, page);
   const test = testScore(saved, page);
 
@@ -296,6 +303,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
         {cards.map(part)}
         {challenge && !cards.some((c) => c.card_template === "completion") && challenge.done}
       </main>
+      <BonusToast show={bonusAwarded} />
       <GlossaryTooltip scopeRef={rootRef} />
       {tour?.reels === reels && <ModuleTour rootRef={rootRef} reels={reels} steps={tour.steps} onClose={() => setTour(null)} />}
     </div>
