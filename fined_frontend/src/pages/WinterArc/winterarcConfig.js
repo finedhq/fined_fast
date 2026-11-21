@@ -48,7 +48,7 @@ export const WINTERARC = {
   certificateMinDays: 21,
   // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
   // hidden (show.certificatePrice) until that is confirmed.
-  certificatePrice: "₹149",
+  certificatePrice: "₹199",
 
   // Prize pool and its split (DECIDED 2026-11-15). The parts add up to the pool.
   prizePool: "₹10,000",
@@ -122,7 +122,7 @@ export const WINTERARC = {
     resets: true,
     referrals: true,
     certificate: true,
-    certificatePrice: false,
+    certificatePrice: true,
   },
 };
 

@@ -371,7 +371,11 @@ function Faqs() {
         <Reveal className="wa-head">
           <h2>Questions</h2>
         </Reveal>
-        <Faq q="Does it cost anything?">No. Entry is free and you can win without paying anything.</Faq>
+        <Faq q="Does it cost anything?">
+          No. Entry is free and you can win without paying anything.
+          {W.show.certificatePrice &&
+            ` The only paid extra is the optional completion certificate (${W.certificatePrice}), which you can choose once you've finished.`}
+        </Faq>
         <Faq q="How long does a day take?">A few minutes: one short read and {W.questionsPerDay} questions.</Faq>
         <Faq q="What if I miss a day?">
           You can still do it later and earn points, within the late window in the full rules.
@@ -391,6 +395,7 @@ function Faqs() {
             If you complete at least {W.certificateMinDays} of the {W.totalDays} days, you can get a completion
             certificate after the challenge ends. It records that you finished WinterArc; it is not an accredited
             qualification, and getting one does not change your score, rank or prizes.
+            {W.show.certificatePrice && ` It's optional and costs ${W.certificatePrice}, paid only after the challenge ends.`}
           </Faq>
         )}
         <Faq q="Is this investment advice?">No. WinterArc teaches how money works. It does not tell you what to buy or sell.</Faq>
