@@ -11,7 +11,8 @@ import { useUserProfile } from "../../context/UserProfileContext";
 import CommunityBanner from "../../components/Community/CommunityBanner";
 import WinterArcPopup from "../WinterArc/WinterArcPopup";
 import useWinterArcStatus from "../WinterArc/useWinterArcStatus";
-import { WINTERARC as WA } from "../WinterArc/winterarcConfig";
+import { WINTERARC as WA, isBeforeStart, isChallengeOver } from "../WinterArc/winterarcConfig";
+import { trackCrossSell } from "../../utils/analytics";
 import {
   PiArrowRightBold,
   PiBookOpenTextBold,
@@ -360,6 +361,29 @@ const Dashboard = () => {
               <div className="dh-setup-actions">
                 <Link to={winterArc.today && !winterArc.today_done ? `/winterarc/day/${winterArc.today}` : "/winterarc/challenge"} className="dh-btn dh-setup-btn">
                   {winterArc.today && !winterArc.today_done ? `Start Day ${winterArc.today}` : "Open your hub"}
+                </Link>
+              </div>
+            </section>
+          )}
+
+          {/* Not on WinterArc yet: a small join card until the challenge ends */}
+          {winterArc.checked && !winterArc.joined && !isChallengeOver() && (
+            <section className="dh-panel dh-setup dh-wa wax-dash-join" aria-labelledby="dh-wa-join-title">
+              <PiSnowflakeBold className="dh-wa-flake" aria-hidden="true" />
+              <div className="dh-wa-body">
+                <p className="dh-wa-tag">
+                  <PiSnowflakeBold aria-hidden="true" /> {WA.name} · 30 Days of Money
+                </p>
+                <h2 id="dh-wa-join-title" className="dh-setup-title">
+                  {isBeforeStart() ? `${WA.name} starts ${WA.startDate}` : `${WA.name} is on. Join any day`}
+                </h2>
+                <p className="dh-setup-sub">
+                  One short money task a day, {WA.startDate} to {WA.endDate}. Free to join, with {WA.prizePool} in prizes.
+                </p>
+              </div>
+              <div className="dh-setup-actions">
+                <Link to="/winterarc/join" className="dh-btn dh-setup-btn" onClick={() => trackCrossSell("dashboard_winterarc_join", "/winterarc/join")}>
+                  Join {WA.name}
                 </Link>
               </div>
             </section>

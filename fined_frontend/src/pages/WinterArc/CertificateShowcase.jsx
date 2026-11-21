@@ -10,7 +10,7 @@ export default function CertificateShowcase() {
   const [name, setName] = useState("");
 
   const when = W.show.certificatePrice
-    ? `On sale for ${W.certificatePrice} once the challenge ends on ${W.endDate}.`
+    ? `Optional, ${W.certificatePrice}. You only decide after the challenge ends on ${W.endDate}, never before you start.`
     : `Available once the challenge ends on ${W.endDate}.`;
 
   const facts = [

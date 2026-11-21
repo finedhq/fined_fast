@@ -615,3 +615,103 @@
 /* Prize ticket in the hero (component: PrizeTicket.jsx) */
 .wa-hero-ticket { margin-top: 20px; }
 .wa-hero-ticket .pt-ticket { --ticket-notch: var(--wa-sky); }
+
+/* ---------- Join page (/winterarc/join) and the landing's join card ---------- */
+.wa-join-page {
+  position: relative; min-height: 100vh; padding: 104px 0 96px;
+  background: linear-gradient(180deg, var(--wa-ice) 0, var(--wa-purple-surface) 55%, var(--wa-bg) 100%);
+}
+/* The landing hero's hills, faint, along the bottom */
+.wa-join-scene { position: absolute; left: 0; right: 0; bottom: 0; height: 360px; pointer-events: none; opacity: 0.55; }
+.wa-join-scene img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center bottom; transform: scaleX(-1);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 60%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 60%);
+}
+.wa-join-wrap { position: relative; z-index: 1; }
+.wa-join-back {
+  display: flex; width: fit-content; align-items: center; gap: 6px; margin-bottom: 18px;
+  font-family: var(--wa-action); font-weight: 800; font-size: 0.9rem; color: var(--wa-ink-3); text-decoration: none;
+}
+.wa-join-back:hover { color: var(--wa-purple); }
+
+/* 3-step tracker */
+.wa-steps-bar {
+  list-style: none; margin: 0 0 28px; padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  background: var(--wa-white); border: 1px solid var(--wa-purple-border); border-radius: 9999px;
+  box-shadow: 0 10px 30px -18px rgba(65, 0, 188, 0.35);
+}
+.wa-steps-bar li {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0;
+  padding: 8px 10px; border-radius: 9999px; font-family: var(--wa-action); font-weight: 800; font-size: 0.86rem; color: var(--wa-muted);
+}
+.wa-steps-dot {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 0.82rem;
+  background: var(--wa-sky); border: 1.5px solid var(--wa-border); color: var(--wa-muted);
+}
+.wa-steps-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wa-steps-bar li.is-done { color: var(--wa-green); }
+.wa-steps-bar li.is-done .wa-steps-dot { background: var(--wa-green-tint); border-color: #A7F3D0; color: var(--wa-green); }
+.wa-steps-bar li.is-now { background: var(--wa-purple); color: var(--wa-white); }
+.wa-steps-bar li.is-now .wa-steps-dot { background: var(--wa-amber); border-color: var(--wa-ink); color: var(--wa-ink); }
+
+.wa-join-grid { display: grid; gap: 28px; align-items: start; }
+.wa-join-side h1 { font-size: clamp(2rem, 6vw, 3.1rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.08; max-width: 13ch; }
+.wa-join-hl { color: var(--wa-purple); background: linear-gradient(180deg, transparent 62%, rgba(255, 182, 0, 0.5) 62%); padding: 0 2px; }
+.wa-join-ticket {
+  margin-top: 24px; padding: 20px 22px; border-radius: 20px; background: var(--wa-white);
+  border: 2px solid var(--wa-ink); box-shadow: 5px 5px 0 0 var(--wa-ink);
+}
+.wa-join-ticket-label { font-family: var(--wa-action); font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wa-purple); }
+.wa-join-perks { list-style: none; margin: 16px 0 0; padding: 16px 0 0; border-top: 1px dashed var(--wa-border); display: grid; gap: 12px; }
+.wa-join-perks li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: center; color: var(--wa-ink-2); line-height: 1.4; font-weight: 600; }
+.wa-join-perk-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--wa-purple-surface); color: var(--wa-purple); font-size: 1.1rem; }
+
+/* The form card */
+.wa-join-card { gap: 18px; padding: 24px 20px; border-radius: 24px; }
+.wa-join-signed {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px;
+  background: var(--wa-green-tint); border: 1px solid #A7F3D0; color: #065F46; font-size: 0.92rem; line-height: 1.4;
+}
+.wa-join-signed svg { flex: none; font-size: 1.3rem; color: var(--wa-green); }
+.wa-join-signed strong { overflow-wrap: anywhere; }
+.wa-join-step { font-family: var(--wa-action); font-weight: 800; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wa-purple); margin-bottom: -10px !important; }
+.wa .wa-join-title { font-size: clamp(1.45rem, 3.4vw, 1.8rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+.wa-join-text { color: var(--wa-ink-3); line-height: 1.55; margin-top: -8px !important; }
+.wa-join-note { font-size: 0.9rem; color: var(--wa-ink-2); background: var(--wa-gold-tint); border: 1px solid #FDE68A; border-radius: 12px; padding: 10px 12px; }
+.wa-join-group { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 16px; }
+.wa-join-group legend {
+  padding: 0; margin-bottom: 12px; width: 100%; display: flex; align-items: center; gap: 10px;
+  font-family: var(--wa-action); font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--wa-muted);
+}
+.wa-join-group legend::after { content: ""; flex: 1; height: 1px; background: var(--wa-border); }
+.wa-join-agree { gap: 14px; padding: 16px; border-radius: 16px; background: var(--wa-purple-surface); border: 1px solid var(--wa-purple-border); }
+.wa-field input.is-locked { background: var(--wa-sky); color: var(--wa-ink-3); cursor: default; }
+.wa-field-lock { display: inline-block; vertical-align: -2px; margin-left: 4px; color: var(--wa-muted); }
+.wa-join-card .wa-btn-block { padding-top: 15px; padding-bottom: 15px; font-size: 1.02rem; }
+.wa-join-free { margin-top: -4px !important; }
+.wa-signin-first .wa-btn-block { margin-top: 4px; }
+.wa-signin-first .wa-thanks-other { margin-top: -6px; justify-self: center; }
+
+/* Landing page join card */
+.wa-join-cta { text-align: center; }
+.wa-join-cta p { color: var(--wa-ink-3); line-height: 1.55; }
+
+/* Phones: the form first (it's why you're here), the countdown card after */
+@media (max-width: 959px) {
+  .wa-join-grid .wa-form-wrap { order: -1; }
+  .wa-join-side { padding-top: 8px; }
+}
+@media (max-width: 559px) {
+  .wa-steps-bar { border-radius: 20px; padding: 8px; }
+  .wa-steps-bar li { flex-direction: column; gap: 4px; padding: 8px 4px; font-size: 0.72rem; text-align: center; border-radius: 14px; }
+  .wa-steps-label { white-space: normal; }
+}
+@media (min-width: 640px) {
+  .wa-join-card { padding: 30px 30px 26px; }
+}
+@media (min-width: 960px) {
+  .wa-join-page { padding-top: 128px; }
+  .wa-join-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 56px; }
+  .wa-join-side { position: sticky; top: 110px; }
+}

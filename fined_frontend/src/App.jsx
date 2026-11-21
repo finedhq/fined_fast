@@ -47,6 +47,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFound/NotFoundPage"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding/OnboardingPage"));
 const WinterArcLanding = lazy(() => import("./pages/WinterArc/WinterArcLanding"));
+const WinterArcJoin = lazy(() => import("./pages/WinterArc/WinterArcJoin"));
 const WinterArcRules = lazy(() => import("./pages/WinterArc/WinterArcRules"));
 const WinterArcHub = lazy(() => import("./pages/WinterArc/WinterArcHub"));
 const WinterArcDay = lazy(() => import("./pages/WinterArc/WinterArcDay"));
@@ -95,6 +96,7 @@ function App() {
 
                     <Route path="about" element={<AboutPage />} />
                     <Route path="winterarc" element={<WinterArcLanding />} />
+                    <Route path="winterarc/join" element={<WinterArcJoin />} />
                     <Route path="winterarc/rules" element={<WinterArcRules />} />
                     <Route path="winterarc/challenge" element={<WinterArcHub />} />
                     <Route path="winterarc/leaderboard" element={<WinterArcLeaderboard />} />

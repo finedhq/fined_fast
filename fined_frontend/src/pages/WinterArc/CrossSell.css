@@ -1,0 +1,101 @@
+/* WinterArc cross-sell blocks (CrossSell.jsx). Self-contained tokens, since
+   these also show on the dashboard, articles and course module pages. */
+.wax {
+  --x-purple: #4100BC;
+  --x-electric: #4A3AFF;
+  --x-surface: #F7F4FF;
+  --x-border: #DCD3F7;
+  --x-amber: #FFB600;
+  --x-amber-600: #E6A200;
+  --x-ink: #171321;
+  --x-ink-3: #625D6D;
+  --x-white: #FFFFFF;
+  --x-ice: #EEF1FF;
+  --x-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --x-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --x-action: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--x-body);
+  color: var(--x-ink);
+  text-align: left;
+}
+.wax h3 { font-family: var(--x-display); font-size: 1.25rem; font-weight: 800; margin: 6px 0 6px; line-height: 1.25; color: var(--x-ink); }
+.wax-kicker {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0;
+  font-family: var(--x-action); font-weight: 800; font-size: 0.76rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--x-purple);
+}
+.wax-text { margin: 0 0 14px; color: var(--x-ink-3); line-height: 1.5; }
+.wax-note { margin: 10px 0 0; font-size: 0.86rem; color: var(--x-ink-3); }
+
+.wax-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 20px; border-radius: 9999px; border: 2px solid var(--x-ink);
+  background: var(--x-amber); color: var(--x-ink); box-shadow: 3px 3px 0 0 var(--x-ink);
+  font-family: var(--x-action); font-weight: 800; font-size: 0.95rem; text-decoration: none; cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+.wax-btn:hover { background: var(--x-amber-600); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 var(--x-ink); }
+.wax-btn svg { width: 17px; height: 17px; flex: none; }
+.wax-btn-ghost { background: var(--x-white); color: var(--x-purple); border-color: var(--x-border); box-shadow: none; }
+.wax-btn-ghost:hover { background: var(--x-surface); border-color: var(--x-purple); box-shadow: none; }
+.wax-btn-wa { background: #25D366; color: #06210F; }
+.wax-btn-wa:hover { background: #3BE07A; }
+.wax :focus-visible { outline: 3px solid var(--x-electric); outline-offset: 3px; }
+
+.wax-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px;
+  background: var(--x-surface); border: 1px solid var(--x-border); color: var(--x-ink); text-decoration: none;
+  font-weight: 700; line-height: 1.35;
+}
+.wax-row:hover { border-color: var(--x-purple); }
+.wax-row svg { flex: none; color: var(--x-purple); }
+.wax-row span { flex: 1; min-width: 0; }
+.wax-row-strong { background: var(--x-white); }
+.wax-row-go { margin-left: auto; }
+
+/* Go deeper (inside the day's end card) */
+.wax-deeper { margin-top: 16px; }
+.wax-deeper .wax-row { margin-top: 8px; }
+
+/* Day 30 */
+.wax-finale { margin-top: 16px; padding: 20px; border-radius: 18px; background: linear-gradient(160deg, var(--x-ice), var(--x-white)); border: 1px solid var(--x-border); }
+.wax-spark { margin: 0; font-size: 1.8rem; color: #F5A623; line-height: 1; }
+.wax-cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.wax-card {
+  position: relative; display: grid; gap: 2px; padding: 14px 44px 14px 16px; border-radius: 14px;
+  background: var(--x-white); border: 2px solid var(--x-ink); box-shadow: 3px 3px 0 0 var(--x-ink); color: var(--x-ink); text-decoration: none;
+}
+.wax-card strong { font-family: var(--x-display); font-size: 1.02rem; }
+.wax-card span { color: var(--x-ink-3); font-size: 0.9rem; }
+.wax-card .wax-row-go { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--x-purple); }
+.wax-card:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 var(--x-ink); }
+
+/* Share card */
+.wax-share { position: relative; background: var(--x-white); border: 1px solid var(--x-border); border-radius: 20px; padding: 20px; }
+.wax-share-img { display: block; width: 100%; max-width: 260px; aspect-ratio: 4 / 5; margin: 12px auto; border-radius: 12px; border: 1px solid var(--x-border); }
+.wax-share-wait { background: var(--x-ice); }
+.wax-share-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.wax-close {
+  position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--x-border); background: var(--x-white); color: var(--x-ink-3); cursor: pointer;
+}
+
+/* Bonus toast */
+.wax-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 1000;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px);
+  padding: 12px 18px; border-radius: 9999px; background: var(--x-ink); color: var(--x-white);
+  font-weight: 700; box-shadow: 0 12px 30px rgba(23, 19, 33, 0.3);
+}
+.wax-toast svg { color: var(--x-amber); flex: none; }
+.wax-toast a { color: var(--x-amber); font-weight: 800; white-space: nowrap; }
+
+/* Dashboard card for people not on WinterArc */
+.wax-dash-join .dh-wa-tag { margin: 0; }
+
+@media (max-width: 560px) {
+  .wax-share { padding: 16px; }
+  .wax-toast { border-radius: 16px; bottom: 16px; }
+}
+
+/* Small bits on existing WinterArc pages */
+.wa-check em { font-style: normal; color: #8E8A95; }

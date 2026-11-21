@@ -1,17 +1,16 @@
-// Join form (sign-in first), the thank-you card with the referral link, and the countdown.
+// The join form (its own page, /winterarc/join) and the countdown.
+// Flow (owner 2026-11-21): sign up -> this form -> straight to the hub.
 import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Link } from "react-router-dom";
-import { PiArrowRightBold, PiCheckBold, PiCopyBold, PiUserCirclePlusBold, PiWhatsappLogoBold } from "react-icons/pi";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { PiArrowRightBold, PiCheckCircleFill, PiGoogleLogoBold, PiLockSimpleBold } from "react-icons/pi";
 import { WINTERARC as W } from "./winterarcConfig";
-import ContestCard from "./ContestCard";
 import { joinWinterArcWaitlist } from "../../services/api";
 import { getAttribution } from "../../utils/attribution";
 import { trackEvent } from "../../utils/analytics";
-import { forgetJoined, joinedCode, markJoined } from "./winterarcVisitor";
-import { refreshWinterArcStatus } from "./useWinterArcStatus";
-
-const SITE = "https://myfined.com";
+import { markJoined } from "./winterarcVisitor";
+import useWinterArcStatus, { refreshWinterArcStatus } from "./useWinterArcStatus";
+import { HUB_PATH, JOIN_PATH } from "./useJoinWinterArc";
 
 const HEARD_OPTIONS = [
   ["", "Choose one"],
@@ -55,109 +54,74 @@ export function Countdown() {
   );
 }
 
-function ThankYou({ code, already, remembered, onNotYou }) {
-  const [copied, setCopied] = useState(false);
-  const link = `${SITE}/winterarc?ref=${code}`;
-  const shareText = `I'm doing WinterArc: 30 Days of Money with FinEd, 1 to 30 Dec. One short money task a day, free to join. Join with my link: ${link}`;
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      trackEvent("share", { method: "copy_link", content_type: "winterarc_referral" });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard blocked: the link is on screen to copy by hand
-    }
-  };
-
-  return (
-    <div className="wa-form wa-thanks" role="status">
-      <div className="wa-thanks-tick"><PiCheckBold aria-hidden="true" /></div>
-      <h3>{already && !remembered ? "You've already joined" : "You're in"}</h3>
-      <p>Day 1 opens on {W.startDate}. Your hub is ready now.</p>
-      <Link className="wa-btn wa-btn-primary" to="/winterarc/challenge">
-        Go to your hub <PiArrowRightBold aria-hidden="true" />
-      </Link>
-      {W.show.referrals && (
-        <>
-          <ContestCard />
-          <p className="wa-thanks-lead">Bring your friends along</p>
-          <div className="wa-link-row">
-            <code className="wa-ref-link">{link}</code>
-            <button type="button" className="wa-btn wa-btn-ghost" onClick={copy}>
-              <PiCopyBold aria-hidden="true" /> {copied ? "Copied" : "Copy"}
-            </button>
-          </div>
-          <a
-            className="wa-btn wa-btn-whatsapp"
-            href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackEvent("share", { method: "whatsapp", content_type: "winterarc_referral" })}
-          >
-            <PiWhatsappLogoBold aria-hidden="true" /> Share on WhatsApp
-          </a>
-          <p className="wa-small">
-            You earn referral points when a friend who joined with your link finishes Day 3 and passes a quick check.
-          </p>
-        </>
-      )}
-      {remembered && (
-        <button type="button" className="wa-thanks-other" onClick={onNotYou}>
-          Not you? Join with a different email
-        </button>
-      )}
-    </div>
-  );
-}
-
 // Referral codes: letters and digits only, upper case (what the link carries)
-const cleanCode = (v) => String(v || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 12);
+const cleanCode = (v) =>
+  String(v || "")
+    .replace(/[^A-Za-z0-9]/g, "")
+    .toUpperCase()
+    .slice(0, 12);
 
 export default function SignupForm() {
   // The referral code box starts with the code from a friend's link, if any
   const [linkCode] = useState(() => cleanCode(getAttribution().ref));
   const [form, setForm] = useState(() => ({
-    name: "", email: "", college: "", heard_from: "", age_confirmed: false, consent: false, ref: linkCode,
+    name: "",
+    email: "",
+    college: "",
+    heard_from: "",
+    age_confirmed: false,
+    consent: false,
+    newsletter: false,
+    ref: linkCode,
   }));
   const [refError, setRefError] = useState("");
-  // A browser that already joined sees its invite link instead of the form
-  const [state, setState] = useState(() => {
-    const code = joinedCode();
-    return code
-      ? { status: "done", error: "", code, already: true, remembered: true }
-      : { status: "idle", error: "", code: "", already: false };
-  });
-  const notYou = () => {
-    forgetJoined();
-    setState({ status: "idle", error: "", code: "", already: false });
-  };
+  const [state, setState] = useState({ status: "idle", error: "" });
+  const navigate = useNavigate();
+  const status = useWinterArcStatus();
 
   // Signed-in learners: fill in their name and email (only into empty fields)
   const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
   const [prefilled, setPrefilled] = useState(false);
   if (user && !prefilled) {
     setPrefilled(true);
-    setForm((f) => ({ ...f, name: f.name || user.name || "", email: user.email || f.email || "" }));
+    setForm((f) => ({
+      ...f,
+      name: f.name || user.name || "",
+      email: user.email || f.email || "",
+    }));
   }
 
   const set = (key) => (e) =>
-    setForm((f) => ({ ...f, [key]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
+    setForm((f) => ({
+      ...f,
+      [key]: e.target.type === "checkbox" ? e.target.checked : e.target.value,
+    }));
 
   const submit = async (e) => {
     e.preventDefault();
     if (state.status === "sending") return;
-    if (!form.age_confirmed) return setState((s) => ({ ...s, error: `WinterArc is for residents of ${W.residency} aged ${W.minAge} or over.` }));
-    if (!form.consent) return setState((s) => ({ ...s, error: "Please agree to the WinterArc rules and the privacy policy to join." }));
+    if (!form.age_confirmed)
+      return setState((s) => ({
+        ...s,
+        error: `WinterArc is for residents of ${W.residency} aged ${W.minAge} or over.`,
+      }));
+    if (!form.consent)
+      return setState((s) => ({
+        ...s,
+        error: "Please agree to the WinterArc rules and the privacy policy to join.",
+      }));
     setState((s) => ({ ...s, status: "sending", error: "" }));
     setRefError("");
     try {
       // The box wins over the link: what's in it is what counts
-      const res = await joinWinterArcWaitlist({ ...getAttribution(), ...form, ref: form.ref || null });
-      setState({ status: "done", error: "", code: res.referral_code, already: res.already_joined });
+      const res = await joinWinterArcWaitlist({
+        ...getAttribution(),
+        ...form,
+        ref: form.ref || null,
+      });
       markJoined(res.referral_code);
       refreshWinterArcStatus();
+      if (form.newsletter) trackEvent("newsletter_optin", { form_type: "winterarc_waitlist" });
       if (!res.already_joined) {
         const src = getAttribution();
         trackEvent("generate_lead", {
@@ -167,6 +131,10 @@ export default function SignupForm() {
           referred: form.ref ? "yes" : "no",
         });
       }
+      // Straight to the hub, which says "You're in" once
+      navigate(HUB_PATH, {
+        state: { welcome: res.already_joined ? "already" : "new" },
+      });
     } catch (err) {
       const message = err.message || "Something went wrong. Please try again.";
       if (/referral code/i.test(message)) {
@@ -180,101 +148,177 @@ export default function SignupForm() {
 
   // Joining needs a FinEd account, so the hub can find you with the same email.
   // A friend's referral code survives the sign-in trip (it is kept in this browser).
-  if (state.status !== "done" && !isAuthenticated) {
-    const goSignIn = (signup) =>
-      loginWithRedirect({
-        appState: { returnTo: "/winterarc#join" },
-        authorizationParams: signup ? { screen_hint: "signup" } : undefined,
-      });
+  if (!isAuthenticated) {
+    // Same Auth0 call as the navbar's Sign Up. A screen_hint: "signup" makes
+    // this tenant answer "connection not found for the client", so none here.
+    const goSignIn = () => loginWithRedirect({ appState: { returnTo: JOIN_PATH } });
     return (
-      <div className="wa-form wa-signin-first">
-        <div className="wa-thanks-tick"><PiUserCirclePlusBold aria-hidden="true" /></div>
-        <h3>First, make your free FinEd account</h3>
-        <p>You'll use it to open each day's task and track your streak. Then you'll come straight back here to join.</p>
-        {linkCode && <p className="wa-small">Your friend's code <strong>{linkCode}</strong> is saved and will be filled in.</p>}
-        <button type="button" className="wa-btn wa-btn-primary wa-btn-block" disabled={isLoading} onClick={() => goSignIn(true)}>
-          Sign up for free <PiArrowRightBold aria-hidden="true" />
+      <div className="wa-form wa-join-card wa-signin-first">
+        <p className="wa-join-step">First step</p>
+        <h2 className="wa-join-title">First, make your free FinEd account</h2>
+        <p className="wa-join-text">
+          You'll use it to open each day's task and track your streak. It takes one tap with Google, and then you come
+          straight back here to register for the competition.
+        </p>
+        {linkCode && (
+          <p className="wa-join-note">
+            Your friend's code <strong>{linkCode}</strong> is saved and will be filled in.
+          </p>
+        )}
+        <button type="button" className="wa-btn wa-btn-primary wa-btn-block" disabled={isLoading} onClick={goSignIn}>
+          <PiGoogleLogoBold aria-hidden="true" /> Sign up for free
         </button>
-        <button type="button" className="wa-thanks-other" disabled={isLoading} onClick={() => goSignIn(false)}>
+        <button type="button" className="wa-thanks-other" disabled={isLoading} onClick={goSignIn}>
           Already have an account? Log in
         </button>
       </div>
     );
   }
 
-  if (state.status === "done") {
-    return <ThankYou code={state.code} already={state.already} remembered={state.remembered} onNotYou={notYou} />;
-  }
+  // Already a member (checked with the server): nothing to fill in
+  if (status.checked && status.joined) return <Navigate to={HUB_PATH} replace />;
 
   return (
-    <form className="wa-form" onSubmit={submit} noValidate>
-      <div className="wa-field-row">
-        <label className="wa-field">
-          <span>Name</span>
-          <input type="text" autoComplete="name" maxLength={100} value={form.name} onChange={set("name")} />
-        </label>
-        <label className="wa-field">
-          <span>Email</span>
-          <input
-            type="email" required autoComplete="email" inputMode="email" maxLength={254}
-            value={form.email} onChange={set("email")}
-            readOnly={!!user?.email} title={user?.email ? "The email on your FinEd account" : undefined}
-          />
-        </label>
-      </div>
-      <label className="wa-field">
-        <span>College <em>if you're a student</em></span>
-        <input type="text" autoComplete="organization" maxLength={150} value={form.college} onChange={set("college")} />
-      </label>
-      <label className="wa-field">
-        <span>How did you hear about WinterArc?</span>
-        <select value={form.heard_from} onChange={set("heard_from")}>
-          {HEARD_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-      </label>
-      {W.show.referrals && (
-        <label className={`wa-field wa-field-code${refError ? " has-error" : ""}`}>
-          <span>Referral code <em>optional</em></span>
-          <input
-            type="text"
-            inputMode="text"
-            autoCapitalize="characters"
-            autoComplete="off"
-            spellCheck="false"
-            maxLength={12}
-            placeholder="e.g. K7MP3X"
-            value={form.ref}
-            aria-invalid={refError ? "true" : undefined}
-            aria-describedby="wa-ref-help"
-            onChange={(e) => {
-              setRefError("");
-              setForm((f) => ({ ...f, ref: cleanCode(e.target.value) }));
-            }}
-          />
-          <small id="wa-ref-help" className={refError ? "wa-field-error" : "wa-field-hint"}>
-            {refError || (linkCode && form.ref === linkCode
-              ? "Filled in from your friend's link."
-              : "Got a code from a friend? Put it here. Leave it empty if not.")}
-          </small>
-        </label>
-      )}
-      <label className="wa-check">
-        <input type="checkbox" checked={form.age_confirmed} onChange={set("age_confirmed")} />
-        <span>I am {W.minAge} or older and live in {W.residency}.</span>
-      </label>
-      <label className="wa-check">
-        <input type="checkbox" checked={form.consent} onChange={set("consent")} />
+    <form className="wa-form wa-join-card" onSubmit={submit} noValidate>
+      {/* You have a FinEd account now; WinterArc is a separate sign-up */}
+      <div className="wa-join-signed">
+        <PiCheckCircleFill aria-hidden="true" />
         <span>
-          I agree to the{" "}
-          <Link to="/winterarc/rules" target="_blank">WinterArc rules</Link> and the{" "}
-          <Link to="/privacy-policy" target="_blank">privacy policy</Link>.
+          You're signed up
+          {user?.email ? (
+            <>
+              {" "}
+              as <strong>{user.email}</strong>
+            </>
+          ) : null}
         </span>
-      </label>
-      {state.error && <p className="wa-error" role="alert">{state.error}</p>}
+      </div>
+      <p className="wa-join-step">Last step</p>
+      <h2 className="wa-join-title">Now register for the competition</h2>
+      <p className="wa-join-text">
+        Your FinEd account is ready. {W.name} is a separate competition, so tell us a little about you and you're in.
+      </p>
+
+      <fieldset className="wa-join-group">
+        <legend>About you</legend>
+        <div className="wa-field-row">
+          <label className="wa-field">
+            <span>Name</span>
+            <input type="text" autoComplete="name" maxLength={100} value={form.name} onChange={set("name")} />
+          </label>
+          <label className="wa-field">
+            <span>
+              Email {user?.email && <PiLockSimpleBold className="wa-field-lock" aria-label="from your FinEd account" />}
+            </span>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              inputMode="email"
+              maxLength={254}
+              value={form.email}
+              onChange={set("email")}
+              readOnly={!!user?.email}
+              title={user?.email ? "The email on your FinEd account" : undefined}
+              className={user?.email ? "is-locked" : undefined}
+            />
+          </label>
+        </div>
+        <label className="wa-field">
+          <span>
+            College <em>if you're a student</em>
+          </span>
+          <input type="text" autoComplete="organization" maxLength={150} value={form.college} onChange={set("college")} />
+        </label>
+      </fieldset>
+
+      <fieldset className="wa-join-group">
+        <legend>Almost there</legend>
+        <label className="wa-field">
+          <span>How did you hear about WinterArc?</span>
+          <select value={form.heard_from} onChange={set("heard_from")}>
+            {HEARD_OPTIONS.map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        {W.show.referrals && (
+          <label className={`wa-field wa-field-code${refError ? " has-error" : ""}`}>
+            <span>
+              Referral code <em>optional</em>
+            </span>
+            <input
+              type="text"
+              inputMode="text"
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck="false"
+              maxLength={12}
+              placeholder="e.g. K7MP3X"
+              value={form.ref}
+              aria-invalid={refError ? "true" : undefined}
+              aria-describedby="wa-ref-help"
+              onChange={(e) => {
+                setRefError("");
+                setForm((f) => ({ ...f, ref: cleanCode(e.target.value) }));
+              }}
+            />
+            <small id="wa-ref-help" className={refError ? "wa-field-error" : "wa-field-hint"}>
+              {refError ||
+                (linkCode && form.ref === linkCode
+                  ? "Filled in from your friend's link."
+                  : "Got a code from a friend? Put it here. Leave it empty if not.")}
+            </small>
+          </label>
+        )}
+      </fieldset>
+
+      <fieldset className="wa-join-group wa-join-agree">
+        <legend className="wa-sr">Before you join</legend>
+        <label className="wa-check">
+          <input type="checkbox" checked={form.age_confirmed} onChange={set("age_confirmed")} />
+          <span>
+            I am {W.minAge} or older and live in {W.residency}.
+          </span>
+        </label>
+        <label className="wa-check">
+          <input type="checkbox" checked={form.consent} onChange={set("consent")} />
+          <span>
+            I agree to the{" "}
+            <Link to="/winterarc/rules" target="_blank">
+              WinterArc rules
+            </Link>{" "}
+            and the{" "}
+            <Link to="/privacy-policy" target="_blank">
+              privacy policy
+            </Link>
+            .
+          </span>
+        </label>
+        <label className="wa-check">
+          <input type="checkbox" checked={form.newsletter} onChange={set("newsletter")} />
+          <span>
+            Email me a short money article each day during {W.name}. <em>Optional</em>
+          </span>
+        </label>
+      </fieldset>
+      {state.error && (
+        <p className="wa-error" role="alert">
+          {state.error}
+        </p>
+      )}
       <button type="submit" className="wa-btn wa-btn-primary wa-btn-block" disabled={state.status === "sending"}>
-        {state.status === "sending" ? "Joining..." : "Join WinterArc"}
+        {state.status === "sending" ? (
+          "Registering..."
+        ) : (
+          <>
+            Register for {W.name} <PiArrowRightBold aria-hidden="true" />
+          </>
+        )}
       </button>
-      <p className="wa-small wa-center">Entry is always free. No payment is needed to take part or to win.</p>
+      <p className="wa-small wa-center wa-join-free">Entry is always free. No payment is needed to take part or to win.</p>
     </form>
   );
 }

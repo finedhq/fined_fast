@@ -560,6 +560,16 @@ export function answerWinterArcQuestion(day, cardId, answer) {
   });
 }
 
+// +3 WinterArc bonus for reading an article / finishing a course module
+// (once a day; anyone not on WinterArc just gets { awarded: false })
+export function claimWinterArcBonus(kind, ref) {
+  return request("/winterarc/bonus", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, ref }),
+  });
+}
+
 export function tickWinterArcAction(day, done) {
   return request(`/winterarc/days/${day}/action`, {
     method: "POST",

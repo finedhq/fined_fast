@@ -5,17 +5,19 @@
 // Phones stack them: today, streak, resets, month, invite.
 // Missed days can be repaired with a reset from the Resets card.
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   PiArrowCounterClockwiseBold, PiArrowRightBold, PiCheckBold, PiClockBold, PiCopyBold, PiLockSimpleBold, PiTrophyBold,
-  PiWhatsappLogoBold,
+  PiWhatsappLogoBold, PiXBold,
 } from "react-icons/pi";
-import { WINTERARC as W, dayInfo } from "./winterarcConfig";
+import { WINTERARC as W, dayInfo, isBeforeStart } from "./winterarcConfig";
 import ContestCard from "./ContestCard";
 import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 import { Countdown } from "./WinterArcSignup";
+import { ShareCard } from "./CrossSell";
+import { hideShare, shareHidden, shareMilestone } from "./crossSellUtils";
 
 const SITE = "https://myfined.com";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -263,12 +265,35 @@ function Invite({ r }) {
   );
 }
 
+/** Shown once, right after the join form sends people here ("You're in"). */
+function Welcome({ kind, onClose }) {
+  return (
+    <section className="wa-welcome" role="status">
+      <button type="button" className="wa-welcome-close" onClick={onClose} aria-label="Hide this message">
+        <PiXBold aria-hidden="true" />
+      </button>
+      <span className="wa-welcome-tick"><PiCheckBold aria-hidden="true" /></span>
+      <div>
+        <h2>{kind === "already" ? "You've already joined" : "You're in"}</h2>
+        <p>
+          {isBeforeStart()
+            ? `Day 1 opens on ${W.startDate}. This is your hub: each day's task, your streak and your invite link live here.`
+            : "This is your hub: each day's task, your streak and your invite link live here."}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function Hub() {
+  const location = useLocation();
+  const [welcome, setWelcome] = useState(() => location.state?.welcome || null);
   const { user } = useAuth0();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [resetMsg, setResetMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [, setHiddenTick] = useState(0);
 
   const load = useCallback(() => getWinterArcMe().then(setData).catch((e) => setError(e.message || "Couldn't load WinterArc.")), []);
   useEffect(() => {
@@ -298,6 +323,10 @@ function Hub() {
   const now = new Date(data.now); // the server's clock, so "today" and the hub agree
   const today = data.days.find((d) => d.day === data.today);
   const first = (user?.given_name || user?.name || "").split(" ")[0];
+  // Share card: the latest streak milestone (7/14/21) or the finish, until hidden
+  const finished = data.days.find((d) => d.day === W.totalDays)?.status === "done";
+  const milestone = shareMilestone(data.streak.best, finished);
+  const showShare = milestone && !shareHidden(milestone);
 
   return (
     <div className="wa wa-doc-page wa-app">
@@ -314,12 +343,35 @@ function Hub() {
           </Link>
         </header>
 
+        {welcome && (
+          <Welcome
+            kind={welcome}
+            onClose={() => {
+              setWelcome(null);
+              // so a refresh or Back doesn't bring it back
+              window.history.replaceState({ ...window.history.state, usr: null }, "");
+            }}
+          />
+        )}
+
         <div className="wa-app-grid">
           <div className="wa-app-main">
             {today ? <Today day={today} now={now} /> : <BeforeStart opensAt={data.days[0].opens_at} />}
             <Month days={data.days} weekPoints={data.week_points} today={data.today} />
           </div>
           <aside className="wa-app-side">
+            {showShare && (
+              <ShareCard
+                milestone={milestone}
+                points={data.total_points}
+                name={first}
+                code={data.referrals?.code}
+                onClose={() => {
+                  hideShare(milestone);
+                  setHiddenTick((t) => t + 1);
+                }}
+              />
+            )}
             <Streak streak={data.streak} />
             <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
             <Invite r={data.referrals} />

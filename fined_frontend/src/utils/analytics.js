@@ -50,6 +50,31 @@ export const trackSignUp = (userSub) => {
   trackEvent("sign_up", { method: signupMethod(userSub) });
 };
 
+// The WinterArc placement that last sent this visitor to a course or article
+// (set by trackCrossSell, kept for this tab only).
+const CROSS_SELL_KEY = "fined_wa_src";
+export const crossSellSource = () => {
+  try {
+    return sessionStorage.getItem(CROSS_SELL_KEY) || "";
+  } catch {
+    return "";
+  }
+};
+
+/**
+ * Track a WinterArc cross-sell click (head start, go deeper, finale, share).
+ * @param {string} source - e.g. winterarc_headstart, winterarc_day_12, winterarc_finale
+ * @param {string} target - the path clicked
+ */
+export const trackCrossSell = (source, target) => {
+  try {
+    sessionStorage.setItem(CROSS_SELL_KEY, source);
+  } catch {
+    // ignore
+  }
+  trackEvent("winterarc_cross_sell", { source, target });
+};
+
 /**
  * Track a learner's first saved progress in a course. The server decides it is
  * the first (first_in_course); the browser check stops parallel saves doubling it.
@@ -57,7 +82,7 @@ export const trackSignUp = (userSub) => {
  */
 export const trackCourseStart = (courseSlug) => {
   if (!courseSlug || sentOnce(`fined_ga_course_start_${courseSlug}`)) return;
-  trackEvent("course_start", { course_slug: courseSlug });
+  trackEvent("course_start", { course_slug: courseSlug, source: crossSellSource() || "direct" });
 };
 
 /**

@@ -32,6 +32,8 @@ class WaitlistRequest(BaseModel):
     heard_from: Optional[str] = Field(default=None, max_length=40)
     age_confirmed: bool = False
     consent: bool = False
+    # The optional "email me a daily article" tick box (not ticked by default)
+    newsletter: bool = False
     # First-touch source, captured by the browser on the first visit
     ref: Optional[str] = Field(default=None, max_length=20)
     utm_source: Optional[str] = Field(default=None, max_length=100)
@@ -84,6 +86,17 @@ def _code_exists(code: str) -> bool:
     return bool(res and res.data)
 
 
+def _subscribe(email: str):
+    """Add this person to the site newsletter list (the admin newsletter page
+    sends to it). A failure here never stops the join."""
+    try:
+        supabase.from_("newsletter_gmails").upsert(
+            [{"email": email, "enteredEmail": email}], on_conflict="email"
+        ).execute()
+    except Exception as exc:
+        print(f"[winterarc] newsletter opt-in not saved: {exc}")
+
+
 @router.post("/waitlist")
 async def join_waitlist(body: WaitlistRequest):
     email = (body.email or "").strip().lower()
@@ -96,6 +109,8 @@ async def join_waitlist(body: WaitlistRequest):
 
     # Already on the list: keep the first-touch source, just return their code
     existing = _find_by_email(email)
+    if body.newsletter:
+        _subscribe(email)
     if existing:
         return {"referral_code": existing["referral_code"], "already_joined": True}
 
