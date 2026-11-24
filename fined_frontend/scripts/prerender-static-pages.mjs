@@ -42,6 +42,11 @@ function setTitle(html, value) {
   return html.replace(/<title>[^<]*<\/title>/i, () => `<title>${text}</title>`)
 }
 
+// Pages Google should not list yet. /help is still a placeholder ("will be fully populated in a future
+// update"), so it stays out of search until it has real content. Remove it from here when it does,
+// and add it back to the sitemap (fined_backend/app/services/article_service.py).
+const NOINDEX_PATHS = new Set(['/help'])
+
 function pageHtml(shell, path) {
   const tagSlug = path.startsWith('/tags/') ? path.slice('/tags/'.length) : null
   const title = tagSlug ? `Articles tagged "${TAG_NAMES[tagSlug]}" | FinEd` : getTitleForPath(path)
@@ -57,6 +62,7 @@ function pageHtml(shell, path) {
   html = setMetaContent(html, 'property', 'og:description', description)
   html = setMetaContent(html, 'name', 'twitter:title', title)
   html = setMetaContent(html, 'name', 'twitter:description', description)
+  if (NOINDEX_PATHS.has(path)) html = setMetaContent(html, 'name', 'robots', 'noindex, follow')
 
   const extraTags =
     `  <link rel="canonical" href="${escapeHtml(canonical)}" />\n` +

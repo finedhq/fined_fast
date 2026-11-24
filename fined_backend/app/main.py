@@ -118,6 +118,7 @@ import re
 import uuid
 from app.services.page_shell import get_shell_html, strip_replaced_tags
 from app.services import crawler_pages as cp
+from app.services import crawler_static_pages as csp
 from app.repositories.course_repo import course_repo
 from app.services.course_visibility import course_status, is_released
 from app.routes.certificates import find_public as find_public_certificate
@@ -236,6 +237,29 @@ def _courses_index_page():
     return head, cp.courses_index_body(courses)
 
 
+# Same as "/about" and "/contact" in fined_frontend/src/config/pageTitles.js
+_ABOUT_DESCRIPTION = (
+    "FinEd breaks down complex financial topics into simple, bite-sized lessons so you can make confident money decisions."
+)
+_CONTACT_DESCRIPTION = "Questions or feedback about FinEd? Get in touch with our team."
+
+
+def _about_page():
+    """(head, body) for /about. The experts list is optional, as on the page."""
+    try:
+        authors = article_service.get_all_authors()
+    except Exception:
+        authors = []
+    head = cp.head_tags(title="About Us | FinEd", description=_ABOUT_DESCRIPTION, url=f"{cp.SITE}/about")
+    return head, csp.about_page_body(authors)
+
+
+def _contact_page():
+    """(head, body) for /contact."""
+    head = cp.head_tags(title="Contact Us | FinEd", description=_CONTACT_DESCRIPTION, url=f"{cp.SITE}/contact")
+    return head, csp.contact_page_body()
+
+
 def _course_page(course_slug: str):
     """(head, body) for /courses/<slug>, or None for a missing or draft course."""
     course = course_repo.get_by_slug(course_slug)
@@ -302,8 +326,11 @@ async def spa_fallback(fallback_path: str):
     bare_path = fallback_path.rstrip("/")
     is_home_path = bare_path == _HOME_CRAWLER_PATH
     is_courses_index = bare_path == "courses"
+    is_about = bare_path == "about"
+    is_contact = bare_path == "contact"
     is_listing_path = (
         bare_path == "articles" or bool(tag_match) or bool(course_match) or is_home_path or is_courses_index
+        or is_about or is_contact
     )
     listing_missing = False
     if is_listing_path:
@@ -312,6 +339,10 @@ async def spa_fallback(fallback_path: str):
                 page = await asyncio.to_thread(_home_page)
             elif is_courses_index:
                 page = await asyncio.to_thread(_courses_index_page)
+            elif is_about:
+                page = await asyncio.to_thread(_about_page)
+            elif is_contact:
+                page = _contact_page()
             elif tag_match:
                 page = await asyncio.to_thread(_tag_page, tag_match.group(1))
             elif course_match:

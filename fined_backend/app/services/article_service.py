@@ -337,7 +337,7 @@ class ArticleService:
             ("https://myfined.com/contact", "monthly", "0.5"),
             ("https://myfined.com/feedback", "monthly", "0.5"),
             ("https://myfined.com/courses", "weekly", "0.9"),
-            ("https://myfined.com/help", "monthly", "0.5"),
+            # /help is left out while it is a placeholder page (it is also noindex)
             ("https://myfined.com/privacy-policy", "monthly", "0.5"),
             ("https://myfined.com/termsofservice", "monthly", "0.5"),
         ]
