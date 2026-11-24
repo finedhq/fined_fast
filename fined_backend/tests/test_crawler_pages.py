@@ -359,6 +359,51 @@ def test_api_root_is_still_the_health_check(client):
     assert client.get("/").json()["status"] == "FinEd API is running"
 
 
+# ── About and Contact ──
+
+def test_about_page_has_its_own_tags_founders_and_experts(client, listed):
+    resp = client.get("/about")
+    assert resp.status_code == 200
+    assert_one_set_of_tags(resp.text, "About Us | FinEd", "https://myfined.com/about")
+    body = resp.text.split("</head>")[1]
+    assert "<h1>Making financial education simple, practical and accessible.</h1>" in body
+    assert "Meet the founders" in body and 'href="https://myfined.com/authors/shravan-mutha"' in body
+    # experts leave out the founders; the count matches the list
+    assert 'href="https://myfined.com/authors/puja-tayal"' in body
+    assert "<strong>1</strong> finance experts writing for FinEd" in body
+    assert client.get("/about/").status_code == 200
+
+
+def test_about_page_without_authors_still_has_its_text(client, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(article_service, "get_all_authors", boom)
+    body = client.get("/about").text.split("</head>")[1]
+    assert "Our mission" in body and "Meet the founders" in body
+    assert "The experts behind FinEd" not in body and "finance experts writing" not in body
+
+
+def test_contact_page_has_its_own_tags_and_details(client):
+    resp = client.get("/contact")
+    assert resp.status_code == 200
+    assert_one_set_of_tags(resp.text, "Contact Us | FinEd", "https://myfined.com/contact")
+    body = resp.text.split("</head>")[1]
+    assert "<h1>Get in Touch with FinEd</h1>" in body
+    assert 'href="mailto:support@myfined.com"' in body and 'href="tel:7507972411"' in body
+
+
+def test_sitemap_leaves_out_the_placeholder_help_page(monkeypatch):
+    from app.services import article_service as article_service_module
+
+    monkeypatch.setattr(article_service_module.article_repo, "get_all_for_sitemap", lambda: [])
+    monkeypatch.setattr(article_service_module.article_repo, "get_all_authors", lambda: [])
+    monkeypatch.setattr(article_service_module.course_repo, "get_listed", lambda: [])
+    xml = article_service.build_sitemap_xml()
+    assert "<loc>https://myfined.com/about</loc>" in xml
+    assert "myfined.com/help" not in xml
+
+
 # ── converter details ──
 
 def test_first_paragraph_becomes_the_description_when_none_is_set():

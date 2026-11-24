@@ -37,6 +37,50 @@
       "destination": "https://api.myfined.com/courses"
     },
     {
+      "source": "/about",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/about"
+    },
+    {
+      "source": "/about/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/about"
+    },
+    {
+      "source": "/contact",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/contact"
+    },
+    {
+      "source": "/contact/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|applebot|discordbot|bingbot|googlebot|pinterest|skypeuripreview|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|bytespider|cohere|diffbot|ia_archiver|curl|wget|python-requests|urllib).*"
+        }
+      ],
+      "destination": "https://api.myfined.com/contact"
+    },
+    {
       "source": "/articles",
       "has": [
         {
