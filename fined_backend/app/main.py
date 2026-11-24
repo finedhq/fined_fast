@@ -181,6 +181,61 @@ def _tag_page(tag_slug: str):
     return head, cp.tag_page_body(tag, articles)
 
 
+# Same as "/" and "/courses" in fined_frontend/src/config/pageTitles.js
+_HOME_TITLE = "FinEd: Learn Personal Finance & Investing in India"
+_HOME_DESCRIPTION = (
+    "Clear, practical finance explainers, market insights and bite-sized courses on investing, "
+    "UPI, IPOs and personal finance in India."
+)
+_COURSES_INDEX_DESCRIPTION = (
+    "Learn investing and personal finance step by step with short, interactive FinEd courses made for Indian learners."
+)
+_HOME_ARTICLE_COUNT = 10  # the home page's article row (Hero.jsx)
+# vercel.json sends crawlers asking for "/" here. The path isn't "/", which is this API's health check.
+_HOME_CRAWLER_PATH = "home"
+
+
+def _home_page():
+    """(head, body) for the home page. Each section's data is optional, as on the page."""
+    def safe(load, default):
+        try:
+            return load()
+        except Exception:
+            return default
+
+    course = cp.featured_course(safe(course_repo.get_listed, []))
+    articles = safe(lambda: article_service.get_all(limit=_HOME_ARTICLE_COUNT, offset=0), [])
+    authors = safe(article_service.get_all_authors, [])
+    head = cp.head_tags(
+        title=_HOME_TITLE,
+        description=_HOME_DESCRIPTION,
+        url=f"{cp.SITE}/",
+        robots="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+    )
+    return head, cp.home_page_body(course, articles, authors)
+
+
+def _courses_index_page():
+    """(head, body) for /courses."""
+    courses = course_repo.get_listed()
+    url = f"{cp.SITE}/courses"
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Courses",
+        "url": url,
+        "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": i, "url": f"{cp.SITE}/courses/{c.get('slug') or c['id']}", "name": c.get("title")}
+                for i, c in enumerate(courses, start=1)
+            ],
+        },
+    }
+    head = cp.head_tags(title="Courses | FinEd", description=_COURSES_INDEX_DESCRIPTION, url=url, schema=schema)
+    return head, cp.courses_index_body(courses)
+
+
 def _course_page(course_slug: str):
     """(head, body) for /courses/<slug>, or None for a missing or draft course."""
     course = course_repo.get_by_slug(course_slug)
@@ -244,11 +299,20 @@ async def spa_fallback(fallback_path: str):
     # Article list, tag and course pages for crawlers: the page's own head tags plus its text
     tag_match = _TAG_PATH.match(fallback_path)
     course_match = _COURSE_PATH.match(fallback_path)
-    is_listing_path = fallback_path.rstrip("/") == "articles" or bool(tag_match) or bool(course_match)
+    bare_path = fallback_path.rstrip("/")
+    is_home_path = bare_path == _HOME_CRAWLER_PATH
+    is_courses_index = bare_path == "courses"
+    is_listing_path = (
+        bare_path == "articles" or bool(tag_match) or bool(course_match) or is_home_path or is_courses_index
+    )
     listing_missing = False
     if is_listing_path:
         try:
-            if tag_match:
+            if is_home_path:
+                page = await asyncio.to_thread(_home_page)
+            elif is_courses_index:
+                page = await asyncio.to_thread(_courses_index_page)
+            elif tag_match:
                 page = await asyncio.to_thread(_tag_page, tag_match.group(1))
             elif course_match:
                 page = await asyncio.to_thread(_course_page, course_match.group(1))

@@ -1,9 +1,13 @@
 // Writes a real HTML file for each public static page (about.html, tags/ipo.html, ...) with that
 // page's own title, description and canonical, so crawlers get them without running JavaScript.
 // Runs right after `vite build` (see the "build" script). Vercel serves the files through the
-// rewrites at the top of vercel.json; every other route still gets the plain index.html.
+// rewrites at the top of vercel.json; every other route gets the plain app shell.
+//
+// Last, it renames the built index.html to app.html. Vercel serves a real file before it looks at
+// rewrites, so while index.html exists "/" never reaches the crawler rewrite that sends bots to the
+// API's home page. People still get the app on "/" through the catch-all rewrite to /app.html.
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -78,6 +82,9 @@ const wantedSources = paths.flatMap((path) => [path, `${path}/`])
 const missingRewrites = wantedSources.filter(
   (source) => rewrites.get(source) !== `${source.replace(/\/$/, '')}.html`,
 )
+if (rewrites.get('/(.*)') !== '/app.html') {
+  missingRewrites.push('/(.*) -> /app.html (the catch-all, last)')
+}
 if (missingRewrites.length) {
   throw new Error(
     `vercel.json needs a rewrite from each path (with and without a trailing slash) to its .html file. Missing: ${missingRewrites.join(', ')}`,
@@ -90,4 +97,6 @@ for (const path of paths) {
   writeFileSync(file, pageHtml(shell, path))
 }
 
-console.log(`Prerendered head tags for ${paths.length} pages: ${paths.join(', ')}`)
+renameSync(resolve(distDir, 'index.html'), resolve(distDir, 'app.html'))
+
+console.log(`Prerendered head tags for ${paths.length} pages: ${paths.join(', ')}. The app shell is app.html.`)

@@ -338,6 +338,201 @@ def course_page_body(course: dict, modules: list) -> str:
     return "\n".join(parts)
 
 
+# ── home page (mirrors fined_frontend/src/pages/Home: Hero.jsx and its sections) ──
+#
+# The static wording below is copied from those components. If a section's text
+# changes there, change it here too, or crawlers read an old page.
+
+# StorySection.jsx
+_HOME_STORY_LEAD = (
+    "Most people never really learned about money. Not in school, not at home. "
+    "Someone just handed you a salary one day and said good luck."
+)
+_HOME_STORY_FOLLOW = (
+    "FinEd fixes that, but without making it feel like homework. "
+    "Every lesson is short enough to finish on a lunch break."
+)
+_HOME_TOPICS = [
+    "Your first salary", "“No cost” EMIs", "Credit scores", "How UPI makes money",
+    "Index funds", "TDS on your salary", "How IPOs work", "Credit vs debit cards",
+    "Nifty & Sensex", "Investing in US stocks", "Why prices keep rising", "How dividends work",
+]
+# FeaturesSection.jsx
+_HOME_FEATURES = [
+    ("Bite-sized lessons", [
+        "Built for short attention spans (we get it)",
+        "One money topic at a time. No information overload",
+        "No boring 45-minute lectures or endless videos",
+        "From budgeting to SIPs, taxes and credit scores",
+    ]),
+    ("Interactive Learning", [
+        "Learn by doing, not just scrolling",
+        "Make money decisions without real-life consequences",
+        "Quick quizzes that keep things interesting",
+        "Feels more like a game than a finance class",
+    ]),
+    ("Rewards & Leaderboards", [
+        "Every lesson earns you rewards",
+        "Friendly competition keeps you motivated",
+        "Don't break the streak \U0001F440",
+        "Build your FinScore by staying consistent",
+    ]),
+    ("Personalized Recommendations", [
+        "No one-size-fits-all money advice",
+        "We recommend what actually fits you",
+        "Zero spam, Zero random product pushes",
+        "The more you learn, the better we get",
+    ]),
+]
+# CoursesSection.jsx: shown when the course has no description of its own
+_HOME_COURSE_FALLBACK = (
+    "This course will provide you everything you need to start investing in India. The stock market can "
+    "seem complicated, but it doesn't have to be. This course breaks down how the market works, from stocks, "
+    "IPOs, and key market terms to the basics of analysing companies and the economy."
+)
+# TestimonialsSection.jsx
+_HOME_QUOTES = [
+    ("The articles explain complex financial topics in a way that's actually easy to understand. "
+     "I finally feel confident reading about investing.", "Gaurav", 20),
+    ("I wish I had access to content like this when I started college. "
+     "It's practical and doesn't overwhelm beginners.", "Rahul", 25),
+    ("FinEd's mission of making financial education free and accessible is something I genuinely support. "
+     "Financial literacy shouldn't be a privilege.", "Priya", 24),
+    ("The content is concise, engaging, and easy to revisit whenever I need a quick refresher.", "Ananya", 19),
+]
+# fined_frontend/src/lib/authorTitles.js
+FOUNDER_SLUGS = {"anish-pujari", "shravan-mutha"}
+AUTHOR_TITLES = {
+    "shishir-bhartia": "Directional Strategy Consultant, Ex Head Times Group Alliances and Brand Capital West",
+    "deepan-datta": "Investment Writer",
+    "dharsana-gandhi-r": "Finance Professional",
+    "madhvendra": "Finance Writer",
+    "puja-tayal": "Financial Writer & Equity Analyst",
+}
+DEFAULT_AUTHOR_TITLE = "Writer at FinEd"
+
+
+def author_blurb(author: dict, title: str) -> str:
+    """Like authorBlurb: the bio, unless it only repeats the title."""
+    letters = lambda s: re.sub(r"[^a-z]", "", _clean(s or "").lower())
+    bio = _clean(author.get("bio") or "")
+    if bio and letters(bio) != letters((title or "").replace(",", "", 1)):
+        return bio
+    return _clean(author.get("description") or "")
+
+
+def featured_course(courses: list) -> dict | None:
+    """The course the home page features: the stock market one, else the newest."""
+    if not courses:
+        return None
+    return next((c for c in courses if "stock market" in (c.get("title") or "").lower()), courses[0])
+
+
+def course_display_title(course: dict) -> str:
+    # The admin title can carry a "v2" marker that learners never see
+    return re.sub(r"\s+v\d+$", "", course.get("title") or "", flags=re.I)
+
+
+def _course_href(course: dict) -> str:
+    return f"{SITE}/courses/{esc(course.get('slug') or course.get('id'))}"
+
+
+def home_page_body(course: dict | None, articles: list, authors: list) -> str:
+    try_link = f'<a href="{SITE}/try">Try Module 1</a>'
+    articles_link = f'<a href="{SITE}/articles">Explore Articles</a>'
+    topics = "".join(f"<li>{esc(t)}</li>" for t in _HOME_TOPICS)
+    parts = [
+        "<main>",
+        "<section><h1>Learn money skills in 10 minutes a day</h1>",
+        "<p>Bite-sized interactive personal finance courses built for the youth. No jargon, no fees, no excuses.</p>",
+        f"<p>{try_link} · {articles_link}</p></section>",
+        "<p>Join <strong>2000+</strong> learners building their financial future</p>",
+        f"<section><p>{esc(_HOME_STORY_LEAD)}</p><p>{esc(_HOME_STORY_FOLLOW)}</p>",
+        f'<ul aria-label="Topics we cover">{topics}</ul></section>',
+        "<section><h2>Everything you need to build a strong financial future</h2>",
+        "<p>Practical paths . Real skills . Lifelong effect .</p>",
+    ]
+    for heading, points in _HOME_FEATURES:
+        items = "".join(f"<li>{esc(p)}</li>" for p in points)
+        parts.append(f"<h3>{esc(heading)}</h3><ul>{items}</ul>")
+    parts.append("</section>")
+
+    parts.append("<section><h2>Start with the right course</h2><p>Practical paths. Real skills. Lifelong effect.</p>")
+    if course:
+        title = course_display_title(course) or "Basics of Stock Market"
+        modules = course.get("planned_modules") or course.get("modules_count") or 12
+        minutes = course.get("duration") or 15
+        parts.append(
+            f'<article><h3><a href="{_course_href(course)}">{esc(title)}</a></h3>'
+            f"<p>{esc(modules)} Modules · {esc(minutes)} mins · Free</p>"
+            f"<p>{esc(course.get('description') or _HOME_COURSE_FALLBACK)}</p>"
+            f'<p><a href="{_course_href(course)}">View Course</a></p></article>'
+        )
+    parts.append("<h3>More courses coming soon...</h3><p>Stay tuned for new financial lessons</p>")
+    parts.append(f'<p><a href="{SITE}/courses">Explore all courses</a></p></section>')
+
+    parts.append("<section><h2>Insights to grow your money</h2><p>Short reads. Big takeaways.</p>")
+    parts.append(article_list_html(articles))
+    parts.append(f'<p><a href="{SITE}/articles">Explore all articles</a></p></section>')
+
+    experts = [a for a in authors or [] if a.get("name") and a.get("slug") not in FOUNDER_SLUGS]
+    if experts:
+        parts.append("<section><h2>The experts behind FinEd</h2>")
+        parts.append("<p>Learn from industry experts with years of experience in finance.</p><ul>")
+        for a in experts:
+            title = AUTHOR_TITLES.get(a.get("slug"), DEFAULT_AUTHOR_TITLE)
+            blurb = author_blurb(a, title)
+            parts.append(
+                f'<li><h3><a href="{SITE}/authors/{esc(a.get("slug"))}">{esc(a["name"])}</a></h3>'
+                f"<p>{esc(title)}</p>" + (f"<p>{esc(blurb)}</p>" if blurb else "") + "</li>"
+            )
+        parts.append("</ul></section>")
+
+    parts.append("<section><h2>Every path leads somewhere</h2>")
+    parts.append("<p>See what learners achieved after taking their first step.</p><ul>")
+    for quote, name, age in _HOME_QUOTES:
+        parts.append(f"<li><blockquote><p>{esc(quote)}</p></blockquote><p>{esc(name)}, {esc(age)}</p></li>")
+    parts.append("</ul></section>")
+
+    parts.append("<section><h2>Your financial journey starts here.</h2>")
+    parts.append("<p>Small steps today. Bigger opportunities tomorrow.</p>")
+    parts.append(f"<p>{try_link} · {articles_link}</p></section>")
+    parts.append("</main>")
+    return "\n".join(parts)
+
+
+# ── course list (mirrors fined_frontend/src/pages/CoursesPage/Courses.jsx, signed out) ──
+
+_COURSE_CARD_FALLBACK = (
+    "Master core financial concepts through visual scenarios, bite-sized lessons, and interactive quiz cards."
+)
+
+
+def courses_index_body(courses: list) -> str:
+    parts = [
+        "<main><section><h1>Master Finance in 15-Minute Lessons</h1>",
+        "<p>Visual, gamified, and practical courses on investing, market mechanics, budgeting, "
+        "and wealth building designed for everyday investors.</p>",
+        "<ul><li>100% Free &amp; Interactive</li><li>Gamified Scenarios</li><li>Earn Certificates</li></ul></section>",
+        "<section><h2>Available Courses</h2>",
+    ]
+    if not courses:
+        parts.append("<h3>No courses available yet</h3>")
+        parts.append("<p>New interactive finance modules are being crafted. Check back shortly!</p>")
+    else:
+        count = len(courses)
+        parts.append(f"<p>{count} {'course' if count == 1 else 'interactive courses'} available</p><ul>")
+        for c in courses:
+            modules = c.get("planned_modules") or c.get("modules_count") or 0
+            parts.append(
+                f'<li><h3><a href="{_course_href(c)}">{esc(c.get("title"))}</a></h3>'
+                f"<p>{esc(modules)} Modules</p><p>{esc(c.get('description') or _COURSE_CARD_FALLBACK)}</p></li>"
+            )
+        parts.append("</ul>")
+    parts.append("</section></main>")
+    return "\n".join(parts)
+
+
 # ── head tags ──
 
 def head_tags(*, title: str, description: str, url: str, image: str = DEFAULT_IMAGE,
