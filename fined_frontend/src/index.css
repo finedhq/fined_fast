@@ -423,6 +423,12 @@ h1, h2, h3, h4, h5, h6 {
   background: #111827;
 }
 
+/* Previous / Next are links when there is an article to go to */
+a.ap-nav-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
 @keyframes apPulse {
   to {
     background-position: -200% 0;
@@ -3829,6 +3835,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .ar-related-card {
+  color: inherit;
+  text-decoration: none;
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;

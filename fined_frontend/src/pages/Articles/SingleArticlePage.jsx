@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import ArticleReader from "../../components/ArticleReader";
 import { fetchArticleBySlug, fetchAdjacentArticles, getCachedArticle, prefetchArticle } from "../../services/api";
 import { ETF_DEMO_ARTICLE } from "../../lib/demoArticle";
@@ -117,24 +117,25 @@ function SingleArticlePage() {
         footer={
           <div className="ap-reader-footer">
             <ArticleReadBonus key={slug} slug={slug} />
-            <button
-              className={`ap-nav-btn ${adjacent.previous ? "active" : ""}`}
-              onClick={() => {
-                if (adjacent.previous) navigate(`/articles/${adjacent.previous.slug}`);
-              }}
-              disabled={!adjacent.previous}
-            >
-              ← Previous
-            </button>
-            <button
-              className={`ap-nav-btn ${adjacent.next ? "active" : ""}`}
-              onClick={() => {
-                if (adjacent.next) navigate(`/articles/${adjacent.next.slug}`);
-              }}
-              disabled={!adjacent.next}
-            >
-              Next →
-            </button>
+            {/* Real links when there is somewhere to go, so search engines can follow them */}
+            {adjacent.previous ? (
+              <Link className="ap-nav-btn active" to={`/articles/${adjacent.previous.slug}`}>
+                ← Previous
+              </Link>
+            ) : (
+              <button type="button" className="ap-nav-btn" disabled>
+                ← Previous
+              </button>
+            )}
+            {adjacent.next ? (
+              <Link className="ap-nav-btn active" to={`/articles/${adjacent.next.slug}`}>
+                Next →
+              </Link>
+            ) : (
+              <button type="button" className="ap-nav-btn" disabled>
+                Next →
+              </button>
+            )}
           </div>
         }
       />
