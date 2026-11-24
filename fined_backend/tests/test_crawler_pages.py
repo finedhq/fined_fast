@@ -252,6 +252,83 @@ def test_without_a_shell_listing_pages_still_answer(client, monkeypatch):
     assert client.get("/tags/crypto", follow_redirects=False).status_code == 404
 
 
+# ── home page and course list ──
+
+LISTED = [
+    {"id": "c9", "slug": "money-basics", "title": "Money Basics", "description": "", "modules_count": 3},
+    {"id": "11111111-1111-1111-1111-111111111111", "slug": "basics-of-stock-market", "title": "Basics of Stock Market v2",
+     "description": "Learn how the market works.", "planned_modules": 12, "duration": 15},
+]
+AUTHORS = [
+    {"name": "Anish Pujari", "slug": "anish-pujari", "bio": "Co-founder"},
+    {"name": "Puja Tayal", "slug": "puja-tayal", "bio": "Financial Writer & Equity Analyst", "description": "Tracks markets."},
+]
+
+
+@pytest.fixture
+def listed(monkeypatch):
+    monkeypatch.setattr(course_repo, "get_listed", lambda: [dict(c) for c in LISTED])
+    monkeypatch.setattr(article_service, "get_all_authors", lambda: AUTHORS)
+
+
+def test_home_page_has_its_own_tags_and_text(client, listed):
+    resp = client.get("/home")
+    assert resp.status_code == 200
+    assert_one_set_of_tags(resp.text, "FinEd: Learn Personal Finance &amp; Investing in India", "https://myfined.com/")
+    text = root_text(resp.text)
+    assert "<h1>Learn money skills in 10 minutes a day</h1>" in resp.text
+    assert "Most people never really learned about money." in text
+    assert "Bite-sized lessons" in text and "Personalized Recommendations" in text
+
+
+def test_home_page_links_to_courses_articles_and_experts(client, listed):
+    page = client.get("/home").text
+    # the stock market course, without the admin's "v2"
+    assert '<a href="https://myfined.com/courses/basics-of-stock-market">Basics of Stock Market</a>' in page
+    assert "12 Modules · 15 mins · Free" in page
+    assert 'href="https://myfined.com/articles/ipo-101"' in page
+    assert 'href="https://myfined.com/courses"' in page and 'href="https://myfined.com/articles"' in page
+    # experts leave out the co-founders, and a bio that repeats the title gives way to the description
+    assert 'href="https://myfined.com/authors/puja-tayal"' in page and "Tracks markets." in page
+    assert "anish-pujari" not in page.split("</head>")[1]
+
+
+def test_home_page_without_data_still_has_its_text(client, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(course_repo, "get_listed", boom)
+    monkeypatch.setattr(article_service, "get_all", boom)
+    monkeypatch.setattr(article_service, "get_all_authors", boom)
+    resp = client.get("/home/")
+    assert resp.status_code == 200
+    assert "Learn money skills in 10 minutes a day" in resp.text
+    assert "The experts behind FinEd" not in resp.text
+
+
+def test_courses_index_lists_every_listed_course(client, listed):
+    resp = client.get("/courses")
+    assert resp.status_code == 200
+    assert_one_set_of_tags(resp.text, "Courses | FinEd", "https://myfined.com/courses")
+    assert "<h1>Master Finance in 15-Minute Lessons</h1>" in resp.text
+    assert "2 interactive courses available" in root_text(resp.text)
+    assert 'href="https://myfined.com/courses/money-basics"' in resp.text
+    assert client.get("/courses/").status_code == 200
+
+
+def test_courses_index_lookup_error_serves_the_plain_shell(client, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(course_repo, "get_listed", boom)
+    resp = client.get("/courses")
+    assert resp.status_code == 200 and resp.text == SHELL
+
+
+def test_api_root_is_still_the_health_check(client):
+    assert client.get("/").json()["status"] == "FinEd API is running"
+
+
 # ── converter details ──
 
 def test_first_paragraph_becomes_the_description_when_none_is_set():

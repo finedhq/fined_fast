@@ -1,7 +1,11 @@
-# Loads the built frontend index.html so the API can inject per-page SEO tags.
+# Loads the built frontend app shell so the API can inject per-page SEO tags.
+#
+# The build writes the shell as app.html (not index.html, so that "/" is not a
+# file on Vercel and its crawler rewrite can run). index.html is still tried, for
+# a build from before that change.
 #
 # On the API host (Heroku) the frontend build is not on disk, so the shell is
-# fetched from the frontend's static /index.html and cached in memory. That path
+# fetched from the frontend's static /app.html and cached in memory. That path
 # is a plain static file on Vercel, so it never goes through the bot rewrite
 # and can't loop back to this server.
 
@@ -38,6 +42,7 @@ _REPLACED_TAGS = [
 
 def _read_local() -> Optional[str]:
     candidates = [
+        os.path.join(_FRONTEND_DIR, "dist", "app.html"),
         os.path.join(_FRONTEND_DIR, "dist", "index.html"),
         os.path.join(_FRONTEND_DIR, "index.html"),
     ]
@@ -60,17 +65,18 @@ def _remote_bases() -> list:
 async def _fetch_remote() -> Optional[str]:
     async with httpx.AsyncClient(timeout=_FETCH_TIMEOUT_SECONDS, follow_redirects=False) as client:
         for base in _remote_bases():
-            try:
-                resp = await client.get(f"{base}/index.html")
-            except Exception:
-                continue
-            if resp.status_code == 200 and 'id="root"' in resp.text:
-                return resp.text
+            for name in ("app.html", "index.html"):
+                try:
+                    resp = await client.get(f"{base}/{name}")
+                except Exception:
+                    continue
+                if resp.status_code == 200 and 'id="root"' in resp.text:
+                    return resp.text
     return None
 
 
 async def get_shell_html() -> Optional[str]:
-    """Return the frontend index.html, or None if it can't be had right now."""
+    """Return the frontend app shell, or None if it can't be had right now."""
     local = _read_local()
     if local:
         return local
