@@ -48,6 +48,11 @@ LIST = [
     {"title": "What Is a <Credit> Score?", "slug": "credit-score", "description": "Score basics.", "tag": "Personal Finance"},
     {"title": "IPO 101", "slug": "ipo-101", "description": "How IPOs work.", "tag": "IPO"},
 ]
+RELATED = [
+    {"title": "IPO 101", "slug": "ipo-101", "description": "How IPOs work.", "tag": "IPO",
+     "published_at": "2026-09-01T00:00:00+00:00", "authors": {"name": "Asha Rao", "slug": "asha-rao"}},
+    {"title": "EMI <Math>", "slug": "emi", "tag": None},
+]
 AUTHOR = {"id": "u1", "name": "Asha Rao", "slug": "asha-rao", "bio": "CFA", "description": "Writes about credit.",
           "linkedin_url": "https://linkedin.com/in/asha"}
 COURSES = {
@@ -79,6 +84,8 @@ def client(monkeypatch):
         article_service, "get_all",
         lambda limit=30, offset=0, tag=None: [a for a in LIST if tag is None or a["tag"] == tag],
     )
+    monkeypatch.setattr(article_service, "get_related", lambda slug, limit=3: [dict(a) for a in RELATED])
+    monkeypatch.setattr(article_service, "get_adjacent", lambda slug: {"previous": None, "next": {"slug": "ipo-101", "title": "IPO 101"}})
     monkeypatch.setattr(article_service, "get_author_by_slug", lambda slug: AUTHOR if slug == "asha-rao" else None)
     monkeypatch.setattr(article_service, "get_articles_by_author", lambda author_id, limit=12, offset=0: {"articles": LIST[:1]})
 
@@ -145,6 +152,29 @@ def test_article_text_is_not_hidden(client):
     root = body.split('<div id="root">')[1]
     assert "<noscript" not in root
     assert "display:none" not in root.replace(" ", "") and "hidden" not in root
+
+
+def test_article_links_to_related_reads_and_next(client):
+    page = client.get("/articles/credit-score").text
+    body = page.split("</head>")[1]
+    assert "<h2>Related Reads</h2>" in body
+    assert 'href="https://myfined.com/articles/ipo-101"' in body
+    assert 'href="https://myfined.com/articles/emi">EMI &lt;Math&gt;</a>' in body  # escaped
+    assert "More in Personal Finance →" in body and 'href="https://myfined.com/tags/personal-finance"' in body
+    # only the side that exists: there is a next article and no previous one
+    assert ">Next →</a>" in body and "Previous" not in body
+
+
+def test_article_still_renders_when_related_and_adjacent_fail(client, monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(article_service, "get_related", boom)
+    monkeypatch.setattr(article_service, "get_adjacent", boom)
+    resp = client.get("/articles/credit-score")
+    assert resp.status_code == 200
+    assert "Imagine two friends applying for the same loan." in resp.text
+    assert "Related Reads" not in resp.text
 
 
 def test_unknown_article_is_still_a_404(client):

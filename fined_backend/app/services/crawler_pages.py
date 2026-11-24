@@ -243,7 +243,48 @@ def article_body_html(article: dict) -> str:
 
 # ── page bodies ──
 
-def article_page_body(article: dict) -> str:
+def _related_reads_html(article: dict, related: list) -> str:
+    """ArticleReader's "Related Reads": up to three cards, plus "More in <tag>"."""
+    cards = []
+    for item in related or []:
+        slug = item.get("slug")
+        if not slug or not item.get("title"):
+            continue
+        tag = item.get("tag") or article.get("tag") or ""
+        meta = []
+        if format_date(item.get("published_at") or item.get("created_at")):
+            meta.append(esc(format_date(item.get("published_at") or item.get("created_at"))))
+        author = item.get("authors") if isinstance(item.get("authors"), dict) else None
+        if author and author.get("name") and author.get("slug"):
+            meta.append(f'By <a href="{SITE}/authors/{esc(author["slug"])}">{esc(author["name"])}</a>')
+        desc = f"<p>{esc(item['description'])}</p>" if item.get("description") else ""
+        cards.append(
+            "<li>"
+            + (f'<p><a href="{SITE}/tags/{esc(slugify_tag(tag))}">{esc(tag)}</a></p>' if tag else "")
+            + f'<h3><a href="{SITE}/articles/{esc(slug)}">{esc(item["title"])}</a></h3>'
+            + (f"<p>{' • '.join(meta)}</p>" if meta else "")
+            + desc
+            + "</li>"
+        )
+    if not cards:
+        return ""
+    tag = article.get("tag") or "Finance"
+    more = f'<p><a href="{SITE}/tags/{esc(slugify_tag(tag))}">More in {esc(tag)} →</a></p>'
+    return f'<section aria-label="Related Reads"><h2>Related Reads</h2>{more}<ul>{"".join(cards)}</ul></section>'
+
+
+def _previous_next_html(adjacent: dict | None) -> str:
+    """SingleArticlePage's footer: links only where there is an article to go to."""
+    links = []
+    for key, label in (("previous", "← Previous"), ("next", "Next →")):
+        target = (adjacent or {}).get(key) or {}
+        if target.get("slug"):
+            title = f' title="{esc(target["title"])}"' if target.get("title") else ""
+            links.append(f'<a href="{SITE}/articles/{esc(target["slug"])}"{title}>{label}</a>')
+    return f"<nav>{' '.join(links)}</nav>" if links else ""
+
+
+def article_page_body(article: dict, related: list | None = None, adjacent: dict | None = None) -> str:
     tag = article.get("tag") or ""
     author = article.get("authors") if isinstance(article.get("authors"), dict) else None
     reviewer = article.get("reviewer") if isinstance(article.get("reviewer"), dict) else None
@@ -273,7 +314,11 @@ def article_page_body(article: dict) -> str:
     if image:
         parts.append(f'<img src="{esc(image)}" alt="{esc(article.get("title"))}" />')
     parts.append(article_body_html(article))
-    parts.append("</article></main>")
+    parts.append("</article>")
+    # What follows the article on the page: Related Reads, then Previous / Next
+    parts.append(_related_reads_html(article, related or []))
+    parts.append(_previous_next_html(adjacent))
+    parts.append("</main>")
     return "\n".join(parts)
 
 

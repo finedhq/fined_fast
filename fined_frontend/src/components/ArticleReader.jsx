@@ -1264,11 +1264,12 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
               {relatedArticles.map((item) => {
                 const itemSlug = item.slug || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : "");
                 return (
-                  <div
+                  // A real link, so search engines can follow it (and ctrl-click opens a new tab)
+                  <Link
                     key={item.id || itemSlug}
+                    to={`/articles/${itemSlug}`}
                     className="ap-grid-card ar-related-card"
                     onClick={() => {
-                      navigate(`/articles/${itemSlug}`);
                       if (scrollRef.current) {
                         scrollRef.current.scrollTop = 0;
                       }
@@ -1290,6 +1291,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                       <span
                         className="ap-grid-category"
                         onClick={(e) => {
+                          e.preventDefault(); // inside the card's link: go to the tag, not the article
                           e.stopPropagation();
                           const tagSlug = (item.tag || articleTag || "finance").toLowerCase().replace(/[^a-z0-9]+/g, '-');
                           navigate(`/tags/${tagSlug}`);
@@ -1306,6 +1308,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                         <span
                           style={{ color: "#0ea5e9", textDecoration: "underline", cursor: "pointer" }}
                           onClick={(e) => {
+                            e.preventDefault(); // inside the card's link: go to the author, not the article
                             e.stopPropagation();
                             navigate(`/authors/${item.authors?.slug || "shravan-mutha"}`);
                           }}
@@ -1319,7 +1322,7 @@ function ArticleReader({ article, onClose, children, footer, isLoadingMore = fal
                         </p>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

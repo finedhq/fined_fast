@@ -456,7 +456,17 @@ async def spa_fallback(fallback_path: str):
   <script type="application/ld+json">{schema_json}</script>
 """
                     # The shell (minus its generic title/description/OG tags) with this article's tags and text
-                    page_html = cp.build_page(shell_html, seo_meta_tags, cp.article_page_body(article), strip_replaced_tags)
+                    # The links under the article. Either list is optional, as on the page.
+                    try:
+                        related = article_service.get_related(slug, limit=3)
+                    except Exception:
+                        related = []
+                    try:
+                        adjacent = article_service.get_adjacent(slug)
+                    except Exception:
+                        adjacent = None
+                    body = cp.article_page_body(article, related, adjacent)
+                    page_html = cp.build_page(shell_html, seo_meta_tags, body, strip_replaced_tags)
                     return Response(content=page_html, media_type="text/html")
                 article_missing = True
             except Exception:
