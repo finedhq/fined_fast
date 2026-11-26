@@ -6,17 +6,60 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import instance from "../../lib/axios";
 import { getWinterArcCalendar } from "../../services/api";
-import "./CardFields/authoring.css";
+import { WINTERARC as W } from "../WinterArc/winterarcConfig";
+import WinterArcAdminShell, { Loading, Notice } from "./WinterArcAdminShell";
 
 const when = (iso) =>
   new Date(iso).toLocaleString("en-IN", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" });
+const shortDate = (iso) => new Date(iso).toLocaleString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
+
+function Day({ d, courseId, onStatus }) {
+  const status = d.open_now ? ["live", "Open now"] : d.released ? ["ok", "Published"] : ["", "Draft"];
+  return (
+    <tr className={d.problems.length ? "has-problem" : ""}>
+      <td><strong>Day {d.day}</strong></td>
+      <td>{when(d.opens_at)}</td>
+      <td>
+        {d.module ? (
+          <Link to={`/admin/courses/${courseId}/modules/${d.module.id}/cards`}>{d.module.title}</Link>
+        ) : (
+          <span className="waa-sub">No module yet</span>
+        )}
+        {d.module && <div className="waa-sub">{d.questions} {d.questions === 1 ? "question" : "questions"}</div>}
+      </td>
+      <td>{d.module && <span className={`adm-pill${status[0] ? ` adm-pill--${status[0]}` : ""}`}>{status[1]}</span>}</td>
+      <td>
+        {d.problems.length ? (
+          <ul className="waa-problems">{d.problems.map((p) => <li key={p}>{p}</li>)}</ul>
+        ) : (
+          <span className="waa-ok">OK</span>
+        )}
+      </td>
+      <td>
+        {d.module && (
+          <div className="adm-actions">
+            <Link className="adm-btn adm-btn--sm" to={`/winterarc/day/${d.day}`}>Preview</Link>
+            <button
+              type="button"
+              className={`adm-btn adm-btn--sm${d.released ? "" : " adm-btn--primary"}`}
+              onClick={() => onStatus(d, d.released ? "draft" : "published")}
+            >
+              {d.released ? "Hide" : "Publish"}
+            </button>
+          </div>
+        )}
+      </td>
+    </tr>
+  );
+}
 
 export default function AdminWinterArc() {
   const [cal, setCal] = useState(null);
   const [error, setError] = useState("");
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(() => {
-    getWinterArcCalendar().then(setCal).catch((e) => setError(e.message || "Couldn't load the calendar."));
+    getWinterArcCalendar().then((c) => { setNow(Date.now()); setCal(c); }).catch((e) => setError(e.message || "Couldn't load the calendar."));
   }, []);
   useEffect(load, [load]);
 
@@ -33,93 +76,75 @@ export default function AdminWinterArc() {
     }
   };
 
-  if (error) return <main className="af-page"><div className="af-error">{error}</div></main>;
-  if (!cal) return null;
+  const slug = cal?.course?.slug || cal?.course_slug;
+  const shell = (body) => (
+    <WinterArcAdminShell
+      title="Calendar"
+      lede={
+        <>
+          Day n is the module with order n in the course <code>{slug || "winterarc"}</code>. Keep that course a draft. Each
+          day opens at midnight IST on its date once published, and needs 3 questions with explanations (the finale can have more).
+        </>
+      }
+      actions={cal?.course && (
+        <Link className="adm-btn" to={`/admin/courses/${cal.course.id}/modules`}>Edit the modules</Link>
+      )}
+    >
+      {body}
+    </WinterArcAdminShell>
+  );
 
-  const problems = cal.days.filter((d) => d.problems.length).length;
-  return (
-    <main className="af-page">
-      <div className="af-page-head">
-        <div>
-          <h1>WinterArc calendar</h1>
-          <div className="af-hint">
-            Day n is the module with order {"n"} in the course <code>{cal.course?.slug || cal.course_slug}</code>. Keep that
-            course a draft. Each day opens at midnight IST on its date once published, and needs 3 questions with explanations
-            (the finale can have more).
-          </div>
-        </div>
-        <div className="wa-admin-actions">
-          <Link className="af-btn" to="/admin/winterarc/metrics">Numbers</Link>
-          <Link className="af-btn" to="/admin/winterarc/people">People</Link>
-          <Link className="af-btn" to="/admin/winterarc/referrals">Referral checks</Link>
-          {cal.course && <Link className="af-btn" to={`/admin/courses/${cal.course.id}/modules`}>Edit the modules</Link>}
-        </div>
-      </div>
+  if (error) return shell(<Notice kind="bad">{error}</Notice>);
+  if (!cal) return shell(<Loading />);
 
-      {!cal.course && (
-        <div className="af-warn">
+  const days = cal.days;
+  const problems = days.filter((d) => d.problems.length).length;
+  const published = days.filter((d) => d.released).length;
+  const openNow = days.filter((d) => d.open_now).length;
+  const next = days.find((d) => Date.parse(d.opens_at) > now);
+
+  return shell(
+    <>
+      {!cal.course ? (
+        <Notice kind="warn">
           There is no course with the slug <code>{cal.course_slug}</code> yet. Create it as a draft, then add a module per day.
-        </div>
-      )}
-      {cal.course && problems > 0 && <div className="af-warn">{problems} {problems === 1 ? "day needs" : "days need"} attention.</div>}
+        </Notice>
+      ) : (
+        <>
+          <div className="adm-stats">
+            <div className="adm-stat"><b>{published} / {W.totalDays}</b><span>Days published</span></div>
+            <div className="adm-stat"><b>{openNow}</b><span>Open to members now</span></div>
+            <div className={`adm-stat${problems ? " adm-stat--warn" : ""}`}><b>{problems}</b><span>{problems === 1 ? "Day needs" : "Days need"} attention</span></div>
+            <div className="adm-stat">
+              <b>{next ? `Day ${next.day}` : "None"}</b>
+              <span>{next ? `Opens next, ${shortDate(next.opens_at)} (${next.released ? "published" : "draft"})` : "Every day has opened"}</span>
+            </div>
+          </div>
 
-      {cal.course && (
-        <table className="wa-admin-cal">
-          <thead>
-            <tr>
-              <th>Day</th>
-              <th>Opens (IST)</th>
-              <th>Module</th>
-              <th>Status</th>
-              <th>Checks</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cal.days.map((d) => (
-              <tr key={d.day} className={d.problems.length ? "has-problem" : ""}>
-                <td><strong>{d.day}</strong> <span className="af-hint">wk {d.week}</span></td>
-                <td>{when(d.opens_at)}</td>
-                <td>
-                  {d.module ? (
-                    <Link to={`/admin/courses/${cal.course.id}/modules/${d.module.id}/cards`}>{d.module.title}</Link>
-                  ) : (
-                    <span className="af-hint">None</span>
-                  )}
-                  {d.module && <div className="af-hint">{d.questions} questions</div>}
-                </td>
-                <td>
-                  {d.module && (
-                    <span className={`af-badge af-badge--${d.released ? "published" : "draft"}`}>
-                      {d.open_now ? "Open now" : d.released ? "Published" : "Draft"}
-                    </span>
-                  )}
-                </td>
-                <td>{d.problems.length ? d.problems.join(" ") : "OK"}</td>
-                <td className="wa-admin-actions">
-                  {d.module && <Link className="af-btn" to={`/winterarc/day/${d.day}`}>Preview</Link>}
-                  {d.module && (
-                    <button type="button" className={`af-btn${d.released ? "" : " af-btn--primary"}`} onClick={() => setStatus(d, d.released ? "draft" : "published")}>
-                      {d.released ? "Hide" : "Publish"}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <div className="adm-card">
+            <div className="adm-table-scroll">
+              <table className="adm-table waa-cal">
+                <thead>
+                  <tr><th>Day</th><th>Opens (IST)</th><th>Module</th><th>Status</th><th>Checks</th><th></th></tr>
+                </thead>
+                <tbody>
+                  {W.weeks.map((w, i) => {
+                    const inWeek = days.filter((d) => d.week === i + 1);
+                    if (!inWeek.length) return null;
+                    const pub = inWeek.filter((d) => d.released).length;
+                    return [
+                      <tr key={w.label} className="waa-week-row">
+                        <td colSpan={6}>{w.label} (Days {w.from}–{w.to}), {pub} of {inWeek.length} published</td>
+                      </tr>,
+                      ...inWeek.map((d) => <Day key={d.day} d={d} courseId={cal.course.id} onStatus={setStatus} />),
+                    ];
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
-      <style>{`
-        .wa-admin-cal { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.92rem; }
-        .wa-admin-cal th, .wa-admin-cal td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-        .wa-admin-cal tr.has-problem td { background: #fffbeb; }
-        .wa-admin-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-        @media (max-width: 760px) {
-          .wa-admin-cal thead { display: none; }
-          .wa-admin-cal tr { display: block; border-bottom: 1px solid #e5e7eb; padding: 8px 0; }
-          .wa-admin-cal td { display: block; border: 0; padding: 4px 0; }
-        }
-      `}</style>
-    </main>
+    </>
   );
 }
