@@ -292,7 +292,7 @@ function PrizesAndRules() {
               <div className="wa-prize">
                 <PiGiftBold className="wa-prize-icon" aria-hidden="true" />
                 <p className="wa-prize-amount">{W.prizePool}</p>
-                <p className="wa-prize-label">in cash prizes</p>
+                <p className="wa-prize-label">prize pool</p>
                 <ol className="wa-prize-podium" aria-label="Final leaderboard prizes">
                   {W.finalPrizes.map((p) => (
                     <li key={p.place}><span>{p.place}</span><strong>{p.amount}</strong></li>
