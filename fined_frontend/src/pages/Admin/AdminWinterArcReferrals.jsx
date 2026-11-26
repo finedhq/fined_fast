@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { decideReferral, getReferrals, when } from "./winterarcAdminApi";
-import "./CardFields/authoring.css";
+import WinterArcAdminShell, { Loading, Notice } from "./WinterArcAdminShell";
 
 const FILTERS = [
   ["ready", "Ready to check"],
@@ -17,6 +17,7 @@ const FILTERS = [
   ["all", "All"],
 ];
 const LABEL = { ready: "Ready to check", waiting: "Waiting for Day 3", approved: "Approved", rejected: "Rejected" };
+const PILL = { ready: "ok", approved: "live", rejected: "bad" };
 
 export default function AdminWinterArcReferrals() {
   const [data, setData] = useState(null);
@@ -53,93 +54,69 @@ export default function AdminWinterArcReferrals() {
   const rows = (data?.referrals || []).filter((r) =>
     filter === "all" ? true : filter === "flagged" ? r.flags.length > 0 : r.status === filter
   );
+  const count = (k) =>
+    !data ? null : k in (data.counts || {}) ? data.counts[k] : k === "flagged" ? data.referrals.filter((r) => r.flags.length).length : null;
 
   return (
-    <main className="af-page wa-admin-page">
-      <div className="af-page-head">
-        <div>
-          <h1>WinterArc referral checks</h1>
-          <div className="af-hint">
-            A referral earns the referrer +{data?.points ?? 10} points (up to {data?.cap ?? 20}) once the friend finishes Day 3 and you
-            approve it. Flags are reasons to look closely; they don't block anything. The pre-launch ₹500 contest is on the Numbers page.
-          </div>
-        </div>
-        <div className="wa-admin-actions">
-          <Link className="af-btn" to="/admin/winterarc/people">People</Link>
-          <Link className="af-btn" to="/admin/winterarc/metrics">Numbers</Link>
-        </div>
+    <WinterArcAdminShell
+      title="Referral checks"
+      lede={`A referral earns the referrer +${data?.points ?? 10} points (up to ${data?.cap ?? 20}) once the friend finishes Day 3 and you approve it. Flags are reasons to look closely; they don't block anything. The ₹500 Avalanche Award is on the Numbers page.`}
+    >
+      {notice && <Notice kind={notice.ok ? "ok" : "bad"}>{notice.message}</Notice>}
+
+      <div className="adm-seg" role="group" aria-label="Filter">
+        {FILTERS.map(([k, l]) => {
+          const n = count(k);
+          return (
+            <button key={k} type="button" className={filter === k ? "on" : ""} aria-pressed={filter === k} onClick={() => setFilter(k)}>
+              {l}
+              {n != null && <span className="adm-count">({n})</span>}
+            </button>
+          );
+        })}
       </div>
 
-      {notice && <div className={notice.ok ? "af-ok" : "af-error"}>{notice.message}</div>}
-
-      <div className="wa-admin-filters" role="group" aria-label="Filter">
-        {FILTERS.map(([k, l]) => (
-          <button key={k} type="button" className={`af-btn${filter === k ? " af-btn--primary" : ""}`} onClick={() => setFilter(k)}>
-            {l}
-            {k in (data?.counts || {}) ? ` (${data.counts[k]})` : k === "flagged" && data ? ` (${data.referrals.filter((r) => r.flags.length).length})` : ""}
-          </button>
-        ))}
-      </div>
-
-      {data && rows.length === 0 && <p className="af-hint">Nothing here.</p>}
-      <div className="wa-admin-list">
+      {!data && !notice && <Loading />}
+      {data && rows.length === 0 && <div className="adm-empty">Nothing here.</div>}
+      <div className="waa-refs">
         {rows.map((r) => (
-          <div key={r.friend_id} className={`af-item wa-ref-item${r.flags.length ? " is-flagged" : ""}`}>
-            <div className="wa-ref-top">
+          <article key={r.friend_id} className={`waa-ref${r.flags.length ? " is-flagged" : ""}`}>
+            <div className="waa-ref-top">
               <div>
-                <strong>{r.friend_name || "(no name)"}</strong> <span className="af-hint">{r.friend_email}</span>
-                {r.friend_college && <div className="af-hint">{r.friend_college}</div>}
-                <div className="af-hint">
-                  Joined {when(r.joined_at)} with code {r.code}, from{" "}
+                <strong>{r.friend_name || "(no name)"}</strong>
+                <div className="waa-ref-line">{r.friend_email}{r.friend_college ? ` · ${r.friend_college}` : ""}</div>
+                <div className="waa-ref-line">
+                  Joined {when(r.joined_at)} with code <code>{r.code}</code>, from{" "}
                   {r.referrer_id ? <Link to={`/admin/winterarc/people?id=${r.referrer_id}`}>{r.referrer_name || r.referrer_email}</Link> : "nobody on the list"}
                 </div>
               </div>
-              <span className={`af-badge af-badge--${r.status === "approved" ? "published" : r.status === "rejected" ? "archived" : "draft"}`}>{LABEL[r.status]}</span>
+              <span className={`adm-pill${PILL[r.status] ? ` adm-pill--${PILL[r.status]}` : ""}`}>{LABEL[r.status]}</span>
             </div>
             {r.flags.length > 0 && (
-              <ul className="wa-ref-flags">{r.flags.map((f) => <li key={f}>{f}</li>)}</ul>
+              <ul className="waa-ref-flags">{r.flags.map((f) => <li key={f}>{f}</li>)}</ul>
             )}
-            {r.decided_reason && <div className="af-hint">Note: {r.decided_reason}</div>}
-            <div className="wa-admin-actions">
+            {r.decided_reason && <div className="waa-ref-note">Note: {r.decided_reason}</div>}
+            <div className="adm-actions">
               {r.status === "ready" && (
-                <button type="button" className="af-btn af-btn--primary" disabled={busy === r.friend_id} onClick={() => act(r, "approve")}>Approve</button>
+                <button type="button" className="adm-btn adm-btn--primary" disabled={busy === r.friend_id} onClick={() => act(r, "approve")}>
+                  Approve
+                </button>
               )}
               {(r.status === "ready" || r.status === "waiting") && (
-                <button type="button" className="af-btn af-btn--danger" disabled={busy === r.friend_id} onClick={() => act(r, "reject")}>Reject</button>
+                <button type="button" className="adm-btn adm-btn--danger" disabled={busy === r.friend_id} onClick={() => act(r, "reject")}>
+                  Reject
+                </button>
               )}
               {r.status === "rejected" && (
-                <button type="button" className="af-btn" disabled={busy === r.friend_id} onClick={() => act(r, "undo")}>Undo rejection</button>
+                <button type="button" className="adm-btn" disabled={busy === r.friend_id} onClick={() => act(r, "undo")}>
+                  Undo rejection
+                </button>
               )}
-              <Link className="af-btn" to={`/admin/winterarc/people?id=${r.friend_id}`}>Friend's record</Link>
+              <Link className="adm-btn" to={`/admin/winterarc/people?id=${r.friend_id}`}>Friend's record</Link>
             </div>
-          </div>
+          </article>
         ))}
       </div>
-      <AdminWinterArcStyles />
-    </main>
-  );
-}
-
-export function AdminWinterArcStyles() {
-  return (
-    <style>{`
-      .wa-admin-page > * { min-width: 0; }
-      .wa-admin-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-      .wa-admin-filters { display: flex; gap: 6px; flex-wrap: wrap; }
-      .wa-admin-list { display: grid; gap: 10px; }
-      .wa-ref-item.is-flagged { border-color: #f59e0b; }
-      .wa-ref-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-      .wa-ref-top > div { min-width: 0; overflow-wrap: anywhere; }
-      .wa-ref-flags { margin: 8px 0; padding-left: 18px; color: #92400e; font-size: 0.9rem; }
-      .wa-admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 560px; }
-      .wa-admin-table th, .wa-admin-table td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-      .wa-admin-scroll { overflow-x: auto; }
-      .wa-admin-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-      .wa-admin-tile { padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; }
-      .wa-admin-tile strong { display: block; font-size: 1.3rem; }
-      .wa-admin-tile span { font-size: 0.8rem; color: #6b7280; }
-      .wa-admin-search { display: flex; gap: 8px; }
-      .wa-admin-search input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 10px; }
-    `}</style>
+    </WinterArcAdminShell>
   );
 }

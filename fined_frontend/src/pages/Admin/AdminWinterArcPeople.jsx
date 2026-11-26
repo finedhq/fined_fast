@@ -8,8 +8,7 @@ import { WINTERARC as W } from "../WinterArc/winterarcConfig";
 import {
   disqualifyPerson, getPerson, getWinners, giftReset, grantPoints, reinstatePerson, searchPeople, when,
 } from "./winterarcAdminApi";
-import { AdminWinterArcStyles } from "./AdminWinterArcReferrals";
-import "./CardFields/authoring.css";
+import WinterArcAdminShell, { Notice } from "./WinterArcAdminShell";
 
 const KIND = {
   streak_bonus: "Streak bonus",
@@ -20,6 +19,23 @@ const KIND = {
   reset_used: "Reset used",
   reset_earned: "Reset earned",
 };
+
+function DayStrip({ done, missed }) {
+  const doneSet = new Set(done);
+  const missedSet = new Set(missed);
+  return (
+    <div className="waa-strip">
+      <div className="waa-strip-cells" role="img" aria-label={`Days done: ${done.length ? done.join(", ") : "none"}. Missed: ${missed.length ? missed.join(", ") : "none"}.`}>
+        {Array.from({ length: W.totalDays }, (_, i) => i + 1).map((n) => (
+          <i key={n} className={doneSet.has(n) ? "done" : missedSet.has(n) ? "missed" : ""} title={`Day ${n}`}>{n}</i>
+        ))}
+      </div>
+      <p className="adm-note" style={{ marginTop: 6 }}>
+        Purple: done on time or repaired ({done.length}). Red: missed ({missed.length}). Grey: not yet.
+      </p>
+    </div>
+  );
+}
 
 function Person({ id, onChanged }) {
   const [p, setP] = useState(null);
@@ -65,65 +81,79 @@ function Person({ id, onChanged }) {
     run(() => reinstatePerson(id), "Reinstated.");
   };
 
-  if (!p) return notice ? <div className="af-error">{notice.message}</div> : null;
+  if (!p) return notice ? <Notice kind="bad">{notice.message}</Notice> : <p className="adm-empty">Loading…</p>;
   const person = p.person;
   return (
-    <section className="af-item">
-      <div className="wa-ref-top">
+    <section className="adm-card waa-person" aria-label="Person">
+      <div className="waa-person-top">
         <div>
-          <h2 style={{ margin: 0 }}>{person.name || "(no name)"}</h2>
-          <div className="af-hint">{person.email}{person.college ? ` · ${person.college}` : ""}</div>
-          <div className="af-hint">
-            Joined {when(person.created_at)} · code {person.referral_code}
-            {person.referred_by_code ? ` · referred with ${person.referred_by_code}` : ""} ·{" "}
+          <h2>{person.name || "(no name)"}</h2>
+          <div className="waa-person-meta">{person.email}{person.college ? ` · ${person.college}` : ""}</div>
+          <div className="waa-person-meta">
+            Joined {when(person.created_at)} · code <code>{person.referral_code}</code>
+            {person.referred_by_code ? <> · referred with <code>{person.referred_by_code}</code></> : null} ·{" "}
             {p.has_account ? `FinEd account since ${when(p.account_created_at)}` : "no FinEd account"}
           </div>
         </div>
-        {person.disqualified_at && <span className="af-badge af-badge--archived">Disqualified</span>}
+        {person.disqualified_at && <span className="adm-pill adm-pill--bad">Disqualified</span>}
       </div>
-      {person.disqualified_at && <div className="af-warn">Disqualified {when(person.disqualified_at)}: {person.disqualified_reason}</div>}
-      {notice && <div className={notice.ok ? "af-ok" : "af-error"}>{notice.message}</div>}
 
-      <div className="wa-admin-tiles" style={{ marginTop: 12 }}>
-        <div className="wa-admin-tile"><strong>{p.total_points}</strong><span>points</span></div>
+      {person.disqualified_at && (
+        <div style={{ marginTop: 14 }}>
+          <Notice kind="warn">Disqualified {when(person.disqualified_at)}: {person.disqualified_reason}</Notice>
+        </div>
+      )}
+      {notice && <div style={{ marginTop: 14 }}><Notice kind={notice.ok ? "ok" : "bad"}>{notice.message}</Notice></div>}
+
+      <div className="adm-stats">
+        <div className="adm-stat"><b>{p.total_points}</b><span>Points</span></div>
         {W.weeks.map((w, i) => (
-          <div key={w.label} className="wa-admin-tile"><strong>{p.week_points[i + 1] || 0}</strong><span>{w.label}</span></div>
+          <div key={w.label} className="adm-stat"><b>{p.week_points[i + 1] || 0}</b><span>{w.label}</span></div>
         ))}
-        <div className="wa-admin-tile"><strong>{p.streak.current}</strong><span>streak (best {p.streak.best})</span></div>
-        <div className="wa-admin-tile"><strong>{p.resets.left}</strong><span>resets left ({p.resets.used} used)</span></div>
+        <div className="adm-stat"><b>{p.streak.current}</b><span>Streak (best {p.streak.best})</span></div>
+        <div className="adm-stat"><b>{p.resets.left}</b><span>Resets left ({p.resets.used} used)</span></div>
       </div>
-      <p className="af-hint">
-        Days done on time or repaired: {p.days_done.length ? p.days_done.join(", ") : "none"}. Missed: {p.days_missed.length ? p.days_missed.join(", ") : "none"}.
-      </p>
 
-      <div className="wa-admin-actions">
-        <button type="button" className="af-btn" onClick={grant}>Grant or take back points</button>
-        <button type="button" className="af-btn" onClick={gift}>Gift a reset</button>
+      <DayStrip done={p.days_done} missed={p.days_missed} />
+
+      <div className="adm-actions">
+        <button type="button" className="adm-btn" onClick={grant}>Grant or take back points</button>
+        <button type="button" className="adm-btn" onClick={gift}>Gift a reset</button>
         {person.disqualified_at ? (
-          <button type="button" className="af-btn" onClick={reinstate}>Reinstate</button>
+          <button type="button" className="adm-btn" onClick={reinstate}>Reinstate</button>
         ) : (
-          <button type="button" className="af-btn af-btn--danger" onClick={dq}>Disqualify</button>
+          <button type="button" className="adm-btn adm-btn--danger" onClick={dq}>Disqualify</button>
         )}
       </div>
 
       <h3>Friends who joined with their link ({p.friends.length})</h3>
       {p.friends.length ? (
-        <ul>{p.friends.map((f) => <li key={f.id}><Link to={`/admin/winterarc/people?id=${f.id}`}>{f.name || f.email}</Link> <span className="af-hint">{when(f.created_at)}</span></li>)}</ul>
-      ) : <p className="af-hint">None.</p>}
+        <ul className="waa-friends">
+          {p.friends.map((f) => (
+            <li key={f.id}><Link to={`/admin/winterarc/people?id=${f.id}`}>{f.name || f.email}</Link> <span className="waa-sub">{when(f.created_at)}</span></li>
+          ))}
+        </ul>
+      ) : <p className="adm-note">None.</p>}
 
       <h3>History</h3>
       {p.history.length ? (
-        <div className="wa-admin-scroll">
-          <table className="wa-admin-table">
-            <thead><tr><th>When</th><th>What</th><th>Points</th><th>Week</th><th>Detail</th></tr></thead>
+        <div className="adm-table-scroll">
+          <table className="adm-table">
+            <thead><tr><th>When</th><th>What</th><th className="num">Points</th><th>Week</th><th>Detail</th></tr></thead>
             <tbody>
               {p.history.map((h, i) => (
-                <tr key={i}><td>{when(h.at)}</td><td>{KIND[h.kind] || h.kind}</td><td>{h.points}</td><td>{h.week}</td><td>{h.day ? `Day ${h.day}` : h.ref}</td></tr>
+                <tr key={i}>
+                  <td>{when(h.at)}</td>
+                  <td>{KIND[h.kind] || h.kind}</td>
+                  <td className="num">{h.points > 0 ? `+${h.points}` : h.points}</td>
+                  <td>{h.week}</td>
+                  <td>{h.day ? `Day ${h.day}` : h.ref}</td>
+                </tr>
               ))}
             </tbody>
           </table>
         </div>
-      ) : <p className="af-hint">Nothing yet. Points from answering questions show in the weekly totals above.</p>}
+      ) : <div className="adm-empty">Nothing yet. Points from answering questions show in the weekly totals above.</div>}
     </section>
   );
 }
@@ -146,12 +176,21 @@ function Winners() {
   }, [week, day, daily]);
   const shown = data && (daily ? data.day === day : !data.day && (data.week ?? null) === week) ? data : null;
   return (
-    <section>
-      <h2>Winners to verify</h2>
-      <div className="wa-admin-filters">
-        {[["day", "Daily"], ...W.weeks.map((w, i) => [i + 1, w.label]), [null, "Overall"]].map(([w, l]) => (
-          <button key={l} type="button" className={`af-btn${week === w ? " af-btn--primary" : ""}`} onClick={() => setWeek(w)}>{l}</button>
-        ))}
+    <section className="adm-card">
+      <div className="adm-card-head">
+        <h2>Winners to verify</h2>
+        {shown && (
+          <span className={`adm-pill ${shown.closed ? "adm-pill--draft" : "adm-pill--live"}`}>
+            {shown.closed ? "Closed" : "Still open, closes"} {when(shown.closes_at)}
+          </span>
+        )}
+      </div>
+      <div className="waa-winners-bar">
+        <div className="adm-seg" role="group" aria-label="Board">
+          {[["day", "Daily"], ...W.weeks.map((w, i) => [i + 1, w.label]), [null, "Overall"]].map(([w, l]) => (
+            <button key={l} type="button" className={week === w ? "on" : ""} aria-pressed={week === w} onClick={() => setWeek(w)}>{l}</button>
+          ))}
+        </div>
         {daily && (
           <select value={day} onChange={(e) => setDay(Number(e.target.value))} aria-label="Day">
             {Array.from({ length: W.totalDays }, (_, i) => i + 1).map((n) => <option key={n} value={n}>Day {n}</option>)}
@@ -159,24 +198,28 @@ function Winners() {
         )}
       </div>
       {daily && (
-        <p className="af-hint">
+        <p className="adm-note" style={{ marginBottom: 12 }}>
           Daily prize: ₹{shown?.prize ?? 100} to rank 1. A day's score counts only questions finished inside its {W.lateFullHours}-hour
           full-points window; ties go to whoever finished first.
         </p>
       )}
-      {error && <div className="af-error">{error}</div>}
+      {error && <Notice kind="bad">{error}</Notice>}
       {shown && (
         <>
-          <p className="af-hint">{shown.closed ? "Closed" : "Still open, closes"} {when(shown.closes_at)}. Disqualified people are already left out.</p>
-          {shown.rows.length === 0 ? <p className="af-hint">No points on this board yet.</p> : (
-            <div className="wa-admin-scroll">
-              <table className="wa-admin-table">
-                <thead><tr><th>Rank</th><th>Name</th><th>Email</th><th>College</th><th>Points</th><th>{daily ? "Finished at" : "Days on time"}</th><th></th></tr></thead>
+          <p className="adm-note" style={{ marginBottom: 12 }}>Disqualified people are already left out.</p>
+          {shown.rows.length === 0 ? <div className="adm-empty">No points on this board yet.</div> : (
+            <div className="adm-table-scroll">
+              <table className="adm-table">
+                <thead><tr><th>Rank</th><th>Name</th><th>Email</th><th>College</th><th className="num">Points</th><th>{daily ? "Finished at" : "Days on time"}</th><th></th></tr></thead>
                 <tbody>
                   {shown.rows.map((r) => (
                     <tr key={r.email}>
-                      <td>{r.rank}</td><td>{r.name || r.display_name}</td><td>{r.email}</td><td>{r.college || ""}</td>
-                      <td>{r.points}</td><td>{daily ? when(r.reached_at) : r.on_time_days}</td>
+                      <td>{r.rank}</td>
+                      <td>{r.name || r.display_name}</td>
+                      <td>{r.email}</td>
+                      <td>{r.college || ""}</td>
+                      <td className="num">{r.points}</td>
+                      <td>{daily ? when(r.reached_at) : r.on_time_days}</td>
                       <td>{r.person_id && <Link to={`/admin/winterarc/people?id=${r.person_id}`}>Open</Link>}</td>
                     </tr>
                   ))}
@@ -208,39 +251,32 @@ export default function AdminWinterArcPeople() {
   };
 
   return (
-    <main className="af-page wa-admin-page">
-      <div className="af-page-head">
-        <div>
-          <h1>WinterArc people</h1>
-          <div className="af-hint">Find someone by name, email, college or referral code. Every change is kept with your email and a reason; nothing is deleted.</div>
-        </div>
-        <div className="wa-admin-actions">
-          <Link className="af-btn" to="/admin/winterarc/referrals">Referral checks</Link>
-          <Link className="af-btn" to="/admin/winterarc">Calendar</Link>
-        </div>
-      </div>
-
-      <form className="wa-admin-search" onSubmit={search}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name, email, college or code" aria-label="Search people" />
-        <button type="submit" className="af-btn af-btn--primary">Search</button>
-      </form>
-      {error && <div className="af-error">{error}</div>}
-      {results && (
-        results.length === 0 ? <p className="af-hint">Nobody found.</p> : (
-          <div className="wa-admin-list">
-            {results.map((r) => (
-              <button key={r.id} type="button" className="af-item" style={{ textAlign: "left", cursor: "pointer" }} onClick={() => setParams({ id: r.id })}>
-                <strong>{r.name || "(no name)"}</strong> <span className="af-hint">{r.email}</span>
-                <div className="af-hint">{r.college || "No college"} · code {r.referral_code}{r.disqualified_at ? " · disqualified" : ""}</div>
-              </button>
-            ))}
-          </div>
-        )
-      )}
+    <WinterArcAdminShell
+      title="People and winners"
+      lede="Find someone by name, email, college or referral code. Every change is kept with your email and a reason; nothing is deleted."
+    >
+      <section className="adm-card">
+        <form className="waa-search" onSubmit={search} role="search">
+          <input className="adm-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name, email, college or code" aria-label="Search people" />
+          <button type="submit" className="adm-btn adm-btn--primary">Search</button>
+        </form>
+        {error && <div style={{ marginTop: 12 }}><Notice kind="bad">{error}</Notice></div>}
+        {results && (
+          results.length === 0 ? <div className="adm-empty" style={{ marginTop: 14 }}>Nobody found.</div> : (
+            <div className="waa-results">
+              {results.map((r) => (
+                <button key={r.id} type="button" className={`waa-result${r.id === id ? " is-on" : ""}`} onClick={() => setParams({ id: r.id })}>
+                  <strong>{r.name || "(no name)"}{r.disqualified_at ? <span className="adm-pill adm-pill--bad" style={{ marginLeft: 6 }}>Disqualified</span> : null}</strong>
+                  <small>{r.email} · {r.college || "No college"} · {r.referral_code}</small>
+                </button>
+              ))}
+            </div>
+          )
+        )}
+      </section>
 
       {id && <Person key={id} id={id} />}
       <Winners />
-      <AdminWinterArcStyles />
-    </main>
+    </WinterArcAdminShell>
   );
 }
