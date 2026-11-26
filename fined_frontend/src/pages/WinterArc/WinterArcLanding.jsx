@@ -20,6 +20,7 @@ import FrostWindow from "./FrostWindow";
 import PrizeTicket from "./PrizeTicket";
 import CertificateShowcase from "./CertificateShowcase";
 import SampleQuestion from "./SampleQuestion";
+import PresentedBy from "./PresentedBy";
 import { Countdown } from "./WinterArcSignup";
 import useJoinWinterArc from "./useJoinWinterArc";
 import useWinterArcStatus from "./useWinterArcStatus";
@@ -115,6 +116,9 @@ function Hero() {
               </svg>
             </span>
           </motion.h1>
+          <motion.div className="wa-hero-sponsor" {...rise(0.12)}>
+            <PresentedBy size="lg" placement="landing_hero" />
+          </motion.div>
           <motion.p className="wa-hero-sub" {...rise(0.16)}>
             One short money task a day for {W.totalDays} days. Free to enter, free to win.
           </motion.p>
@@ -303,7 +307,11 @@ function PrizesAndRules() {
                   {W.show.referralContest && W.referralContests.map((c) => (
                     <li key={c.key}><strong>{c.prize}</strong> {W.referralAwardName}: top referrer by {c.closes.split(",")[0]}</li>
                   ))}
+                  {W.show.sponsor && W.sponsor && (
+                    <li><strong>{W.sponsor.vouchers}</strong> {W.sponsor.name} vouchers: {W.sponsor.voucherReward} each</li>
+                  )}
                 </ul>
+                <PresentedBy size="sm" className="wa-prize-sponsor" placement="landing_prizes" />
                 <Link className="wa-prize-link" to="/winterarc/rules#prizes">Full prize rules</Link>
               </div>
             </FrostWindow>

@@ -64,6 +64,15 @@ export function FinaleNext() {
 
 const headline = (milestone) => (milestone >= W.totalDays ? "I finished WinterArc" : `${milestone}-day streak`);
 
+/** Loads a same-site image for the canvas; resolves null if it fails. */
+const loadImage = (src) =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+
 /** Draws the share image (1080 x 1350) and returns it as a PNG blob. */
 async function drawCard({ name, milestone, points }) {
   try {
@@ -119,6 +128,23 @@ async function drawCard({ name, milestone, points }) {
   g.fillStyle = "#4100BC";
   g.font = `800 64px ${display}`;
   g.fillText(`${points} points`, 540, 880);
+
+  // "PRESENTED BY [logo]" between the card and the link
+  const logo = W.show.sponsor && W.sponsor ? await loadImage(W.sponsor.logo) : null;
+  if (logo) {
+    const logoH = 46;
+    const logoW = (logo.naturalWidth / logo.naturalHeight) * logoH;
+    g.font = `800 26px ${display}`;
+    const label = "PRESENTED BY";
+    const labelW = g.measureText(label).width;
+    const gap = 18;
+    const x0 = 540 - (labelW + gap + logoW) / 2;
+    g.textAlign = "left";
+    g.fillStyle = "#625D6D";
+    g.fillText(label, x0, 1134);
+    g.drawImage(logo, x0 + labelW + gap, 1134 - logoH + 6, logoW, logoH);
+    g.textAlign = "center";
+  }
 
   g.fillStyle = "#171321";
   g.font = `800 48px ${display}`;

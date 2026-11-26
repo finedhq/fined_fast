@@ -9,6 +9,7 @@ import { PiSnowflakeBold, PiXBold, PiArrowRightBold, PiLightningFill, PiTrophyFi
 import { WINTERARC as W } from "./winterarcConfig";
 import SnowField from "./SnowField";
 import PrizeTicket from "./PrizeTicket";
+import PresentedBy from "./PresentedBy";
 import { trackEvent } from "../../utils/analytics";
 import { tagSourceIfUntagged } from "../../utils/attribution";
 import { hasJoined, popupShownThisVisit, markPopupShown } from "./winterarcVisitor";
@@ -92,6 +93,7 @@ export default function WinterArcPopup() {
             <h2 id="wap-title">
               Skill up this winter. <span className="wap-hl">For free.</span>
             </h2>
+            <PresentedBy size="sm" className="wap-sponsor" />
             <p className="wap-sub">
               {W.totalDays} days of short, fun money lessons. One task a day, and you could win real cash.
             </p>

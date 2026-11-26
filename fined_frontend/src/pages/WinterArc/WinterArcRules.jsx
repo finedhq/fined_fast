@@ -161,8 +161,14 @@ export default function WinterArcRules() {
                   {W.show.referralContest && (
                     <li>{W.referralAwardName}: {W.referralContests.map((c) => `${c.prize} to the top referrer until ${c.closes.split(",")[0]}`).join(", and ")}, with at least {W.referralAwardMin} friends (see section 6).</li>
                   )}
+                  {W.show.sponsor && W.sponsor && (
+                    <li>
+                      {W.name} is presented by {W.sponsor.name}. {W.sponsor.name} vouchers: {W.sponsor.vouchers} vouchers,
+                      each for {W.sponsor.voucherReward}.{W.sponsor.vouchersHow && ` ${W.sponsor.vouchersHow}`}
+                    </li>
+                  )}
                   <li>Leaderboard winners are decided by score only.</li>
-                  <li>Prizes are paid by UPI to verified winners, using details they choose to share after winning.</li>
+                  <li>Cash prizes are paid by UPI to verified winners, using details they choose to share after winning.</li>
                   <li>FinEd does not deduct tax from prizes. Any tax due on winnings is the winner's own responsibility.</li>
                   <li>Winners are contacted after verification. If a winner does not reply within {W.winnerResponseHours} hours, the prize may pass to the next eligible person.</li>
                 </ul>
