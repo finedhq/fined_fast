@@ -155,7 +155,7 @@ export default function WinterArcRules() {
               <section id="prizes">
                 <h2>8. Prizes</h2>
                 <ul>
-                  <li>Total prize pool: {W.prizePool} in cash.</li>
+                  <li>Total prize pool: {W.prizePool}.</li>
                   <li>Final leaderboard: {W.finalPrizes.map((p) => `${p.place} place ${p.amount}`).join(", ")}.</li>
                   <li>Daily prizes: {W.dailyPrizeTotal} in total, {W.dailyPrizeEach} to the top scorer of each of the {W.totalDays} days.</li>
                   {W.show.referralContest && (

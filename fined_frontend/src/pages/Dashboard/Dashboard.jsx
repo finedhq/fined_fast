@@ -378,7 +378,7 @@ const Dashboard = () => {
                   {isBeforeStart() ? `${WA.name} starts ${WA.startDate}` : `${WA.name} is on. Join any day`}
                 </h2>
                 <p className="dh-setup-sub">
-                  One short money task a day, {WA.startDate} to {WA.endDate}. Free to join, with {WA.prizePool} in prizes.
+                  One short money task a day, {WA.startDate} to {WA.endDate}. Free to join, with a {WA.prizePool} prize pool.
                 </p>
               </div>
               <div className="dh-setup-actions">
