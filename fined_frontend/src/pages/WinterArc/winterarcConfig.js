@@ -51,7 +51,7 @@ export const WINTERARC = {
   certificatePrice: "₹199",
 
   // Prize pool and its split (DECIDED 2026-11-15). The parts add up to the pool.
-  prizePool: "₹10,000",
+  prizePool: "₹25,000",
   prizeNote: "Final top 3, a winner every day, and two referral contests.",
   finalPrizes: [
     { place: "1st", amount: "₹3,000" },

@@ -1,5 +1,5 @@
-// The gold WinterArc prize ticket: the prize pool counting up from 0, "in cash
-// prizes", and a tilted FREE ENTRY stamp. Used in the home page popup and the
+// The gold WinterArc prize ticket: the prize pool counting up from 0, "prize
+// pool", and a tilted FREE ENTRY stamp. Used in the home page popup and the
 // /winterarc hero. Set --ticket-notch to the background colour behind it so the
 // ticket's side notches look cut out.
 import { useEffect, useRef } from "react";
@@ -25,7 +25,7 @@ function PrizeCount({ value, delay }) {
   return <span ref={ref} className="pt-num">{value}</span>;
 }
 
-export default function PrizeTicket({ amount, label = "in cash prizes", delay = 0.35, className = "", ...rest }) {
+export default function PrizeTicket({ amount, label = "prize pool", delay = 0.35, className = "", ...rest }) {
   return (
     <div className={`pt-ticket ${className}`} {...rest}>
       <PiGiftFill className="pt-icon" aria-hidden="true" />
