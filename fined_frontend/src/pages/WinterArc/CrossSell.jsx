@@ -12,6 +12,9 @@ import { PiArrowRightBold, PiBookOpenTextBold, PiDownloadSimpleBold, PiShareNetw
 import { CROSS_SELL as X, WINTERARC as W } from "./winterarcConfig";
 import { useContentBonus } from "./crossSellUtils";
 import { trackCrossSell, trackEvent } from "../../utils/analytics";
+import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
+import planeImg from "../../assets/newnewplane.webp";
+import markImg from "../../assets/fined-mark.png";
 import "./CrossSell.css";
 
 const SITE = "https://myfined.com";
@@ -73,85 +76,260 @@ const loadImage = (src) =>
     img.src = src;
   });
 
-/** Draws the share image (1080 x 1350) and returns it as a PNG blob. */
+// Brand colours, as on the WinterArc landing page
+const INK = "#171321";
+const INK_2 = "#3E3A4A";
+const INK_3 = "#625D6D";
+const PURPLE = "#4100BC";
+const AMBER = "#FFB600";
+const DISPLAY = "'Plus Jakarta Sans', 'Segoe UI', sans-serif";
+
+/** Rounded rectangle path (canvas roundRect is missing on older Safari). */
+function rr(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+}
+
+/** A filled box with an ink border and a solid offset shadow (the brand's card look). */
+function inkBox(g, x, y, w, h, r, { fill = "#FFFFFF", shadow = INK, off = 8, border = 5 } = {}) {
+  if (off) {
+    g.fillStyle = shadow;
+    rr(g, x + off, y + off, w, h, r);
+    g.fill();
+  }
+  g.fillStyle = fill;
+  rr(g, x, y, w, h, r);
+  g.fill();
+  if (border) {
+    g.lineWidth = border;
+    g.strokeStyle = INK;
+    g.stroke();
+  }
+}
+
+/** Sets the largest font (down to `min`) that keeps `text` within `maxW`. */
+function fitFont(g, text, weight, size, min, maxW) {
+  let px = size;
+  g.font = `${weight} ${px}px ${DISPLAY}`;
+  while (px > min && g.measureText(text).width > maxW) {
+    px -= 4;
+    g.font = `${weight} ${px}px ${DISPLAY}`;
+  }
+}
+
+/** Text with letter spacing where the browser supports it. */
+function spaced(g, text, x, y, px) {
+  if ("letterSpacing" in g) {
+    g.letterSpacing = `${px}px`;
+    g.fillText(text, x, y);
+    g.letterSpacing = "0px";
+  } else {
+    g.fillText(text, x, y);
+  }
+}
+
+/**
+ * Draws the share image (1080 x 1350) and returns it as a PNG blob: the
+ * landing page's winter scene, a ticket card with the 30 calendar doors (the
+ * days done in gold), the points on a gold sticker, and the sponsor strip.
+ */
 async function drawCard({ name, milestone, points }) {
+  const finished = milestone >= W.totalDays;
   try {
+    // The canvas only uses fonts the page has loaded, so ask for these weights first
+    await Promise.all(["700 48px", "800 48px"].map((f) => document.fonts?.load(`${f} 'Plus Jakarta Sans'`)));
     await document.fonts?.ready;
   } catch {
     // fonts not ready: the fallbacks are fine
   }
+  const sponsorOn = W.show.sponsor && W.sponsor;
+  const [scene, plane, mark, logo] = await Promise.all([
+    loadImage(sceneImg),
+    loadImage(planeImg),
+    loadImage(markImg),
+    sponsorOn ? loadImage(W.sponsor.logo) : null,
+  ]);
+
   const c = document.createElement("canvas");
   c.width = 1080;
   c.height = 1350;
   const g = c.getContext("2d");
-  const bg = g.createLinearGradient(0, 0, 0, 1350);
-  bg.addColorStop(0, "#EEF1FF");
-  bg.addColorStop(1, "#FAFBFF");
-  g.fillStyle = bg;
+
+  // Sky, then the home page's hills along the bottom
+  const sky = g.createLinearGradient(0, 0, 0, 1350);
+  sky.addColorStop(0, "#EEF1FF");
+  sky.addColorStop(0.45, "#F9F7F9");
+  sky.addColorStop(1, "#F9F7F9");
+  g.fillStyle = sky;
   g.fillRect(0, 0, 1080, 1350);
-  // snow dots
-  g.fillStyle = "#DDE2FF";
-  for (let i = 0; i < 60; i += 1) {
-    const x = (i * 197) % 1080;
-    const y = (i * 311) % 1350;
+  if (scene) {
+    g.save();
+    // mirrored, like the landing hero, so the temple sits on the left
+    g.translate(1080, 0);
+    g.scale(-1, 1);
+    g.drawImage(scene, -80, 1350 - 700, 1240, (1240 * scene.naturalHeight) / scene.naturalWidth);
+    g.restore();
+  }
+  // Snow (a fixed pattern, so every card looks the same)
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  g.fillStyle = "#C9D1FF";
+  for (let i = 0; i < 70; i += 1) {
+    const x = rnd() * 1080;
+    const y = rnd() * 1350;
+    const r = 3 + rnd() * 7;
+    g.globalAlpha = 0.35 + rnd() * 0.45;
     g.beginPath();
-    g.arc(x, y, 4 + (i % 5) * 2, 0, Math.PI * 2);
+    g.arc(x, y, r, 0, Math.PI * 2);
     g.fill();
   }
-  // ink card
-  g.fillStyle = "#171321";
-  g.fillRect(96, 300, 900, 760);
-  g.fillStyle = "#FFFFFF";
-  g.fillRect(80, 284, 900, 760);
-  g.strokeStyle = "#171321";
-  g.lineWidth = 6;
-  g.strokeRect(80, 284, 900, 760);
+  g.globalAlpha = 1;
 
-  const display = "'Plus Jakarta Sans', 'Segoe UI', sans-serif";
-  g.textAlign = "center";
-  g.fillStyle = "#4100BC";
-  g.font = `800 44px ${display}`;
-  g.fillText("WINTERARC · 30 DAYS OF MONEY", 540, 190);
+  // Header: a big WinterArc wordmark (the largest brand on the card), then "by FinEd"
+  g.textAlign = "left";
+  g.fillStyle = PURPLE;
+  g.font = `800 88px ${DISPLAY}`;
+  const wordW = g.measureText("WinterArc").width;
+  g.fillText("WinterArc", 76, 134);
+  let bx = 76 + wordW + 26;
+  g.fillStyle = INK_3;
+  g.font = `700 32px ${DISPLAY}`;
+  g.fillText("by", bx, 132);
+  bx += g.measureText("by").width + 12;
+  if (mark) {
+    g.drawImage(mark, bx, 96, 46, 40);
+    bx += 46 + 8;
+  }
+  g.fillStyle = PURPLE;
+  g.font = `800 34px ${DISPLAY}`;
+  g.fillText("FinEd", bx, 132);
 
-  g.fillStyle = "#625D6D";
-  g.font = `700 46px ${display}`;
-  g.fillText(name ? `${name} hit` : "I hit", 540, 420);
-  g.fillStyle = "#171321";
-  g.font = `800 ${milestone >= W.totalDays ? 92 : 120}px ${display}`;
-  g.fillText(milestone >= W.totalDays ? "all 30 days" : `${milestone} days`, 540, 570);
-  g.fillStyle = "#F5A623";
-  g.fillRect(300, 610, 480, 14);
-
-  g.fillStyle = "#3E3A4A";
-  g.font = `700 52px ${display}`;
-  g.fillText(milestone >= W.totalDays ? "of WinterArc" : "in a row", 540, 720);
-  g.fillStyle = "#4100BC";
-  g.font = `800 64px ${display}`;
-  g.fillText(`${points} points`, 540, 880);
-
-  // "PRESENTED BY [logo]" between the card and the link
-  const logo = W.show.sponsor && W.sponsor ? await loadImage(W.sponsor.logo) : null;
-  if (logo) {
-    const logoH = 46;
-    const logoW = (logo.naturalWidth / logo.naturalHeight) * logoH;
-    g.font = `800 26px ${display}`;
-    const label = "PRESENTED BY";
-    const labelW = g.measureText(label).width;
-    const gap = 18;
-    const x0 = 540 - (labelW + gap + logoW) / 2;
-    g.textAlign = "left";
-    g.fillStyle = "#625D6D";
-    g.fillText(label, x0, 1134);
-    g.drawImage(logo, x0 + labelW + gap, 1134 - logoH + 6, logoW, logoH);
-    g.textAlign = "center";
+  // The ticket card, with the paper plane flying over its corner
+  inkBox(g, 80, 210, 920, 800, 40, { shadow: PURPLE, off: 16, border: 5 });
+  if (plane) {
+    // the same crop of the plane artwork the banners use
+    g.save();
+    g.translate(92, 196);
+    g.rotate((-10 * Math.PI) / 180);
+    g.drawImage(plane, 541, 331, 443, 307, -66, -45, 132, 92);
+    g.restore();
   }
 
-  g.fillStyle = "#171321";
-  g.font = `800 48px ${display}`;
-  g.fillText("myfined.com/winterarc", 540, 1210);
-  g.fillStyle = "#625D6D";
-  g.font = `600 34px ${display}`;
-  g.fillText("Learn money with FinEd", 540, 1270);
+  g.textAlign = "center";
+  g.fillStyle = PURPLE;
+  g.font = `800 34px ${DISPLAY}`;
+  spaced(g, finished ? "CHALLENGE COMPLETE" : `${milestone}-DAY STREAK`, 540, 300, 5);
+
+  const who = finished ? `${name || "I"} finished` : `${name || "I"} hit`;
+  g.fillStyle = INK_3;
+  fitFont(g, who, 700, 48, 30, 600);
+  g.fillText(who, 540, 376);
+
+  const big = finished ? "all 30 days" : `${milestone} days`;
+  g.font = `800 ${finished ? 126 : 150}px ${DISPLAY}`;
+  // gold underline doodle behind the number, like the landing headline
+  const bw = Math.min(g.measureText(big).width, 640);
+  g.strokeStyle = AMBER;
+  g.lineWidth = 16;
+  g.lineCap = "round";
+  g.beginPath();
+  g.moveTo(540 - bw / 2, 560);
+  g.bezierCurveTo(540 - bw / 4, 540, 540 + bw / 6, 538, 540 + bw / 2, 552);
+  g.stroke();
+  g.fillStyle = INK;
+  g.fillText(big, 540, 520);
+
+  g.fillStyle = INK_2;
+  g.font = `700 50px ${DISPLAY}`;
+  g.fillText(finished ? "of WinterArc" : "in a row", 540, 636);
+
+  // The 30 calendar doors, the days done in gold
+  const door = 68;
+  const gap = 13;
+  const perRow = 10;
+  const gx = 540 - (perRow * door + (perRow - 1) * gap) / 2;
+  const gy = 686;
+  for (let d = 1; d <= W.totalDays; d += 1) {
+    const i = d - 1;
+    const x = gx + (i % perRow) * (door + gap);
+    const y = gy + Math.floor(i / perRow) * (door + gap);
+    if (d <= milestone) {
+      inkBox(g, x, y, door, door, 14, { fill: AMBER, off: 4, border: 3 });
+      g.fillStyle = INK;
+    } else if (d === W.totalDays) {
+      inkBox(g, x, y, door, door, 14, { fill: PURPLE, off: 0, border: 0 });
+      g.fillStyle = "#FFFFFF";
+    } else {
+      const ice = g.createLinearGradient(x, y, x + door, y + door);
+      ice.addColorStop(0, "#FFFFFF");
+      ice.addColorStop(1, "#EEF1FF");
+      g.fillStyle = ice;
+      rr(g, x, y, door, door, 14);
+      g.fill();
+      g.lineWidth = 2;
+      g.strokeStyle = "#DDE2FF";
+      g.stroke();
+      g.fillStyle = "#8F86C9";
+    }
+    g.font = `800 28px ${DISPLAY}`;
+    g.fillText(String(d), x + door / 2, y + door / 2 + 10);
+  }
+
+  // Points on a round gold sticker over the card's corner
+  g.save();
+  g.translate(925, 205);
+  g.rotate((10 * Math.PI) / 180);
+  g.fillStyle = INK;
+  g.beginPath();
+  g.arc(7, 7, 108, 0, Math.PI * 2);
+  g.fill();
+  const gold = g.createLinearGradient(-108, -108, 108, 108);
+  gold.addColorStop(0, "#FFD15C");
+  gold.addColorStop(1, AMBER);
+  g.fillStyle = gold;
+  g.beginPath();
+  g.arc(0, 0, 108, 0, Math.PI * 2);
+  g.fill();
+  g.lineWidth = 5;
+  g.strokeStyle = INK;
+  g.stroke();
+  g.fillStyle = INK;
+  fitFont(g, String(points), 800, 70, 40, 170);
+  g.fillText(String(points), 0, 14);
+  g.font = `800 22px ${DISPLAY}`;
+  spaced(g, "POINTS", 0, 50, 3);
+  g.restore();
+
+  // Sponsor strip (kept smaller than the WinterArc wordmark), then the link
+  if (logo) {
+    const logoH = 38;
+    const logoW = (logo.naturalWidth / logo.naturalHeight) * logoH;
+    const label = "PRESENTED BY";
+    g.font = `800 21px ${DISPLAY}`;
+    const labelW = g.measureText(label).width + 3 * label.length;
+    const sw = labelW + 18 + logoW + 72;
+    const sx = 540 - sw / 2;
+    inkBox(g, sx, 1080, sw, 76, 38, { off: 5, border: 3.5 });
+    g.textAlign = "left";
+    g.fillStyle = INK_3;
+    spaced(g, label, sx + 36, 1126, 3);
+    g.drawImage(logo, sx + 36 + labelW + 18, 1118 - logoH / 2, logoW, logoH);
+    g.textAlign = "center";
+  }
+  // The link, in a pill sized to the text
+  const link = "Join free · myfined.com/winterarc";
+  g.font = `800 38px ${DISPLAY}`;
+  const linkW = g.measureText(link).width + 72;
+  g.fillStyle = "rgba(255, 255, 255, 0.9)";
+  rr(g, 540 - linkW / 2, 1206, linkW, 76, 38);
+  g.fill();
+  g.fillStyle = INK;
+  g.fillText(link, 540, 1257);
 
   return new Promise((resolve) => c.toBlob(resolve, "image/png"));
 }
