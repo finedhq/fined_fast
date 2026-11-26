@@ -17,6 +17,7 @@ import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 import { Countdown } from "./WinterArcSignup";
 import { ShareCard } from "./CrossSell";
+import PresentedBy from "./PresentedBy";
 import { hideShare, shareHidden, shareMilestone } from "./crossSellUtils";
 
 const SITE = "https://myfined.com";
@@ -337,6 +338,7 @@ function Hub() {
             <p className="wa-app-sub">
               {today ? `Day ${today.day} of ${W.totalDays}` : `Starts ${W.startDate}`} <span aria-hidden="true">·</span> <strong>{data.total_points}</strong> points
             </p>
+            <PresentedBy size="sm" className="wa-hub-sponsor" placement="hub" />
           </div>
           <Link className="wa-btn wa-btn-ghost" to="/winterarc/leaderboard">
             <PiTrophyBold aria-hidden="true" /> Leaderboards

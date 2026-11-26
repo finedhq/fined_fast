@@ -1,0 +1,35 @@
+/* "presented by [logo]" line. Logo file is 937 x 146. */
+.wa-presented {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  line-height: 1;
+}
+.wa-presented-label {
+  font-family: "Manrope", "Nunito", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #625D6D;
+  white-space: nowrap;
+}
+.wa-presented img { display: block; width: auto; height: 20px; }
+.wa-presented-link { display: block; border-radius: 4px; transition: opacity 0.15s ease; }
+.wa-presented-link:hover { opacity: 0.75; }
+.wa-presented-link:focus-visible { outline: 2px solid #4100BC; outline-offset: 4px; }
+.wa-presented-sm img { height: 15px; }
+.wa-presented-sm .wa-presented-label { font-size: 0.66rem; }
+.wa-presented-lg img { height: 26px; }
+.wa-presented-lg .wa-presented-label { font-size: 0.78rem; }
+.wa-presented.is-dark .wa-presented-label { color: rgba(255, 255, 255, 0.75); }
+
+/* Where it sits on each page */
+.wa-hero-sponsor { margin-top: 22px; }
+.wa-presented.wa-prize-sponsor { margin-top: 14px; }
+.wa-prize-sponsor .wa-presented-label { color: #4A3A10; }
+.wa-presented.wa-hub-sponsor { margin-top: 10px; }
+.wa-presented.wa-join-sponsor { margin-top: 16px; }
+.wa-presented.wap-sponsor { position: relative; z-index: 2; margin-top: 12px; }
+.wa-presented.dh-wa-sponsor { margin-top: 10px; }

@@ -10,6 +10,7 @@ import {
 } from "react-icons/pi";
 import { WINTERARC as W } from "./winterarcConfig";
 import SignupForm, { Countdown } from "./WinterArcSignup";
+import PresentedBy from "./PresentedBy";
 import sceneImg from "../../assets/newnewbg-imgofhomepg.webp";
 import "./WinterArcLanding.css";
 
@@ -64,6 +65,7 @@ export default function WinterArcJoin() {
             <h1>
               Give your money a <span className="wa-join-hl">winter arc.</span>
             </h1>
+            <PresentedBy className="wa-join-sponsor" placement="join" />
             <div className="wa-join-ticket">
               <p className="wa-join-ticket-label">Day 1 unlocks in</p>
               <Countdown />

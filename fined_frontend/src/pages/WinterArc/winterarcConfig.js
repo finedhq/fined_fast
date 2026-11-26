@@ -61,6 +61,21 @@ export const WINTERARC = {
   dailyPrizeTotal: "₹3,000",
   dailyPrizeEach: "₹100", // shown on the rules page only; the landing says "a winner every day"
 
+  // Presenting sponsor (owner 2026-11-27): "WinterArc, presented by Aguafuel".
+  // Logos live in public/sponsors/ (black text for light pages, white for dark).
+  // `vouchersHow` says who gets the vouchers; it shows on the rules page only
+  // once it is filled in. Turn it all off with show.sponsor.
+  sponsor: {
+    name: "Aguafuel",
+    // The logo links here (new tab, rel="sponsored", UTM-tagged; clicks send GTM sponsor_click)
+    url: "https://www.aguafuel.com/",
+    logo: "/sponsors/aguafuel-logo-black.png",
+    logoOnDark: "/sponsors/aguafuel-logo-white.png",
+    vouchers: 50,
+    voucherReward: "2 free bottles of protein water",
+    vouchersHow: "",
+  },
+
   // Leaderboard weeks (DECIDED). Days are December dates; Sundays close each week.
   weeks: [
     { label: "Week 1", from: 1, to: 6 },
@@ -123,6 +138,7 @@ export const WINTERARC = {
     referrals: true,
     certificate: true,
     certificatePrice: true,
+    sponsor: true,
   },
 };
 
