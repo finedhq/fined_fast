@@ -710,6 +710,36 @@
 @media (min-width: 640px) {
   .wa-join-card { padding: 30px 30px 26px; }
 }
+
+/* ---------- Phones: a calmer landing ----------
+   Feedback: on phones it felt crammed. Same content, fewer things fighting
+   for attention: one big button in the hero, no repeated facts, the points
+   list laid out like the steps list, plainer calendar doors. */
+@media (max-width: 639px) {
+  .wa-hero-sub { margin-top: 16px; font-size: 1.02rem; }
+  .wa-hero-ctas { flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 26px; }
+  .wa-hero-ctas .wa-btn-ghost {
+    padding: 8px 2px; border: 0; background: none; font-size: 0.95rem;
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  .wa-hero-ctas .wa-btn-ghost:hover { background: none; }
+  .wa-hero-login { margin-top: 4px !important; font-size: 0.9rem; }
+  .wa-hero-card { padding: 20px; }
+  /* "30 days · 3 questions · ₹0 to enter" repeats the line under the title */
+  .wa-hero-facts { display: none; }
+
+  .wa-section { padding: 60px 0; }
+  .wa-head { margin-bottom: 28px; }
+
+  .wa-facts { gap: 24px; margin-top: 48px; }
+  .wa-fact { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 16px; }
+  .wa-fact .wa-icon { grid-row: span 2; }
+  .wa-fact h3 { margin-top: 2px; }
+  .wa-fact p { max-width: none; }
+
+  .wa-cal { padding: 16px 10px 14px; }
+  .wa-door-front::after { display: none; } /* the little knob on every door */
+}
 @media (min-width: 960px) {
   .wa-join-page { padding-top: 128px; }
   .wa-join-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 56px; }

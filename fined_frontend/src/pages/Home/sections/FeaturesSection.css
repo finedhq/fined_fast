@@ -282,3 +282,11 @@
     line-height: 1.5;
   }
 }
+
+/* Phones, calmer: smaller pictures and clearer breaks between the four
+   blocks, so they read as four short stops instead of one long list. */
+@media (max-width: 640px) {
+  .lp-wf .wf-img-placeholder { height: 150px; }
+  .lp-wf .wf-row { margin-bottom: 36px; }
+  .lp-wf .wf-row:last-child { margin-bottom: 0; }
+}

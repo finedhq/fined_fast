@@ -11,6 +11,7 @@ import { useUserProfile } from "../../context/UserProfileContext";
 import CommunityBanner from "../../components/Community/CommunityBanner";
 import WinterArcPopup from "../WinterArc/WinterArcPopup";
 import useWinterArcStatus from "../WinterArc/useWinterArcStatus";
+import PresentedBy from "../WinterArc/PresentedBy";
 import { WINTERARC as WA, isBeforeStart, isChallengeOver } from "../WinterArc/winterarcConfig";
 import { trackCrossSell } from "../../utils/analytics";
 import {
@@ -357,6 +358,7 @@ const Dashboard = () => {
                       ? "Check your streak and the leaderboard in your hub."
                       : `${WA.questionsPerDay} questions, a few minutes. Keep your streak going.`}
                 </p>
+                <PresentedBy size="sm" className="dh-wa-sponsor" placement="dashboard_hub_card" />
               </div>
               <div className="dh-setup-actions">
                 <Link to={winterArc.today && !winterArc.today_done ? `/winterarc/day/${winterArc.today}` : "/winterarc/challenge"} className="dh-btn dh-setup-btn">
@@ -380,6 +382,7 @@ const Dashboard = () => {
                 <p className="dh-setup-sub">
                   One short money task a day, {WA.startDate} to {WA.endDate}. Free to join, with a {WA.prizePool} prize pool.
                 </p>
+                <PresentedBy size="sm" className="dh-wa-sponsor" placement="dashboard_join_card" />
               </div>
               <div className="dh-setup-actions">
                 <Link to="/winterarc/join" className="dh-btn dh-setup-btn" onClick={() => trackCrossSell("dashboard_winterarc_join", "/winterarc/join")}>

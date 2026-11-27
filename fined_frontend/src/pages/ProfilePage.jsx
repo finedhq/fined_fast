@@ -452,7 +452,7 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="hidden sm:block text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Overall financial knowledge &amp; consistency score.
                 </p>
               </div>
@@ -460,7 +460,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/courses"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="inline-flex items-center sm:justify-center sm:w-auto mt-1 sm:mt-0 py-1.5 sm:py-2 sm:px-4 rounded-full text-[13px] sm:text-xs font-bold text-[#4100BC] sm:text-slate-800 sm:bg-slate-50 sm:hover:bg-slate-100 sm:border sm:border-slate-200 transition-colors"
                 >
                   Boost Score &rarr;
                 </Link>
@@ -489,7 +489,7 @@ export default function ProfilePage() {
                   <span className="text-3xl font-black text-slate-900 tracking-tight">{finStars}</span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="hidden sm:block text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Exchange your FinStars for rewards and coupons.
                 </p>
               </div>
@@ -497,7 +497,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/rewards"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="inline-flex items-center sm:justify-center sm:w-auto mt-1 sm:mt-0 py-1.5 sm:py-2 sm:px-4 rounded-full text-[13px] sm:text-xs font-bold text-[#4100BC] sm:text-slate-800 sm:bg-slate-50 sm:hover:bg-slate-100 sm:border sm:border-slate-200 transition-colors"
                 >
                   Redeem Now &rarr;
                 </Link>
@@ -526,7 +526,7 @@ export default function ProfilePage() {
                   <span className="text-3xl font-black text-slate-900 tracking-tight">#{rank}</span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="hidden sm:block text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Your current standing among all active learners!
                 </p>
               </div>
@@ -534,7 +534,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/leaderboard"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="inline-flex items-center sm:justify-center sm:w-auto mt-1 sm:mt-0 py-1.5 sm:py-2 sm:px-4 rounded-full text-[13px] sm:text-xs font-bold text-[#4100BC] sm:text-slate-800 sm:bg-slate-50 sm:hover:bg-slate-100 sm:border sm:border-slate-200 transition-colors"
                 >
                   View Leaderboard &rarr;
                 </Link>
@@ -565,7 +565,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed mt-1 mb-4">
+                <p className="hidden sm:block text-xs text-slate-500 leading-relaxed mt-1 mb-4">
                   Personal Best: <strong className="font-bold text-slate-700">{personalBest || streak} Days</strong>. Keep learning daily!
                 </p>
               </div>
@@ -573,7 +573,7 @@ export default function ProfilePage() {
               <div>
                 <Link
                   to="/courses"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-full text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="inline-flex items-center sm:justify-center sm:w-auto mt-1 sm:mt-0 py-1.5 sm:py-2 sm:px-4 rounded-full text-[13px] sm:text-xs font-bold text-[#4100BC] sm:text-slate-800 sm:bg-slate-50 sm:hover:bg-slate-100 sm:border sm:border-slate-200 transition-colors"
                 >
                   Keep Streak &rarr;
                 </Link>

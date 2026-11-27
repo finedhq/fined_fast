@@ -48,8 +48,10 @@ const LeaderboardSection = ({
   const currentList = fullLeaderboard.slice(0, 8);
 
   // Find user's specific rank and score in current timeframe list if available
-  const userEntryInList = fullLeaderboard.find(e => 
-    (userData?.email && e.email === userData.email) || 
+  // The server marks the signer-in's own row (it no longer sends emails)
+  const userEntryInList = fullLeaderboard.find(e =>
+    e.me ||
+    (userData?.email && e.email === userData.email) ||
     (userData?.userId && e.user_sub === userData.userId)
   );
   const activeUserScore = userEntryInList 

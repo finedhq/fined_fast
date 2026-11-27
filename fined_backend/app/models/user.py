@@ -62,6 +62,8 @@ class UserProfileUpdate(BaseModel):
     financial_level: Optional[str] = None
     bio: Optional[str] = None
     location: Optional[str] = None
+    # The person's own name from their sign-in, saved once for the leaderboard
+    full_name: Optional[str] = None
     # Onboarding answers and state, kept inside users.macro_profile
     learning_interests: Optional[list[str]] = None
     onboarding_completed: Optional[bool] = None
@@ -74,6 +76,7 @@ class UserProfileResponse(BaseModel):
     email: str
     display_name: str
     full_name: Optional[str] = None
+    name_saved: bool = False
     username: str
     career_stage: str
     financial_level: str

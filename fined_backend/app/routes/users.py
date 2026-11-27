@@ -42,6 +42,17 @@ async def update_my_profile(payload: UserProfileUpdate, current_user: AuthUser =
             )
         update_data["username"] = username
 
+    # Name from the person's own sign-in (leaderboards show "First L.")
+    full_name = update_data.get("full_name")
+    if full_name is not None:
+        full_name = " ".join(full_name.split())
+        if not 1 <= len(full_name) <= 60 or "@" in full_name or "://" in full_name:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Name must be 1 to 60 characters and not an email or link."
+            )
+        update_data["full_name"] = full_name
+
     updated_profile = await asyncio.to_thread(
         user_repo.update_profile, current_user.email, update_data, current_user.sub
     )
