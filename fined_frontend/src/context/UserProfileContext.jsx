@@ -77,6 +77,17 @@ export const UserProfileProvider = ({ children }) => {
       if (data?.onboarding_required && !data.onboarding_completed) {
         trackSignUp(user?.sub);
       }
+      // Leaderboards show "First L." from the name saved on the account. Save the
+      // sign-in name once (and try at most once per browser session).
+      const signInName = (user?.name || "").trim().replace(/\s+/g, " ").slice(0, 60).trim();
+      if (data && !data.name_saved && signInName && !signInName.includes("@")) {
+        let tried = false;
+        try { tried = sessionStorage.getItem("fined_name_saved") === "1"; } catch { /* no storage */ }
+        if (!tried) {
+          try { sessionStorage.setItem("fined_name_saved", "1"); } catch { /* no storage */ }
+          updateUserProfile({ full_name: signInName }, token).catch(() => {});
+        }
+      }
       if (data) {
         setProfile((prev) => {
           const next = {

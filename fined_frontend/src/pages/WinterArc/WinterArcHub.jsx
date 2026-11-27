@@ -17,6 +17,7 @@ import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
 import { Countdown } from "./WinterArcSignup";
 import { ShareCard } from "./CrossSell";
+import PresentedBy from "./PresentedBy";
 import { hideShare, shareHidden, shareMilestone } from "./crossSellUtils";
 
 const SITE = "https://myfined.com";
@@ -338,6 +339,7 @@ function Hub() {
             <p className="wa-app-sub">
               {today ? `Day ${today.day} of ${W.totalDays}` : `Starts ${W.startDate}`} <span aria-hidden="true">·</span> <strong>{data.total_points}</strong> points
             </p>
+            <PresentedBy size="sm" className="wa-hub-sponsor" placement="hub" />
           </div>
           <Link className="wa-btn wa-btn-ghost" to="/winterarc/leaderboard">
             <PiTrophyBold aria-hidden="true" /> Leaderboards
@@ -373,8 +375,11 @@ function Hub() {
                 }}
               />
             )}
-            <Streak streak={data.streak} />
-            <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
+            {/* one card on phones, two on wider screens */}
+            <div className="wa-stats">
+              <Streak streak={data.streak} />
+              <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
+            </div>
             <Invite r={data.referrals} />
             <p className="wa-app-rules"><Link to="/winterarc/rules">How points work</Link></p>
           </aside>

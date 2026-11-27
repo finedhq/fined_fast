@@ -74,8 +74,9 @@ export default function WinterArcRules() {
               <h2>4. Points</h2>
               <p className="wa-doc-note">The values in this section and in sections 5 and 6 may still change. The final rules will be published on {W.finalRulesDate}.</p>
               <ul>
-                <li>Each correct answer earns {W.pointsPerQuestion} points. A wrong answer earns 0.</li>
-                <li>{W.retryPointsNote}</li>
+                <li>You get up to {W.tryPoints.length} tries at each question. A right answer earns {W.tryPoints[0]} points on the first try, {W.tryPoints[1]} on the second and {W.tryPoints[2]} on the third.</li>
+                <li>A question ends when you answer it right or after your third try. If all {W.tryPoints.length} tries are wrong, it earns 0.</li>
+                <li>Late and reset points are half of these, rounded down: {W.tryPoints.map((p) => Math.floor(p / 2)).join(", ").replace(/, (\d+)$/, " and $1")}.</li>
                 <li>A task done within {W.lateFullHours} hours of its start earns full points. After that it earns {W.latePercentAfter}% until that week's Sunday cut-off, and nothing after.</li>
                 <li>The finale quiz is worth {W.finalePoints} points.</li>
                 <li>{W.name} points are kept separately and added to your FinStars only after results are verified.</li>
@@ -161,8 +162,14 @@ export default function WinterArcRules() {
                   {W.show.referralContest && (
                     <li>{W.referralAwardName}: {W.referralContests.map((c) => `${c.prize} to the top referrer until ${c.closes.split(",")[0]}`).join(", and ")}, with at least {W.referralAwardMin} friends (see section 6).</li>
                   )}
+                  {W.show.sponsor && W.sponsor && (
+                    <li>
+                      {W.name} is presented by {W.sponsor.name}. {W.sponsor.name} vouchers: {W.sponsor.vouchers} vouchers,
+                      each for {W.sponsor.voucherReward}.{W.sponsor.vouchersHow && ` ${W.sponsor.vouchersHow}`}
+                    </li>
+                  )}
                   <li>Leaderboard winners are decided by score only.</li>
-                  <li>Prizes are paid by UPI to verified winners, using details they choose to share after winning.</li>
+                  <li>Cash prizes are paid by UPI to verified winners, using details they choose to share after winning.</li>
                   <li>FinEd does not deduct tax from prizes. Any tax due on winnings is the winner's own responsibility.</li>
                   <li>Winners are contacted after verification. If a winner does not reply within {W.winnerResponseHours} hours, the prize may pass to the next eligible person.</li>
                 </ul>

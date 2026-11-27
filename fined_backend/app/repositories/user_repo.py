@@ -45,9 +45,12 @@ class UserRepository:
         supabase.from_("users").update(fields).eq("email", email).execute()
 
     def get_all_for_leaderboard(self) -> list:
-        res = supabase.from_("users").select(
-            "user_sub, email, article_score, course_score, consistency_score, fin_stars"
-        ).execute()
+        cols = "user_sub, email, username, article_score, course_score, consistency_score, fin_stars"
+        try:
+            res = supabase.from_("users").select(cols + ", full_name").execute()
+        except Exception:
+            # users.full_name comes with migration 017; until then, no names
+            res = supabase.from_("users").select(cols).execute()
         return res.data or []
     
 
@@ -258,6 +261,8 @@ class UserRepository:
         # Derive display name / full name
         if name:
             display_name = name
+        elif user.get("full_name"):
+            display_name = user.get("full_name")
         elif user.get("name"):
             display_name = user.get("name")
         elif user.get("display_name"):
@@ -397,6 +402,8 @@ class UserRepository:
             "email": email,
             "display_name": display_name,
             "full_name": display_name,
+            # whether users.full_name holds a name yet (the site saves it once, for the leaderboard)
+            "name_saved": bool(user.get("full_name")),
             "username": username,
             "career_stage": career_stage,
             "financial_level": financial_level,
@@ -442,7 +449,7 @@ class UserRepository:
 
         # Try to persist to Supabase users table
         try:
-            allowed_cols = ["username", "career_stage", "financial_level", "bio", "location"]
+            allowed_cols = ["username", "career_stage", "financial_level", "bio", "location", "full_name"]
             db_update = {k: v for k, v in fields.items() if k in allowed_cols and v is not None}
             if db_update:
                 res = supabase.from_("users").update(db_update).eq("email", email).execute()

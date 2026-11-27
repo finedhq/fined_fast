@@ -1,0 +1,12 @@
+-- ==========================================================
+-- 017: users.full_name (2026-11-27)
+-- The site leaderboard showed every learner's email address, and the public
+-- /api/home/leaderboard sent all of them to anyone. It now shows "First L."
+-- instead, from this column. The site fills it once per person from their
+-- Google sign-in name (PATCH /api/v1/users/me with full_name).
+-- Until this runs, the leaderboard still works and shows "FinEd learner"
+-- (or the person's @handle) in place of names.
+-- Additive only. Safe to re-run.
+-- Run on practice, then live, BEFORE the backend that uses it is deployed.
+-- ==========================================================
+alter table public.users add column if not exists full_name text;
