@@ -24,7 +24,9 @@ export const WINTERARC = {
   ],
   startingResets: 2,
   // Rules page values (TENTATIVE, from the brief)
-  retryPointsNote: "Each retry of a question earns fewer points than the try before. The exact scale is set before launch.",
+  // Points for a right answer on try 1, 2 and 3. Matches TRY_POINTS in
+  // winterarc_rules.py; change both together.
+  tryPoints: [10, 5, 2],
   lateFullHours: 36,
   latePercentAfter: 50,
   streakGrace: "12:00 noon IST the next day",
@@ -46,8 +48,8 @@ export const WINTERARC = {
   referralAwardName: "Avalanche Award",
   referralAwardMin: 3,
   certificateMinDays: 21,
-  // TENTATIVE: paid checkout needs entity status + gateway approval. Price stays
-  // hidden (show.certificatePrice) until that is confirmed.
+  // Owner decided 27 Nov 2026 to show the price on all pages while payment
+  // gateway approval is pending.
   certificatePrice: "₹199",
 
   // Prize pool and its split (DECIDED 2026-11-15). The parts add up to the pool.
