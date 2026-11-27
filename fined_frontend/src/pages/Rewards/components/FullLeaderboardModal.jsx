@@ -95,7 +95,7 @@ const FullLeaderboardModal = ({
             <span className="rw-sr-only">Search learners</span>
             <input
               type="text"
-              placeholder="Search learners by name or email..."
+              placeholder="Search learners by name..."
               value={searchTerm}
               onChange={handleSearchChange}
               autoFocus
@@ -109,6 +109,7 @@ const FullLeaderboardModal = ({
               {paginatedList.map((entry, idx) => {
                 const rank = entry.rank || (startIndex + idx + 1);
                 const isUser = userEntry && (
+                  entry.me ||
                   (entry.email && entry.email === userEntry.email) ||
                   entry.isCurrentUser
                 );
@@ -117,7 +118,7 @@ const FullLeaderboardModal = ({
 
                 return (
                   <li
-                    key={entry.email || `${validCurrentPage}-${idx}`}
+                    key={`${rank}-${displayName}`}
                     className={`rw-row${isUser ? ' rw-row--you' : ''}${rank <= 3 ? ` rw-row--top rw-row--top${rank}` : ''}`}
                   >
                     <span className="rw-row-rank">{isUser ? `#${rank}` : rank}</span>

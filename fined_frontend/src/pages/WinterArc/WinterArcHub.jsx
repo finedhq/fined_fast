@@ -374,8 +374,11 @@ function Hub() {
                 }}
               />
             )}
-            <Streak streak={data.streak} />
-            <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
+            {/* one card on phones, two on wider screens */}
+            <div className="wa-stats">
+              <Streak streak={data.streak} />
+              <Resets resets={data.resets} busy={busy} msg={resetMsg} onRepair={repair} />
+            </div>
             <Invite r={data.referrals} />
             <p className="wa-app-rules"><Link to="/winterarc/rules">How points work</Link></p>
           </aside>

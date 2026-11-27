@@ -58,6 +58,8 @@ function Leaderboard() {
               <tbody>
                 {leaderboard.map((entry, idx) => {
                   const rank = entry.rank || idx + 1;
+                  // The server sends a public name only ("Anish P."), never emails
+                  const name = entry.name || "FinEd learner";
                   let rankClass = "";
                   let rankBadge = rank;
                   
@@ -73,13 +75,13 @@ function Leaderboard() {
                   }
                   
                   return (
-                    <tr key={entry.email + "-" + rank} className={rankClass}>
+                    <tr key={`${rank}-${name}`} className={rankClass}>
                       <td className="cell-rank">{rankBadge}</td>
                       <td className="cell-user">
-                        <span className="user-avatar">
-                          {entry.email.charAt(0).toUpperCase()}
+                        <span className="user-avatar" aria-hidden="true">
+                          {name.replace("@", "").charAt(0).toUpperCase()}
                         </span>
-                        <span className="user-email">{entry.email}</span>
+                        <span className="user-email">{name}{entry.me ? " (you)" : ""}</span>
                       </td>
                       <td className="cell-score cell-bold">{entry.finScore || entry.fin_score || 0}</td>
                       <td className="cell-score">{entry.course_score || 0}</td>

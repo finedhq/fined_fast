@@ -48,7 +48,19 @@
 .wa-race.is-compact .wa-race-title { font-size: 0.98rem; }
 .wa-race.is-compact .wa-race-rule { font-size: 0.8rem; }
 
+/* The compact card's fold-away copy of the rule: phones only */
+.wa-race-more { display: none; }
+.wa-race-more > summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 0;
+  font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.84rem; color: #FFE08A;
+}
+.wa-race-more > summary::-webkit-details-marker { display: none; }
+.wa-race-more > summary::after { content: "+"; font-size: 1.05rem; line-height: 1; transition: transform 0.2s ease; }
+.wa-race-more[open] > summary::after { transform: rotate(45deg); }
+
 @media (max-width: 600px) {
   .wa-race { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .wa-race-prize { flex-direction: row; align-items: center; justify-content: space-between; padding: 0 0 12px; border-right: 0; border-bottom: 1.5px dashed rgba(255, 255, 255, 0.28); }
+  .wa-race.is-compact .wa-race-text > .wa-race-rule { display: none; }
+  .wa-race.is-compact .wa-race-more { display: block; }
 }

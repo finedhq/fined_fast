@@ -14,6 +14,12 @@ const DAYS_LEFT = C ? Math.max(0, Math.ceil((Date.parse(C.endsAt) - Date.now()) 
 export default function ContestCard({ compact = false, standing = null }) {
   if (!C) return null;
   const left = DAYS_LEFT <= 1 ? "Ends today" : `${DAYS_LEFT} days left`;
+  const rule = (
+    <>
+      Closes {C.closes}. A friend counts once they join with your link using their FinEd account and
+      finish {C.friendDays}. You need at least {W.referralAwardMin} such friends to win. Results {C.results}.
+    </>
+  );
   return (
     <div className={`wa-race${compact ? " is-compact" : ""}`}>
       <div className="wa-race-prize">
@@ -22,10 +28,14 @@ export default function ContestCard({ compact = false, standing = null }) {
       </div>
       <div className="wa-race-text">
         <p className="wa-race-title">The {W.referralAwardName}: bring the most friends, win {C.prize}</p>
-        <p className="wa-race-rule">
-          Closes {C.closes}. A friend counts once they join with your link using their FinEd account and
-          finish {C.friendDays}. You need at least {W.referralAwardMin} such friends to win. Results {C.results}.
-        </p>
+        <p className="wa-race-rule">{rule}</p>
+        {compact && (
+          // Hub on phones: the rule above is hidden and folds away here instead (CSS swaps them)
+          <details className="wa-race-more">
+            <summary>How friends count</summary>
+            <p className="wa-race-rule">{rule}</p>
+          </details>
+        )}
         {standing && (
           <p className="wa-race-standing">
             {standing.joined
