@@ -33,6 +33,66 @@ function PollGroup({ kind, num, prompt, options, picked, ack, onPick }) {
   );
 }
 
+// WinterArc Day 6 on: "your month" — money in and must-pay costs, as two
+// steppers with preset chips (`month` in the hero card). Kept in this tab's
+// page state only (never in the saved answers), so the note under it is true.
+function MonthInputs({ m, num, answers, onAnswer }) {
+  const inr = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+  const income = answers.income ?? m.income.default;
+  const must = Math.min(income, answers.must ?? Math.round((income * m.must.default_pct) / 100));
+  const set = (patch) => {
+    const nextIncome = patch.income ?? income;
+    const nextMust = Math.min(nextIncome, patch.must ?? (patch.pct != null ? Math.round((nextIncome * patch.pct) / 100) : must));
+    onAnswer({ income: nextIncome, must: nextMust });
+  };
+  const row = (label, value, onLess, onMore, chips) => (
+    <div className="hero-month-row">
+      <div className="hero-month-label">{label}</div>
+      <div className="hero-month-ctrl">
+        <button type="button" className="stepper-btn" aria-label={`${label}: less`} onClick={onLess}>
+          −
+        </button>
+        <strong>{inr(value)}</strong>
+        <button type="button" className="stepper-btn" aria-label={`${label}: more`} onClick={onMore}>
+          +
+        </button>
+      </div>
+      <div className="poll-chip-row">{chips}</div>
+    </div>
+  );
+  return (
+    <div className="hero-poll hero-poll--month is-answered">
+      <div className="hero-poll-prompt">
+        <span className="poll-num">{num}</span>
+        {m.prompt}
+      </div>
+      {row(
+        m.income.label,
+        income,
+        () => set({ income: Math.max(m.income.step, income - m.income.step) }),
+        () => set({ income: income + m.income.step }),
+        m.income.options.map((v) => (
+          <button key={v} type="button" className={`poll-chip${income === v ? " selected" : ""}`} onClick={() => set({ income: v })}>
+            {inr(v)}
+          </button>
+        )),
+      )}
+      {row(
+        m.must.label,
+        must,
+        () => set({ must: Math.max(0, must - m.must.step) }),
+        () => set({ must: Math.min(income, must + m.must.step) }),
+        m.must.presets.map((p) => (
+          <button key={p} type="button" className={`poll-chip${must === Math.round((income * p) / 100) ? " selected" : ""}`} onClick={() => set({ pct: p })}>
+            {p}%
+          </button>
+        )),
+      )}
+      {m.note && <p className="warmup-note">{m.note}</p>}
+    </div>
+  );
+}
+
 export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSelector, rootRef, unit = "FinStars" }) {
   const d = card.card_data || {};
   const meta = [d.read_time ? `${String(d.read_time).replace(/^~/, "")} read` : null, ...(d.meta_chips || [])].filter(Boolean);
@@ -92,6 +152,7 @@ export default function Hero({ card, maxStars, answers, onAnswer, firstSectionSe
               onPick={(o) => onAnswer({ savings: o.id, amount: o.value ?? null })}
             />
           )}
+          {d.month && <MonthInputs m={d.month} num={chip ? "03" : "02"} answers={answers} onAnswer={onAnswer} />}
           {d.note && <p className="warmup-note">{d.note}</p>}
         </div>
       </div>

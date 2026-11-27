@@ -14,6 +14,14 @@
 //           an effect that lands harder on one box than another (Module 9)
 // Config `tall: true` (Module 10) gives a four-row layout more height.
 // `pulse` may be a list of boxes (Module 11: the whole map pulses).
+// Config `wrapNotes: true` (WinterArc Day 2 on) lets a box's note wrap onto
+// a second line and lines it up with the box's outer edge (left boxes from
+// their left edge, right boxes from their right), so a long note on a phone
+// stays on screen. Older maps keep one centred line.
+// Config `record: {tool, node, empty}` (WinterArc Day 4): on a step with
+// `record: true`, box `node` shows the reader's own on-time / late record,
+// saved by that tool card (its slug) in the page's tool state; `empty` shows
+// instead if they haven't played it.
 // The reader doesn't touch the map. Its one reaction: once the step's
 // tap-to-guess is answered, the `pulse` box pulses. Nothing is saved.
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
@@ -61,7 +69,23 @@ function Token({ token, spot, from, index }) {
   );
 }
 
-export default function TradeMap({ step, steps, state, config }) {
+// The reader's own repayment record (✓ on time, ✗ late), under a box.
+function RecordStrip({ record, empty }) {
+  if (!record?.length) return <span className="tm-note tm-record-empty">{empty}</span>;
+  const lates = record.filter((r) => r === "late").length;
+  return (
+    <span className="tm-record" aria-hidden="true">
+      {record.map((r, k) => (
+        <i key={k} className={`tm-record-box is-${r}`}>
+          {r === "late" ? "✗" : "✓"}
+        </i>
+      ))}
+      <em>{lates ? `${lates} late` : "all on time"}</em>
+    </span>
+  );
+}
+
+export default function TradeMap({ step, steps, state, config, tools }) {
   const s = mapStep(config, step);
   const at = Math.min(Math.max(step ?? 0, 0), config.steps.length - 1);
   const stageRef = useRef(null);
@@ -114,7 +138,10 @@ export default function TradeMap({ step, steps, state, config }) {
                 ))}
               </span>
             )}
-            {s.notes?.[id] && <span className="tm-note">{s.notes[id]}</span>}
+            {s.record && config.record?.node === id && <RecordStrip record={tools?.[config.record.tool]?.record} empty={config.record.empty} />}
+            {s.notes?.[id] && (
+              <span className={`tm-note${config.wrapNotes ? ` tm-note--wrap${n.x < 40 ? " tm-note--start" : n.x > 60 ? " tm-note--end" : ""}` : ""}`}>{s.notes[id]}</span>
+            )}
           </div>
         ))}
         {(s.linkLabels || []).filter(both).map(([a, b, text]) => (
