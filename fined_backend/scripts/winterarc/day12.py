@@ -1,0 +1,86 @@
+"""Day 12 · SIPs and Index Funds (Sat 12 Dec). Spec: Days 8 to 14 doc, Day 12 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        12, "wa-d12-hero", "SIPs and Index Funds",
+        "₹1,000 a month, every month.",
+        "What a SIP actually does in a bad year, and why so many people pick funds that just copy the market.",
+        "11 min", "poll_sip_better",
+        "Is a SIP always better than investing a lump sum?",
+        [("always", "Yes, always"), ("never", "No, lump sum is always better"), ("depends", "Depends on how prices move")],
+        "Two made-up years will settle it.",
+    ),
+    chapter("wa-d12-ch1-sip", "The monthly habit", "Chapter 1", "sip_sim_wa12", "₹1,000 a month for 12 months", [
+        step("s1-1", "Set it up", "Same ₹1,000 on the 5th of every month.",
+             "Arjun starts a [[SIP]] of ₹1,000 a month in a made-up fund. Its NAV falls from ₹100 to ₹70, then climbs to ₹110 over the year. Each month, ₹1,000 ÷ that month's NAV fills a bucket of units.",
+             glossary=[g("SIP", "Systematic investment plan; investing a fixed amount at regular intervals.")]),
+        step("s1-2", "Your call", "Month 3. It's falling. Keep going?",
+             "The NAV is ₹80 and falling. Headlines are gloomy. Tap **Keep the SIP** or **Pause for four months**. A fixed amount buys more units when prices are low: that's [[rupee cost averaging]].",
+             glossary=[g("rupee cost averaging", "Buying more units when prices are low and fewer when high, by investing a fixed amount regularly.")]),
+        step("s1-3", "Guess first", "What if Arjun had put all ₹12,000 in on day one?",
+             "Same fund, same year. One lump sum at ₹100, or ₹1,000 every month?",
+             guess=("Which wins this year?", [
+                 ("sip", "SIP wins", "Right, this year: the SIP's ₹14,271 beat the lump sum's ₹13,200, because it bought lots of cheap units in the dip.", True),
+                 ("lump", "Lump sum wins", "Not this year: ₹13,200 against the SIP's ₹14,271. The SIP bought lots of cheap units in the dip.", False),
+             ])),
+        step("s1-4", "The other year", "Now prices only go up.",
+             "Tap **Play a rising year**: the NAV climbs from ₹100 to ₹155 in steady steps. Same two strategies. A [[lump sum]] has all its money in from the start.",
+             glossary=[g("lump sum", "Investing a large amount at once.")]),
+    ]),
+    chapter("wa-d12-ch2-pick-star", "Pick the star", "Chapter 2", "manager_pick_wa12", "Ten fund managers (all made up)", [
+        step("s2-1", "Two kinds", "Pick companies, or copy an index?",
+             "An [[active fund]]'s manager picks which companies to buy, aiming to beat an index. An [[index fund]] simply holds what the index holds, in the same weights.",
+             glossary=[g("active fund", "A fund whose manager chooses investments to try to beat a benchmark."),
+                       g("index fund", "A fund that copies an index.")]),
+        step("s2-2", "Pick one", "Here's last year. Who do you back?",
+             "Ten made-up managers and last year's returns. The index made +12%. The top card shows +28%. Tap the one you'd back."),
+        step("s2-3", "Next year", "The leaderboard reshuffles.",
+             "Tap **Play next year** and watch the cards re-sort. Your pick stays outlined wherever it lands."),
+        step("s2-4", "Real data", "Ten years of the real scoreboard.",
+             "S&P Dow Jones Indices' SPIVA India scorecard compares Indian active funds with their benchmarks. Over the 10 years to June 2026, more than 70% of active funds underperformed in every category it examined. Over shorter periods, results vary: in 2025, most mid- and small-cap active funds beat their benchmark."),
+    ]),
+    chapter("wa-d12-ch3-copy-index", "Copy the index", "Chapter 3", "index_fund_wa12", "The FinEd Five Index Fund", [
+        step("s3-1", "Same weights", "₹1,000 split exactly like the index.",
+             "Arjun puts ₹1,000 in a made-up fund that copies Day 10's FinEd Five. His money splits in the index's weights."),
+        step("s3-2", "Index change", "Kisan Seeds leaves. Green Cart joins.",
+             "The index swaps one company. Tap **Apply the index change** and see what the fund does."),
+        step("s3-3", "The gap", "Index +12.0%. Fund +11.8%.",
+             "An index fund aims to match its index, not beat it. The small gap, mostly costs, is called the [[tracking difference]]. When comparing index funds on the same index, a smaller gap is what you're looking for. Day 15 covers comparing funds.",
+             glossary=[g("tracking difference", "How far an index fund's return falls short of (or exceeds) its index.")]),
+    ]),
+    check("wa-d12-check1-units", 1, "Kabir invests ₹2,000 through a SIP in a month when the NAV is ₹50. Next month the NAV is ₹80. In which month does he get more units?", [
+        ("a", "When the NAV is ₹50", True),
+        ("b", "When the NAV is ₹80", False),
+        ("c", "Same units both months", False),
+        ("d", "He gets no units in a SIP", False),
+    ], "₹2,000 ÷ ₹50 = 40 units; ₹2,000 ÷ ₹80 = 25 units. A fixed amount buys more units when the price is low."),
+    check("wa-d12-check2-index-fund", 2, "What does an index fund do?", [
+        ("a", "Its manager picks the companies most likely to rise", False),
+        ("b", "It holds the same companies as its index, in the same weights", True),
+        ("c", "It guarantees the index's return", False),
+        ("d", "It only buys government bonds", False),
+    ], "An index fund copies its index. It doesn't guarantee a return, and costs make it trail the index slightly."),
+    check("wa-d12-check3-sip-vs-lump", 3, "Which statement is true?", [
+        ("a", "A SIP always beats a lump sum", False),
+        ("b", "A lump sum always beats a SIP", False),
+        ("c", "Neither always wins; it depends on how prices move after you invest", True),
+        ("d", "A SIP removes all risk of loss", False),
+    ], "In a falling-then-rising year a SIP did better; in a steadily rising year the lump sum did. A SIP doesn't remove market risk."),
+    completion(
+        "wa-d12-done", 12, "You know what a SIP does and doesn't do, and how index funds work.", "Habit card",
+        [
+            "A SIP invests a fixed amount regularly, buying more units when prices are low. It suits monthly income and removes timing decisions, but doesn't always beat a lump sum.",
+            "Active funds try to beat an index; over 10 years to June 2026, more than 70% of Indian active funds trailed their benchmark in every SPIVA category.",
+            "Index funds copy an index automatically and trail it slightly because of costs.",
+        ],
+        {
+            "always": "You said always. In the rising year, the lump sum ended ₹3,735 ahead.",
+            "never": "You said never. In the falling-then-rising year, the SIP ended ₹1,071 ahead.",
+            "depends": "You said it depends. That's what both years showed.",
+        },
+        ("Day 13: Fixed Income Investments", "FDs, bonds and government securities, and why a bond's price falls when rates rise."),
+        "Find out what an index fund's 'tracking error' or 'tracking difference' means on any fund house's website. Just read. Don't invest.",
+        "wa12",
+    ),
+])

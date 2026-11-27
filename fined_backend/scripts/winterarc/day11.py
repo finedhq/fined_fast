@@ -1,0 +1,85 @@
+"""Day 11 · Mutual Funds (Fri 11 Dec). Spec: Days 8 to 14 doc, Day 11 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        11, "wa-d11-hero", "Mutual Funds",
+        "100 friends, one manager.",
+        "Run your own tiny mutual fund and see how units, NAV and costs really work.",
+        "10 min", "poll_cheap_nav",
+        "Fund A's NAV is ₹10. Fund B's NAV is ₹100. Which is the better deal?",
+        [("a", "Fund A, it's cheaper"), ("b", "Fund B, it's grown more"), ("neither", "NAV alone doesn't tell you")],
+        "Run the fund, then decide.",
+    ),
+    chapter("wa-d11-ch1-run-fund", "Run a fund", "Chapter 1", "unit_shop_wa11", "The Hostel Fund (made up)", [
+        step("s1-1", "Pool it", "100 friends, ₹10,000 each.",
+             "They hand ₹10 lakh to one manager to invest in many companies. That pool is a tiny [[mutual fund]]. Each friend gets [[unit]]s: 1,000 each at ₹10 a unit.",
+             glossary=[g("mutual fund", "A pool of money from many investors, managed by a professional and invested in many securities."),
+                       g("unit", "Your share of a mutual fund.")]),
+        step("s1-2", "Markets move", "The holdings rise 8%.",
+             "The companies the fund holds rise a made-up 8%. The fund's [[NAV]] is its assets divided by its units.",
+             glossary=[g("NAV", "Net asset value per unit; the fund's assets minus its costs, divided by the number of units.")]),
+        step("s1-3", "New money", "Arjun joins late with ₹5,000.",
+             "Arjun wants in. Tap **Invest ₹5,000** and watch the unit counter and the NAV tag."),
+        step("s1-4", "Guess first", "₹10 NAV vs ₹100 NAV.",
+             "Arjun has ₹10,000. Fund A's NAV is ₹10; Fund B's is ₹100. Both hold similar companies and both rise 10% next year.",
+             guess=("Which ends higher?", [
+                 ("a", "A ends higher", "More units isn't more money. Each A unit is worth less.", False),
+                 ("b", "B ends higher", "A higher NAV doesn't mean it'll grow faster.", False),
+                 ("same", "Same", "Right. What matters is the % change, not the NAV level.", True),
+             ])),
+    ]),
+    chapter("wa-d11-ch2-who-holds", "Who holds your money", "Chapter 2", "fund_vault_wa11", "The fund's safety layers", [
+        step("s2-1", "Sort it", "Who does what?",
+             "Five roles keep a fund running: the [[AMC]], the [[custodian]], the trustees, the registrar (RTA) and SEBI. Tap a role, then its job.",
+             glossary=[g("AMC", "Asset management company, the firm that manages the fund."),
+                       g("custodian", "The institution that holds the fund's securities.")]),
+        step("s2-2", "Why it matters", "The manager never holds the cash.",
+             "The fund's assets are held separately from the AMC's own money. This separation is designed so the fund's assets belong to its investors. It doesn't protect against market falls; a fund's value can still go down."),
+        step("s2-3", "Costs", "1% a year sounds small.",
+             "Every fund charges a yearly cost, its [[expense ratio]], taken out of its assets a little each day, so the NAV you see is already after costs. From April 2026, SEBI's new rules split this into a capped base fee plus brokerage and government levies, shown separately. Pick a cost and watch the bucket leak.",
+             glossary=[g("expense ratio", "A fund's yearly costs as a % of its assets. Day 15 shows how to compare it.")]),
+    ]),
+    chapter("wa-d11-ch3-menu", "The menu", "Chapter 3", "fund_menu_wa11", "What each type is built for", [
+        step("s3-1", "Match", "Which type is designed for which job?",
+             "Fund types differ by what they hold, and each is designed for a different time horizon. Match each job to a type."),
+        step("s3-2", "Riskometer", "Same dial, different needles.",
+             "Day 9's riskometer is on every fund's fact sheet. It describes the fund, not whether it suits you. Tap each type to swing the needle."),
+        step("s3-3", "Coming up", "How do you put money in?",
+             "You can invest a lump sum, or a fixed amount every month. And some funds don't pick companies at all; they copy an index. That's tomorrow."),
+    ]),
+    check("wa-d11-check1-nav", 1, "A fund holds ₹50 lakh of assets (after costs) and has 2,50,000 units. What is its NAV?", [
+        ("a", "₹5", False),
+        ("b", "₹20", True),
+        ("c", "₹50", False),
+        ("d", "₹200", False),
+    ], "₹50,00,000 ÷ 2,50,000 units = ₹20 per unit."),
+    check("wa-d11-check2-who-holds", 2, "In a mutual fund, who holds the fund's securities?", [
+        ("a", "The fund manager personally", False),
+        ("b", "The distributor who sold it", False),
+        ("c", "A custodian, separate from the AMC", True),
+        ("d", "SEBI", False),
+    ], "The custodian holds the fund's securities; the AMC manages them but doesn't hold them."),
+    check("wa-d11-check3-cost", 3, "Two funds hold the same investments. One charges 0.5% a year and the other 1.5%. Over 20 years, what happens?", [
+        ("a", "Nothing much; 1% is too small to matter", False),
+        ("b", "The cheaper one ends up noticeably higher, because the cost is taken every year", True),
+        ("c", "The pricier one always wins because it has better managers", False),
+        ("d", "They end up exactly the same", False),
+    ], "A yearly cost compounds against you. With the same holdings, the lower-cost fund keeps more."),
+    completion(
+        "wa-d11-done", 11, "You know how a fund pools money, prices units and charges costs.", "Fund card",
+        [
+            "A mutual fund pools money and issues units; the NAV is the value of one unit, and a low NAV isn't \"cheap\".",
+            "The AMC manages the fund, a custodian holds the securities, trustees watch, and SEBI regulates.",
+            "Yearly costs come out of returns every year, so small differences add up over decades.",
+        ],
+        {
+            "a": "You picked the ₹10 NAV. Both pots ended at ₹11,000.",
+            "b": "You picked the ₹100 NAV. A higher NAV didn't grow any faster.",
+            "neither": "You said NAV alone doesn't tell you. Right.",
+        },
+        ("Day 12: SIPs and Index Funds", "Investing a little every month, and funds that simply copy the market."),
+        "Open any mutual fund's fact sheet and find three things: its NAV, its expense ratio and its riskometer. Just find them.",
+        "wa11",
+    ),
+])

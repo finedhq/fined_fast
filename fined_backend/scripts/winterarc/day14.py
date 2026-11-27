@@ -1,0 +1,82 @@
+"""Day 14 · Alternative Investments (Mon 14 Dec). Spec: Days 8 to 14 doc, Day 14 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        14, "wa-d14-hero", "Alternative Investments",
+        "Beyond shares and FDs.",
+        "Gold, silver, ETFs, PPF, EPF, NPS and property: what each one is, and when you can get your money out.",
+        "11 min", "poll_gold_jewellery",
+        "Is gold jewellery a good way to invest in gold?",
+        [("yes", "Yes, it's gold"), ("partly", "Partly, there are extra costs"), ("no", "No, it's not an investment at all")],
+        "Chapter 1 puts numbers on it.",
+    ),
+    chapter("wa-d14-ch1-gold", "Four ways to buy gold", "Chapter 1", "gold_counter_wa14", "₹10,000 of gold", [
+        step("s1-1", "Guess first", "Which route gives you the most gold for ₹10,000?",
+             "Four counters: jewellery, a coin or bar, a gold ETF, and digital gold on an app. Each has ₹10,000 on it. Tap the one you think ends up holding the most gold value."),
+        step("s1-2", "Buy", "What ₹10,000 actually buys.",
+             "Each route takes its own costs before you hold any gold. An [[ETF]] trades on an exchange like a share. All costs here are made up to show the pattern; real ones vary by seller.",
+             glossary=[g("ETF", "Exchange-traded fund; a fund whose units trade on a stock exchange like a share.")]),
+        step("s1-3", "Who protects you", "Same metal, different safety nets.",
+             "A gold ETF is a SEBI-regulated mutual fund product. In November 2025, SEBI warned that \"digital gold\" or \"e-gold\" sold by online platforms is outside its regulation, so securities-market investor protections don't apply to it."),
+        step("s1-4", "Silver and SGBs", "Two quick notes.",
+             "Silver can be held the same ways, including silver ETFs, and its price tends to swing more than gold's. Sovereign Gold Bonds, a government gold bond, haven't had a new issue since February 2024; existing ones still trade."),
+    ]),
+    chapter("wa-d14-ch2-locked", "The locked boxes", "Chapter 2", "lock_timeline_wa14", "When can you open it?", [
+        step("s2-1", "Meet them", "Three boxes, three rule-setters.",
+             "Tap each box to open it: [[PPF]], [[EPF]] and [[NPS]].",
+             glossary=[g("PPF", "Public Provident Fund, a government savings scheme with a 15-year term."),
+                       g("EPF", "Employees' Provident Fund, retirement savings through your employer."),
+                       g("NPS", "National Pension System, a market-linked pension account.")]),
+        step("s2-2", "Place them", "Put each box where it fully opens.",
+             "Each box has a [[lock-in]]. Place the three boxes on the timeline, plus a gold ETF and a savings account for contrast. Tap a box, then its zone. Day 27 covers these three in detail.",
+             glossary=[g("lock-in", "A period during which you can't take your money out freely.")]),
+        step("s2-3", "Who sets the return", "Fixed by government, declared yearly, or market-linked.",
+             "PPF's rate is set every quarter by the government and can change. EPF's is declared each year. NPS depends on markets."),
+    ]),
+    chapter("wa-d14-ch3-card-battle", "Card battle", "Chapter 3", "card_battle_wa14", "Play the right card", [
+        step("s3-1", "Property", "The biggest card in the deck.",
+             "Real estate can pay rent and its price can change, but it needs a big amount, takes months to sell and costs money to buy and keep. A [[REIT]] lets people own a slice of rent-paying buildings through units traded on an exchange, regulated by SEBI.",
+             glossary=[g("REIT", "Real estate investment trust; a vehicle that owns rent-paying property and issues units.")]),
+        step("s3-2", "Battle", "Five challenges. Play a card.",
+             "Each challenge card describes a job. Play the asset card from your hand that's built for it."),
+        step("s3-3", "Final round", "Need ₹20,000 next week.",
+             "Play any card."),
+        step("s3-4", "Your deck", "Round-up.",
+             "Every card in the deck has its own job. This describes what each option is. It isn't a recommendation to buy any of them."),
+    ]),
+    check("wa-d14-check1-ppf", 1, "Which is true of PPF?", [
+        ("a", "Its rate is set by the stock market each day", False),
+        ("b", "It has a 15-year term and a yearly limit of ₹1.5 lakh", True),
+        ("c", "Only salaried employees can open one", False),
+        ("d", "You can withdraw everything at any time", False),
+    ], "PPF runs for 15 years, with up to ₹1.5 lakh a year, and the government sets its rate each quarter."),
+    check("wa-d14-check2-gold-etf", 2, "What is a gold ETF?", [
+        ("a", "Gold jewellery with a certificate", False),
+        ("b", "A fund tracking gold, whose units trade on a stock exchange", True),
+        ("c", "A gold coin stored by a bank", False),
+        ("d", "A government bond issued in 2026", False),
+    ], "A gold ETF is a fund that holds gold and trades on an exchange, so you don't store physical gold."),
+    check("wa-d14-check3-digital-gold", 3, "What did SEBI say about \"digital gold\" sold on online platforms in November 2025?", [
+        ("a", "It's the safest way to own gold", False),
+        ("b", "It falls outside SEBI's regulation, so securities-market protections don't apply", True),
+        ("c", "It's guaranteed by the RBI", False),
+        ("d", "It's the same as a gold ETF", False),
+    ], "SEBI cautioned that these products are unregulated by it; regulated routes include gold ETFs."),
+    completion(
+        "wa-d14-done", 14, "You know what gold routes, PPF, EPF, NPS and property each are, and when they open.", "Deck card",
+        [
+            "How you buy gold changes the gold value you hold and who protects you; SEBI says platform \"digital gold\" is outside its regulation.",
+            "PPF (government-set rate, 15 years), EPF (through your employer) and NPS (market-linked, PFRDA) trade access for long-term discipline.",
+            "Property can pay rent but needs a lot of money and is slow to sell; for next week's needs, nothing beats an emergency fund.",
+        ],
+        {
+            "yes": "You said yes. It is gold, but in our example only about ₹8,600 of ₹10,000 was gold value.",
+            "partly": "You said partly. Right: making charges and taxes eat into it.",
+            "no": "You said not at all. It does hold gold value, just less of it per rupee, and it has other uses.",
+        },
+        ("Day 15: Choosing Mutual Funds", "Categories, expense ratios, benchmarks and why last year's return isn't enough."),
+        "If you or a family member has a salaried job, find out whether there's an EPF account and where its passbook can be seen. Just find out.",
+        "wa14",
+    ),
+])

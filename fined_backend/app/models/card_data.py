@@ -369,7 +369,7 @@ class NextModuleTeaser(BaseModel):
 # WinterArc Days 5–7: the day's collectible "Arc card" on the completion
 # screen, filled from the reader's own games on the page (frontend arc.js).
 class ArcCard(BaseModel):
-    kind: Literal["wa5", "wa6", "wa7"]
+    kind: Literal["wa5", "wa6", "wa7", "wa8", "wa9", "wa10", "wa11", "wa12", "wa13", "wa14", "wa15"]
     label: str = Field(max_length=40)
 
 class CompletionCardData(BaseModel):
@@ -434,6 +434,14 @@ FigureKind = Literal[
     "pool_wa5", "claim_wa5", "shield_wa5",  # WinterArc Day 5
     "shock_deck_wa6", "fund_sizer_wa6", "goal_forge_wa6",  # WinterArc Day 6
     "city_wa7", "routes_wa7", "complaints_wa7",  # WinterArc Day 7
+    "door_sim_wa8", "owner_lender_wa8", "time_machine_wa8",  # WinterArc Day 8
+    "spread_cloud_wa9", "name_risk_wa9", "baskets_wa9",  # WinterArc Day 9
+    "share_slicer_wa10", "ipo_drum_wa10", "index_builder_wa10",  # WinterArc Day 10
+    "unit_shop_wa11", "fund_vault_wa11", "fund_menu_wa11",  # WinterArc Day 11
+    "sip_sim_wa12", "manager_pick_wa12", "index_fund_wa12",  # WinterArc Day 12
+    "bond_card_wa13", "bond_seesaw_wa13", "three_lenders_wa13",  # WinterArc Day 13
+    "gold_counter_wa14", "lock_timeline_wa14", "card_battle_wa14",  # WinterArc Day 14
+    "fund_table_wa15", "direct_regular_wa15", "steady_ride_wa15",  # WinterArc Day 15
 ]
 ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder", "month_happens", "run_the_bank", "compound_race", "card_months"]
 
@@ -496,6 +504,30 @@ FIGURE_STEP_COUNTS = {
     "routes_wa7": 4,
     "complaints_wa7": 6,
     "trade_map_wa4_credit_record": 4,
+    "door_sim_wa8": 5,
+    "owner_lender_wa8": 3,
+    "time_machine_wa8": 3,
+    "spread_cloud_wa9": 4,
+    "name_risk_wa9": 3,
+    "baskets_wa9": 4,
+    "share_slicer_wa10": 4,
+    "ipo_drum_wa10": 4,
+    "index_builder_wa10": 4,
+    "unit_shop_wa11": 4,
+    "fund_vault_wa11": 3,
+    "fund_menu_wa11": 3,
+    "sip_sim_wa12": 4,
+    "manager_pick_wa12": 4,
+    "index_fund_wa12": 3,
+    "bond_card_wa13": 4,
+    "bond_seesaw_wa13": 4,
+    "three_lenders_wa13": 3,
+    "gold_counter_wa14": 4,
+    "lock_timeline_wa14": 3,
+    "card_battle_wa14": 4,
+    "fund_table_wa15": 4,
+    "direct_regular_wa15": 3,
+    "steady_ride_wa15": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")
