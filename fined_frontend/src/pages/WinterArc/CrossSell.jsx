@@ -9,12 +9,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { PiArrowRightBold, PiBookOpenTextBold, PiDownloadSimpleBold, PiShareNetworkBold, PiSparkleBold, PiWhatsappLogoBold, PiXBold } from "react-icons/pi";
-import { CROSS_SELL as X, WINTERARC as W } from "./winterarcConfig";
+import { CROSS_SELL as X, WINTERARC as W, winterarcLink } from "./winterarcConfig";
 import { useContentBonus } from "./crossSellUtils";
 import { trackCrossSell, trackEvent } from "../../utils/analytics";
 import "./CrossSell.css";
-
-const SITE = "https://myfined.com";
 
 function TrackedLink({ to, source, className, children }) {
   return (
@@ -138,10 +136,12 @@ export function ShareCard({ milestone, points, name, code, onClose }) {
   const [url, setUrl] = useState(null);
   const [canShare, setCanShare] = useState(false);
   const blobRef = useRef(null);
-  const link = `${SITE}/winterarc${code ? `?ref=${code}` : ""}`;
-  const text = milestone >= W.totalDays
-    ? `I finished all 30 days of WinterArc with FinEd and scored ${points} points. Learn money one short task a day: ${link}`
-    : `${milestone} days in a row on WinterArc with FinEd, ${points} points so far. Learn money one short task a day: ${link}`;
+  const textFor = (source) => {
+    const link = winterarcLink({ code, source, medium: "streak_share" });
+    return milestone >= W.totalDays
+      ? `I finished all 30 days of WinterArc with FinEd and scored ${points} points. Learn money one short task a day: ${link}`
+      : `${milestone} days in a row on WinterArc with FinEd, ${points} points so far. Learn money one short task a day: ${link}`;
+  };
 
   useEffect(() => {
     let live = true;
@@ -167,7 +167,7 @@ export function ShareCard({ milestone, points, name, code, onClose }) {
   const share = async () => {
     trackEvent("share", { method: "native", content_type: "winterarc_milestone", milestone });
     try {
-      await navigator.share({ files: [file()], text });
+      await navigator.share({ files: [file()], text: textFor("native") });
     } catch {
       // cancelled
     }
@@ -191,7 +191,7 @@ export function ShareCard({ milestone, points, name, code, onClose }) {
         )}
         <a
           className="wax-btn wax-btn-wa"
-          href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(textFor("whatsapp"))}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackEvent("share", { method: "whatsapp", content_type: "winterarc_milestone", milestone })}

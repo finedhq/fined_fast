@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url'
 import {
   CANONICAL_STATIC_PATHS,
   TAG_NAMES,
+  STATIC_ROUTE_IMAGES,
   getTitleForPath,
   getDescriptionForPath,
   getCanonicalForPath,
@@ -62,6 +63,11 @@ function pageHtml(shell, path) {
   html = setMetaContent(html, 'property', 'og:description', description)
   html = setMetaContent(html, 'name', 'twitter:title', title)
   html = setMetaContent(html, 'name', 'twitter:description', description)
+  const image = STATIC_ROUTE_IMAGES[path]
+  if (image) {
+    html = setMetaContent(html, 'property', 'og:image', image)
+    html = setMetaContent(html, 'name', 'twitter:image', image)
+  }
   if (NOINDEX_PATHS.has(path)) html = setMetaContent(html, 'name', 'robots', 'noindex, follow')
 
   const extraTags =

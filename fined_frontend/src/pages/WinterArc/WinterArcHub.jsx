@@ -11,7 +11,7 @@ import {
   PiArrowCounterClockwiseBold, PiArrowRightBold, PiCheckBold, PiClockBold, PiCopyBold, PiLockSimpleBold, PiTrophyBold,
   PiWhatsappLogoBold, PiXBold,
 } from "react-icons/pi";
-import { WINTERARC as W, dayInfo, isBeforeStart } from "./winterarcConfig";
+import { WINTERARC as W, dayInfo, isBeforeStart, winterarcLink } from "./winterarcConfig";
 import ContestCard from "./ContestCard";
 import { getWinterArcMe, spendWinterArcReset } from "../../services/api";
 import WinterArcGate, { JoinFirst, WinterArcMessage } from "./WinterArcGate";
@@ -222,17 +222,18 @@ function Resets({ resets, busy, msg, onRepair }) {
 function Invite({ r }) {
   const [copied, setCopied] = useState(false);
   if (!r?.code || !W.show.referrals) return null;
+  // Shown on screen without tags so it stays readable; copied and shared with them
   const link = `${SITE}/winterarc?ref=${r.code}`;
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(winterarcLink({ code: r.code, source: "link", medium: "invite" }));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard blocked: the link is on screen
     }
   };
-  const shareText = `I'm doing WinterArc: 30 Days of Money with FinEd, 1 to 30 Dec. One short money task a day, free to join. Join with my link: ${link}`;
+  const shareText = `I'm doing WinterArc: 30 Days of Money with FinEd, 1 to 30 Dec. One short money task a day, free to join. Join with my link: ${winterarcLink({ code: r.code, source: "whatsapp", medium: "invite" })}`;
   return (
     <section className="wa-side-card wa-invite" aria-labelledby="wa-invite-title">
       <h3 id="wa-invite-title">Invite friends</h3>
