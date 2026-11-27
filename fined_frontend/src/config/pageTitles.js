@@ -1,3 +1,5 @@
+import { WINTERARC } from "../pages/WinterArc/winterarcConfig.js";
+
 export const DEFAULT_TITLE = "FinEd: Learn Personal Finance & Investing in India";
 
 export const STATIC_ROUTE_DESCRIPTIONS = {
@@ -10,6 +12,13 @@ export const STATIC_ROUTE_DESCRIPTIONS = {
   "/help": "Help and support for using FinEd's articles, courses and account features.",
   "/privacy-policy": "How FinEd collects, uses and protects your personal data.",
   "/termsofservice": "The terms of service for using FinEd's website, articles and courses.",
+  "/winterarc": `A free 30-day money challenge from FinEd, ${WINTERARC.startDate} to ${WINTERARC.endDate}. One short lesson and ${WINTERARC.questionsPerDay} questions a day, a leaderboard and a ${WINTERARC.prizePool} prize pool.`,
+};
+
+// Link preview images (og:image / twitter:image) for pages that should not use the site-wide
+// banner in index.html. Files live in public/. Read by scripts/prerender-static-pages.mjs.
+export const STATIC_ROUTE_IMAGES = {
+  "/winterarc": "https://myfined.com/winterarc-share.png",
 };
 
 export const TAG_NAMES = {
@@ -34,6 +43,7 @@ export const STATIC_ROUTE_TITLES = {
   "/help": "Help & Support | FinEd",
   "/privacy-policy": "Privacy Policy | FinEd",
   "/termsofservice": "Terms of Service | FinEd",
+  "/winterarc": `${WINTERARC.name}: ${WINTERARC.tagline} | FinEd`,
   "/admin": "Admin Dashboard | FinEd",
   "/admin/articles": "Manage Articles | FinEd Admin",
   "/admin/articles/add": "Add Article | FinEd Admin",
@@ -47,7 +57,7 @@ const SITE_ORIGIN = "https://myfined.com";
 
 export const CANONICAL_STATIC_PATHS = new Set([
   "/", "/courses", "/articles", "/about", "/contact", "/feedback",
-  "/help", "/privacy-policy", "/termsofservice",
+  "/help", "/privacy-policy", "/termsofservice", "/winterarc",
 ]);
 
 /**

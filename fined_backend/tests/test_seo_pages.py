@@ -106,3 +106,11 @@ def test_sitemap_lastmod_only_on_pages_that_follow_the_articles(monkeypatch):
     assert "<loc>https://myfined.com/</loc><lastmod>2026-10-05</lastmod>" in xml
     assert "<loc>https://myfined.com/articles</loc><lastmod>2026-10-05</lastmod>" in xml
     assert "<loc>https://myfined.com/about</loc><changefreq>" in xml
+
+
+def test_sitemap_lists_the_winterarc_page(monkeypatch):
+    monkeypatch.setattr(article_service_module.article_repo, "get_all_for_sitemap", lambda: [])
+    monkeypatch.setattr(article_service_module.article_repo, "get_all_authors", lambda: [])
+    monkeypatch.setattr(article_service_module.course_repo, "get_listed", lambda: [])
+    xml = article_service.build_sitemap_xml()
+    assert "<loc>https://myfined.com/winterarc</loc><changefreq>weekly</changefreq>" in xml
