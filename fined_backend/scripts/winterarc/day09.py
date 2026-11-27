@@ -1,0 +1,93 @@
+"""Day 9 · Risk and Return (Wed 9 Dec). Spec: Days 8 to 14 doc, Day 9 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        9, "wa-d09-hero", "Risk and Return",
+        "Risk isn't just losing.",
+        "It's how far things can swing, and when you need the money.",
+        "11 min", "poll_safe_bet",
+        "An app shows a fund that returned 40% last year. What does that tell you about next year?",
+        [("more", "It'll probably do well again"), ("nothing", "Very little on its own"), ("safe", "It's a safe pick now")],
+        "We'll come back to that 40%.",
+        warmup_chip=(
+            "hero_horizon", "When might you need money you invest today?",
+            [("h1", "Within 1 year", 1), ("h5", "1 to 5 years", 5), ("h10", "More than 5 years", 10)],
+            "Got it. Chapter 1 will start from your timeline.",
+            "No problem. We'll start from 1 to 5 years.",
+        ),
+    ),
+    chapter("wa-d09-ch1-spread", "The spread", "Chapter 1", "spread_cloud_wa9", "100 possible years", [
+        step("s1-1", "Three baskets", "Same ₹1,000. Three kinds of investment.",
+             "A made-up model of three kinds of investment: a deposit (pays a fixed 6.5%), a bond-like one (averages 7%) and a shares-like one (averages 11%). Each dot is one possible year. Roll a few years from the shares cloud to feel the [[volatility]].",
+             glossary=[g("return", "What you gain or lose on an investment, usually as a % a year."),
+                       g("volatility", "How much returns swing around their average.")]),
+        step("s1-2", "Guess first", "How often does the shares basket lose money in a year?",
+             "Look at the shares-like cloud. In how many of its 100 possible years does it end below zero?",
+             guess=("How often does it lose money in a year?", [
+                 ("1in20", "About 1 in 20", "More often than that: 27 of 100. Higher average returns came with more bad years.", False),
+                 ("1in4", "About 1 in 4", "Right in this model: 27 of 100 years.", True),
+                 ("1in2", "About 1 in 2", "Less often: 27 of 100. Most years were positive, but a quarter weren't.", False),
+             ])),
+        step("s1-3", "Add time", "Hold longer, and the cloud tightens.",
+             "Switch how long you hold: 1, 5 or 10 years. Each dot now shows the **average yearly return** over that time. Watch how many loss years are left."),
+        step("s1-4", "About that 40%", "One great year is one dot.",
+             "Last year's 40% is one dot from a wide cloud. It tells you the cloud is wide, not where next year's dot lands."),
+    ]),
+    chapter("wa-d09-ch2-name-risk", "Name that risk", "Chapter 2", "name_risk_wa9", "Six ways money can go wrong", [
+        step("s2-1", "Match", "Which risk is this?",
+             "Six real-life situations, six kinds of risk: market, inflation, credit, liquidity, concentration and interest-rate. Tap a situation, then the risk it belongs to."),
+        step("s2-2", "Defences", "Each risk has its own shield.",
+             "The tiles flip to show one defence each. Any card in the wrong place moves to the right tile. A flat has [[liquidity]] risk; a borrower who might not repay is [[credit risk]].",
+             glossary=[g("liquidity", "How quickly you can turn something into cash without losing value."),
+                       g("credit risk", "The chance a borrower doesn't pay you back.")]),
+        step("s2-3", "Real label", "The riskometer on every mutual fund.",
+             "SEBI requires every mutual fund scheme to show a [[riskometer]] with six levels: Low, Low to Moderate, Moderate, Moderately High, High and Very High. It tells you how risky the fund's holdings are, not whether it suits you. Tap where you think a fund holding mostly company shares would sit.",
+             glossary=[g("riskometer", "SEBI's six-level label for a mutual fund's risk.")]),
+    ]),
+    chapter("wa-d09-ch3-baskets", "Eggs and baskets", "Chapter 3", "baskets_wa9", "Ten fictional companies, one year", [
+        step("s3-1", "Build", "Pick your companies.",
+             "Ten fictional companies across eight industries. Tap any you like, or a preset. Money splits equally. You'll see how they did in one made-up year after you choose."),
+        step("s3-2", "Run the year", "News hits.",
+             "Three headlines land. The other companies move modestly. Watch your basket's result."),
+        step("s3-3", "The range", "More companies, narrower range.",
+             "Each bar shows the worst and best possible basket of that size. One company could land anywhere from −60% to +40%. All ten land on exactly +1.3%. That narrowing is [[diversification]].",
+             glossary=[g("diversification", "Spreading money across many investments so one failure can't sink you.")]),
+        step("s3-4", "The trap", "Three companies, one risk.",
+             "The three EV makers were three different companies, but one policy change hit all of them. Tap **Swap two EV makers for other industries** and re-run the year."),
+    ]),
+    check("wa-d09-check1-liquidity", 1, "Meera has all her savings in a plot of land. Her laptop breaks and she needs ₹25,000 this week. Which risk is she facing?", [
+        ("a", "Inflation risk", False),
+        ("b", "Liquidity risk", True),
+        ("c", "Credit risk", False),
+        ("d", "Interest-rate risk", False),
+    ], "Land can take months to sell, so the money isn't reachable when she needs it."),
+    check("wa-d09-check2-diversify", 2, "Which basket is the most diversified?", [
+        ("a", "Five companies that all make phones", False),
+        ("b", "One large, famous company", False),
+        ("c", "Ten companies across banking, farming, energy, retail and healthcare", True),
+        ("d", "Two companies owned by the same group", False),
+    ], "Spreading across industries means one shared problem is less likely to hit everything at once."),
+    check("wa-d09-check3-horizon", 3, "Rohan needs his money for college fees in 8 months. Why might a shares-based investment be a poor fit for that money?", [
+        ("a", "Shares never go up", False),
+        ("b", "Over a short period, a big fall could land just before he needs the money", True),
+        ("c", "Shares can't be sold within a year", False),
+        ("d", "Shares only suit people over 40", False),
+    ], "The shorter the horizon, the less time there is to recover from a bad patch. It's a mismatch with 8 months, not a verdict on shares."),
+    completion(
+        "wa-d09-done", 9, "You know risk is spread, not just loss, and how to spread your eggs.", "Basket card",
+        [
+            "Risk is how widely results can spread. Higher possible returns usually come with wider swings.",
+            "Different risks (market, inflation, credit, liquidity, concentration, interest rate) need different defences.",
+            "Diversification narrows the range of outcomes, but only across things that don't fall for the same reason.",
+        ],
+        {
+            "more": "You said it'll do well again. One great year is one dot; it says the cloud is wide, not where the next dot lands.",
+            "nothing": "You said very little. That's the honest answer.",
+            "safe": "You said it's safe now. A fund that can rise 40% can also fall a lot. That's what a wide cloud means.",
+        },
+        ("Day 10: Stock Market Basics", "What a share really is, what the Nifty and Sensex measure, and why most people don't get shares in a hot IPO."),
+        "Look up any one mutual fund's riskometer on its fact sheet. Just read the level. Don't invest.",
+        "wa9",
+    ),
+])

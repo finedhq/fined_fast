@@ -366,6 +366,12 @@ class NextModuleTeaser(BaseModel):
     title: str
     description: str
 
+# WinterArc Days 5–7: the day's collectible "Arc card" on the completion
+# screen, filled from the reader's own games on the page (frontend arc.js).
+class ArcCard(BaseModel):
+    kind: Literal["wa5", "wa6", "wa7", "wa8", "wa9", "wa10", "wa11", "wa12", "wa13", "wa14", "wa15"]
+    label: str = Field(max_length=40)
+
 class CompletionCardData(BaseModel):
     card_type: Literal["completion"] = "completion"
     card_label: Optional[str] = None
@@ -392,6 +398,7 @@ class CompletionCardData(BaseModel):
     # "{amount}" is that amount, "{20%}" (any whole number) is that share of
     # it. Omitted when the reader skipped the chip. Stays on the page.
     chip_replay: Optional[str] = Field(default=None, max_length=300)
+    arc: Optional[ArcCard] = None
     cta_text: str = "Continue"
 
     @model_validator(mode="after")
@@ -421,8 +428,22 @@ FigureKind = Literal[
     "line_chart_nifty_ride", "line_chart_end_of_2007", "trade_map_money_homes",  # Module 10
     "bars_two_questions", "bars_fair_yardstick", "trade_map_course_parts",  # Module 11
     "stack_bars_arjun_month", "line_chart_save_first", "stack_bars_needs_wants",  # WinterArc Day 1
+    "trade_map_wa2_bank", "accounts_wa2",  # WinterArc Day 2
+    "thali_wa3", "growth_lanes_wa3",  # WinterArc Day 3
+    "emi_calendar_wa4", "card_statement_wa4", "trade_map_wa4_credit_record",  # WinterArc Day 4
+    "pool_wa5", "claim_wa5", "shield_wa5",  # WinterArc Day 5
+    "shock_deck_wa6", "fund_sizer_wa6", "goal_forge_wa6",  # WinterArc Day 6
+    "city_wa7", "routes_wa7", "complaints_wa7",  # WinterArc Day 7
+    "door_sim_wa8", "owner_lender_wa8", "time_machine_wa8",  # WinterArc Day 8
+    "spread_cloud_wa9", "name_risk_wa9", "baskets_wa9",  # WinterArc Day 9
+    "share_slicer_wa10", "ipo_drum_wa10", "index_builder_wa10",  # WinterArc Day 10
+    "unit_shop_wa11", "fund_vault_wa11", "fund_menu_wa11",  # WinterArc Day 11
+    "sip_sim_wa12", "manager_pick_wa12", "index_fund_wa12",  # WinterArc Day 12
+    "bond_card_wa13", "bond_seesaw_wa13", "three_lenders_wa13",  # WinterArc Day 13
+    "gold_counter_wa14", "lock_timeline_wa14", "card_battle_wa14",  # WinterArc Day 14
+    "fund_table_wa15", "direct_regular_wa15", "steady_ride_wa15",  # WinterArc Day 15
 ]
-ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder", "month_happens"]
+ModelKind = Literal["leak_lab", "slice_calculator", "money_sorter", "allocation_builder", "month_happens", "run_the_bank", "compound_race", "card_months"]
 
 # Each figure reacts to the step's position (1st, 2nd, …), so a chapter must
 # have exactly as many steps as its figure has states. The trade maps take
@@ -467,6 +488,46 @@ FIGURE_STEP_COUNTS = {
     "stack_bars_arjun_month": 4,
     "line_chart_save_first": 4,
     "stack_bars_needs_wants": 4,
+    "trade_map_wa2_bank": 4,
+    "accounts_wa2": 4,
+    "thali_wa3": 4,
+    "growth_lanes_wa3": 4,
+    "emi_calendar_wa4": 3,
+    "card_statement_wa4": 4,
+    "pool_wa5": 5,
+    "claim_wa5": 7,
+    "shield_wa5": 5,
+    "shock_deck_wa6": 6,
+    "fund_sizer_wa6": 3,
+    "goal_forge_wa6": 5,
+    "city_wa7": 5,
+    "routes_wa7": 4,
+    "complaints_wa7": 6,
+    "trade_map_wa4_credit_record": 4,
+    "door_sim_wa8": 5,
+    "owner_lender_wa8": 3,
+    "time_machine_wa8": 3,
+    "spread_cloud_wa9": 4,
+    "name_risk_wa9": 3,
+    "baskets_wa9": 4,
+    "share_slicer_wa10": 4,
+    "ipo_drum_wa10": 4,
+    "index_builder_wa10": 4,
+    "unit_shop_wa11": 4,
+    "fund_vault_wa11": 3,
+    "fund_menu_wa11": 3,
+    "sip_sim_wa12": 4,
+    "manager_pick_wa12": 4,
+    "index_fund_wa12": 3,
+    "bond_card_wa13": 4,
+    "bond_seesaw_wa13": 4,
+    "three_lenders_wa13": 3,
+    "gold_counter_wa14": 4,
+    "lock_timeline_wa14": 3,
+    "card_battle_wa14": 4,
+    "fund_table_wa15": 4,
+    "direct_regular_wa15": 3,
+    "steady_ride_wa15": 4,
 }
 
 _GLOSSARY_MARK = re.compile(r"\[\[([^\[\]]+)\]\]")
@@ -777,6 +838,164 @@ class MonthHappensConfig(BaseModel):
                     raise ValueError(f"event '{e.id}' uses unknown pot '{p}'")
         return self
 
+# ── WinterArc Days 2–4 games. Never scored; every amount is made up. The
+# frontend rules live in scrolly/tools/winterarcGames.js. Texts with {name}
+# placeholders are filled in by the game.
+
+# "Run the Bank" (run_the_bank, Day 2): choose how much of the deposits to
+# lend, then withdrawals and a loan request arrive; what the vault can't
+# cover is borrowed in a hurry at emergency_rate. Rates are % a year.
+class BankEvent(BaseModel):
+    id: str
+    kind: Literal["withdraw", "loan"]
+    sender: str
+    who: str               # "Arjun", "shop owner" — used in the log and endings
+    when: str
+    text: str
+    amount: int = Field(gt=0)
+    yes: Optional[str] = None   # a loan's two buttons
+    no: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _check_loan(self):
+        if self.kind == "loan" and not (self.yes and self.no):
+            raise ValueError(f"loan event '{self.id}' needs `yes` and `no` button labels")
+        return self
+
+class BankEndings(BaseModel):
+    profit: str
+    loss: str
+    cost_part: str
+    vault: str
+    waited: str
+    paid_all: str
+
+class RunTheBankConfig(BaseModel):
+    deposits: int = Field(gt=0)
+    saver_rate: float = Field(gt=0, le=30)
+    loan_rate: float = Field(gt=0, le=40)
+    emergency_rate: float = Field(gt=0, le=60)
+    lend_options: list[int] = Field(min_length=2, max_length=6)
+    end_label: str
+    events: list[BankEvent] = Field(min_length=2, max_length=6)
+    texts: dict[str, str] = {}
+    endings: BankEndings
+    closing: Optional[str] = None
+    neutrality_note: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _check(self):
+        _require_unique([e.id for e in self.events], "event")
+        if any(not 0 <= p <= 100 for p in self.lend_options):
+            raise ValueError("lend_options are percentages from 0 to 100")
+        if self.loan_rate <= self.saver_rate:
+            raise ValueError("loan_rate must be above saver_rate, or the bank can never earn the gap")
+        return self
+
+# "Race to ₹10 lakh" (compound_race, Day 3): reach `goal` by end_age with the
+# least of your own money; monthly payments at each month's end from a start
+# age, for a number of years or until end_age, growing at rate (% a year,
+# added monthly). The "today's prices" toggle uses inflation from now_age.
+class RaceLength(BaseModel):
+    id: str
+    label: str
+    years: Optional[int] = Field(default=None, ge=1)  # null = until end_age
+
+class RacePick(BaseModel):
+    start: int
+    amount: int
+    length: str
+
+class RaceGhost(RacePick):
+    label: str
+
+class CompoundRaceConfig(BaseModel):
+    goal: int = Field(gt=0)
+    rate: float = Field(gt=0, le=30)
+    end_age: int = Field(ge=30, le=80)
+    now_age: int = Field(ge=15, le=60)
+    inflation: float = Field(ge=0, le=20)
+    starts: list[int] = Field(min_length=2, max_length=6)
+    amounts: list[int] = Field(min_length=2, max_length=6)
+    lengths: list[RaceLength] = Field(min_length=1, max_length=3)
+    defaults: RacePick
+    ghost: Optional[RaceGhost] = None
+    texts: dict[str, str] = {}
+    footnote: Optional[str] = None
+    min_tries: int = Field(ge=1, le=5, default=2)
+
+    @model_validator(mode="after")
+    def _check(self):
+        ids = [l.id for l in self.lengths]
+        _require_unique(ids, "length")
+        if any(not self.now_age <= a < self.end_age for a in self.starts):
+            raise ValueError("every start age must be from now_age to before end_age")
+        for name, pick in (("defaults", self.defaults), ("ghost", self.ghost)):
+            if pick and (pick.start not in range(self.now_age, self.end_age) or pick.length not in ids or pick.amount <= 0):
+                raise ValueError(f"{name}: start, amount or length is out of range")
+        if self.defaults.start not in self.starts or self.defaults.amount not in self.amounts:
+            raise ValueError("defaults must be one of the chips")
+        return self
+
+# "Six Statements" (card_months, Day 4): a card bill month by month. An
+# optional swipe joins the bill, then the reader pays in full, part_amount,
+# the minimum (min_pct of the bill, at least min_floor) or after the due date
+# (the minimum plus late_fee, marked late). What isn't paid is charged
+# monthly_rate (% a month). `only` limits a month's ways to pay.
+class CardSpend(BaseModel):
+    sender: str
+    text: str
+    amount: int = Field(gt=0)
+    yes: str
+    no: str
+
+class CardMonth(BaseModel):
+    id: str
+    label: str
+    spend: Optional[CardSpend] = None
+    notice: Optional[str] = None
+    only: Optional[list[Literal["full", "part", "min", "late"]]] = None
+
+class CardEveryday(BaseModel):
+    amount: int = Field(gt=0)  # joins every bill after the first
+    label: str                 # may use {amount}
+
+class CardEndings(BaseModel):
+    lead_cost: str
+    lead_free: str
+    fees_part: str
+    owed: str
+    clear: str
+    record_late: str
+    record_min: str
+    record_full: str
+
+class CardMonthsConfig(BaseModel):
+    start_balance: int = Field(gt=0)
+    monthly_rate: float = Field(gt=0, le=10)
+    min_pct: float = Field(gt=0, le=100)
+    min_floor: int = Field(ge=0)
+    late_fee: int = Field(ge=0)
+    part_amount: int = Field(gt=0)
+    everyday: Optional[CardEveryday] = None
+    months: list[CardMonth] = Field(min_length=2, max_length=12)
+    labels: dict[str, str]  # full / part / min / late / none, and log_<id>
+    texts: dict[str, str] = {}
+    endings: CardEndings
+    closing: Optional[str] = None
+    neutrality_note: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _check(self):
+        _require_unique([m.id for m in self.months], "month")
+        missing = {"full", "part", "min", "late", "none"} - set(self.labels)
+        if missing:
+            raise ValueError(f"labels needs {sorted(missing)}")
+        for m in self.months:
+            if m.only is not None and not m.only:
+                raise ValueError(f"month '{m.id}': `only` can't be empty")
+        return self
+
 # Which settings shape each tool takes.
 MODEL_CONFIGS = {
     "leak_lab": LeakLabConfig,
@@ -784,6 +1003,9 @@ MODEL_CONFIGS = {
     "money_sorter": MoneySorterConfig,
     "allocation_builder": AllocationBuilderConfig,
     "month_happens": MonthHappensConfig,
+    "run_the_bank": RunTheBankConfig,
+    "compound_race": CompoundRaceConfig,
+    "card_months": CardMonthsConfig,
 }
 
 class ModelCardData(BaseModel):
@@ -792,7 +1014,7 @@ class ModelCardData(BaseModel):
     title: str
     concept: Optional[str] = None
     model_kind: ModelKind
-    config: LeakLabConfig | SliceCalculatorConfig | MoneySorterConfig | AllocationBuilderConfig | MonthHappensConfig
+    config: LeakLabConfig | SliceCalculatorConfig | MoneySorterConfig | AllocationBuilderConfig | MonthHappensConfig | RunTheBankConfig | CompoundRaceConfig | CardMonthsConfig
     as_of: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")  # month the rates were checked, e.g. "2026-09"
     rate_source: Optional[str] = None
     reward_rule: Optional[str] = None  # e.g. "Move at least two controls." (shown next to the stars)
@@ -842,6 +1064,26 @@ class WarmupChip(BaseModel):
         _require_unique([o.id for o in self.options], "option")
         return self
 
+# WinterArc Day 6: "your month" in the hero — money in and must-pay costs,
+# used by the day's figures and kept in the browser only.
+class MonthIncome(BaseModel):
+    label: str
+    options: list[int] = Field(min_length=2, max_length=6)
+    default: int = Field(gt=0)
+    step: int = Field(gt=0, default=1000)
+
+class MonthMust(BaseModel):
+    label: str
+    presets: list[int] = Field(min_length=1, max_length=4)  # % of money in
+    default_pct: int = Field(gt=0, le=100)
+    step: int = Field(gt=0, default=500)
+
+class HeroMonth(BaseModel):
+    prompt: str
+    income: MonthIncome
+    must: MonthMust
+    note: Optional[str] = None
+
 class HeroCardData(BaseModel):
     """The top of a module page, exactly as in the prototype: badge, headline,
     subhead, read time + info chips, and the warm-up (poll + optional chip)."""
@@ -855,6 +1097,7 @@ class HeroCardData(BaseModel):
     warmup_label: str = "Before you start"
     poll: WarmupPoll
     chip: Optional[WarmupChip] = None
+    month: Optional[HeroMonth] = None
     note: Optional[str] = "No right answers here. Tap whatever feels true."
     scroll_cta: str = "Scroll to begin"
     allotted_finstars: int = Field(ge=0, default=0)

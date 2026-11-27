@@ -1,0 +1,82 @@
+"""Day 15 · Choosing Mutual Funds (Tue 15 Dec). Spec: Days 15 to 21 doc, Day 15 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        15, "wa-d15-hero", "Choosing Mutual Funds",
+        "The top return isn't the top fund.",
+        "Categories, benchmarks, costs and consistency: how to read a fund before you trust it.",
+        "11 min", "poll_pick_by_return",
+        "Choosing a fund, what would you look at first?",
+        [("last_year", "Last year's return"), ("rating", "Its star rating"), ("goal", "Whether its type fits my goal"), ("friends", "What friends invested in")],
+        "Let's test the most common one first.",
+    ),
+    chapter("wa-d15-ch1-wrong-race", "The wrong race", "Chapter 1", "fund_table_wa15", "Three funds, one year (all made up)", [
+        step("s1-1", "Crown one", "Which fund did best last year?",
+             "You're the fund detective. Three made-up funds, one year: Fund A +14%, Fund B +30%, Fund C +12%. Tap a crown onto the best one."),
+        step("s1-2", "Labels", "They weren't running the same race.",
+             "SEBI groups funds into categories by what they hold, so funds in one [[fund category]] can be compared with each other. Large-cap funds mostly hold India's biggest companies; small-cap funds hold much smaller ones, which tend to swing more.",
+             glossary=[g("fund category", "SEBI's grouping of funds by what they invest in.")]),
+        step("s1-3", "Benchmarks", "Now add the finish line for each lane.",
+             "Each lane gets its [[benchmark]]: large cap +13%, small cap +38% (made up). Watch where the crown goes.",
+             glossary=[g("benchmark", "The index a fund measures itself against.")]),
+        step("s1-4", "One year", "And one year is a very short race.",
+             "Stretch the race to five years. Compare over 5 years or more, and against the benchmark, not just against other funds' headline numbers."),
+    ]),
+    chapter("wa-d15-ch2-direct-regular", "Same fund, two prices", "Chapter 2", "direct_regular_wa15", "Direct vs regular", [
+        step("s2-1", "Twins", "Same fund, same holdings, two plans.",
+             "A [[regular plan]] includes a commission for the distributor who sold it to you. A [[direct plan]], bought straight from the fund house or a direct platform, doesn't. That makes its expense ratio lower and its NAV slightly higher over time.",
+             glossary=[g("direct plan", "A fund plan with no distributor commission."),
+                       g("regular plan", "A plan that pays a distributor, so it costs more.")]),
+        step("s2-2", "Guess first", "₹5,000 a month for 15 years. How big is the gap?",
+             "Direct costs a made-up 0.6% a year, regular 1.6%. Both start from a made-up 12% before costs. Set your guess for the gap after 15 years, then lock it."),
+        step("s2-3", "Fair trade?", "What the extra cost pays for.",
+             "The commission pays someone to help you, which some people value. The point is to know you're paying it and decide whether it's worth it to you. Distributors must have an ARN (Day 7)."),
+    ]),
+    chapter("wa-d15-ch3-consistency", "Steady or rollercoaster", "Chapter 3", "steady_ride_wa15", "Five years, two funds", [
+        step("s3-1", "Same-ish average", "Both made about 12% a year.",
+             "Two made-up funds. Fund X went +45%, −10%, +8%, +25%, +2%. Fund Y went +12%, +10%, +14%, +11%, +13%. Both compound to about 12% a year."),
+        step("s3-2", "Your goal", "You need the money at the end of year 2.",
+             "Pick X or Y for a goal due after year 2. Then replay X's same five years in a different order. Looking at many overlapping periods, called [[rolling returns]], shows how consistent a fund has been.",
+             glossary=[g("rolling returns", "Returns measured over many overlapping periods, to show consistency rather than one lucky start date.")]),
+        step("s3-3", "Stars", "What a star rating can and can't tell you.",
+             "Ratings mostly summarise past returns and risk. They can change, and they don't know your goal."),
+        step("s3-4", "Build it", "Your fund checklist.",
+             "Tap the six cards in the order you'd check them, top first. A suggested order appears beside yours. This is a way to read funds, not a recommendation of any fund."),
+    ]),
+    check("wa-d15-check1-benchmark", 1, "A small-cap fund returned 20% last year. Its benchmark returned 25%. How did it do?", [
+        ("a", "Very well: 20% is high", False),
+        ("b", "It trailed its benchmark by 5 percentage points", True),
+        ("c", "It beat its benchmark", False),
+        ("d", "You can't compare a fund with a benchmark", False),
+    ], "A fund is judged against its own benchmark. 20% against 25% means it trailed."),
+    check("wa-d15-check2-direct", 2, "Why does a direct plan usually have a lower expense ratio than the regular plan of the same fund?", [
+        ("a", "It holds different companies", False),
+        ("b", "It doesn't pay a distributor commission", True),
+        ("c", "SEBI subsidises it", False),
+        ("d", "It has a better fund manager", False),
+    ], "Same holdings and manager; the regular plan includes a commission for the distributor."),
+    check("wa-d15-check3-compare", 3, "Which comparison makes the most sense?", [
+        ("a", "A large-cap fund's 1-year return against a small-cap fund's", False),
+        ("b", "A large-cap fund's 5-year return against its large-cap benchmark", True),
+        ("c", "A debt fund against a gold ETF on last month's return", False),
+        ("d", "Two funds by their NAV level", False),
+    ], "Compare like with like, over a longer period, against the right benchmark."),
+    completion(
+        "wa-d15-done", 15, "You can read a fund by category, benchmark, cost and consistency.", "Detective card",
+        [
+            "Compare a fund with its own category and benchmark, over 5 years or more.",
+            "Direct and regular plans hold the same things; the regular plan pays a distributor, so it costs more each year.",
+            "A steadier path makes your result depend less on timing; star ratings mostly describe the past.",
+        ],
+        {
+            "last_year": "You'd look at last year's return. Fund B had the best one and the worst result against its benchmark.",
+            "rating": "You'd look at the rating. Fund X's stars fell after one bad year.",
+            "goal": "You'd check the goal first. That's where the checklist starts.",
+            "friends": "You'd ask friends. Their goal and timeline may not be yours.",
+        },
+        ("Day 16: Introduction to Fundamental Analysis", "Look inside a business: what it sells, what it earns and what it owes."),
+        "Open any one fund's fact sheet and find its category, benchmark and expense ratio. Just find them.",
+        "wa15",
+    ),
+])

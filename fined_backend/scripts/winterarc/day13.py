@@ -1,0 +1,87 @@
+"""Day 13 · Fixed Income Investments (Sun 13 Dec). Spec: Days 8 to 14 doc, Day 13 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        13, "wa-d13-hero", "Fixed Income Investments",
+        "This time, you're the bank.",
+        "Lend to the government or a company, collect interest, and find out why bond prices move.",
+        "10 min", "poll_bond_safe",
+        "Can the price of a government bond fall?",
+        [("no", "No, it's government-backed"), ("yes", "Yes, it can"), ("unsure", "Not sure")],
+        "Chapter 2 tests it.",
+    ),
+    chapter("wa-d13-ch1-lender", "Be the lender", "Chapter 1", "bond_card_wa13", "Arjun's first bond", [
+        step("s1-1", "Buy it", "₹10,000 to the government for 5 years.",
+             "The government borrows by selling [[bond]]s. Arjun buys one (made up): face value ₹10,000, a 7% [[coupon]], for 5 years. Individuals can buy government securities directly through the RBI's Retail Direct platform, usually from ₹10,000. Tap **Buy**.",
+             glossary=[g("bond", "A loan you give to a government or company, which pays interest and returns your money at the end."),
+                       g("coupon", "The fixed interest a bond pays.")]),
+        step("s1-2", "Collect", "₹700 a year, then ₹10,000 back.",
+             "7% of ₹10,000 is ₹700 a year. At [[maturity]], the ₹10,000 comes back.",
+             glossary=[g("maturity", "The date a bond ends and repays its face value.")]),
+        step("s1-3", "Guess first", "Volt Scooters offers 11%. Why?",
+             "Volt Scooters (fictional) also wants to borrow for 5 years. It offers 11%, not 7%.",
+             guess=("Why does Volt offer more?", [
+                 ("generous", "It's more generous", "Borrowers don't pay more out of kindness. Higher interest usually signals higher risk.", False),
+                 ("riskier", "It's riskier, so it must pay more", "Right. The extra 4% pays you for the chance Volt can't repay.", True),
+                 ("always", "Company bonds always pay 11%", "Rates depend on the borrower and the time. Riskier borrowers pay more.", False),
+             ])),
+        step("s1-4", "Ratings", "Letters that estimate the risk.",
+             "Rating agencies grade company bonds, from AAA (highest) downward. A [[credit rating]] is an opinion and can change; it isn't a guarantee.",
+             glossary=[g("credit rating", "An agency's opinion of how likely a borrower is to repay.")]),
+    ]),
+    chapter("wa-d13-ch2-seesaw", "The seesaw", "Chapter 2", "bond_seesaw_wa13", "Rates up, prices down", [
+        step("s2-1", "Rates rise", "New 5-year bonds now pay 8%.",
+             "Right after Arjun buys his 7% bond, interest rates rise. New bonds pay 8%. He wants to sell his."),
+        step("s2-2", "Sell it", "Set your price.",
+             "Pick an asking price and offer it to five buyers. They can always buy a new 8% bond instead. The return a bond gives at its current price is its [[yield]].",
+             glossary=[g("yield", "The return a bond gives at its current price.")]),
+        step("s2-3", "Longer = bigger swing", "What if it were a 10-year bond?",
+             "Same rise to 8%. Switch the bond's length: 1, 5 or 10 years."),
+        step("s2-4", "Flip it", "And if rates fall to 6%?",
+             "Move the rate lever down to 6% and watch the seesaw tip the other way. If Arjun simply holds to maturity, he still gets ₹700 a year and ₹10,000 back (assuming the borrower pays). Price swings matter if he sells early."),
+    ]),
+    chapter("wa-d13-ch3-rate-rise", "Rate-rise day", "Chapter 3", "three_lenders_wa13", "FD, bond, debt fund", [
+        step("s3-1", "Guess first", "The RBI raises rates. What changes today?",
+             "Arjun has ₹10,000 in each: a 5-year FD, a 5-year government bond, and a [[debt fund]] (a mutual fund that holds many bonds). For each, guess whether its value changes today.",
+             glossary=[g("debt fund", "A mutual fund that invests mainly in bonds and similar lending.")]),
+        step("s3-2", "Compare", "Three ways to lend, side by side.",
+             "Who you lend to, whether the value can move, how you're protected, and how it's taxed. Tap **Next row** to fill the card."),
+        step("s3-3", "Your read", "No winner, just different jobs.",
+             "Pick the feature that matters most to you, and see which ones are built for it."),
+    ]),
+    check("wa-d13-check1-coupon", 1, "Meera buys a bond with a face value of ₹20,000 and a 6% coupon. How much interest does it pay each year?", [
+        ("a", "₹600", False),
+        ("b", "₹1,200", True),
+        ("c", "₹2,000", False),
+        ("d", "₹6,000", False),
+    ], "6% of ₹20,000 = ₹1,200 a year."),
+    check("wa-d13-check2-rates-prices", 2, "Kabir holds a bond paying 6%. New bonds now pay 7%. What usually happens to the market price of Kabir's bond?", [
+        ("a", "It rises", False),
+        ("b", "It falls", True),
+        ("c", "It stays at face value until maturity", False),
+        ("d", "It becomes worthless", False),
+    ], "Buyers can get 7% elsewhere, so they'll only buy his 6% bond at a lower price."),
+    check("wa-d13-check3-credit-risk", 3, "Why does a lower-rated company usually pay a higher interest rate on its bonds?", [
+        ("a", "To reward investors for a higher chance it may not repay", True),
+        ("b", "Because the government sets it", False),
+        ("c", "Because its bonds are shorter", False),
+        ("d", "Because it has more cash", False),
+    ], "Higher interest compensates lenders for higher credit risk."),
+    completion(
+        "wa-d13-done", 13, "You know how bonds pay, why their prices move, and how FDs, bonds and debt funds differ.", "Lender card",
+        [
+            "A bond is a loan: fixed interest, money back at maturity, and riskier borrowers pay more.",
+            "When rates rise, existing bond prices fall (and the reverse), and longer bonds swing more.",
+            "FDs, bonds and debt funds are all lending but differ in price movement, protection and tax.",
+        ],
+        {
+            "no": "You said it can't fall. Its credit risk is low, but its market price fell to about ₹9,601 when rates rose.",
+            "yes": "You said it can fall. Right: that's interest-rate risk, not credit risk.",
+            "unsure": "Now you know: the price can move with rates even when repayment is very likely.",
+        },
+        ("Day 14: Alternative Investments", "Gold, silver, ETFs, PPF, EPF, NPS and real estate: what each one actually is."),
+        "Look up today's 10-year Indian government bond yield in any business news app. Just read it.",
+        "wa13",
+    ),
+])

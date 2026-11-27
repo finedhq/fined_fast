@@ -104,6 +104,14 @@ const JSON_HINTS = {
     "cards: [{id, label}] (2–6); zones: [{id, label}] (2–5); notes: {cardId: {zoneId: text}} for every pair; min_controls_to_complete (cards to place); neutrality_note; summary; guardrail (not shown).",
   allocation_builder:
     "controls.shares / controls.limit: {min, max, step, default, label, unit}; model: {steady_return_pct, share_returns_pct: {bad_year, typical_year, good_year}}; base_amount; labels: {bad_year, typical_year, good_year}; verdict: {within, beyond}; footnote (may use {steady_return_pct}); min_controls_to_complete (1–2).",
+  month_happens:
+    "pots: [{id, label, amount, note}] (2–4); savings_pot; wants_pot; start_label; end_label; events: [{id, sender, when, text, short, choices: [{id, label, take: {potId: ₹}, outcome}] or forced: {amount, order, text, button}}] (2–6); endings: {kept_all, kept_some, kept_none, from_wants}; compare; closing; neutrality_note.",
+  run_the_bank:
+    "deposits; saver_rate / loan_rate / emergency_rate (% a year); lend_options (percents); end_label; events: [{id, kind: withdraw | loan, sender, who, when, text, amount, yes, no}] (2–6); texts; endings: {profit, loss, cost_part, vault, waited, paid_all}; closing; neutrality_note.",
+  compound_race:
+    "goal; rate (% a year, added monthly); end_age; now_age; inflation; starts; amounts; lengths: [{id, label, years}] (years empty = until end_age); defaults: {start, amount, length}; ghost: {label, start, amount, length}; texts; footnote; min_tries.",
+  card_months:
+    "start_balance; monthly_rate (% a month); min_pct; min_floor; late_fee; part_amount; months: [{id, label, spend: {sender, text, amount, yes, no}, notice, only: [full | part | min | late]}]; labels: {full, part, min, late, none, log_<id>}; texts; endings: {lead_cost, lead_free, fees_part, owed, clear, record_late, record_min, record_full}; closing; neutrality_note.",
 };
 
 function SliceFields({ data, onChange, kindChoice }) {

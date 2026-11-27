@@ -36,6 +36,20 @@ import { M9_CH1_MAP, M9_CH1_ORDER, M9_CH2_MAP, M9_CH3_MAP } from "./module9Figur
 import { M10_CH1_CHART, M10_CH2_CHART, M10_CH3_MAP } from "./module10Figures";
 import { M11_CH1_BARS, M11_CH2_BARS, M11_CH3_MAP } from "./module11Figures";
 import { WA1_CH1_STACK, WA1_CH2_CHART, WA1_CH3_STACK } from "./winterarcDay01Figures";
+import { WA2_CH1_MAP, WA2_CH2_ACCOUNTS } from "./winterarcDay02Figures";
+import { WA3_CH1_THALI, WA3_CH2_GROWTH } from "./winterarcDay03Figures";
+import { WA4_CH1_EMI, WA4_CH2_CARD, WA4_CH3_MAP } from "./winterarcDay04Figures";
+import { WA5_CH1_POOL, WA5_CH2_CLAIM, WA5_CH3_SHIELD } from "./winterarcDay05Figures";
+import { WA6_CH1_DECK, WA6_CH2_FUND, WA6_CH3_GOALS } from "./winterarcDay06Figures";
+import { WA7_CH1_CITY, WA7_CH2_ROUTES, WA7_CH3_DESK } from "./winterarcDay07Figures";
+import { WA8_CH1_DOORS, WA8_CH2_OWNER, WA8_CH3_TIME } from "./winterarcDay08Figures";
+import { WA9_CH1_CLOUD, WA9_CH2_RISKS, WA9_CH3_BASKETS } from "./winterarcDay09Figures";
+import { WA10_CH1_SLICE, WA10_CH2_IPO, WA10_CH3_INDEX } from "./winterarcDay10Figures";
+import { WA11_CH1_FUND, WA11_CH2_VAULT, WA11_CH3_MENU } from "./winterarcDay11Figures";
+import { WA12_CH1_SIP, WA12_CH2_MANAGERS, WA12_CH3_INDEX_FUND } from "./winterarcDay12Figures";
+import { WA13_CH1_BOND, WA13_CH2_SEESAW, WA13_CH3_LENDERS } from "./winterarcDay13Figures";
+import { WA14_CH1_GOLD, WA14_CH2_LOCKS, WA14_CH3_BATTLE } from "./winterarcDay14Figures";
+import { WA15_CH1_TABLE, WA15_CH2_PLANS, WA15_CH3_RIDE } from "./winterarcDay15Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -261,5 +275,248 @@ export const FIGURES = {
     steps: WA1_CH3_STACK.views.length,
     component: lazy(() => import("./StackBars")),
     config: WA1_CH3_STACK,
+  },
+  // WinterArc Days 2–4: one picture per idea, something to tap at each step
+  trade_map_wa2_bank: {
+    label: "Trade map: money travels savers → bank → borrowers → interest back — WinterArc Day 2 §1",
+    steps: WA2_CH1_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: WA2_CH1_MAP,
+  },
+  accounts_wa2: {
+    label: "Account cards: pay by UPI, break an FD, fill an RD — WinterArc Day 2 §2",
+    steps: 4,
+    component: lazy(() => import("./AccountCards")),
+    config: WA2_CH2_ACCOUNTS,
+  },
+  thali_wa3: {
+    label: "Thali and ₹100 note: price tags, a guess, 100 thalis, the RBI dial — WinterArc Day 3 §1",
+    steps: 4,
+    component: lazy(() => import("./ThaliPlate")),
+    config: WA3_CH1_THALI,
+  },
+  growth_lanes_wa3: {
+    label: "Coin piles: simple vs compound year by year, Asha vs Dev race — WinterArc Day 3 §2",
+    steps: 4,
+    component: lazy(() => import("./GrowthLanes")),
+    config: WA3_CH2_GROWTH,
+  },
+  emi_calendar_wa4: {
+    label: "EMI calendar: borrow, pick a length, see the interest in each EMI — WinterArc Day 4 §1",
+    steps: 3,
+    component: lazy(() => import("./EmiCalendar")),
+    config: WA4_CH1_EMI,
+  },
+  card_statement_wa4: {
+    label: "Card statement: pay it, the minimum, a 90-month fast-forward — WinterArc Day 4 §2",
+    steps: 4,
+    component: lazy(() => import("./CardStatement")),
+    config: WA4_CH2_CARD,
+  },
+  trade_map_wa4_credit_record: {
+    label: "Trade map: your record travels to a lender's score — WinterArc Day 4 §3",
+    steps: WA4_CH3_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: WA4_CH3_MAP,
+  },
+  // WinterArc Days 5–7: a game in every chapter (spec of 26 Nov)
+  pool_wa5: {
+    label: "The Pool: guess the share, join or go solo, play 5 years — WinterArc Day 5 §1",
+    steps: 5,
+    component: lazy(() => import("./PoolSim")),
+    config: WA5_CH1_POOL,
+  },
+  claim_wa5: {
+    label: "Claim Machine: a bill cut clause by clause, sandbox, waiting period — WinterArc Day 5 §2",
+    steps: 7,
+    component: lazy(() => import("./ClaimMachine")),
+    config: WA5_CH2_CLAIM,
+  },
+  shield_wa5: {
+    label: "Shield Loadout: sort risks, 2×2 reveal, your shield, rights passport — WinterArc Day 5 §3",
+    steps: 5,
+    component: lazy(() => import("./ShieldLoadout")),
+    config: WA5_CH3_SHIELD,
+  },
+  shock_deck_wa6: {
+    label: "Shock Deck: a year of surprises with the buffer you chose — WinterArc Day 6 §1",
+    steps: 6,
+    component: lazy(() => import("./ShockDeck")),
+    config: WA6_CH1_DECK,
+  },
+  fund_sizer_wa6: {
+    label: "Fund sizer: your jar, months and monthly saving, notches — WinterArc Day 6 §2",
+    steps: 3,
+    component: lazy(() => import("./FundSizer")),
+    config: WA6_CH2_FUND,
+  },
+  goal_forge_wa6: {
+    label: "Goal Forge: wishes into plans that fit your spare money — WinterArc Day 6 §3",
+    steps: 5,
+    component: lazy(() => import("./GoalForge")),
+    config: WA6_CH3_GOALS,
+  },
+  city_wa7: {
+    label: "Money City: sort players onto referees, AMFI, the whistle — WinterArc Day 7 §1",
+    steps: 5,
+    component: lazy(() => import("./CityMap")),
+    config: WA7_CH1_CITY,
+  },
+  routes_wa7: {
+    label: "Follow Arjun's day: three money routes, three referees — WinterArc Day 7 §2",
+    steps: 4,
+    component: lazy(() => import("./RouteDay")),
+    config: WA7_CH2_ROUTES,
+  },
+  complaints_wa7: {
+    label: "Complaint Router: route tickets up the escalation ladders — WinterArc Day 7 §3",
+    steps: 6,
+    component: lazy(() => import("./ComplaintDesk")),
+    config: WA7_CH3_DESK,
+  },
+  // WinterArc Days 8–15: a game in every chapter (specs of 26 Nov)
+  door_sim_wa8: {
+    label: "Three doors: save, invest or trade ₹10,000 for ten years — WinterArc Day 8 §1",
+    steps: 5,
+    component: lazy(() => import("./DoorSim")),
+    config: WA8_CH1_DOORS,
+  },
+  owner_lender_wa8: {
+    label: "Owner or lender: sort the returns, follow the money, who's paid first — WinterArc Day 8 §2",
+    steps: 3,
+    component: lazy(() => import("./OwnerLender")),
+    config: WA8_CH2_OWNER,
+  },
+  time_machine_wa8: {
+    label: "Time machine: starting at 21 vs 31, the cost of waiting — WinterArc Day 8 §3",
+    steps: 3,
+    component: lazy(() => import("./TimeMachine")),
+    config: WA8_CH3_TIME,
+  },
+  spread_cloud_wa9: {
+    label: "The spread: 100 possible years, roll a year, add time — WinterArc Day 9 §1",
+    steps: 4,
+    component: lazy(() => import("./SpreadCloud")),
+    config: WA9_CH1_CLOUD,
+  },
+  name_risk_wa9: {
+    label: "Name that risk: six situations, six shields, the riskometer — WinterArc Day 9 §2",
+    steps: 3,
+    component: lazy(() => import("./NameRisk")),
+    config: WA9_CH2_RISKS,
+  },
+  baskets_wa9: {
+    label: "Eggs and baskets: build a basket, news hits, range by size, the trap — WinterArc Day 9 §3",
+    steps: 4,
+    component: lazy(() => import("./Baskets")),
+    config: WA9_CH3_BASKETS,
+  },
+  share_slicer_wa10: {
+    label: "Slice the company: shares, raising money, market cap — WinterArc Day 10 §1",
+    steps: 4,
+    component: lazy(() => import("./ShareSlicer")),
+    config: WA10_CH1_SLICE,
+  },
+  ipo_drum_wa10: {
+    label: "The IPO lottery: two lanes, apply, the drum, listing day — WinterArc Day 10 §2",
+    steps: 4,
+    component: lazy(() => import("./IpoDrum")),
+    config: WA10_CH2_IPO,
+  },
+  index_builder_wa10: {
+    label: "The FinEd Five: weights, move the market, free float — WinterArc Day 10 §3",
+    steps: 4,
+    component: lazy(() => import("./IndexBuilder")),
+    config: WA10_CH3_INDEX,
+  },
+  unit_shop_wa11: {
+    label: "Run a fund: pool, NAV, a late joiner, ₹10 vs ₹100 NAV — WinterArc Day 11 §1",
+    steps: 4,
+    component: lazy(() => import("./UnitShop")),
+    config: WA11_CH1_FUND,
+  },
+  fund_vault_wa11: {
+    label: "Who holds your money: five roles, the vault, the leaking bucket — WinterArc Day 11 §2",
+    steps: 3,
+    component: lazy(() => import("./FundVault")),
+    config: WA11_CH2_VAULT,
+  },
+  fund_menu_wa11: {
+    label: "The menu: jobs to fund types, the riskometer, two taps — WinterArc Day 11 §3",
+    steps: 3,
+    component: lazy(() => import("./FundMenu")),
+    config: WA11_CH3_MENU,
+  },
+  sip_sim_wa12: {
+    label: "The monthly habit: unit buckets, keep or pause, SIP vs lump sum — WinterArc Day 12 §1",
+    steps: 4,
+    component: lazy(() => import("./SipSim")),
+    config: WA12_CH1_SIP,
+  },
+  manager_pick_wa12: {
+    label: "Pick the star: back a manager, the reshuffle, SPIVA — WinterArc Day 12 §2",
+    steps: 4,
+    component: lazy(() => import("./ManagerPick")),
+    config: WA12_CH2_MANAGERS,
+  },
+  index_fund_wa12: {
+    label: "Copy the index: same weights, an index change, the gap — WinterArc Day 12 §3",
+    steps: 3,
+    component: lazy(() => import("./IndexFund")),
+    config: WA12_CH3_INDEX_FUND,
+  },
+  bond_card_wa13: {
+    label: "Be the lender: buy a bond, collect, risk and ratings — WinterArc Day 13 §1",
+    steps: 4,
+    component: lazy(() => import("./BondCard")),
+    config: WA13_CH1_BOND,
+  },
+  bond_seesaw_wa13: {
+    label: "The seesaw: sell your bond, longer swings more, rates fall — WinterArc Day 13 §2",
+    steps: 4,
+    component: lazy(() => import("./BondSeesaw")),
+    config: WA13_CH2_SEESAW,
+  },
+  three_lenders_wa13: {
+    label: "Rate-rise day: FD, bond, debt fund, compare, your read — WinterArc Day 13 §3",
+    steps: 3,
+    component: lazy(() => import("./ThreeLenders")),
+    config: WA13_CH3_LENDERS,
+  },
+  gold_counter_wa14: {
+    label: "Four ways to buy gold: guess, weigh, shields, silver and SGBs — WinterArc Day 14 §1",
+    steps: 4,
+    component: lazy(() => import("./GoldCounter")),
+    config: WA14_CH1_GOLD,
+  },
+  lock_timeline_wa14: {
+    label: "The locked boxes: open them, place them, who sets the return — WinterArc Day 14 §2",
+    steps: 3,
+    component: lazy(() => import("./LockTimeline")),
+    config: WA14_CH2_LOCKS,
+  },
+  card_battle_wa14: {
+    label: "Card battle: property, five challenges, the final round, your deck — WinterArc Day 14 §3",
+    steps: 4,
+    component: lazy(() => import("./CardBattle")),
+    config: WA14_CH3_BATTLE,
+  },
+  fund_table_wa15: {
+    label: "The wrong race: crown a fund, categories, benchmarks, five years — WinterArc Day 15 §1",
+    steps: 4,
+    component: lazy(() => import("./FundTable")),
+    config: WA15_CH1_TABLE,
+  },
+  direct_regular_wa15: {
+    label: "Same fund, two prices: twins, guess the gap, the commission — WinterArc Day 15 §2",
+    steps: 3,
+    component: lazy(() => import("./DirectRegular")),
+    config: WA15_CH2_PLANS,
+  },
+  steady_ride_wa15: {
+    label: "Steady or rollercoaster: two rides, the year-2 cut, stars, your checklist — WinterArc Day 15 §3",
+    steps: 4,
+    component: lazy(() => import("./SteadyRide")),
+    config: WA15_CH3_RIDE,
   },
 };

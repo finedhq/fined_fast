@@ -1,0 +1,86 @@
+"""Day 8 · Introduction to Investing (Tue 8 Dec). Spec: Days 8 to 14 doc, Day 8 tab."""
+from cards import chapter, check, completion, day, g, hero, step
+
+CARDS = day([
+    hero(
+        8, "wa-d08-hero", "Introduction to Investing",
+        "Same ₹10,000. Three doors.",
+        "Saving, investing and trading aren't three words for the same thing. Walk through each one and see.",
+        "10 min", "poll_invest_vs_trade",
+        "What's the main difference between investing and trading?",
+        [("time", "How long you hold"), ("amount", "How much money you put in"), ("same", "They're the same thing"), ("risk_only", "Only trading is risky")],
+        "Hold that. Door 3 will test it.",
+    ),
+    chapter("wa-d08-ch1-three-doors", "Three doors", "Chapter 1", "door_sim_wa8", "Arjun's ₹10,000, ten years", [
+        step("s1-1", "Pick a door", "Arjun got ₹10,000 for his birthday.",
+             "He won't need it for ten years. Behind door 1, a **savings account**. Behind door 2, a slice of many businesses, held for ten years. Behind door 3, buying and selling often to catch quick price moves. Tap a door: all three will play."),
+        step("s1-2", "Guess first", "After ten years, what does door 1 buy?",
+             "The savings account pays a made-up 3% a year. Prices rise a made-up 6% a year (Day 3's inflation). In today's money, what is Arjun's savings worth after ten years? Set your guess and lock it, then flip the track to today's buying power.",
+             glossary=[g("real return", "Return after inflation, which tells you what happened to buying power.")]),
+        step("s1-3", "Door 2", "Investing: up, down, up.",
+             "Door 2 follows a made-up path for a basket of businesses: some great years, some bad ones. Watch year 5.",
+             glossary=[g("investing", "Putting money into something you expect to grow or pay you over years.")]),
+        step("s1-4", "Your call", "Hold, or get out?",
+             "The headlines are loud and the lane is red. Tap **Hold** or **Sell and move to savings**. The next five years play out on your pick, with the other as a faint ghost."),
+        step("s1-5", "Door 3", "Trading: what happened to most people.",
+             "Trading is buying and selling often to profit from short-term moves. One popular form is trading futures and options. SEBI studied individual traders in that segment: in 2025–26, about 88 in 100 ended the year with a net loss.",
+             glossary=[g("trading", "Buying and selling often to profit from short-term price moves.")]),
+    ]),
+    chapter("wa-d08-ch2-owner-lender", "Owner or lender", "Chapter 2", "owner_lender_wa8", "Where does the return come from?", [
+        step("s2-1", "Sort it", "Lender, owner or holder?",
+             "You earn by lending (interest), by owning (a share of profits and growth), or by holding something whose price may rise. Sort the six cards: tap a card, then its zone."),
+        step("s2-2", "Follow the money", "Each one pays you differently.",
+             "Each card shows what pays it. Any card in the wrong zone slides to the right one, with a line on why.",
+             glossary=[g("equity", "Ownership in a business."), g("debt", "Money lent, repaid with interest.")]),
+        step("s2-3", "Who gets paid first", "Chai Point Co. has a bad year.",
+             "Chai Point Co. (fictional) earns ₹100. First it pays costs, then interest to its lenders, then tax. Owners get what's left. Slide sales from a good year to a bad one and watch whose slice shrinks."),
+    ]),
+    chapter("wa-d08-ch3-time-machine", "The time machine", "Chapter 3", "time_machine_wa8", "Starting at 21 vs 31", [
+        step("s3-1", "Guess first", "Who ends up with more at 60?",
+             "Both invest ₹2,000 a month at a made-up steady 10% a year. Arjun starts at 21 and stops at 31: ten years, ₹2,40,000 in total. Kabir starts at 31 and keeps going to 60: ₹6,96,000 in total.",
+             guess=("Who has more at 60?", [
+                 ("arjun", "Arjun", "Right. His money had 29 extra years to grow.", True),
+                 ("kabir", "Kabir", "Most people pick Kabir, because he puts in nearly three times as much. Time beat amount here.", False),
+                 ("same", "About the same", "Not even close. Time beat amount here.", False),
+             ])),
+        step("s3-2", "The reveal", "Arjun, by a lot.",
+             "Arjun's ten years of bricks keep compounding for 29 more years: about ₹74 lakh. Kabir's 29 years of bricks reach about ₹41 lakh. Arjun put in about a third as much."),
+        step("s3-3", "Your start", "What does waiting cost?",
+             "Slide the age someone starts ₹2,000 a month (made-up 10% a year) and invests until 60. Every year later shows what waiting one more year costs."),
+    ]),
+    check("wa-d08-check1-invest-vs-trade", 1, "Which of these sounds most like investing rather than trading?", [
+        ("a", "Buying in the morning to sell before the market closes", False),
+        ("b", "Buying a share of businesses and holding it for years for growth or income", True),
+        ("c", "Switching every week to whatever went up last week", False),
+        ("d", "Buying options that expire this Thursday", False),
+    ], "Investing is about holding for years for growth or income. Trading aims to profit from short-term price moves."),
+    check("wa-d08-check2-real-return", 2, "Aman's savings earn 4% a year while prices rise 6% a year. After one year, what has happened to his buying power?", [
+        ("a", "Up about 4%", False),
+        ("b", "Up about 10%", False),
+        ("c", "Down about 2%", True),
+        ("d", "Unchanged, because he didn't lose any rupees", False),
+    ], "His rupees grew 4% but prices grew 6%, so the same money buys roughly 2% less."),
+    check("wa-d08-check3-who-paid-first", 3, "Volt Scooters (fictional) has borrowed from lenders and also has shareholders. In a bad year, who gets paid first?", [
+        ("a", "Shareholders, because they own the company", False),
+        ("b", "Lenders, because interest is paid before owners get anything", True),
+        ("c", "Both equally", False),
+        ("d", "Whoever invested most recently", False),
+    ], "Interest to lenders is paid before profits reach owners. That's why lending is usually steadier and owning can swing more."),
+    completion(
+        "wa-d08-done", 8, "You know the difference between saving, investing and trading.", "Door card",
+        [
+            "Saving protects the amount but can lose buying power to inflation.",
+            "Investing aims to grow buying power over years, with bad years along the way. Trading aims at short-term moves, and in SEBI's FY26 study about 88 in 100 individual derivatives traders had net losses.",
+            "Lenders earn interest and are paid first; owners share in profits and growth but take more risk. Time can matter more than amount.",
+        ],
+        {
+            "time": "You said how long you hold. That's the core of it.",
+            "amount": "You said amount. Both can use any amount; the difference is time and purpose.",
+            "same": "You said they're the same. Door 2 and door 3 played very differently.",
+            "risk_only": "You said only trading is risky. Door 2 fell 18% in one year, so investing has risk too, just of a different kind.",
+        },
+        ("Day 9: Risk and Return", "Why higher possible returns usually come with bigger swings, and how not to put all your eggs in one basket."),
+        "Find your savings account's interest rate (Day 2) and compare it with the latest inflation figure in the news. Just compare. Don't move any money.",
+        "wa8",
+    ),
+])

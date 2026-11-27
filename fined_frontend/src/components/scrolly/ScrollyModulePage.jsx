@@ -25,6 +25,7 @@ import Hero from "./Hero";
 import Chapter from "./Chapter";
 import Checkpoint from "./Checkpoint";
 import Completion from "./Completion";
+import { arcCard } from "./arc";
 import GlossaryTooltip from "./GlossaryTooltip";
 import ModuleTour from "./ModuleTour";
 import { tourSeen, tourSteps } from "./tourSteps";
@@ -43,6 +44,7 @@ import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
 import "./scrolly-winterarc.css";
+import "./scrolly-winterarc-815.css";
 import "./scrolly-reels.css";
 import "./scrolly-tour.css";
 
@@ -198,6 +200,8 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             onFigureState={patchPart("steps", card.slug)}
             reels={reels}
             hero={{ answers: page.hero || {}, poll: hero?.card_data?.poll }}
+            tools={page.tools}
+            pageSteps={page.steps}
           />
         );
       case "model": {
@@ -242,6 +246,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
               heroPoll={hero?.card_data?.poll}
               pollChoice={page.hero?.poll}
               chipAmount={page.hero?.amount}
+              arc={arcCard(card, page)}
               stars={stars}
               maxStars={maxStars}
               unit="Points"
@@ -264,6 +269,7 @@ export default function ScrollyModulePage({ bundle, focusSlug, email, preview = 
             moduleNumber={bundle.module_order_index}
             heroPoll={hero?.card_data?.poll}
             pollChoice={page.hero?.poll}
+            arc={arcCard(card, page)}
             stars={stars}
             maxStars={maxStars}
             open={open}
