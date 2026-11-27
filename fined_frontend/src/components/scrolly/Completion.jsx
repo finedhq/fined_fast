@@ -68,7 +68,7 @@ function SkippedLine({ open, onGoTo }) {
 // ("points") instead of FinStars, with the warm-up chip's line under the poll
 // replay (`chipAmount`, completion `chip_replay`) and the day's own end
 // (`children`: progress, the day's action, back links) in place of "Up next".
-export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, test, onRetake, retakeError, onGoTo, onReviewTop, onReached, unit = "FinStars", chipAmount, children }) {
+export default function Completion({ card, moduleNumber, heroPoll, pollChoice, stars, maxStars, open, nextHref, comingSoon, certificate, onSignup, test, onRetake, retakeError, onGoTo, onReviewTop, onReached, unit = "FinStars", chipAmount, arc, children }) {
   const d = card.card_data || {};
   const sectionRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
@@ -130,6 +130,21 @@ export default function Completion({ card, moduleNumber, heroPoll, pollChoice, s
           <h2 className="completion-heading">{d.title}</h2>
 
           <SkippedLine open={open} onGoTo={onGoTo} />
+
+          {/* WinterArc Days 5–7: the day's collectible card, from the reader's own games */}
+          {arc && (
+            <div className="wf-arc" aria-label={`${arc.label}: your results`}>
+              <div className="wf-arc-label">{arc.label}</div>
+              <ul>
+                {arc.stats.map((st) => (
+                  <li key={st.label}>
+                    <span>{st.label}</span>
+                    <strong>{st.value}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="completion-grid">
             <div className="completion-replay-card" style={{ display: replay || chipLine ? "block" : "none" }}>

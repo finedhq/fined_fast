@@ -1,6 +1,7 @@
 // Plain rules for the hands-on tools (no React), so the page's star count and
 // "still open" list can use them and they can be unit-tested.
 import { fmtPct } from "../figures/blocksMath";
+import { bankDone, cardDone, raceDone } from "./winterarcGames";
 
 // ── Shared ─────────────────────────────────────────────────────────────
 /** A setter that saves a control's value and remembers that it was moved. */
@@ -242,6 +243,9 @@ export const TOOL_DONE = {
   money_sorter: sorterDone,
   allocation_builder: mixDone,
   month_happens: monthDone,
+  run_the_bank: bankDone,
+  compound_race: raceDone,
+  card_months: cardDone,
 };
 
 // What each tool saves to the learner's account (savedAnswers.js).
@@ -251,6 +255,9 @@ export const TOOL_SAVED_KEYS = {
   money_sorter: ["placements"],
   allocation_builder: ["shares", "limit", "touchedControls"],
   month_happens: ["choices"],
+  run_the_bank: ["lend", "choices"],
+  compound_race: ["start", "amount", "length", "tries", "today"],
+  card_months: ["months", "record"],
 };
 
 export function toolDone(cardData, state) {

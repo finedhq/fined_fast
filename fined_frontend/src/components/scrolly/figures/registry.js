@@ -36,6 +36,12 @@ import { M9_CH1_MAP, M9_CH1_ORDER, M9_CH2_MAP, M9_CH3_MAP } from "./module9Figur
 import { M10_CH1_CHART, M10_CH2_CHART, M10_CH3_MAP } from "./module10Figures";
 import { M11_CH1_BARS, M11_CH2_BARS, M11_CH3_MAP } from "./module11Figures";
 import { WA1_CH1_STACK, WA1_CH2_CHART, WA1_CH3_STACK } from "./winterarcDay01Figures";
+import { WA2_CH1_MAP, WA2_CH2_ACCOUNTS } from "./winterarcDay02Figures";
+import { WA3_CH1_THALI, WA3_CH2_GROWTH } from "./winterarcDay03Figures";
+import { WA4_CH1_EMI, WA4_CH2_CARD, WA4_CH3_MAP } from "./winterarcDay04Figures";
+import { WA5_CH1_POOL, WA5_CH2_CLAIM, WA5_CH3_SHIELD } from "./winterarcDay05Figures";
+import { WA6_CH1_DECK, WA6_CH2_FUND, WA6_CH3_GOALS } from "./winterarcDay06Figures";
+import { WA7_CH1_CITY, WA7_CH2_ROUTES, WA7_CH3_DESK } from "./winterarcDay07Figures";
 
 export const FIGURES = {
   shrinking_basket_predict: {
@@ -261,5 +267,103 @@ export const FIGURES = {
     steps: WA1_CH3_STACK.views.length,
     component: lazy(() => import("./StackBars")),
     config: WA1_CH3_STACK,
+  },
+  // WinterArc Days 2–4: one picture per idea, something to tap at each step
+  trade_map_wa2_bank: {
+    label: "Trade map: money travels savers → bank → borrowers → interest back — WinterArc Day 2 §1",
+    steps: WA2_CH1_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: WA2_CH1_MAP,
+  },
+  accounts_wa2: {
+    label: "Account cards: pay by UPI, break an FD, fill an RD — WinterArc Day 2 §2",
+    steps: 4,
+    component: lazy(() => import("./AccountCards")),
+    config: WA2_CH2_ACCOUNTS,
+  },
+  thali_wa3: {
+    label: "Thali and ₹100 note: price tags, a guess, 100 thalis, the RBI dial — WinterArc Day 3 §1",
+    steps: 4,
+    component: lazy(() => import("./ThaliPlate")),
+    config: WA3_CH1_THALI,
+  },
+  growth_lanes_wa3: {
+    label: "Coin piles: simple vs compound year by year, Asha vs Dev race — WinterArc Day 3 §2",
+    steps: 4,
+    component: lazy(() => import("./GrowthLanes")),
+    config: WA3_CH2_GROWTH,
+  },
+  emi_calendar_wa4: {
+    label: "EMI calendar: borrow, pick a length, see the interest in each EMI — WinterArc Day 4 §1",
+    steps: 3,
+    component: lazy(() => import("./EmiCalendar")),
+    config: WA4_CH1_EMI,
+  },
+  card_statement_wa4: {
+    label: "Card statement: pay it, the minimum, a 90-month fast-forward — WinterArc Day 4 §2",
+    steps: 4,
+    component: lazy(() => import("./CardStatement")),
+    config: WA4_CH2_CARD,
+  },
+  trade_map_wa4_credit_record: {
+    label: "Trade map: your record travels to a lender's score — WinterArc Day 4 §3",
+    steps: WA4_CH3_MAP.steps.length,
+    component: lazy(() => import("./TradeMap")),
+    config: WA4_CH3_MAP,
+  },
+  // WinterArc Days 5–7: a game in every chapter (spec of 26 Nov)
+  pool_wa5: {
+    label: "The Pool: guess the share, join or go solo, play 5 years — WinterArc Day 5 §1",
+    steps: 5,
+    component: lazy(() => import("./PoolSim")),
+    config: WA5_CH1_POOL,
+  },
+  claim_wa5: {
+    label: "Claim Machine: a bill cut clause by clause, sandbox, waiting period — WinterArc Day 5 §2",
+    steps: 7,
+    component: lazy(() => import("./ClaimMachine")),
+    config: WA5_CH2_CLAIM,
+  },
+  shield_wa5: {
+    label: "Shield Loadout: sort risks, 2×2 reveal, your shield, rights passport — WinterArc Day 5 §3",
+    steps: 5,
+    component: lazy(() => import("./ShieldLoadout")),
+    config: WA5_CH3_SHIELD,
+  },
+  shock_deck_wa6: {
+    label: "Shock Deck: a year of surprises with the buffer you chose — WinterArc Day 6 §1",
+    steps: 6,
+    component: lazy(() => import("./ShockDeck")),
+    config: WA6_CH1_DECK,
+  },
+  fund_sizer_wa6: {
+    label: "Fund sizer: your jar, months and monthly saving, notches — WinterArc Day 6 §2",
+    steps: 3,
+    component: lazy(() => import("./FundSizer")),
+    config: WA6_CH2_FUND,
+  },
+  goal_forge_wa6: {
+    label: "Goal Forge: wishes into plans that fit your spare money — WinterArc Day 6 §3",
+    steps: 5,
+    component: lazy(() => import("./GoalForge")),
+    config: WA6_CH3_GOALS,
+  },
+  city_wa7: {
+    label: "Money City: sort players onto referees, AMFI, the whistle — WinterArc Day 7 §1",
+    steps: 5,
+    component: lazy(() => import("./CityMap")),
+    config: WA7_CH1_CITY,
+  },
+  routes_wa7: {
+    label: "Follow Arjun's day: three money routes, three referees — WinterArc Day 7 §2",
+    steps: 4,
+    component: lazy(() => import("./RouteDay")),
+    config: WA7_CH2_ROUTES,
+  },
+  complaints_wa7: {
+    label: "Complaint Router: route tickets up the escalation ladders — WinterArc Day 7 §3",
+    steps: 6,
+    component: lazy(() => import("./ComplaintDesk")),
+    config: WA7_CH3_DESK,
   },
 };

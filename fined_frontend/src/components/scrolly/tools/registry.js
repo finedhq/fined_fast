@@ -12,6 +12,9 @@ import SliceCalculator from "./SliceCalculator";
 import MoneySorter from "./MoneySorter";
 import AllocationBuilder from "./AllocationBuilder";
 import MonthHappens from "./MonthHappens";
+import RunTheBank from "./RunTheBank";
+import CompoundRace from "./CompoundRace";
+import CardMonths from "./CardMonths";
 
 export const TOOLS = {
   leak_lab: {
@@ -33,5 +36,17 @@ export const TOOLS = {
   month_happens: {
     label: "The Month Happens — a budget meets four unplanned messages (WinterArc)",
     component: MonthHappens,
+  },
+  run_the_bank: {
+    label: "Run the Bank — lend, keep some ready, earn the gap (WinterArc Day 2)",
+    component: RunTheBank,
+  },
+  compound_race: {
+    label: "Race to ₹10 lakh — start age vs monthly amount (WinterArc Day 3)",
+    component: CompoundRace,
+  },
+  card_months: {
+    label: "Six Statements — a card bill month by month, with a record (WinterArc Day 4)",
+    component: CardMonths,
   },
 };
