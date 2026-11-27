@@ -74,8 +74,9 @@ export default function WinterArcRules() {
               <h2>4. Points</h2>
               <p className="wa-doc-note">The values in this section and in sections 5 and 6 may still change. The final rules will be published on {W.finalRulesDate}.</p>
               <ul>
-                <li>Each correct answer earns {W.pointsPerQuestion} points. A wrong answer earns 0.</li>
-                <li>{W.retryPointsNote}</li>
+                <li>You get up to {W.tryPoints.length} tries at each question. A right answer earns {W.tryPoints[0]} points on the first try, {W.tryPoints[1]} on the second and {W.tryPoints[2]} on the third.</li>
+                <li>A question ends when you answer it right or after your third try. If all {W.tryPoints.length} tries are wrong, it earns 0.</li>
+                <li>Late and reset points are half of these, rounded down: {W.tryPoints.map((p) => Math.floor(p / 2)).join(", ").replace(/, (\d+)$/, " and $1")}.</li>
                 <li>A task done within {W.lateFullHours} hours of its start earns full points. After that it earns {W.latePercentAfter}% until that week's Sunday cut-off, and nothing after.</li>
                 <li>The finale quiz is worth {W.finalePoints} points.</li>
                 <li>{W.name} points are kept separately and added to your FinStars only after results are verified.</li>
