@@ -162,6 +162,8 @@
     { "source": "/privacy-policy/", "destination": "/privacy-policy.html" },
     { "source": "/termsofservice", "destination": "/termsofservice.html" },
     { "source": "/termsofservice/", "destination": "/termsofservice.html" },
+    { "source": "/winterarc", "destination": "/winterarc.html" },
+    { "source": "/winterarc/", "destination": "/winterarc.html" },
     { "source": "/tags/personal-finance", "destination": "/tags/personal-finance.html" },
     { "source": "/tags/personal-finance/", "destination": "/tags/personal-finance.html" },
     { "source": "/tags/ipo", "destination": "/tags/ipo.html" },

@@ -203,3 +203,18 @@ export function dayInfo(n) {
     finale: n === WINTERARC.totalDays,
   };
 }
+
+/**
+ * A WinterArc link to share, with campaign tags so analytics can tell where a
+ * visit came from. `source`: where it is posted (whatsapp, link, native).
+ * `medium`: what kind of share it is (invite, streak_share). `code`: the
+ * sharer's invite code, kept as ?ref= so referrals still count.
+ */
+export function winterarcLink({ code, source, medium } = {}) {
+  const params = new URLSearchParams();
+  if (code) params.set("ref", code);
+  if (source) params.set("utm_source", source);
+  if (medium) params.set("utm_medium", medium);
+  params.set("utm_campaign", "winterarc");
+  return `https://myfined.com/winterarc?${params.toString()}`;
+}
