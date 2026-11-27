@@ -17,6 +17,19 @@ from app.services.article_service import article_service
 
 router = APIRouter(prefix="/home", tags=["Home"])
 
+
+def public_name(u: dict) -> str:
+    """How a learner appears on the public leaderboard: "Anish P." from their
+    saved name (users.full_name), else their @handle, else "FinEd learner".
+    Never anything taken from the email address."""
+    parts = (u.get("full_name") or "").split()
+    if parts:
+        first = parts[0][:20]
+        return f"{first} {parts[-1][0].upper()}." if len(parts) > 1 else first
+    if u.get("username"):
+        return f"@{u['username']}"
+    return "FinEd learner"
+
 # --- Request Schemas ---
 
 class FetchDataRequest(BaseModel):
@@ -216,14 +229,21 @@ async def fetch_leaderboard(timeframe: Optional[str] = "all_time", user: Optiona
         # Maps to the array structure expected by the client Leaderboard
         raw_leaderboard = await asyncio.to_thread(home_service.get_leaderboard, timeframe=timeframe)
         
+        # Anyone can call this, so no emails or account ids go out: a public
+        # name ("First L.") and a flag on the caller's own row.
+        my_email = (user.email or "").lower() if user else ""
         leaderboard_formatted = []
         for u in raw_leaderboard:
             fin_score = u.get("fin_score", 0)
             fin_stars = u.get("fin_stars") or fin_score
+            name = public_name(u)
             leaderboard_formatted.append({
-                "user_sub": u.get("user_sub"),
-                "email": u.get("email"),
-                "name": (u.get("email") or "").split("@")[0].capitalize(),
+                "name": name,
+                # Legacy field, NOT an address: site builds from before 2026-11-27
+                # print entry.email (and crash if it's missing), so it carries the
+                # public name until every open tab and app build is newer.
+                "email": name,
+                "me": bool(my_email) and (u.get("email") or "").lower() == my_email,
                 "article_score": u.get("article_score") or 0,
                 "course_score": u.get("course_score") or 0,
                 "consistency_score": u.get("consistency_score") or 0,

@@ -921,6 +921,31 @@
   .dh-read-desc { display: none; }
 }
 
+/* ───── Phones: a calmer dashboard ─────
+   Feedback: on phones it felt crammed. Same content, better order: the
+   things you came to do (today's WinterArc task, continue learning) come
+   right after the greeting, the optional "personalise" card moves down,
+   the streak pill goes (it's in "Your progress"), and three articles show
+   with "View all" for the rest. */
+@media (max-width: 699px) {
+  .dh-grid { display: flex; flex-direction: column; }
+  .dh-area-greet { display: contents; }
+  .dh-grid > *, .dh-area-greet > * { order: 10; }
+  .dh-greet { order: 0; }
+  .dh-wa { order: 1; }
+  .dh-area-continue { order: 2; }
+  .dh-area-card { order: 3; }
+  .dh-area-stats { order: 4; }
+  .dh-setup:not(.dh-wa) { order: 5; }
+  .dh-area-course { order: 6; }
+  .dh-area-articles { order: 7; }
+  .dh-setup { margin-top: 0; }
+
+  .dh-greet .dh-streak { display: none; }
+  .dh-course-media { aspect-ratio: 16 / 7; }
+  .dh-reads > li:nth-child(n + 4) { display: none; }
+}
+
 /* ───── Loading + error ───── */
 .dh-skel {
   border-radius: 20px;
