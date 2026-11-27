@@ -44,6 +44,7 @@ import "./scrolly.css";
 import "./scrolly-app.css";
 import "./scrolly-blocks.css";
 import "./scrolly-winterarc.css";
+import "./scrolly-winterarc-815.css";
 import "./scrolly-reels.css";
 import "./scrolly-tour.css";
 
